@@ -13,7 +13,7 @@ import us.awfl.utils.KalaVibhaga
 import us.awfl.utils.SegKala
 import us.awfl.utils.Convo.StepName
 import us.awfl.utils.strider.Strider
-import us.awfl.workflows.assistant.TopicContextYoj
+import us.awfl.utils.TopicContextYoj
 import us.awfl.utils.YojComposer
 
 case class TopicContext(prevTopics: ListValue[TopicInfo], convoContext: BaseValue[ConvoContext])

@@ -13,7 +13,7 @@ import us.awfl.utils.KalaVibhaga
 import us.awfl.utils.SegKala
 import us.awfl.utils.Convo.StepName
 import us.awfl.utils.post
-import us.awfl.workflows.assistant.TopicContextYoj
+import us.awfl.utils.TopicContextYoj
 
 // Minimal prompt; core JSON schema/instructions live in Ista[CollapseResponse]
 private given Convo.Prompt = Convo.Prompt(

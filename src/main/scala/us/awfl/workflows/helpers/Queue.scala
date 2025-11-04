@@ -3,7 +3,7 @@ package us.awfl.workflows.helpers
 import us.awfl.dsl.*
 import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
-import us.awfl.workflows.tools.CliTools.OperationEnvelope
+import us.awfl.utils.Events.OperationEnvelope
 
 /**
  * Queue: a small helper workflow to enqueue Pub/Sub messages (fire-and-forget).

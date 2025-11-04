@@ -7,7 +7,7 @@ import us.awfl.ista.ChatMessage
 import us.awfl.utils.Convo
 import us.awfl.utils.KalaVibhaga
 import us.awfl.utils.SegKala
-import us.awfl.workflows.assistant.TopicContextYoj
+import us.awfl.utils.TopicContextYoj
 import us.awfl.services.Llm.ChatToolResponse
 import us.awfl.ista.ToolCall
 import us.awfl.workflows.tools.{CliTools, Tools}
@@ -18,6 +18,7 @@ import us.awfl.workflows.assistant.TopicContext
 import us.awfl.utils.Locks
 import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents}
 import us.awfl.utils.{Env, ENV}
+import us.awfl.utils.Events
 import us.awfl.workflows.cli.CliActions
 import us.awfl.workflows.Summaries
 import us.awfl.workflows.assistant.ExtractTopics
@@ -129,7 +130,7 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
 
         val sendContents = Switch("sendContents", List(
           // Dispatch only message content via Pub/Sub; not a tool-call interaction
-          ("content" in complete.result.message) -> CliTools.enqueueResponse("enqueueContent", Value("null"), complete.result.message.get.content, Value("null"), complete.result.total_cost).fn,
+          ("content" in complete.result.message) -> Events.enqueueResponse("enqueueContent", Value("null"), complete.result.message.get.content, Value("null"), complete.result.total_cost).fn,
           (true: Cel) -> (List() -> Value("null"))
         ))
 

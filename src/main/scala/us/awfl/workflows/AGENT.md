@@ -21,7 +21,7 @@ Core concepts
   - Provides tool-enabled chat with TopicContextYoj context assembly.
   - Exposes only Tool defs drawn from Tools.defs(runners).
   - On tool_calls, dispatches by exact functionName → Runner.run.
-  - Non-tool assistant content is sent via CliTools.enqueueResponse (Pub/Sub) for UI display.
+  - Non-tool assistant content is sent via Events.enqueueResponse (Pub/Sub) for UI display.
 
 - Preload mechanics
   - Use us.awfl.workflows.helpers.Context.preloadFile(absPath) to read files at workflow start and compose them into the system prompt.
