@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "https://topaigents.dev/workflows/defs/us.awfl.workflows.context.ContextCollapser.json",
+  "name" : "us.awfl.workflows.context.ContextCollapser",
+  "description" : "Auto-generated workflow definition.",
+  "inputSchema" : "us-awfl-workflows-context-ContextCollapser-Input",
+  "outputSchema" : "services-Llm-ChatToolResponse",
+  "inputType" : "us.awfl.workflows.context.ContextCollapser.Input",
+  "outputType" : "services.Llm.ChatToolResponse"
+}

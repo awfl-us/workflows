@@ -1,0 +1,17 @@
+{
+  "name" : "us-awfl-workflows-BusinessAnalysis-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.BusinessAnalysis.Input.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "placeId" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "placeId"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-BusinessAnalysis-Input.json"
+  }
+}

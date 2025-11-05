@@ -1,0 +1,213 @@
+main:
+  params:
+  - "input"
+  steps:
+  - current_switch:
+      steps:
+      - current_get:
+          try:
+            steps:
+            - current_get_call:
+                call: "http.get"
+                args:
+                  url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"In%20Progress\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
+                  auth:
+                    type: "OIDC"
+                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                  headers:
+                    x-user-id: "${input.env.userId}"
+                    x-project-id: "${input.env.projectId}"
+                result: "current_getResult_5809bf50"
+          retry: "${http.default_retry}"
+      - current_content:
+          steps:
+          - current_content_initResult:
+              assign:
+              - current_contentResult_1e8a9790: {}
+          - current_content_steps:
+              switch:
+              - condition: "${((get_type(current_getResult_5809bf50.body) == \"map\") and (len(current_getResult_5809bf50.body.tasks) > 0))}"
+                steps:
+                - current_content_updateResult_0:
+                    assign:
+                    - current_contentResult_1e8a9790:
+                        role: "system"
+                        content: "${(((((((((\"Current task\" + \": id=\") + string(current_getResult_5809bf50.body.tasks[0].id)) + \" | \") + string(current_getResult_5809bf50.body.tasks[0].title)) + \" — \") + string(current_getResult_5809bf50.body.tasks[0].description)) + \" [status=\") + string(current_getResult_5809bf50.body.tasks[0].status)) + \"]\")}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+              - condition: "${(get_type(current_getResult_5809bf50.body) == \"map\")}"
+                steps:
+                - current_content_updateResult_1:
+                    assign:
+                    - current_contentResult_1e8a9790:
+                        role: "system"
+                        content: "${((\"Current task\" + \": \") + \"None found for session\")}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+              - condition: "${true}"
+                steps:
+                - current_content_updateResult_2:
+                    assign:
+                    - current_contentResult_1e8a9790:
+                        role: "system"
+                        content: "${(((((\"Current task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(current_getResult_5809bf50.body)) + \", body=\") + string(current_getResult_5809bf50.body))}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+  - pending_switch:
+      steps:
+      - pending_get:
+          try:
+            steps:
+            - pending_get_call:
+                call: "http.get"
+                args:
+                  url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Queued\") + \"&limit=\") + 1) + \"&order=\") + \"asc\")))}"
+                  auth:
+                    type: "OIDC"
+                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                  headers:
+                    x-user-id: "${input.env.userId}"
+                    x-project-id: "${input.env.projectId}"
+                result: "pending_getResult_a565e64"
+          retry: "${http.default_retry}"
+      - pending_content:
+          steps:
+          - pending_content_initResult:
+              assign:
+              - pending_contentResult_70aad327: {}
+          - pending_content_steps:
+              switch:
+              - condition: "${((get_type(pending_getResult_a565e64.body) == \"map\") and (len(pending_getResult_a565e64.body.tasks) > 0))}"
+                steps:
+                - pending_content_updateResult_0:
+                    assign:
+                    - pending_contentResult_70aad327:
+                        role: "system"
+                        content: "${(((((((((\"Oldest pending task\" + \": id=\") + string(pending_getResult_a565e64.body.tasks[0].id)) + \" | \") + string(pending_getResult_a565e64.body.tasks[0].title)) + \" — \") + string(pending_getResult_a565e64.body.tasks[0].description)) + \" [status=\") + string(pending_getResult_a565e64.body.tasks[0].status)) + \"]\")}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+              - condition: "${(get_type(pending_getResult_a565e64.body) == \"map\")}"
+                steps:
+                - pending_content_updateResult_1:
+                    assign:
+                    - pending_contentResult_70aad327:
+                        role: "system"
+                        content: "${((\"Oldest pending task\" + \": \") + \"None found for session\")}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+              - condition: "${true}"
+                steps:
+                - pending_content_updateResult_2:
+                    assign:
+                    - pending_contentResult_70aad327:
+                        role: "system"
+                        content: "${(((((\"Oldest pending task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(pending_getResult_a565e64.body)) + \", body=\") + string(pending_getResult_a565e64.body))}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+  - done_switch:
+      steps:
+      - done_get:
+          try:
+            steps:
+            - done_get_call:
+                call: "http.get"
+                args:
+                  url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Done\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
+                  auth:
+                    type: "OIDC"
+                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                  headers:
+                    x-user-id: "${input.env.userId}"
+                    x-project-id: "${input.env.projectId}"
+                result: "done_getResult_34e966e5"
+          retry: "${http.default_retry}"
+      - done_content:
+          steps:
+          - done_content_initResult:
+              assign:
+              - done_contentResult_19b0ddd0: {}
+          - done_content_steps:
+              switch:
+              - condition: "${((get_type(done_getResult_34e966e5.body) == \"map\") and (len(done_getResult_34e966e5.body.tasks) > 0))}"
+                steps:
+                - done_content_updateResult_0:
+                    assign:
+                    - done_contentResult_19b0ddd0:
+                        role: "system"
+                        content: "${(((((((((\"Newest complete task\" + \": id=\") + string(done_getResult_34e966e5.body.tasks[0].id)) + \" | \") + string(done_getResult_34e966e5.body.tasks[0].title)) + \" — \") + string(done_getResult_34e966e5.body.tasks[0].description)) + \" [status=\") + string(done_getResult_34e966e5.body.tasks[0].status)) + \"]\")}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+              - condition: "${(get_type(done_getResult_34e966e5.body) == \"map\")}"
+                steps:
+                - done_content_updateResult_1:
+                    assign:
+                    - done_contentResult_19b0ddd0:
+                        role: "system"
+                        content: "${((\"Newest complete task\" + \": \") + \"None found for session\")}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+              - condition: "${true}"
+                steps:
+                - done_content_updateResult_2:
+                    assign:
+                    - done_contentResult_19b0ddd0:
+                        role: "system"
+                        content: "${(((((\"Newest complete task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(done_getResult_34e966e5.body)) + \", body=\") + string(done_getResult_34e966e5.body))}"
+                        tool_calls: "${[]}"
+                        tool_call_id: "${null}"
+                        create_time: "${sys.now()}"
+                        docId: "${null}"
+  - buildList:
+      steps:
+      - buildList_initResult:
+          assign:
+          - buildListResult_2d748648: []
+      - buildList_steps:
+          for:
+            value: "buildListIdx"
+            range: "${[0, (3 - 1)]}"
+            steps:
+            - buildList_switch:
+                steps:
+                - buildList_switch_initResult:
+                    assign:
+                    - buildList_switchResult_424cb0da: {}
+                - buildList_switch_steps:
+                    switch:
+                    - condition: "${(buildListIdx == 0)}"
+                      steps:
+                      - buildList_switch_updateResult_0:
+                          assign:
+                          - buildList_switchResult_424cb0da: "${current_contentResult_1e8a9790}"
+                    - condition: "${(buildListIdx == 1)}"
+                      steps:
+                      - buildList_switch_updateResult_1:
+                          assign:
+                          - buildList_switchResult_424cb0da: "${pending_contentResult_70aad327}"
+                    - condition: "${(buildListIdx == 2)}"
+                      steps:
+                      - buildList_switch_updateResult_2:
+                          assign:
+                          - buildList_switchResult_424cb0da: "${done_contentResult_19b0ddd0}"
+            - buildList_updateResult:
+                assign:
+                - buildListResult_2d748648: "${list.concat(buildListResult_2d748648, buildList_switchResult_424cb0da)}"
+  - return:
+      return:
+        tasks: "${buildListResult_2d748648}"

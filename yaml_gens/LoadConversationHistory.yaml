@@ -1,0 +1,25 @@
+main:
+  params:
+  - "input"
+  steps:
+  - postLoadConvoHistory:
+      try:
+        steps:
+        - postLoadConvoHistory_call:
+            call: "http.post"
+            args:
+              url: "${((input.env.BASE_URL + \"/jobs/\") + \"convo-history/loadConvoHistory\")}"
+              body:
+                objectName: "${input.arg1}"
+                userId: "${input.arg2}"
+              auth:
+                type: "OIDC"
+                audience: "${(input.env.BASE_URL + \"/jobs\")}"
+              headers:
+                x-user-id: "${input.env.userId}"
+                x-project-id: "${input.env.projectId}"
+            result: "postLoadConvoHistoryResult_79c47f86"
+      retry: "${http.default_retry}"
+  - return:
+      return:
+        status: "${\"success\"}"

@@ -1,0 +1,17 @@
+{
+  "name" : "us-awfl-workflows-codebase-workflows-PlainifyWriteHook-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.codebase.workflows.PlainifyWriteHook.Input.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "filepath" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "filepath"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-codebase-workflows-PlainifyWriteHook-Input.json"
+  }
+}

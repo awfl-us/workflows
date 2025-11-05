@@ -1,0 +1,84 @@
+main:
+  params:
+  - "input"
+  steps:
+  - Convo_run:
+      try:
+        steps:
+        - Convo_run_call:
+            call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+            args:
+              workflow_id: "${\"Summaries-Convo${WORKFLOW_ENV}\"}"
+              argument:
+                arg1: "${input.arg1}"
+                arg2: "${input.arg2}"
+                arg3: "${input.arg3}"
+                arg4: "${input.arg4}"
+                env: "${input.env}"
+              location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+              project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+              connector_params:
+                skip_polling: false
+            result: "Convo_runResult_f91691f"
+      retry: "${http.default_retry}"
+  - Session_run:
+      try:
+        steps:
+        - Session_run_call:
+            call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+            args:
+              workflow_id: "${\"Summaries-Session${WORKFLOW_ENV}\"}"
+              argument:
+                arg1: "${input.arg1}"
+                arg2: "${input.arg2}"
+                arg3: "${input.arg3}"
+                arg4: "${input.arg4}"
+                env: "${input.env}"
+              location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+              project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+              connector_params:
+                skip_polling: false
+            result: "Session_runResult_23a7b31a"
+      retry: "${http.default_retry}"
+  - Week_run:
+      try:
+        steps:
+        - Week_run_call:
+            call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+            args:
+              workflow_id: "${\"Summaries-Week${WORKFLOW_ENV}\"}"
+              argument:
+                arg1: "${input.arg1}"
+                arg2: "${input.arg2}"
+                arg3: "${input.arg3}"
+                arg4: "${input.arg4}"
+                env: "${input.env}"
+              location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+              project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+              connector_params:
+                skip_polling: false
+            result: "Week_runResult_eaf8e9e"
+      retry: "${http.default_retry}"
+  - Term_run:
+      try:
+        steps:
+        - Term_run_call:
+            call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+            args:
+              workflow_id: "${\"Summaries-Term${WORKFLOW_ENV}\"}"
+              argument:
+                arg1: "${input.arg1}"
+                arg2: "${input.arg2}"
+                arg3: "${input.arg3}"
+                arg4: "${input.arg4}"
+                env: "${input.env}"
+              location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+              project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+              connector_params:
+                skip_polling: false
+            result: "Term_runResult_7d2fcb12"
+      retry: "${http.default_retry}"
+  - return:
+      return: "${Convo_runResult_f91691f}"
+  - return_1:
+      return: "${Convo_runResult_f91691f}"

@@ -10,7 +10,7 @@ main:
               steps:
               - buildPromptList_initResult:
                   assign:
-                  - buildPromptListResult_561640cb: []
+                  - buildPromptListResult_32fc8814: []
               - buildPromptList_steps:
                   for:
                     value: "buildPromptListIdx"
@@ -20,16 +20,16 @@ main:
                         steps:
                         - buildPromptList_switch_initResult:
                             assign:
-                            - buildPromptList_switchResult_46cb5b48: {}
+                            - buildPromptList_switchResult_291fcb6e: {}
                         - buildPromptList_switch_steps:
                             switch:
                             - condition: "${(buildPromptListIdx == 0)}"
                               steps:
                               - buildPromptList_switch_updateResult_0:
                                   assign:
-                                  - buildPromptList_switchResult_46cb5b48:
+                                  - buildPromptList_switchResult_291fcb6e:
                                       role: "system"
-                                      content: "${\"You are the resident expert for the Context module (functions/jobs/context).\nYou bootstrap your context by reading AGENT.md and appending it to the system prompt.\nSpecialize in TopicContextYoj assembly, filters (sizeLimiter, toolCallBackfill), presets, and request/response schemas.\nLeverage tools (READ_FILE, UPDATE_FILE, RUN_COMMAND) judiciously; prefer minimal, precise edits.\nDefault filter order: sizeLimiter then toolCallBackfill; keep docs and defaults in sync.\n\"}"
+                                      content: "${\"You are the webmaster in charge of the project under awfl_web\n    \"}"
                                       tool_calls: "${[]}"
                                       tool_call_id: "${null}"
                                       create_time: "${sys.now()}"
@@ -38,7 +38,7 @@ main:
                               steps:
                               - buildPromptList_switch_updateResult_1:
                                   assign:
-                                  - buildPromptList_switchResult_46cb5b48:
+                                  - buildPromptList_switchResult_291fcb6e:
                                       role: "system"
                                       content: "${\"Here are the available tool calls.\nUse these tools:\n- THINK: private reflection, no side effects.\n- UPDATE_FILE: write a file with {filepath, content}.\n- READ_FILE: read a file with {filepath}.\n- RUN_COMMAND: execute a shell command with {command}.\n- QUERY: delegate to another workflow with {workflow, query}.\n      \"}"
                                       tool_calls: "${[]}"
@@ -47,108 +47,64 @@ main:
                                       docId: "${null}"
                     - buildPromptList_updateResult:
                         assign:
-                        - buildPromptListResult_561640cb: "${list.concat(buildPromptListResult_561640cb, buildPromptList_switchResult_46cb5b48)}"
+                        - buildPromptListResult_32fc8814: "${list.concat(buildPromptListResult_32fc8814, buildPromptList_switchResult_291fcb6e)}"
           - preloadsBlock:
               steps:
-              - preloadFile_block:
-                  steps:
-                  - preloadFile_preloadFile_callback_block:
-                      steps:
-                      - preloadFile_preloadFile_run_tools_CliTools:
-                          try:
-                            steps:
-                            - preloadFile_preloadFile_run_tools_CliTools_call:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    tool_call:
-                                      id: "${\"preload_file\"}"
-                                      type: "function"
-                                      function:
-                                        name: "${\"READ_FILE\"}"
-                                        arguments: "{\"filepath\": \"/Users/paul/github/awfl/server/workflows/context/AGENT.md\"}"
-                                    cost: 0.0
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(true, null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: false
-                                result: "preloadFile_preloadFile_run_tools_CliToolsResult_3c013e0d"
-                          retry: "${http.default_retry}"
               - joinPreloads:
                   steps:
                   - joinPreloads_initResult:
                       assign:
-                      - joinPreloadsResult_5f0b001c: []
+                      - joinPreloadsResult_23a3e113: []
                   - joinPreloads_steps:
                       for:
                         value: "joinPreloadsIdx"
-                        range: "${[0, (1 - 1)]}"
+                        range: "${[0, (0 - 1)]}"
                         steps:
                         - joinPreloads_switch:
                             steps:
                             - joinPreloads_switch_initResult:
                                 assign:
-                                - joinPreloads_switchResult_6a9eb395: {}
+                                - joinPreloads_switchResult_5c02aeee: {}
                             - joinPreloads_switch_steps:
-                                switch:
-                                - condition: "${(joinPreloadsIdx == 0)}"
-                                  steps:
-                                  - joinPreloads_switch_updateResult_0:
-                                      assign:
-                                      - joinPreloads_switchResult_6a9eb395:
-                                          role: "system"
-                                          content: "${(\"[Preload /Users/paul/github/awfl/server/workflows/context/AGENT.md]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_3c013e0d.encoded)}"
-                                          tool_calls: "${[]}"
-                                          tool_call_id: "${null}"
-                                          create_time: "${sys.now()}"
-                                          docId: "${null}"
+                                switch: []
                         - joinPreloads_updateResult:
                             assign:
-                            - joinPreloadsResult_5f0b001c: "${list.concat(joinPreloadsResult_5f0b001c, joinPreloads_switchResult_6a9eb395)}"
+                            - joinPreloadsResult_23a3e113: "${list.concat(joinPreloadsResult_23a3e113, joinPreloads_switchResult_5c02aeee)}"
           - joinSteps:
               steps:
               - joinSteps_initResult:
                   assign:
-                  - joinStepsResult_757d0b3f: []
+                  - joinStepsResult_1b29c0c5: []
               - joinSteps_steps:
                   for:
                     value: "joinStepsIdx"
-                    range: "${[0, (((0 + len(buildPromptListResult_561640cb)) + len(joinPreloadsResult_5f0b001c)) - 1)]}"
+                    range: "${[0, (((0 + len(buildPromptListResult_32fc8814)) + len(joinPreloadsResult_23a3e113)) - 1)]}"
                     steps:
                     - joinSteps_switch:
                         steps:
                         - joinSteps_switch_initResult:
                             assign:
-                            - joinSteps_switchResult_5bf1a12d: {}
+                            - joinSteps_switchResult_44fdedf2: {}
                         - joinSteps_switch_steps:
                             switch:
-                            - condition: "${(joinStepsIdx >= (0 + len(buildPromptListResult_561640cb)))}"
+                            - condition: "${(joinStepsIdx >= (0 + len(buildPromptListResult_32fc8814)))}"
                               steps:
                               - joinSteps_switch_updateResult_0:
                                   assign:
-                                  - joinSteps_switchResult_5bf1a12d: "${joinPreloadsResult_5f0b001c[(joinStepsIdx - (0 + len(buildPromptListResult_561640cb)))]}"
+                                  - joinSteps_switchResult_44fdedf2: "${joinPreloadsResult_23a3e113[(joinStepsIdx - (0 + len(buildPromptListResult_32fc8814)))]}"
                             - condition: "${(joinStepsIdx >= 0)}"
                               steps:
                               - joinSteps_switch_updateResult_1:
                                   assign:
-                                  - joinSteps_switchResult_5bf1a12d: "${buildPromptListResult_561640cb[(joinStepsIdx - 0)]}"
+                                  - joinSteps_switchResult_44fdedf2: "${buildPromptListResult_32fc8814[(joinStepsIdx - 0)]}"
                     - joinSteps_updateResult:
                         assign:
-                        - joinStepsResult_757d0b3f: "${list.concat(joinStepsResult_757d0b3f, joinSteps_switchResult_5bf1a12d)}"
+                        - joinStepsResult_1b29c0c5: "${list.concat(joinStepsResult_1b29c0c5, joinSteps_switchResult_44fdedf2)}"
       - buildPromptsWithTasks:
           steps:
           - buildPromptsWithTasks_initResult:
               assign:
-              - buildPromptsWithTasksResult_6552b6a8: {}
+              - buildPromptsWithTasksResult_6bec3b8c: {}
           - buildPromptsWithTasks_steps:
               try:
                 steps:
@@ -248,7 +204,7 @@ main:
                               - buildPromptResult_302630f2: "${list.concat(buildPromptResult_302630f2, buildPrompt_switchResult_69a883ce)}"
                 - buildPromptsWithTasks_updateResult:
                     assign:
-                    - buildPromptsWithTasksResult_6552b6a8: "${buildPromptResult_302630f2}"
+                    - buildPromptsWithTasksResult_6bec3b8c: "${buildPromptResult_302630f2}"
               except:
                 as: "buildPromptsWithTasksError"
                 steps:
@@ -263,37 +219,37 @@ main:
                     retry: "${http.default_retry}"
                 - buildPromptsWithTasks_updateResultError:
                     assign:
-                    - buildPromptsWithTasksResult_6552b6a8: "${null}"
+                    - buildPromptsWithTasksResult_6bec3b8c: "${null}"
       - joinSteps_2:
           steps:
           - joinSteps_initResult_1:
               assign:
-              - joinStepsResult_3e8c97a: []
+              - joinStepsResult_4ec44b3d: []
           - joinSteps_steps_1:
               for:
                 value: "joinStepsIdx"
-                range: "${[0, (((0 + len(joinStepsResult_757d0b3f)) + len(buildPromptsWithTasksResult_6552b6a8)) - 1)]}"
+                range: "${[0, (((0 + len(joinStepsResult_1b29c0c5)) + len(buildPromptsWithTasksResult_6bec3b8c)) - 1)]}"
                 steps:
                 - joinSteps_switch_1:
                     steps:
                     - joinSteps_switch_initResult_1:
                         assign:
-                        - joinSteps_switchResult_55c9fc31: {}
+                        - joinSteps_switchResult_7510edf0: {}
                     - joinSteps_switch_steps_1:
                         switch:
-                        - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_757d0b3f)))}"
+                        - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_1b29c0c5)))}"
                           steps:
                           - joinSteps_switch_updateResult_0_1:
                               assign:
-                              - joinSteps_switchResult_55c9fc31: "${buildPromptsWithTasksResult_6552b6a8[(joinStepsIdx - (0 + len(joinStepsResult_757d0b3f)))]}"
+                              - joinSteps_switchResult_7510edf0: "${buildPromptsWithTasksResult_6bec3b8c[(joinStepsIdx - (0 + len(joinStepsResult_1b29c0c5)))]}"
                         - condition: "${(joinStepsIdx >= 0)}"
                           steps:
                           - joinSteps_switch_updateResult_1_1:
                               assign:
-                              - joinSteps_switchResult_55c9fc31: "${joinStepsResult_757d0b3f[(joinStepsIdx - 0)]}"
+                              - joinSteps_switchResult_7510edf0: "${joinStepsResult_1b29c0c5[(joinStepsIdx - 0)]}"
                 - joinSteps_updateResult_1:
                     assign:
-                    - joinStepsResult_3e8c97a: "${list.concat(joinStepsResult_3e8c97a, joinSteps_switchResult_55c9fc31)}"
+                    - joinStepsResult_4ec44b3d: "${list.concat(joinStepsResult_4ec44b3d, joinSteps_switchResult_7510edf0)}"
   - return:
       return:
-        prompts: "${joinStepsResult_3e8c97a}"
+        prompts: "${joinStepsResult_4ec44b3d}"

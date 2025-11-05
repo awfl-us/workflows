@@ -10,7 +10,7 @@ main:
               steps:
               - buildPromptList_initResult:
                   assign:
-                  - buildPromptListResult_561640cb: []
+                  - buildPromptListResult_24788c94: []
               - buildPromptList_steps:
                   for:
                     value: "buildPromptListIdx"
@@ -20,16 +20,16 @@ main:
                         steps:
                         - buildPromptList_switch_initResult:
                             assign:
-                            - buildPromptList_switchResult_46cb5b48: {}
+                            - buildPromptList_switchResult_67dd2378: {}
                         - buildPromptList_switch_steps:
                             switch:
                             - condition: "${(buildPromptListIdx == 0)}"
                               steps:
                               - buildPromptList_switch_updateResult_0:
                                   assign:
-                                  - buildPromptList_switchResult_46cb5b48:
+                                  - buildPromptList_switchResult_67dd2378:
                                       role: "system"
-                                      content: "${\"You are the resident expert for the Context module (functions/jobs/context).\nYou bootstrap your context by reading AGENT.md and appending it to the system prompt.\nSpecialize in TopicContextYoj assembly, filters (sizeLimiter, toolCallBackfill), presets, and request/response schemas.\nLeverage tools (READ_FILE, UPDATE_FILE, RUN_COMMAND) judiciously; prefer minimal, precise edits.\nDefault filter order: sizeLimiter then toolCallBackfill; keep docs and defaults in sync.\n\"}"
+                                      content: "${\"You are the software developer responsible for the repl project under cli.\nUse the following preloaded CLI Agent guide and Plan document as authoritative context.\"}"
                                       tool_calls: "${[]}"
                                       tool_call_id: "${null}"
                                       create_time: "${sys.now()}"
@@ -38,7 +38,7 @@ main:
                               steps:
                               - buildPromptList_switch_updateResult_1:
                                   assign:
-                                  - buildPromptList_switchResult_46cb5b48:
+                                  - buildPromptList_switchResult_67dd2378:
                                       role: "system"
                                       content: "${\"Here are the available tool calls.\nUse these tools:\n- THINK: private reflection, no side effects.\n- UPDATE_FILE: write a file with {filepath, content}.\n- READ_FILE: read a file with {filepath}.\n- RUN_COMMAND: execute a shell command with {command}.\n- QUERY: delegate to another workflow with {workflow, query}.\n      \"}"
                                       tool_calls: "${[]}"
@@ -47,7 +47,7 @@ main:
                                       docId: "${null}"
                     - buildPromptList_updateResult:
                         assign:
-                        - buildPromptListResult_561640cb: "${list.concat(buildPromptListResult_561640cb, buildPromptList_switchResult_46cb5b48)}"
+                        - buildPromptListResult_24788c94: "${list.concat(buildPromptListResult_24788c94, buildPromptList_switchResult_67dd2378)}"
           - preloadsBlock:
               steps:
               - preloadFile_block:
@@ -67,7 +67,7 @@ main:
                                       type: "function"
                                       function:
                                         name: "${\"READ_FILE\"}"
-                                        arguments: "{\"filepath\": \"/Users/paul/github/awfl/server/workflows/context/AGENT.md\"}"
+                                        arguments: "{\"filepath\": \"src/awfl/AGENT.md\"}"
                                     cost: 0.0
                                     env:
                                       userId: "${input.env.userId}"
@@ -81,13 +81,13 @@ main:
                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                   connector_params:
                                     skip_polling: false
-                                result: "preloadFile_preloadFile_run_tools_CliToolsResult_3c013e0d"
+                                result: "preloadFile_preloadFile_run_tools_CliToolsResult_31af0e75"
                           retry: "${http.default_retry}"
               - joinPreloads:
                   steps:
                   - joinPreloads_initResult:
                       assign:
-                      - joinPreloadsResult_5f0b001c: []
+                      - joinPreloadsResult_7426677: []
                   - joinPreloads_steps:
                       for:
                         value: "joinPreloadsIdx"
@@ -97,58 +97,58 @@ main:
                             steps:
                             - joinPreloads_switch_initResult:
                                 assign:
-                                - joinPreloads_switchResult_6a9eb395: {}
+                                - joinPreloads_switchResult_144dc24: {}
                             - joinPreloads_switch_steps:
                                 switch:
                                 - condition: "${(joinPreloadsIdx == 0)}"
                                   steps:
                                   - joinPreloads_switch_updateResult_0:
                                       assign:
-                                      - joinPreloads_switchResult_6a9eb395:
+                                      - joinPreloads_switchResult_144dc24:
                                           role: "system"
-                                          content: "${(\"[Preload /Users/paul/github/awfl/server/workflows/context/AGENT.md]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_3c013e0d.encoded)}"
+                                          content: "${(\"[Preload src/awfl/AGENT.md]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_31af0e75.encoded)}"
                                           tool_calls: "${[]}"
                                           tool_call_id: "${null}"
                                           create_time: "${sys.now()}"
                                           docId: "${null}"
                         - joinPreloads_updateResult:
                             assign:
-                            - joinPreloadsResult_5f0b001c: "${list.concat(joinPreloadsResult_5f0b001c, joinPreloads_switchResult_6a9eb395)}"
+                            - joinPreloadsResult_7426677: "${list.concat(joinPreloadsResult_7426677, joinPreloads_switchResult_144dc24)}"
           - joinSteps:
               steps:
               - joinSteps_initResult:
                   assign:
-                  - joinStepsResult_757d0b3f: []
+                  - joinStepsResult_33a6a8b: []
               - joinSteps_steps:
                   for:
                     value: "joinStepsIdx"
-                    range: "${[0, (((0 + len(buildPromptListResult_561640cb)) + len(joinPreloadsResult_5f0b001c)) - 1)]}"
+                    range: "${[0, (((0 + len(buildPromptListResult_24788c94)) + len(joinPreloadsResult_7426677)) - 1)]}"
                     steps:
                     - joinSteps_switch:
                         steps:
                         - joinSteps_switch_initResult:
                             assign:
-                            - joinSteps_switchResult_5bf1a12d: {}
+                            - joinSteps_switchResult_18876130: {}
                         - joinSteps_switch_steps:
                             switch:
-                            - condition: "${(joinStepsIdx >= (0 + len(buildPromptListResult_561640cb)))}"
+                            - condition: "${(joinStepsIdx >= (0 + len(buildPromptListResult_24788c94)))}"
                               steps:
                               - joinSteps_switch_updateResult_0:
                                   assign:
-                                  - joinSteps_switchResult_5bf1a12d: "${joinPreloadsResult_5f0b001c[(joinStepsIdx - (0 + len(buildPromptListResult_561640cb)))]}"
+                                  - joinSteps_switchResult_18876130: "${joinPreloadsResult_7426677[(joinStepsIdx - (0 + len(buildPromptListResult_24788c94)))]}"
                             - condition: "${(joinStepsIdx >= 0)}"
                               steps:
                               - joinSteps_switch_updateResult_1:
                                   assign:
-                                  - joinSteps_switchResult_5bf1a12d: "${buildPromptListResult_561640cb[(joinStepsIdx - 0)]}"
+                                  - joinSteps_switchResult_18876130: "${buildPromptListResult_24788c94[(joinStepsIdx - 0)]}"
                     - joinSteps_updateResult:
                         assign:
-                        - joinStepsResult_757d0b3f: "${list.concat(joinStepsResult_757d0b3f, joinSteps_switchResult_5bf1a12d)}"
+                        - joinStepsResult_33a6a8b: "${list.concat(joinStepsResult_33a6a8b, joinSteps_switchResult_18876130)}"
       - buildPromptsWithTasks:
           steps:
           - buildPromptsWithTasks_initResult:
               assign:
-              - buildPromptsWithTasksResult_6552b6a8: {}
+              - buildPromptsWithTasksResult_7aa29ae2: {}
           - buildPromptsWithTasks_steps:
               try:
                 steps:
@@ -248,7 +248,7 @@ main:
                               - buildPromptResult_302630f2: "${list.concat(buildPromptResult_302630f2, buildPrompt_switchResult_69a883ce)}"
                 - buildPromptsWithTasks_updateResult:
                     assign:
-                    - buildPromptsWithTasksResult_6552b6a8: "${buildPromptResult_302630f2}"
+                    - buildPromptsWithTasksResult_7aa29ae2: "${buildPromptResult_302630f2}"
               except:
                 as: "buildPromptsWithTasksError"
                 steps:
@@ -263,37 +263,37 @@ main:
                     retry: "${http.default_retry}"
                 - buildPromptsWithTasks_updateResultError:
                     assign:
-                    - buildPromptsWithTasksResult_6552b6a8: "${null}"
+                    - buildPromptsWithTasksResult_7aa29ae2: "${null}"
       - joinSteps_2:
           steps:
           - joinSteps_initResult_1:
               assign:
-              - joinStepsResult_3e8c97a: []
+              - joinStepsResult_3c1eddb0: []
           - joinSteps_steps_1:
               for:
                 value: "joinStepsIdx"
-                range: "${[0, (((0 + len(joinStepsResult_757d0b3f)) + len(buildPromptsWithTasksResult_6552b6a8)) - 1)]}"
+                range: "${[0, (((0 + len(joinStepsResult_33a6a8b)) + len(buildPromptsWithTasksResult_7aa29ae2)) - 1)]}"
                 steps:
                 - joinSteps_switch_1:
                     steps:
                     - joinSteps_switch_initResult_1:
                         assign:
-                        - joinSteps_switchResult_55c9fc31: {}
+                        - joinSteps_switchResult_315c444b: {}
                     - joinSteps_switch_steps_1:
                         switch:
-                        - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_757d0b3f)))}"
+                        - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_33a6a8b)))}"
                           steps:
                           - joinSteps_switch_updateResult_0_1:
                               assign:
-                              - joinSteps_switchResult_55c9fc31: "${buildPromptsWithTasksResult_6552b6a8[(joinStepsIdx - (0 + len(joinStepsResult_757d0b3f)))]}"
+                              - joinSteps_switchResult_315c444b: "${buildPromptsWithTasksResult_7aa29ae2[(joinStepsIdx - (0 + len(joinStepsResult_33a6a8b)))]}"
                         - condition: "${(joinStepsIdx >= 0)}"
                           steps:
                           - joinSteps_switch_updateResult_1_1:
                               assign:
-                              - joinSteps_switchResult_55c9fc31: "${joinStepsResult_757d0b3f[(joinStepsIdx - 0)]}"
+                              - joinSteps_switchResult_315c444b: "${joinStepsResult_33a6a8b[(joinStepsIdx - 0)]}"
                 - joinSteps_updateResult_1:
                     assign:
-                    - joinStepsResult_3e8c97a: "${list.concat(joinStepsResult_3e8c97a, joinSteps_switchResult_55c9fc31)}"
+                    - joinStepsResult_3c1eddb0: "${list.concat(joinStepsResult_3c1eddb0, joinSteps_switchResult_315c444b)}"
   - return:
       return:
-        prompts: "${joinStepsResult_3e8c97a}"
+        prompts: "${joinStepsResult_3c1eddb0}"

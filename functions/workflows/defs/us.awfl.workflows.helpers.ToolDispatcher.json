@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "https://topaigents.dev/workflows/defs/us.awfl.workflows.helpers.ToolDispatcher.json",
+  "name" : "us.awfl.workflows.helpers.ToolDispatcher",
+  "description" : "Auto-generated workflow definition.",
+  "inputSchema" : "us-awfl-workflows-helpers-ToolDispatcher-Input",
+  "outputSchema" : "services-Llm-ChatToolResponse",
+  "inputType" : "us.awfl.workflows.helpers.ToolDispatcher.Input",
+  "outputType" : "services.Llm.ChatToolResponse"
+}

@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "https://topaigents.dev/workflows/defs/us.awfl.workflows.codebase.awfl_web.Webmaster.json",
+  "name" : "us.awfl.workflows.codebase.awfl_web.Webmaster",
+  "description" : "Auto-generated workflow definition.",
+  "inputSchema" : "us-awfl-workflows-codebase-awfl_web-Webmaster-Input",
+  "outputSchema" : "services-Llm-ChatToolResponse",
+  "inputType" : "us.awfl.workflows.codebase.awfl_web.Webmaster.Input",
+  "outputType" : "services.Llm.ChatToolResponse"
+}

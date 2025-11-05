@@ -1,0 +1,355 @@
+main:
+  params:
+  - "input"
+  steps:
+  - mainTry:
+      steps:
+      - mainTry_initResult:
+          assign:
+          - mainTryResult_353926fe: {}
+      - mainTry_steps:
+          try:
+            steps:
+            - registerExecForSessionTry:
+                steps:
+                - registerExecForSessionTry_initResult:
+                    assign:
+                    - registerExecForSessionTryResult_4ab84a3d: {}
+                - registerExecForSessionTry_steps:
+                    try:
+                      steps:
+                      - registerExecForSessionCreate:
+                          try:
+                            steps:
+                            - registerExecForSessionCreate_call:
+                                call: "http.post"
+                                args:
+                                  url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/create\")}"
+                                  body:
+                                    collection: "${\"workflowExecsBySession\"}"
+                                    id: "${((input.env.sessionId + \":\") + sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"))}"
+                                    contents:
+                                      sessionId: "${input.env.sessionId}"
+                                      execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                      created: "${sys.now()}"
+                                    userId: "${input.env.userId}"
+                                  auth:
+                                    type: "OIDC"
+                                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                  headers:
+                                    x-user-id: "${input.env.userId}"
+                                    x-project-id: "${input.env.projectId}"
+                                result: "registerExecForSessionCreateResult_3dea0a5c"
+                          retry: "${http.default_retry}"
+                      - registerExecForSessionTry_updateResult:
+                          assign:
+                          - registerExecForSessionTryResult_4ab84a3d: "${\"ok\"}"
+                    except:
+                      as: "registerExecForSessionTryError"
+                      steps:
+                      - registerExecForSessionSwitch:
+                          steps:
+                          - registerExecForSessionSwitch_initResult:
+                              assign:
+                              - registerExecForSessionSwitchResult_12d6cef7: {}
+                          - registerExecForSessionSwitch_steps:
+                              switch:
+                              - condition: "${((\"code\" in registerExecForSessionTryError) and (registerExecForSessionTryError.code == 409))}"
+                                steps:
+                                - registerExecForSessionUpdate:
+                                    try:
+                                      steps:
+                                      - registerExecForSessionUpdate_call:
+                                          call: "http.post"
+                                          args:
+                                            url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/update\")}"
+                                            body:
+                                              collection: "${\"workflowExecsBySession\"}"
+                                              id: "${((input.env.sessionId + \":\") + sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"))}"
+                                              contents:
+                                                sessionId: "${input.env.sessionId}"
+                                                execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                                created: "${sys.now()}"
+                                              userId: "${input.env.userId}"
+                                            auth:
+                                              type: "OIDC"
+                                              audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                            headers:
+                                              x-user-id: "${input.env.userId}"
+                                              x-project-id: "${input.env.projectId}"
+                                          result: "registerExecForSessionUpdateResult_6870dd47"
+                                    retry: "${http.default_retry}"
+                                - registerExecForSessionSwitch_updateResult_0:
+                                    assign:
+                                    - registerExecForSessionSwitchResult_12d6cef7: "${\"ok\"}"
+                              - condition: "${true}"
+                                steps:
+                                - registerExecForSessionRethrow:
+                                    raise: "${registerExecForSessionTryError}"
+                                - registerExecForSessionSwitch_updateResult_1:
+                                    assign:
+                                    - registerExecForSessionSwitchResult_12d6cef7: "${\"fail\"}"
+                      - registerExecForSessionTry_updateResultError:
+                          assign:
+                          - registerExecForSessionTryResult_4ab84a3d: "${registerExecForSessionSwitchResult_12d6cef7}"
+            - registerWorkflowExecLink:
+                steps:
+                - registerWorkflowExecLink_initResult:
+                    assign:
+                    - registerWorkflowExecLinkResult_72030342: {}
+                - registerWorkflowExecLink_steps:
+                    switch:
+                    - condition: "${(len(default(default(map.get(input.env, \"callingWorkflowExec\"), null), \"\")) > 0)}"
+                      steps:
+                      - registerWorkflowExecLinkTry:
+                          steps:
+                          - registerWorkflowExecLinkTry_initResult:
+                              assign:
+                              - registerWorkflowExecLinkTryResult_30a042af: {}
+                          - registerWorkflowExecLinkTry_steps:
+                              try:
+                                steps:
+                                - registerWorkflowExecLinkCreate:
+                                    try:
+                                      steps:
+                                      - registerWorkflowExecLinkCreate_call:
+                                          call: "http.post"
+                                          args:
+                                            url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/create\")}"
+                                            body:
+                                              collection: "${\"workflowExecLinks\"}"
+                                              id: "${((default(map.get(input.env, \"callingWorkflowExec\"), null) + \":\") + sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"))}"
+                                              contents:
+                                                callingExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                triggeredExec: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                                sessionId: "${input.env.sessionId}"
+                                                created: "${sys.now()}"
+                                              userId: "${input.env.userId}"
+                                            auth:
+                                              type: "OIDC"
+                                              audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                            headers:
+                                              x-user-id: "${input.env.userId}"
+                                              x-project-id: "${input.env.projectId}"
+                                          result: "registerWorkflowExecLinkCreateResult_4d822e3b"
+                                    retry: "${http.default_retry}"
+                                - registerWorkflowExecLinkTry_updateResult:
+                                    assign:
+                                    - registerWorkflowExecLinkTryResult_30a042af: "${\"ok\"}"
+                              except:
+                                as: "registerWorkflowExecLinkTryError"
+                                steps:
+                                - registerWorkflowExecLinkSwitch:
+                                    steps:
+                                    - registerWorkflowExecLinkSwitch_initResult:
+                                        assign:
+                                        - registerWorkflowExecLinkSwitchResult_c1b802d: {}
+                                    - registerWorkflowExecLinkSwitch_steps:
+                                        switch:
+                                        - condition: "${(registerWorkflowExecLinkTryError.code == 409)}"
+                                          steps:
+                                          - registerWorkflowExecLinkUpdate:
+                                              try:
+                                                steps:
+                                                - registerWorkflowExecLinkUpdate_call:
+                                                    call: "http.post"
+                                                    args:
+                                                      url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/update\")}"
+                                                      body:
+                                                        collection: "${\"workflowExecLinks\"}"
+                                                        id: "${((default(map.get(input.env, \"callingWorkflowExec\"), null) + \":\") + sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"))}"
+                                                        contents:
+                                                          callingExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                          triggeredExec: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                                          sessionId: "${input.env.sessionId}"
+                                                          created: "${sys.now()}"
+                                                        userId: "${input.env.userId}"
+                                                      auth:
+                                                        type: "OIDC"
+                                                        audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                                      headers:
+                                                        x-user-id: "${input.env.userId}"
+                                                        x-project-id: "${input.env.projectId}"
+                                                    result: "registerWorkflowExecLinkUpdateResult_7cc6e9f1"
+                                              retry: "${http.default_retry}"
+                                          - registerWorkflowExecLinkSwitch_updateResult_0:
+                                              assign:
+                                              - registerWorkflowExecLinkSwitchResult_c1b802d: "${\"ok\"}"
+                                        - condition: "${true}"
+                                          steps:
+                                          - registerWorkflowExecLinkRethrow:
+                                              raise: "${registerWorkflowExecLinkTryError}"
+                                          - registerWorkflowExecLinkSwitch_updateResult_1:
+                                              assign:
+                                              - registerWorkflowExecLinkSwitchResult_c1b802d: "${\"fail\"}"
+                                - registerWorkflowExecLinkTry_updateResultError:
+                                    assign:
+                                    - registerWorkflowExecLinkTryResult_30a042af: "${registerWorkflowExecLinkSwitchResult_c1b802d}"
+                      - registerWorkflowExecLink_updateResult_0:
+                          assign:
+                          - registerWorkflowExecLinkResult_72030342: "${registerWorkflowExecLinkTryResult_30a042af}"
+                    - condition: "${true}"
+                      steps:
+                      - registerWorkflowExecLink_updateResult_1:
+                          assign:
+                          - registerWorkflowExecLinkResult_72030342: "${\"skip\"}"
+            - forToolCall:
+                steps:
+                - forToolCall_initResult:
+                    assign:
+                    - forToolCallResult_5bc2b367: []
+                - forToolCall_steps:
+                    for:
+                      value: "forToolCallValue"
+                      in: "${input.toolCalls}"
+                      steps:
+                      - fold:
+                          steps:
+                          - fold_initResult:
+                              assign:
+                              - foldResult_b47820d: "${null}"
+                          - fold_steps:
+                              for:
+                                value: "foldValue"
+                                in: "${input.toolDefs}"
+                                steps:
+                                - matchFunction:
+                                    steps:
+                                    - matchFunction_initResult:
+                                        assign:
+                                        - matchFunctionResult_4e3d41ba: {}
+                                    - matchFunction_steps:
+                                        switch:
+                                        - condition: "${(forToolCallValue.function.name == foldValue.function.name)}"
+                                          steps:
+                                          - callToolWorkflow:
+                                              try:
+                                                steps:
+                                                - callToolWorkflow_call:
+                                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                                    args:
+                                                      workflow_id: "${(foldValue.workflowName + \"${WORKFLOW_ENV}\")}"
+                                                      argument:
+                                                        tool_call: "${forToolCallValue}"
+                                                        cost: "${input.totalCost}"
+                                                        env:
+                                                          userId: "${input.env.userId}"
+                                                          model: "${input.env.model}"
+                                                          callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                                          BASE_URL: "${input.env.BASE_URL}"
+                                                          background: "${default(map.get(input.env, \"background\"), null)}"
+                                                          projectId: "${input.env.projectId}"
+                                                          sessionId: "${input.env.sessionId}"
+                                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                      connector_params:
+                                                        skip_polling: false
+                                                    result: "callToolWorkflowResult_2622bf3e"
+                                              retry: "${http.default_retry}"
+                                          - matchFunction_updateResult_0:
+                                              assign:
+                                              - matchFunctionResult_4e3d41ba: "${callToolWorkflowResult_2622bf3e}"
+                                        - condition: "${true}"
+                                          steps:
+                                          - matchFunction_updateResult_1:
+                                              assign:
+                                              - matchFunctionResult_4e3d41ba: "${foldResult_b47820d}"
+                                - fold_updateResult:
+                                    assign:
+                                    - foldResult_b47820d: "${matchFunctionResult_4e3d41ba}"
+                      - saveResult_seg_write_with_session_update:
+                          steps:
+                          - saveResult_newId:
+                              steps:
+                              - saveResult_newId_initResult:
+                                  assign:
+                                  - saveResult_newIdResult_346bbe87: {}
+                              - saveResult_newId_steps:
+                                  try:
+                                    steps:
+                                    - saveResult_newId_updateResult:
+                                        assign:
+                                        - saveResult_newIdResult_346bbe87: "${uuid.generate()}"
+                                  except:
+                                    as: "saveResult_newIdError"
+                                    steps:
+                                    - saveResult_newId_logError:
+                                        try:
+                                          steps:
+                                          - saveResult_newId_logError_call:
+                                              call: "sys.log"
+                                              args:
+                                                text: "${(\"[saveResult_newId_logError] \" + saveResult_newIdError.message)}"
+                                              result: "saveResult_newId_logErrorResult_37610a81"
+                                        retry: "${http.default_retry}"
+                                    - saveResult_newId_updateResultError:
+                                        assign:
+                                        - saveResult_newIdResult_346bbe87: "${null}"
+                          - saveResult_write_messagesIsta_SegKala:
+                              try:
+                                steps:
+                                - saveResult_write_messagesIsta_SegKala_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/create\")}"
+                                      body:
+                                        collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
+                                        id: "${saveResult_newIdResult_346bbe87}"
+                                        contents:
+                                          value:
+                                            role: "${\"tool\"}"
+                                            content: "${foldResult_b47820d.encoded}"
+                                            tool_calls: "${[]}"
+                                            tool_call_id: "${forToolCallValue.id}"
+                                            create_time: "${sys.now()}"
+                                            docId: "${null}"
+                                          create_time: "${sys.now()}"
+                                          cost: "${null}"
+                                          execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "OIDC"
+                                        audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "saveResult_write_messagesIsta_SegKalaResult_50d4e9a"
+                              retry: "${http.default_retry}"
+                          - saveResult_update_session_update_time:
+                              try:
+                                steps:
+                                - saveResult_update_session_update_time_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/update\")}"
+                                      body:
+                                        collection: "${\"convo.sessions\"}"
+                                        id: "${input.env.sessionId}"
+                                        contents:
+                                          update_time: "${sys.now()}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "OIDC"
+                                        audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "saveResult_update_session_update_timeResult_c0cccea"
+                              retry: "${http.default_retry}"
+                      - forToolCall_updateResult:
+                          assign:
+                          - forToolCallResult_5bc2b367: "${list.concat(forToolCallResult_5bc2b367, foldResult_b47820d)}"
+            - mainTry_updateResult:
+                assign:
+                - mainTryResult_353926fe:
+                    results: "${forToolCallResult_5bc2b367}"
+          except:
+            as: "mainTryError"
+            steps:
+            - ReRaise_error:
+                raise: "${mainTryError}"
+            - mainTry_updateResultError:
+                assign:
+                - mainTryResult_353926fe: "${null}"
+  - return:
+      return: "${mainTryResult_353926fe}"
