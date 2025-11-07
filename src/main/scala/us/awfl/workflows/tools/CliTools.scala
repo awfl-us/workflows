@@ -10,6 +10,7 @@ import us.awfl.workflows.traits.ToolWorkflow
 import us.awfl.utils.*
 import us.awfl.utils.Events
 import us.awfl.utils.Events.OperationEnvelope
+import us.awfl.utils.post
 
 object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
   // Workflows callback helpers
@@ -19,9 +20,13 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
 
   case class CallbackRequest(http_request: BaseValue[PostRequest[NoValueT]])
 
+  // jobs/callbacks service payloads
+  case class CreateJobsCallbackBody(callback_url: BaseValue[String])
+  case class CreateCallbackResponse(id: BaseValue[String])
+
   val toolNames = List("READ_FILE", "UPDATE_FILE", "RUN_COMMAND")
 
-  // Standalone workflow to handle tool calls: create callback, enqueue via relay ingest, and await callback
+  // Standalone workflow to handle tool calls: create callback, persist it with an ID, enqueue via relay ingest, and await callback
   override def workflows = List({
     val createCallback = Call[CreateCallbackArgs, CallbackDetails](
       s"createCallback",
@@ -29,9 +34,17 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       obj(CreateCallbackArgs(Field.str("POST")))
     )
 
+    // Save the callback on our server to receive a callback ID
+    // POST /jobs/callbacks with { callback_url }
+    val saveCallback = post[CreateJobsCallbackBody, CreateCallbackResponse](
+      "saveCallback",
+      "callbacks",
+      obj(CreateJobsCallbackBody(createCallback.resultValue.flatMap(_.url)))
+    )
+
     val envelope = OperationEnvelope(
       create_time = Value("sys.now()"),
-      callback_url = createCallback.resultValue.flatMap(_.url),
+      callback_id = saveCallback.result.body.get.id,
       content = Value("null"),
       tool_call = input.tool_call,
       cost = input.cost,
@@ -60,6 +73,8 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     Workflow(buildSteps(
       List[Step[_, _]](
         createCallback,
+        saveCallback,
+        Log("logSavedCallback", str(("Saved callback: id=": Cel) + saveCallback.result.body.get.id)),
         ingest,
         Log("logIngest", str(("Post event result: ": Cel) + CelFunc("json.encode_to_string", ingest.resultValue.cel))),
         awaitCallback

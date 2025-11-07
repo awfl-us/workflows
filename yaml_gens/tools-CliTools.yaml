@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_26f1acde: {}
+          - mainTryResult_1d341b52: {}
       - mainTry_steps:
           try:
             steps:
@@ -14,7 +14,7 @@ main:
                 steps:
                 - registerExecForSessionTry_initResult:
                     assign:
-                    - registerExecForSessionTryResult_5c61d9e6: {}
+                    - registerExecForSessionTryResult_1b548456: {}
                 - registerExecForSessionTry_steps:
                     try:
                       steps:
@@ -43,7 +43,7 @@ main:
                           retry: "${http.default_retry}"
                       - registerExecForSessionTry_updateResult:
                           assign:
-                          - registerExecForSessionTryResult_5c61d9e6: "${\"ok\"}"
+                          - registerExecForSessionTryResult_1b548456: "${\"ok\"}"
                     except:
                       as: "registerExecForSessionTryError"
                       steps:
@@ -91,12 +91,12 @@ main:
                                     - registerExecForSessionSwitchResult_12d6cef7: "${\"fail\"}"
                       - registerExecForSessionTry_updateResultError:
                           assign:
-                          - registerExecForSessionTryResult_5c61d9e6: "${registerExecForSessionSwitchResult_12d6cef7}"
+                          - registerExecForSessionTryResult_1b548456: "${registerExecForSessionSwitchResult_12d6cef7}"
             - registerWorkflowExecLink:
                 steps:
                 - registerWorkflowExecLink_initResult:
                     assign:
-                    - registerWorkflowExecLinkResult_4ca30d68: {}
+                    - registerWorkflowExecLinkResult_773fc4f0: {}
                 - registerWorkflowExecLink_steps:
                     switch:
                     - condition: "${(len(default(default(map.get(input.env, \"callingWorkflowExec\"), null), \"\")) > 0)}"
@@ -105,7 +105,7 @@ main:
                           steps:
                           - registerWorkflowExecLinkTry_initResult:
                               assign:
-                              - registerWorkflowExecLinkTryResult_643c8cbb: {}
+                              - registerWorkflowExecLinkTryResult_203de8f8: {}
                           - registerWorkflowExecLinkTry_steps:
                               try:
                                 steps:
@@ -135,7 +135,7 @@ main:
                                     retry: "${http.default_retry}"
                                 - registerWorkflowExecLinkTry_updateResult:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_643c8cbb: "${\"ok\"}"
+                                    - registerWorkflowExecLinkTryResult_203de8f8: "${\"ok\"}"
                               except:
                                 as: "registerWorkflowExecLinkTryError"
                                 steps:
@@ -184,15 +184,15 @@ main:
                                               - registerWorkflowExecLinkSwitchResult_c1b802d: "${\"fail\"}"
                                 - registerWorkflowExecLinkTry_updateResultError:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_643c8cbb: "${registerWorkflowExecLinkSwitchResult_c1b802d}"
+                                    - registerWorkflowExecLinkTryResult_203de8f8: "${registerWorkflowExecLinkSwitchResult_c1b802d}"
                       - registerWorkflowExecLink_updateResult_0:
                           assign:
-                          - registerWorkflowExecLinkResult_4ca30d68: "${registerWorkflowExecLinkTryResult_643c8cbb}"
+                          - registerWorkflowExecLinkResult_773fc4f0: "${registerWorkflowExecLinkTryResult_203de8f8}"
                     - condition: "${true}"
                       steps:
                       - registerWorkflowExecLink_updateResult_1:
                           assign:
-                          - registerWorkflowExecLinkResult_4ca30d68: "${\"skip\"}"
+                          - registerWorkflowExecLinkResult_773fc4f0: "${\"skip\"}"
             - createCallback:
                 try:
                   steps:
@@ -201,6 +201,32 @@ main:
                       args:
                         http_callback_method: "${\"POST\"}"
                       result: "createCallbackResult_1bffcb86"
+                retry: "${http.default_retry}"
+            - saveCallback:
+                try:
+                  steps:
+                  - saveCallback_call:
+                      call: "http.post"
+                      args:
+                        url: "${((input.env.BASE_URL + \"/jobs/\") + \"callbacks\")}"
+                        body:
+                          callback_url: "${createCallbackResult_1bffcb86.url}"
+                        auth:
+                          type: "OIDC"
+                          audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                        headers:
+                          x-user-id: "${input.env.userId}"
+                          x-project-id: "${input.env.projectId}"
+                      result: "saveCallbackResult_75a04652"
+                retry: "${http.default_retry}"
+            - logSavedCallback:
+                try:
+                  steps:
+                  - logSavedCallback_call:
+                      call: "sys.log"
+                      args:
+                        text: "${(\"[logSavedCallback] \" + (\"Saved callback: id=\" + saveCallbackResult_75a04652.body.id))}"
+                      result: "logSavedCallbackResult_796a1bd2"
                 retry: "${http.default_retry}"
             - relay_ingest_tool_call:
                 try:
@@ -214,7 +240,7 @@ main:
                           projectId: "${input.env.projectId}"
                           data:
                             create_time: "${sys.now()}"
-                            callback_url: "${createCallbackResult_1bffcb86.url}"
+                            callback_id: "${saveCallbackResult_75a04652.body.id}"
                             content: "${null}"
                             tool_call: "${input.tool_call}"
                             cost: "${input.cost}"
@@ -230,7 +256,7 @@ main:
                         headers:
                           x-user-id: "${input.env.userId}"
                           x-project-id: "${input.env.projectId}"
-                      result: "relay_ingest_tool_callResult_17deba23"
+                      result: "relay_ingest_tool_callResult_12c8ab0d"
                 retry: "${http.default_retry}"
             - logIngest:
                 try:
@@ -238,8 +264,8 @@ main:
                   - logIngest_call:
                       call: "sys.log"
                       args:
-                        text: "${(\"[logIngest] \" + (\"Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_17deba23)))}"
-                      result: "logIngestResult_2111955"
+                        text: "${(\"[logIngest] \" + (\"Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_12c8ab0d)))}"
+                      result: "logIngestResult_3d764521"
                 retry: "${http.default_retry}"
             - awaitCallback:
                 try:
@@ -253,7 +279,7 @@ main:
                 retry: "${http.default_retry}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_26f1acde:
+                - mainTryResult_1d341b52:
                     encoded: "${json.encode_to_string(awaitCallbackResult_2ca32d82.http_request.body)}"
                     cost: "${0}"
           except:
@@ -263,6 +289,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_26f1acde: "${null}"
+                - mainTryResult_1d341b52: "${null}"
   - return:
-      return: "${mainTryResult_26f1acde}"
+      return: "${mainTryResult_1d341b52}"
