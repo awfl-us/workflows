@@ -6,7 +6,7 @@ main:
       steps:
       - select_task_tool_initResult:
           assign:
-          - select_task_toolResult_18996193: {}
+          - select_task_toolResult_7d504cfe: {}
       - select_task_tool_steps:
           switch:
           - condition: "${(string(input.tool_call.function.name) == \"CREATE_TASK\")}"
@@ -17,7 +17,7 @@ main:
                     steps:
                     - tryCreateTask_initResult:
                         assign:
-                        - tryCreateTaskResult_601a0a8f: {}
+                        - tryCreateTaskResult_1346ba43: {}
                     - tryCreateTask_steps:
                         try:
                           steps:
@@ -43,16 +43,16 @@ main:
                               retry: "${http.default_retry}"
                           - tryCreateTask_updateResult:
                               assign:
-                              - tryCreateTaskResult_601a0a8f: "${(((((((((\"Created task\" + \": id=\") + string(createTaskCallResult_64313e10.body.task.id)) + \" | \") + string(createTaskCallResult_64313e10.body.task.title)) + \" — \") + string(createTaskCallResult_64313e10.body.task.description)) + \" [status=\") + string(createTaskCallResult_64313e10.body.task.status)) + \"]\")}"
+                              - tryCreateTaskResult_1346ba43: "${(((((((((\"Created task\" + \": id=\") + string(createTaskCallResult_64313e10.body.task.id)) + \" | \") + string(createTaskCallResult_64313e10.body.task.title)) + \" — \") + string(createTaskCallResult_64313e10.body.task.description)) + \" [status=\") + string(createTaskCallResult_64313e10.body.task.status)) + \"]\")}"
                         except:
                           as: "tryCreateTaskError"
                           steps:
                           - tryCreateTask_updateResultError:
                               assign:
-                              - tryCreateTaskResult_601a0a8f: "${(\"Task create failed: \" + string(tryCreateTaskError))}"
+                              - tryCreateTaskResult_1346ba43: "${(\"Task create failed: \" + string(tryCreateTaskError))}"
             - select_task_tool_updateResult_0:
                 assign:
-                - select_task_toolResult_18996193: "${tryCreateTaskResult_601a0a8f}"
+                - select_task_toolResult_7d504cfe: "${tryCreateTaskResult_1346ba43}"
           - condition: "${(string(input.tool_call.function.name) == \"UPDATE_TASK\")}"
             steps:
             - run_update_task:
@@ -81,19 +81,19 @@ main:
                     steps:
                     - tryUpdateTask_initResult:
                         assign:
-                        - tryUpdateTaskResult_6b8e38b4: {}
+                        - tryUpdateTaskResult_22c6cac8: {}
                     - tryUpdateTask_steps:
                         try:
                           steps:
                           - tryUpdateTask_updateResult:
                               assign:
-                              - tryUpdateTaskResult_6b8e38b4: "${(((((((((\"Updated task\" + \": id=\") + string(updateTaskCallResult_23d099f7.body.task.id)) + \" | \") + string(updateTaskCallResult_23d099f7.body.task.title)) + \" — \") + string(updateTaskCallResult_23d099f7.body.task.description)) + \" [status=\") + string(updateTaskCallResult_23d099f7.body.task.status)) + \"]\")}"
+                              - tryUpdateTaskResult_22c6cac8: "${(((((((((\"Updated task\" + \": id=\") + string(updateTaskCallResult_23d099f7.body.task.id)) + \" | \") + string(updateTaskCallResult_23d099f7.body.task.title)) + \" — \") + string(updateTaskCallResult_23d099f7.body.task.description)) + \" [status=\") + string(updateTaskCallResult_23d099f7.body.task.status)) + \"]\")}"
                         except:
                           as: "tryUpdateTaskError"
                           steps:
                           - tryUpdateTask_updateResultError:
                               assign:
-                              - tryUpdateTaskResult_6b8e38b4: "${(\"Task update failed: \" + string(tryUpdateTaskError))}"
+                              - tryUpdateTaskResult_22c6cac8: "${(\"Task update failed: \" + string(tryUpdateTaskError))}"
                 - maybe_promote_next:
                     steps:
                     - maybe_promote_next_initResult:
@@ -201,13 +201,13 @@ main:
                               - maybe_promote_nextResult_3bca864: "${\"\"}"
             - select_task_tool_updateResult_1:
                 assign:
-                - select_task_toolResult_18996193: "${((tryUpdateTaskResult_6b8e38b4 + \"\r\") + maybe_promote_nextResult_3bca864)}"
+                - select_task_toolResult_7d504cfe: "${((tryUpdateTaskResult_22c6cac8 + \"\r\") + maybe_promote_nextResult_3bca864)}"
           - condition: "${true}"
             steps:
             - select_task_tool_updateResult_2:
                 assign:
-                - select_task_toolResult_18996193: "${(\"Unsupported tool: \" + string(input.tool_call.function.name))}"
+                - select_task_toolResult_7d504cfe: "${(\"Unsupported tool: \" + string(input.tool_call.function.name))}"
   - return:
       return:
-        encoded: "${select_task_toolResult_18996193}"
+        encoded: "${select_task_toolResult_7d504cfe}"
         cost: "${0}"

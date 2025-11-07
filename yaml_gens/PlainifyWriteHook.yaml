@@ -6,13 +6,13 @@ main:
       steps:
       - read_raw_params_initResult:
           assign:
-          - read_raw_paramsResult_14204cf: {}
+          - read_raw_paramsResult_45c9d04a: {}
       - read_raw_params_steps:
           try:
             steps:
             - read_raw_params_updateResult:
                 assign:
-                - read_raw_paramsResult_14204cf:
+                - read_raw_paramsResult_45c9d04a:
                     filepath: "${input.filepath}"
           except:
             as: "read_raw_paramsError"
@@ -28,7 +28,7 @@ main:
                 retry: "${http.default_retry}"
             - read_raw_params_updateResultError:
                 assign:
-                - read_raw_paramsResult_14204cf: "${null}"
+                - read_raw_paramsResult_45c9d04a: "${null}"
   - readRaw_callback_block:
       steps:
       - readRaw_run_tools_CliTools:
@@ -44,7 +44,7 @@ main:
                       type: "function"
                       function:
                         name: "${\"READ_FILE\"}"
-                        arguments: "${json.encode_to_string(read_raw_paramsResult_14204cf)}"
+                        arguments: "${json.encode_to_string(read_raw_paramsResult_45c9d04a)}"
                     cost: 0.0
                     env:
                       userId: "${input.env.userId}"
@@ -58,13 +58,13 @@ main:
                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                   connector_params:
                     skip_polling: false
-                result: "readRaw_run_tools_CliToolsResult_386ad8e1"
+                result: "readRaw_run_tools_CliToolsResult_d71a928"
           retry: "${http.default_retry}"
   - plainifyMessages:
       steps:
       - plainifyMessages_initResult:
           assign:
-          - plainifyMessagesResult_7f84d941: []
+          - plainifyMessagesResult_62fa0331: []
       - plainifyMessages_steps:
           for:
             value: "plainifyMessagesIdx"
@@ -74,14 +74,14 @@ main:
                 steps:
                 - plainifyMessages_switch_initResult:
                     assign:
-                    - plainifyMessages_switchResult_5f6f50fb: {}
+                    - plainifyMessages_switchResult_7ff5b531: {}
                 - plainifyMessages_switch_steps:
                     switch:
                     - condition: "${(plainifyMessagesIdx == 0)}"
                       steps:
                       - plainifyMessages_switch_updateResult_0:
                           assign:
-                          - plainifyMessages_switchResult_5f6f50fb:
+                          - plainifyMessages_switchResult_7ff5b531:
                               role: "system"
                               content: "${(\"Translate the following code completely into precise, plain technical English. Include all types, methods, data flow, control flow, external interactions, and intent. No omissions. Include the full class signature in code, but the implementation and logic should be in plain English.\n\nTarget filepath: \" + input.filepath)}"
                               tool_calls: "${[]}"
@@ -92,16 +92,16 @@ main:
                       steps:
                       - plainifyMessages_switch_updateResult_1:
                           assign:
-                          - plainifyMessages_switchResult_5f6f50fb:
+                          - plainifyMessages_switchResult_7ff5b531:
                               role: "user"
-                              content: "${(\"Code follows:\n\n\" + map.get(json.decode(readRaw_run_tools_CliToolsResult_386ad8e1.encoded), \"content\"))}"
+                              content: "${(\"Code follows:\n\n\" + map.get(json.decode(readRaw_run_tools_CliToolsResult_d71a928.encoded), \"content\"))}"
                               tool_calls: "${[]}"
                               tool_call_id: "${null}"
                               create_time: "${sys.now()}"
                               docId: "${null}"
             - plainifyMessages_updateResult:
                 assign:
-                - plainifyMessagesResult_7f84d941: "${list.concat(plainifyMessagesResult_7f84d941, plainifyMessages_switchResult_5f6f50fb)}"
+                - plainifyMessagesResult_62fa0331: "${list.concat(plainifyMessagesResult_62fa0331, plainifyMessages_switchResult_7ff5b531)}"
   - plainify:
       try:
         steps:
@@ -110,7 +110,7 @@ main:
             args:
               url: "${((input.env.BASE_URL + \"/jobs/\") + \"llm/chat\")}"
               body:
-                messages: "${plainifyMessagesResult_7f84d941}"
+                messages: "${plainifyMessagesResult_62fa0331}"
                 model: "${\"gpt-5\"}"
                 temperature: 0.8
                 max_completion_tokens: "${null}"
@@ -124,19 +124,19 @@ main:
               headers:
                 x-user-id: "${input.env.userId}"
                 x-project-id: "${input.env.projectId}"
-            result: "plainifyResult_6410fc24"
+            result: "plainifyResult_6f057b1b"
       retry: "${http.default_retry}"
   - mkdir_plain_params:
       steps:
       - mkdir_plain_params_initResult:
           assign:
-          - mkdir_plain_paramsResult_4482200a: {}
+          - mkdir_plain_paramsResult_57d7a0ae: {}
       - mkdir_plain_params_steps:
           try:
             steps:
             - mkdir_plain_params_updateResult:
                 assign:
-                - mkdir_plain_paramsResult_4482200a:
+                - mkdir_plain_paramsResult_57d7a0ae:
                     command: "${((\"bash -lc 'mkdir -p $(dirname \" + (\"plain/\" + input.filepath)) + \")'\")}"
           except:
             as: "mkdir_plain_paramsError"
@@ -152,7 +152,7 @@ main:
                 retry: "${http.default_retry}"
             - mkdir_plain_params_updateResultError:
                 assign:
-                - mkdir_plain_paramsResult_4482200a: "${null}"
+                - mkdir_plain_paramsResult_57d7a0ae: "${null}"
   - mkdirPlain_callback_block:
       steps:
       - mkdirPlain_run_tools_CliTools:
@@ -168,7 +168,7 @@ main:
                       type: "function"
                       function:
                         name: "${\"RUN_COMMAND\"}"
-                        arguments: "${json.encode_to_string(mkdir_plain_paramsResult_4482200a)}"
+                        arguments: "${json.encode_to_string(mkdir_plain_paramsResult_57d7a0ae)}"
                     cost: 0.0
                     env:
                       userId: "${input.env.userId}"
@@ -182,21 +182,21 @@ main:
                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                   connector_params:
                     skip_polling: false
-                result: "mkdirPlain_run_tools_CliToolsResult_4bcaecce"
+                result: "mkdirPlain_run_tools_CliToolsResult_36ab74e9"
           retry: "${http.default_retry}"
   - write_plain_params:
       steps:
       - write_plain_params_initResult:
           assign:
-          - write_plain_paramsResult_c1b7997: {}
+          - write_plain_paramsResult_3740224e: {}
       - write_plain_params_steps:
           try:
             steps:
             - write_plain_params_updateResult:
                 assign:
-                - write_plain_paramsResult_c1b7997:
+                - write_plain_paramsResult_3740224e:
                     filepath: "${(\"plain/\" + input.filepath)}"
-                    content: "${plainifyResult_6410fc24.body.message.content}"
+                    content: "${plainifyResult_6f057b1b.body.message.content}"
           except:
             as: "write_plain_paramsError"
             steps:
@@ -211,7 +211,7 @@ main:
                 retry: "${http.default_retry}"
             - write_plain_params_updateResultError:
                 assign:
-                - write_plain_paramsResult_c1b7997: "${null}"
+                - write_plain_paramsResult_3740224e: "${null}"
   - writePlain_callback_block:
       steps:
       - writePlain_run_tools_CliTools:
@@ -227,7 +227,7 @@ main:
                       type: "function"
                       function:
                         name: "${\"UPDATE_FILE\"}"
-                        arguments: "${json.encode_to_string(write_plain_paramsResult_c1b7997)}"
+                        arguments: "${json.encode_to_string(write_plain_paramsResult_3740224e)}"
                     cost: 0.0
                     env:
                       userId: "${input.env.userId}"
@@ -241,7 +241,7 @@ main:
                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                   connector_params:
                     skip_polling: false
-                result: "writePlain_run_tools_CliToolsResult_5da590c5"
+                result: "writePlain_run_tools_CliToolsResult_3cc356b9"
           retry: "${http.default_retry}"
   - return:
       return: "${(\"plain/\" + input.filepath)}"

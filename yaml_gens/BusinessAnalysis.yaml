@@ -8,7 +8,7 @@ main:
           steps:
           - cacheReportRead_tryRead_initResult:
               assign:
-              - cacheReportRead_tryReadResult_2e807118: {}
+              - cacheReportRead_tryReadResult_38143a8b: {}
           - cacheReportRead_tryRead_steps:
               try:
                 steps:
@@ -33,7 +33,7 @@ main:
                     retry: "${http.default_retry}"
                 - cacheReportRead_tryRead_updateResult:
                     assign:
-                    - cacheReportRead_tryReadResult_2e807118: "${cacheReportReadResult_179a91e6}"
+                    - cacheReportRead_tryReadResult_38143a8b: "${cacheReportReadResult_179a91e6}"
               except:
                 as: "cacheReportRead_tryReadError"
                 steps:
@@ -67,15 +67,15 @@ main:
                               - cacheReportRead_switchReadResult_294913a4: "${cacheReportReadResult_179a91e6}"
                 - cacheReportRead_tryRead_updateResultError:
                     assign:
-                    - cacheReportRead_tryReadResult_2e807118: "${cacheReportRead_switchReadResult_294913a4}"
+                    - cacheReportRead_tryReadResult_38143a8b: "${cacheReportRead_switchReadResult_294913a4}"
       - cacheReportIfStale:
           steps:
           - cacheReportIfStale_initResult:
               assign:
-              - cacheReportIfStaleResult_60a4df85: {}
+              - cacheReportIfStaleResult_753122bf: {}
           - cacheReportIfStale_steps:
               switch:
-              - condition: "${(((not  (\"body\" in cacheReportRead_tryReadResult_2e807118)) or (not  (\"updatedAt\" in cacheReportRead_tryReadResult_2e807118.body))) or ((sys.now() - cacheReportRead_tryReadResult_2e807118.body.updatedAt) > 86400000))}"
+              - condition: "${(((not  (\"body\" in cacheReportRead_tryReadResult_38143a8b)) or (not  (\"updatedAt\" in cacheReportRead_tryReadResult_38143a8b.body))) or ((sys.now() - cacheReportRead_tryReadResult_38143a8b.body.updatedAt) > 86400000))}"
                 steps:
                 - cacheReportBlock:
                     steps:
@@ -146,7 +146,7 @@ main:
                             steps:
                             - cacheReviews_businessReviewsRead_tryRead_initResult:
                                 assign:
-                                - cacheReviews_businessReviewsRead_tryReadResult_1eca27a9: {}
+                                - cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb: {}
                             - cacheReviews_businessReviewsRead_tryRead_steps:
                                 try:
                                   steps:
@@ -171,7 +171,7 @@ main:
                                       retry: "${http.default_retry}"
                                   - cacheReviews_businessReviewsRead_tryRead_updateResult:
                                       assign:
-                                      - cacheReviews_businessReviewsRead_tryReadResult_1eca27a9: "${cacheReviews_businessReviewsReadResult_437a4d37}"
+                                      - cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb: "${cacheReviews_businessReviewsReadResult_437a4d37}"
                                 except:
                                   as: "cacheReviews_businessReviewsRead_tryReadError"
                                   steps:
@@ -205,15 +205,15 @@ main:
                                                 - cacheReviews_businessReviewsRead_switchReadResult_332b3de7: "${cacheReviews_businessReviewsReadResult_437a4d37}"
                                   - cacheReviews_businessReviewsRead_tryRead_updateResultError:
                                       assign:
-                                      - cacheReviews_businessReviewsRead_tryReadResult_1eca27a9: "${cacheReviews_businessReviewsRead_switchReadResult_332b3de7}"
+                                      - cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb: "${cacheReviews_businessReviewsRead_switchReadResult_332b3de7}"
                         - cacheReviews_businessReviewsIfStale:
                             steps:
                             - cacheReviews_businessReviewsIfStale_initResult:
                                 assign:
-                                - cacheReviews_businessReviewsIfStaleResult_71a8dcdd: {}
+                                - cacheReviews_businessReviewsIfStaleResult_21f91300: {}
                             - cacheReviews_businessReviewsIfStale_steps:
                                 switch:
-                                - condition: "${(((not  (\"body\" in cacheReviews_businessReviewsRead_tryReadResult_1eca27a9)) or (not  (\"updatedAt\" in cacheReviews_businessReviewsRead_tryReadResult_1eca27a9.body))) or ((sys.now() - cacheReviews_businessReviewsRead_tryReadResult_1eca27a9.body.updatedAt) > 86400000))}"
+                                - condition: "${(((not  (\"body\" in cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb)) or (not  (\"updatedAt\" in cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb.body))) or ((sys.now() - cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb.body.updatedAt) > 86400000))}"
                                   steps:
                                   - scrapeReviews_businessReviews:
                                       try:
@@ -256,12 +256,12 @@ main:
                                       retry: "${http.default_retry}"
                                   - cacheReviews_businessReviewsIfStale_updateResult_0:
                                       assign:
-                                      - cacheReviews_businessReviewsIfStaleResult_71a8dcdd: "${scrapeReviews_businessReviewsResult_1090aaf9.body}"
-                                - condition: "${(\"body\" in cacheReviews_businessReviewsRead_tryReadResult_1eca27a9)}"
+                                      - cacheReviews_businessReviewsIfStaleResult_21f91300: "${scrapeReviews_businessReviewsResult_1090aaf9.body}"
+                                - condition: "${(\"body\" in cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb)}"
                                   steps:
                                   - cacheReviews_businessReviewsIfStale_updateResult_1:
                                       assign:
-                                      - cacheReviews_businessReviewsIfStaleResult_71a8dcdd: "${cacheReviews_businessReviewsRead_tryReadResult_1eca27a9.body.result}"
+                                      - cacheReviews_businessReviewsIfStaleResult_21f91300: "${cacheReviews_businessReviewsRead_tryReadResult_22a4bbdb.body.result}"
                                 - condition: "${true}"
                                   steps:
                                   - cacheReviews_businessReviews_raiseFailedCache:
@@ -270,7 +270,7 @@ main:
                                         code: ""
                                   - cacheReviews_businessReviewsIfStale_updateResult_2:
                                       assign:
-                                      - cacheReviews_businessReviewsIfStaleResult_71a8dcdd: "${scrapeReviews_businessReviewsResult_1090aaf9.body}"
+                                      - cacheReviews_businessReviewsIfStaleResult_21f91300: "${scrapeReviews_businessReviewsResult_1090aaf9.body}"
                     - Status_competitorReviews:
                         try:
                           steps:
@@ -297,7 +297,7 @@ main:
                         steps:
                         - scrapeReviewsForCompetitors_initResult:
                             assign:
-                            - scrapeReviewsForCompetitorsResult_4f90251f: []
+                            - scrapeReviewsForCompetitorsResult_5a582f7b: []
                         - scrapeReviewsForCompetitors_steps:
                             for:
                               value: "scrapeReviewsForCompetitorsValue"
@@ -309,7 +309,7 @@ main:
                                       steps:
                                       - cacheReviews_competitorReviewsRead_tryRead_initResult:
                                           assign:
-                                          - cacheReviews_competitorReviewsRead_tryReadResult_499999b6: {}
+                                          - cacheReviews_competitorReviewsRead_tryReadResult_699da557: {}
                                       - cacheReviews_competitorReviewsRead_tryRead_steps:
                                           try:
                                             steps:
@@ -334,7 +334,7 @@ main:
                                                 retry: "${http.default_retry}"
                                             - cacheReviews_competitorReviewsRead_tryRead_updateResult:
                                                 assign:
-                                                - cacheReviews_competitorReviewsRead_tryReadResult_499999b6: "${cacheReviews_competitorReviewsReadResult_296a335b}"
+                                                - cacheReviews_competitorReviewsRead_tryReadResult_699da557: "${cacheReviews_competitorReviewsReadResult_296a335b}"
                                           except:
                                             as: "cacheReviews_competitorReviewsRead_tryReadError"
                                             steps:
@@ -368,15 +368,15 @@ main:
                                                           - cacheReviews_competitorReviewsRead_switchReadResult_5d29a3a4: "${cacheReviews_competitorReviewsReadResult_296a335b}"
                                             - cacheReviews_competitorReviewsRead_tryRead_updateResultError:
                                                 assign:
-                                                - cacheReviews_competitorReviewsRead_tryReadResult_499999b6: "${cacheReviews_competitorReviewsRead_switchReadResult_5d29a3a4}"
+                                                - cacheReviews_competitorReviewsRead_tryReadResult_699da557: "${cacheReviews_competitorReviewsRead_switchReadResult_5d29a3a4}"
                                   - cacheReviews_competitorReviewsIfStale:
                                       steps:
                                       - cacheReviews_competitorReviewsIfStale_initResult:
                                           assign:
-                                          - cacheReviews_competitorReviewsIfStaleResult_68b19fb0: {}
+                                          - cacheReviews_competitorReviewsIfStaleResult_6a55c73f: {}
                                       - cacheReviews_competitorReviewsIfStale_steps:
                                           switch:
-                                          - condition: "${(((not  (\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_499999b6)) or (not  (\"updatedAt\" in cacheReviews_competitorReviewsRead_tryReadResult_499999b6.body))) or ((sys.now() - cacheReviews_competitorReviewsRead_tryReadResult_499999b6.body.updatedAt) > 86400000))}"
+                                          - condition: "${(((not  (\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_699da557)) or (not  (\"updatedAt\" in cacheReviews_competitorReviewsRead_tryReadResult_699da557.body))) or ((sys.now() - cacheReviews_competitorReviewsRead_tryReadResult_699da557.body.updatedAt) > 86400000))}"
                                             steps:
                                             - scrapeReviews_competitorReviews:
                                                 try:
@@ -419,12 +419,12 @@ main:
                                                 retry: "${http.default_retry}"
                                             - cacheReviews_competitorReviewsIfStale_updateResult_0:
                                                 assign:
-                                                - cacheReviews_competitorReviewsIfStaleResult_68b19fb0: "${scrapeReviews_competitorReviewsResult_8ce95b0.body}"
-                                          - condition: "${(\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_499999b6)}"
+                                                - cacheReviews_competitorReviewsIfStaleResult_6a55c73f: "${scrapeReviews_competitorReviewsResult_8ce95b0.body}"
+                                          - condition: "${(\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_699da557)}"
                                             steps:
                                             - cacheReviews_competitorReviewsIfStale_updateResult_1:
                                                 assign:
-                                                - cacheReviews_competitorReviewsIfStaleResult_68b19fb0: "${cacheReviews_competitorReviewsRead_tryReadResult_499999b6.body.result}"
+                                                - cacheReviews_competitorReviewsIfStaleResult_6a55c73f: "${cacheReviews_competitorReviewsRead_tryReadResult_699da557.body.result}"
                                           - condition: "${true}"
                                             steps:
                                             - cacheReviews_competitorReviews_raiseFailedCache:
@@ -433,15 +433,15 @@ main:
                                                   code: ""
                                             - cacheReviews_competitorReviewsIfStale_updateResult_2:
                                                 assign:
-                                                - cacheReviews_competitorReviewsIfStaleResult_68b19fb0: "${scrapeReviews_competitorReviewsResult_8ce95b0.body}"
+                                                - cacheReviews_competitorReviewsIfStaleResult_6a55c73f: "${scrapeReviews_competitorReviewsResult_8ce95b0.body}"
                               - scrapeReviewsForCompetitors_updateResult:
                                   assign:
-                                  - scrapeReviewsForCompetitorsResult_4f90251f: "${list.concat(scrapeReviewsForCompetitorsResult_4f90251f, cacheReviews_competitorReviewsIfStaleResult_68b19fb0)}"
+                                  - scrapeReviewsForCompetitorsResult_5a582f7b: "${list.concat(scrapeReviewsForCompetitorsResult_5a582f7b, cacheReviews_competitorReviewsIfStaleResult_6a55c73f)}"
                     - zipCompetitorReviews:
                         steps:
                         - zipCompetitorReviews_initResult:
                             assign:
-                            - zipCompetitorReviewsResult_659ee5bf: []
+                            - zipCompetitorReviewsResult_20ea34d6: []
                         - zipCompetitorReviews_steps:
                             for:
                               value: "zipCompetitorReviewsIdx"
@@ -451,10 +451,10 @@ main:
                                   assign:
                                   - zipCompetitorReviews_assignIterResultVar:
                                       businessInfo: "${generateKeywordsResult_73a003ef.body.competitors[zipCompetitorReviewsIdx]}"
-                                      reviews: "${scrapeReviewsForCompetitorsResult_4f90251f[zipCompetitorReviewsIdx].reviews}"
+                                      reviews: "${scrapeReviewsForCompetitorsResult_5a582f7b[zipCompetitorReviewsIdx].reviews}"
                               - zipCompetitorReviews_updateResult:
                                   assign:
-                                  - zipCompetitorReviewsResult_659ee5bf: "${list.concat(zipCompetitorReviewsResult_659ee5bf, zipCompetitorReviews_assignIterResultVar)}"
+                                  - zipCompetitorReviewsResult_20ea34d6: "${list.concat(zipCompetitorReviewsResult_20ea34d6, zipCompetitorReviews_assignIterResultVar)}"
                     - Status_analyze:
                         try:
                           steps:
@@ -481,7 +481,7 @@ main:
                         steps:
                         - buildPrompt_initResult:
                             assign:
-                            - buildPromptResult_e8dd064: []
+                            - buildPromptResult_4f425d88: []
                         - buildPrompt_steps:
                             for:
                               value: "buildPromptIdx"
@@ -491,14 +491,14 @@ main:
                                   steps:
                                   - buildPrompt_switch_initResult:
                                       assign:
-                                      - buildPrompt_switchResult_7234118: {}
+                                      - buildPrompt_switchResult_1811bc25: {}
                                   - buildPrompt_switch_steps:
                                       switch:
                                       - condition: "${(buildPromptIdx == 0)}"
                                         steps:
                                         - buildPrompt_switch_updateResult_0:
                                             assign:
-                                            - buildPrompt_switchResult_7234118:
+                                            - buildPrompt_switchResult_1811bc25:
                                                 role: "system"
                                                 content: "You are an expert business analyst specializing in customer feedback analysis.\n          Analyze the provided business and competitor data to generate comprehensive insights.\n          Focus on actionable insights and specific recommendations. \n          \n          In addition to general analysis, return:\n          - Three recent reviews or urgent concerns.\n          - Two of the most notable positive and two most notable negative reviews.\n          - A ranked list of the target business among competitors based on rating and weighted by price level.\n          - The two most relatable competitors with a review from each to highlight comparison.\n\n          Use line breaks and markdown to format larger text blocks.\n          Really try to identify important pieces of information that the owner might not be aware of, especially when comparing with competitors as far as local market trends.\n      "
                                                 tool_calls: "${[]}"
@@ -509,16 +509,16 @@ main:
                                         steps:
                                         - buildPrompt_switch_updateResult_1:
                                             assign:
-                                            - buildPrompt_switchResult_7234118:
+                                            - buildPrompt_switchResult_1811bc25:
                                                 role: "user"
-                                                content: "${((((((\"\rTarget Business:\r\" + json.encode_to_string(generateKeywordsResult_73a003ef.body)) + \"\rTarget Business Reviews: \r\") + json.encode_to_string(cacheReviews_businessReviewsIfStaleResult_71a8dcdd.reviews)) + \"\rCompetitors: \r\") + json.encode_to_string(zipCompetitorReviewsResult_659ee5bf)) + \"\r\rPlease provide a detailed analysis following the specified format.\")}"
+                                                content: "${((((((\"\rTarget Business:\r\" + json.encode_to_string(generateKeywordsResult_73a003ef.body)) + \"\rTarget Business Reviews: \r\") + json.encode_to_string(cacheReviews_businessReviewsIfStaleResult_21f91300.reviews)) + \"\rCompetitors: \r\") + json.encode_to_string(zipCompetitorReviewsResult_20ea34d6)) + \"\r\rPlease provide a detailed analysis following the specified format.\")}"
                                                 tool_calls: "${[]}"
                                                 tool_call_id: "${null}"
                                                 create_time: "${sys.now()}"
                                                 docId: "${null}"
                               - buildPrompt_updateResult:
                                   assign:
-                                  - buildPromptResult_e8dd064: "${list.concat(buildPromptResult_e8dd064, buildPrompt_switchResult_7234118)}"
+                                  - buildPromptResult_4f425d88: "${list.concat(buildPromptResult_4f425d88, buildPrompt_switchResult_1811bc25)}"
                     - analyze_business_block:
                         steps:
                         - analyze_business_buildSchemaList:
@@ -560,7 +560,7 @@ main:
                                   args:
                                     url: "${((input.env.BASE_URL + \"/jobs/\") + \"llm/chat\")}"
                                     body:
-                                      messages: "${list.concat(buildPromptResult_e8dd064, analyze_business_buildSchemaListResult_d9c3e3d[0])}"
+                                      messages: "${list.concat(buildPromptResult_4f425d88, analyze_business_buildSchemaListResult_d9c3e3d[0])}"
                                       model: "${\"gpt-5\"}"
                                       temperature: 0.8
                                       max_completion_tokens: "${null}"
@@ -574,7 +574,7 @@ main:
                                     headers:
                                       x-user-id: "${input.env.userId}"
                                       x-project-id: "${input.env.projectId}"
-                                  result: "analyze_business_postResult_7ad26e5"
+                                  result: "analyze_business_postResult_29db553b"
                             retry: "${http.default_retry}"
                 - cacheReportWrite:
                     try:
@@ -593,8 +593,8 @@ main:
                                   marketAnalysis:
                                     totalCompetitors: "${len(generateKeywordsResult_73a003ef.body.competitors)}"
                                     topCompetitors: "${generateKeywordsResult_73a003ef.body.competitors}"
-                                  analysis: "${json.decode(analyze_business_postResult_7ad26e5.body.message.content)}"
-                                  reviews: "${cacheReviews_businessReviewsIfStaleResult_71a8dcdd.reviews}"
+                                  analysis: "${json.decode(analyze_business_postResult_29db553b.body.message.content)}"
+                                  reviews: "${cacheReviews_businessReviewsIfStaleResult_21f91300.reviews}"
                               userId: "${input.env.userId}"
                             auth:
                               type: "OIDC"
@@ -602,22 +602,22 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "cacheReportWriteResult_4b47b6de"
+                          result: "cacheReportWriteResult_69bdc8f3"
                     retry: "${http.default_retry}"
                 - cacheReportIfStale_updateResult_0:
                     assign:
-                    - cacheReportIfStaleResult_60a4df85:
+                    - cacheReportIfStaleResult_753122bf:
                         businessInfo: "${generateKeywordsResult_73a003ef.body.businessInfo}"
                         marketAnalysis:
                           totalCompetitors: "${len(generateKeywordsResult_73a003ef.body.competitors)}"
                           topCompetitors: "${generateKeywordsResult_73a003ef.body.competitors}"
-                        analysis: "${json.decode(analyze_business_postResult_7ad26e5.body.message.content)}"
-                        reviews: "${cacheReviews_businessReviewsIfStaleResult_71a8dcdd.reviews}"
-              - condition: "${(\"body\" in cacheReportRead_tryReadResult_2e807118)}"
+                        analysis: "${json.decode(analyze_business_postResult_29db553b.body.message.content)}"
+                        reviews: "${cacheReviews_businessReviewsIfStaleResult_21f91300.reviews}"
+              - condition: "${(\"body\" in cacheReportRead_tryReadResult_38143a8b)}"
                 steps:
                 - cacheReportIfStale_updateResult_1:
                     assign:
-                    - cacheReportIfStaleResult_60a4df85: "${cacheReportRead_tryReadResult_2e807118.body.result}"
+                    - cacheReportIfStaleResult_753122bf: "${cacheReportRead_tryReadResult_38143a8b.body.result}"
               - condition: "${true}"
                 steps:
                 - cacheReport_raiseFailedCache:
@@ -626,13 +626,13 @@ main:
                       code: ""
                 - cacheReportIfStale_updateResult_2:
                     assign:
-                    - cacheReportIfStaleResult_60a4df85:
+                    - cacheReportIfStaleResult_753122bf:
                         businessInfo: "${generateKeywordsResult_73a003ef.body.businessInfo}"
                         marketAnalysis:
                           totalCompetitors: "${len(generateKeywordsResult_73a003ef.body.competitors)}"
                           topCompetitors: "${generateKeywordsResult_73a003ef.body.competitors}"
-                        analysis: "${json.decode(analyze_business_postResult_7ad26e5.body.message.content)}"
-                        reviews: "${cacheReviews_businessReviewsIfStaleResult_71a8dcdd.reviews}"
+                        analysis: "${json.decode(analyze_business_postResult_29db553b.body.message.content)}"
+                        reviews: "${cacheReviews_businessReviewsIfStaleResult_21f91300.reviews}"
   - Status_done:
       try:
         steps:

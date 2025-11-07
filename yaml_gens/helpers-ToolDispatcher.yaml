@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_353926fe: {}
+          - mainTryResult_5770e5e9: {}
       - mainTry_steps:
           try:
             steps:
@@ -14,7 +14,7 @@ main:
                 steps:
                 - registerExecForSessionTry_initResult:
                     assign:
-                    - registerExecForSessionTryResult_4ab84a3d: {}
+                    - registerExecForSessionTryResult_36f264ae: {}
                 - registerExecForSessionTry_steps:
                     try:
                       steps:
@@ -43,7 +43,7 @@ main:
                           retry: "${http.default_retry}"
                       - registerExecForSessionTry_updateResult:
                           assign:
-                          - registerExecForSessionTryResult_4ab84a3d: "${\"ok\"}"
+                          - registerExecForSessionTryResult_36f264ae: "${\"ok\"}"
                     except:
                       as: "registerExecForSessionTryError"
                       steps:
@@ -91,12 +91,12 @@ main:
                                     - registerExecForSessionSwitchResult_12d6cef7: "${\"fail\"}"
                       - registerExecForSessionTry_updateResultError:
                           assign:
-                          - registerExecForSessionTryResult_4ab84a3d: "${registerExecForSessionSwitchResult_12d6cef7}"
+                          - registerExecForSessionTryResult_36f264ae: "${registerExecForSessionSwitchResult_12d6cef7}"
             - registerWorkflowExecLink:
                 steps:
                 - registerWorkflowExecLink_initResult:
                     assign:
-                    - registerWorkflowExecLinkResult_72030342: {}
+                    - registerWorkflowExecLinkResult_380e0d13: {}
                 - registerWorkflowExecLink_steps:
                     switch:
                     - condition: "${(len(default(default(map.get(input.env, \"callingWorkflowExec\"), null), \"\")) > 0)}"
@@ -105,7 +105,7 @@ main:
                           steps:
                           - registerWorkflowExecLinkTry_initResult:
                               assign:
-                              - registerWorkflowExecLinkTryResult_30a042af: {}
+                              - registerWorkflowExecLinkTryResult_3bc054dc: {}
                           - registerWorkflowExecLinkTry_steps:
                               try:
                                 steps:
@@ -135,7 +135,7 @@ main:
                                     retry: "${http.default_retry}"
                                 - registerWorkflowExecLinkTry_updateResult:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_30a042af: "${\"ok\"}"
+                                    - registerWorkflowExecLinkTryResult_3bc054dc: "${\"ok\"}"
                               except:
                                 as: "registerWorkflowExecLinkTryError"
                                 steps:
@@ -184,20 +184,20 @@ main:
                                               - registerWorkflowExecLinkSwitchResult_c1b802d: "${\"fail\"}"
                                 - registerWorkflowExecLinkTry_updateResultError:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_30a042af: "${registerWorkflowExecLinkSwitchResult_c1b802d}"
+                                    - registerWorkflowExecLinkTryResult_3bc054dc: "${registerWorkflowExecLinkSwitchResult_c1b802d}"
                       - registerWorkflowExecLink_updateResult_0:
                           assign:
-                          - registerWorkflowExecLinkResult_72030342: "${registerWorkflowExecLinkTryResult_30a042af}"
+                          - registerWorkflowExecLinkResult_380e0d13: "${registerWorkflowExecLinkTryResult_3bc054dc}"
                     - condition: "${true}"
                       steps:
                       - registerWorkflowExecLink_updateResult_1:
                           assign:
-                          - registerWorkflowExecLinkResult_72030342: "${\"skip\"}"
+                          - registerWorkflowExecLinkResult_380e0d13: "${\"skip\"}"
             - forToolCall:
                 steps:
                 - forToolCall_initResult:
                     assign:
-                    - forToolCallResult_5bc2b367: []
+                    - forToolCallResult_3e20b963: []
                 - forToolCall_steps:
                     for:
                       value: "forToolCallValue"
@@ -263,13 +263,13 @@ main:
                               steps:
                               - saveResult_newId_initResult:
                                   assign:
-                                  - saveResult_newIdResult_346bbe87: {}
+                                  - saveResult_newIdResult_1d087d1b: {}
                               - saveResult_newId_steps:
                                   try:
                                     steps:
                                     - saveResult_newId_updateResult:
                                         assign:
-                                        - saveResult_newIdResult_346bbe87: "${uuid.generate()}"
+                                        - saveResult_newIdResult_1d087d1b: "${uuid.generate()}"
                                   except:
                                     as: "saveResult_newIdError"
                                     steps:
@@ -284,7 +284,7 @@ main:
                                         retry: "${http.default_retry}"
                                     - saveResult_newId_updateResultError:
                                         assign:
-                                        - saveResult_newIdResult_346bbe87: "${null}"
+                                        - saveResult_newIdResult_1d087d1b: "${null}"
                           - saveResult_write_messagesIsta_SegKala:
                               try:
                                 steps:
@@ -294,7 +294,7 @@ main:
                                       url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/create\")}"
                                       body:
                                         collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
-                                        id: "${saveResult_newIdResult_346bbe87}"
+                                        id: "${saveResult_newIdResult_1d087d1b}"
                                         contents:
                                           value:
                                             role: "${\"tool\"}"
@@ -313,7 +313,7 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "saveResult_write_messagesIsta_SegKalaResult_50d4e9a"
+                                    result: "saveResult_write_messagesIsta_SegKalaResult_19267205"
                               retry: "${http.default_retry}"
                           - saveResult_update_session_update_time:
                               try:
@@ -338,11 +338,11 @@ main:
                               retry: "${http.default_retry}"
                       - forToolCall_updateResult:
                           assign:
-                          - forToolCallResult_5bc2b367: "${list.concat(forToolCallResult_5bc2b367, foldResult_b47820d)}"
+                          - forToolCallResult_3e20b963: "${list.concat(forToolCallResult_3e20b963, foldResult_b47820d)}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_353926fe:
-                    results: "${forToolCallResult_5bc2b367}"
+                - mainTryResult_5770e5e9:
+                    results: "${forToolCallResult_3e20b963}"
           except:
             as: "mainTryError"
             steps:
@@ -350,6 +350,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_353926fe: "${null}"
+                - mainTryResult_5770e5e9: "${null}"
   - return:
-      return: "${mainTryResult_353926fe}"
+      return: "${mainTryResult_5770e5e9}"
