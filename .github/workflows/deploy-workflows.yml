@@ -52,6 +52,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
       - name: Generate workflow YAML
         run: |
           sbt clean compile
