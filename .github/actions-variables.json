@@ -1,0 +1,1 @@
+{"GCP_PROJECT_ID":"awfl-us","GCP_REGION":"us-central1","GCP_SERVICE_ACCOUNT":"workflows-deployer@awfl-us.iam.gserviceaccount.com","GCP_WORKLOAD_IDENTITY_PROVIDER":"projects/323709301334/locations/global/workloadIdentityPools/github-worklfows-pool/providers/github-workflows"}

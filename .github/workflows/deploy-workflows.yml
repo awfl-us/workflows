@@ -1,0 +1,106 @@
+name: Deploy Workflows
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      workflow_env:
+        description: WORKFLOW_ENV token to inject into YAML (${WORKFLOW_ENV})
+        required: false
+      base_url:
+        description: Optional override for BASE_URL (defaults to vars.WORKFLOW_BASE_URL)
+        required: false
+      gcp_region:
+        description: Optional override for GCP region (defaults to vars.GCP_REGION or us-central1)
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      # Inputs override repo/org vars when provided via workflow_dispatch
+      BASE_URL: ${{ inputs.base_url || vars.WORKFLOW_BASE_URL }}
+      WORKFLOW_ENV: ${{ inputs.workflow_env || vars.WORKFLOW_ENV || 'prod' }}
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ inputs.gcp_region || vars.GCP_REGION || 'us-central1' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load env from .github/actions-variables.json (if present)
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=".github/actions-variables.json"
+          if [ -f "$FILE" ]; then
+            echo "Loading variables from $FILE"
+            jq -r 'to_entries[] | [.key, .value] | @tsv' "$FILE" | while IFS=$'\t' read -r key val; do
+              printf '%s=%s\n' "$key" "$val" >> "$GITHUB_ENV"
+            done
+          else
+            echo "No $FILE found; using repository Variables"
+          fi
+
+      - name: Set up Java (for sbt)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Generate workflow YAML
+        run: |
+          sbt clean compile
+          sbt "run us.awfl.workflows.codebase.ProjectManager"
+
+      # Authenticate to Google Cloud using Workload Identity Federation
+      # Prereqs (loaded from env if .github/actions-variables.json exists; otherwise from repo/org vars):
+      #   - GCP_WORKLOAD_IDENTITY_PROVIDER: projects/<num>/locations/global/workloadIdentityPools/<pool>/providers/<provider>
+      #   - GCP_SERVICE_ACCOUNT: <sa-name>@<project>.iam.gserviceaccount.com
+      - name: Auth to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER || vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT || vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Deploy Workflows
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+          WORKFLOW_ENV: ${{ env.WORKFLOW_ENV }}
+          GCP_PROJECT_ID: ${{ env.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ env.GCP_REGION }}
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for file in yaml_gens/*.yaml; do
+            name=$(basename "$file" .yaml)
+            # If a dot exists in the name, drop the prefix before the first dot
+            if [[ "$name" == *.* ]]; then
+              name="${name#*.}"
+            fi
+            # Replace any remaining dots with hyphens (safety)
+            name="${name//./-}"
+            echo "Deploying workflow: $name from $file"
+
+            content=$(cat "$file")
+            # Note: BASE_URL is now a workflow parameter, so we don't replace it here
+            content=${content//\$\{WORKFLOW_ENV\}/$WORKFLOW_ENV}
+
+            echo "$content" > temp.yaml
+
+            gcloud workflows deploy "$name" \
+              --project="$GCP_PROJECT_ID" \
+              --source=temp.yaml \
+              --location="$GCP_REGION" \
+              --execution-history-level=execution-history-detailed
+          done
+          rm -f temp.yaml

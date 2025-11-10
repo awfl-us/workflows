@@ -7,3 +7,5 @@ project/target
 .metals
 .vscode
 target
+.terraform.lock.hcl
+infra/.terraform
