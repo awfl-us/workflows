@@ -155,13 +155,13 @@ main:
                       steps:
                       - preloadCommand_paramJson_initResult:
                           assign:
-                          - preloadCommand_paramJsonResult_2c751402: {}
+                          - preloadCommand_paramJsonResult_51f15c3e: {}
                       - preloadCommand_paramJson_steps:
                           try:
                             steps:
                             - preloadCommand_paramJson_updateResult:
                                 assign:
-                                - preloadCommand_paramJsonResult_2c751402:
+                                - preloadCommand_paramJsonResult_51f15c3e:
                                     command: "bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \"# workflows/yaml_gens (sorted by mtime)\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \"No workflows/yaml_gens directory\"; fi'"
                           except:
                             as: "preloadCommand_paramJsonError"
@@ -177,7 +177,7 @@ main:
                                 retry: "${http.default_retry}"
                             - preloadCommand_paramJson_updateResultError:
                                 assign:
-                                - preloadCommand_paramJsonResult_2c751402: "${null}"
+                                - preloadCommand_paramJsonResult_51f15c3e: "${null}"
                   - preloadCommand_preloadCommand_callback_block:
                       steps:
                       - preloadCommand_preloadCommand_run_tools_CliTools:
@@ -193,7 +193,7 @@ main:
                                       type: "function"
                                       function:
                                         name: "${\"RUN_COMMAND\"}"
-                                        arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_2c751402)}"
+                                        arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_51f15c3e)}"
                                     cost: 0.0
                                     env:
                                       userId: "${input.env.userId}"
@@ -207,7 +207,7 @@ main:
                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                   connector_params:
                                     skip_polling: false
-                                result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_3a23ea4"
+                                result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_4e7ebcf6"
                           retry: "${http.default_retry}"
               - preloadCommand_block_1:
                   steps:
@@ -215,13 +215,13 @@ main:
                       steps:
                       - preloadCommand_paramJson_initResult_1:
                           assign:
-                          - preloadCommand_paramJsonResult_5168721e: {}
+                          - preloadCommand_paramJsonResult_1c520d03: {}
                       - preloadCommand_paramJson_steps_1:
                           try:
                             steps:
                             - preloadCommand_paramJson_updateResult_1:
                                 assign:
-                                - preloadCommand_paramJsonResult_5168721e:
+                                - preloadCommand_paramJsonResult_1c520d03:
                                     command: "bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'"
                           except:
                             as: "preloadCommand_paramJsonError"
@@ -237,7 +237,7 @@ main:
                                 retry: "${http.default_retry}"
                             - preloadCommand_paramJson_updateResultError_1:
                                 assign:
-                                - preloadCommand_paramJsonResult_5168721e: "${null}"
+                                - preloadCommand_paramJsonResult_1c520d03: "${null}"
                   - preloadCommand_preloadCommand_callback_block_1:
                       steps:
                       - preloadCommand_preloadCommand_run_tools_CliTools_1:
@@ -253,7 +253,7 @@ main:
                                       type: "function"
                                       function:
                                         name: "${\"RUN_COMMAND\"}"
-                                        arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_5168721e)}"
+                                        arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_1c520d03)}"
                                     cost: 0.0
                                     env:
                                       userId: "${input.env.userId}"
@@ -267,13 +267,13 @@ main:
                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                   connector_params:
                                     skip_polling: false
-                                result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_367cfea8"
+                                result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_f002be4"
                           retry: "${http.default_retry}"
               - joinPreloads:
                   steps:
                   - joinPreloads_initResult:
                       assign:
-                      - joinPreloadsResult_381a9a6f: []
+                      - joinPreloadsResult_325f8e6c: []
                   - joinPreloads_steps:
                       for:
                         value: "joinPreloadsIdx"
@@ -283,14 +283,14 @@ main:
                             steps:
                             - joinPreloads_switch_initResult:
                                 assign:
-                                - joinPreloads_switchResult_2c7a8b27: {}
+                                - joinPreloads_switchResult_40f168f5: {}
                             - joinPreloads_switch_steps:
                                 switch:
                                 - condition: "${(joinPreloadsIdx == 0)}"
                                   steps:
                                   - joinPreloads_switch_updateResult_0:
                                       assign:
-                                      - joinPreloads_switchResult_2c7a8b27:
+                                      - joinPreloads_switchResult_40f168f5:
                                           role: "system"
                                           content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_245a2caa.encoded)}"
                                           tool_calls: "${[]}"
@@ -301,7 +301,7 @@ main:
                                   steps:
                                   - joinPreloads_switch_updateResult_1:
                                       assign:
-                                      - joinPreloads_switchResult_2c7a8b27:
+                                      - joinPreloads_switchResult_40f168f5:
                                           role: "system"
                                           content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/Sutradhara.scala]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_4faae236.encoded)}"
                                           tool_calls: "${[]}"
@@ -312,7 +312,7 @@ main:
                                   steps:
                                   - joinPreloads_switch_updateResult_2:
                                       assign:
-                                      - joinPreloads_switchResult_2c7a8b27:
+                                      - joinPreloads_switchResult_40f168f5:
                                           role: "system"
                                           content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/utils/Prakriya.scala]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_25a7f4e3.encoded)}"
                                           tool_calls: "${[]}"
@@ -323,9 +323,9 @@ main:
                                   steps:
                                   - joinPreloads_switch_updateResult_3:
                                       assign:
-                                      - joinPreloads_switchResult_2c7a8b27:
+                                      - joinPreloads_switchResult_40f168f5:
                                           role: "system"
-                                          content: "${(\"[Preload bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \\\"# workflows/yaml_gens (sorted by mtime)\\\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \\\"No workflows/yaml_gens directory\\\"; fi']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_3a23ea4.encoded)}"
+                                          content: "${(\"[Preload bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \\\"# workflows/yaml_gens (sorted by mtime)\\\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \\\"No workflows/yaml_gens directory\\\"; fi']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_4e7ebcf6.encoded)}"
                                           tool_calls: "${[]}"
                                           tool_call_id: "${null}"
                                           create_time: "${sys.now()}"
@@ -334,51 +334,51 @@ main:
                                   steps:
                                   - joinPreloads_switch_updateResult_4:
                                       assign:
-                                      - joinPreloads_switchResult_2c7a8b27:
+                                      - joinPreloads_switchResult_40f168f5:
                                           role: "system"
-                                          content: "${(\"[Preload bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_367cfea8.encoded)}"
+                                          content: "${(\"[Preload bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_f002be4.encoded)}"
                                           tool_calls: "${[]}"
                                           tool_call_id: "${null}"
                                           create_time: "${sys.now()}"
                                           docId: "${null}"
                         - joinPreloads_updateResult:
                             assign:
-                            - joinPreloadsResult_381a9a6f: "${list.concat(joinPreloadsResult_381a9a6f, joinPreloads_switchResult_2c7a8b27)}"
+                            - joinPreloadsResult_325f8e6c: "${list.concat(joinPreloadsResult_325f8e6c, joinPreloads_switchResult_40f168f5)}"
           - joinSteps:
               steps:
               - joinSteps_initResult:
                   assign:
-                  - joinStepsResult_ef7ff63: []
+                  - joinStepsResult_53d5d9fd: []
               - joinSteps_steps:
                   for:
                     value: "joinStepsIdx"
-                    range: "${[0, (((0 + len(buildPromptListResult_26576898)) + len(joinPreloadsResult_381a9a6f)) - 1)]}"
+                    range: "${[0, (((0 + len(buildPromptListResult_26576898)) + len(joinPreloadsResult_325f8e6c)) - 1)]}"
                     steps:
                     - joinSteps_switch:
                         steps:
                         - joinSteps_switch_initResult:
                             assign:
-                            - joinSteps_switchResult_6833b9fc: {}
+                            - joinSteps_switchResult_51ef14d4: {}
                         - joinSteps_switch_steps:
                             switch:
                             - condition: "${(joinStepsIdx >= (0 + len(buildPromptListResult_26576898)))}"
                               steps:
                               - joinSteps_switch_updateResult_0:
                                   assign:
-                                  - joinSteps_switchResult_6833b9fc: "${joinPreloadsResult_381a9a6f[(joinStepsIdx - (0 + len(buildPromptListResult_26576898)))]}"
+                                  - joinSteps_switchResult_51ef14d4: "${joinPreloadsResult_325f8e6c[(joinStepsIdx - (0 + len(buildPromptListResult_26576898)))]}"
                             - condition: "${(joinStepsIdx >= 0)}"
                               steps:
                               - joinSteps_switch_updateResult_1:
                                   assign:
-                                  - joinSteps_switchResult_6833b9fc: "${buildPromptListResult_26576898[(joinStepsIdx - 0)]}"
+                                  - joinSteps_switchResult_51ef14d4: "${buildPromptListResult_26576898[(joinStepsIdx - 0)]}"
                     - joinSteps_updateResult:
                         assign:
-                        - joinStepsResult_ef7ff63: "${list.concat(joinStepsResult_ef7ff63, joinSteps_switchResult_6833b9fc)}"
+                        - joinStepsResult_53d5d9fd: "${list.concat(joinStepsResult_53d5d9fd, joinSteps_switchResult_51ef14d4)}"
       - buildPromptsWithTasks:
           steps:
           - buildPromptsWithTasks_initResult:
               assign:
-              - buildPromptsWithTasksResult_5549a1b1: {}
+              - buildPromptsWithTasksResult_6dd68a67: {}
           - buildPromptsWithTasks_steps:
               try:
                 steps:
@@ -408,24 +408,24 @@ main:
                     steps:
                     - buildGuidancePrompt_initResult:
                         assign:
-                        - buildGuidancePromptResult_1cf24fb8: []
+                        - buildGuidancePromptResult_318543d: []
                     - buildGuidancePrompt_steps:
                         for:
                           value: "buildGuidancePromptIdx"
-                          range: "${[0, (2 - 1)]}"
+                          range: "${[0, (3 - 1)]}"
                           steps:
                           - buildGuidancePrompt_switch:
                               steps:
                               - buildGuidancePrompt_switch_initResult:
                                   assign:
-                                  - buildGuidancePrompt_switchResult_5f72ce93: {}
+                                  - buildGuidancePrompt_switchResult_5b194610: {}
                               - buildGuidancePrompt_switch_steps:
                                   switch:
                                   - condition: "${(buildGuidancePromptIdx == 0)}"
                                     steps:
                                     - buildGuidancePrompt_switch_updateResult_0:
                                         assign:
-                                        - buildGuidancePrompt_switchResult_5f72ce93:
+                                        - buildGuidancePrompt_switchResult_5b194610:
                                             role: "system"
                                             content: "${\"Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.\"}"
                                             tool_calls: "${[]}"
@@ -436,49 +436,60 @@ main:
                                     steps:
                                     - buildGuidancePrompt_switch_updateResult_1:
                                         assign:
-                                        - buildGuidancePrompt_switchResult_5f72ce93:
+                                        - buildGuidancePrompt_switchResult_5b194610:
                                             role: "system"
                                             content: "${\"Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.\"}"
                                             tool_calls: "${[]}"
                                             tool_call_id: "${null}"
                                             create_time: "${sys.now()}"
                                             docId: "${null}"
+                                  - condition: "${(buildGuidancePromptIdx == 2)}"
+                                    steps:
+                                    - buildGuidancePrompt_switch_updateResult_2:
+                                        assign:
+                                        - buildGuidancePrompt_switchResult_5b194610:
+                                            role: "system"
+                                            content: "${\"For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)\"}"
+                                            tool_calls: "${[]}"
+                                            tool_call_id: "${null}"
+                                            create_time: "${sys.now()}"
+                                            docId: "${null}"
                           - buildGuidancePrompt_updateResult:
                               assign:
-                              - buildGuidancePromptResult_1cf24fb8: "${list.concat(buildGuidancePromptResult_1cf24fb8, buildGuidancePrompt_switchResult_5f72ce93)}"
+                              - buildGuidancePromptResult_318543d: "${list.concat(buildGuidancePromptResult_318543d, buildGuidancePrompt_switchResult_5b194610)}"
                 - buildPrompt:
                     steps:
                     - buildPrompt_initResult:
                         assign:
-                        - buildPromptResult_302630f2: []
+                        - buildPromptResult_397a67c6: []
                     - buildPrompt_steps:
                         for:
                           value: "buildPromptIdx"
-                          range: "${[0, (((0 + len(buildGuidancePromptResult_1cf24fb8)) + len(tasksResult_1edf9d6d.tasks)) - 1)]}"
+                          range: "${[0, (((0 + len(buildGuidancePromptResult_318543d)) + len(tasksResult_1edf9d6d.tasks)) - 1)]}"
                           steps:
                           - buildPrompt_switch:
                               steps:
                               - buildPrompt_switch_initResult:
                                   assign:
-                                  - buildPrompt_switchResult_69a883ce: {}
+                                  - buildPrompt_switchResult_6ad57200: {}
                               - buildPrompt_switch_steps:
                                   switch:
-                                  - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_1cf24fb8)))}"
+                                  - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_318543d)))}"
                                     steps:
                                     - buildPrompt_switch_updateResult_0:
                                         assign:
-                                        - buildPrompt_switchResult_69a883ce: "${tasksResult_1edf9d6d.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_1cf24fb8)))]}"
+                                        - buildPrompt_switchResult_6ad57200: "${tasksResult_1edf9d6d.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_318543d)))]}"
                                   - condition: "${(buildPromptIdx >= 0)}"
                                     steps:
                                     - buildPrompt_switch_updateResult_1:
                                         assign:
-                                        - buildPrompt_switchResult_69a883ce: "${buildGuidancePromptResult_1cf24fb8[(buildPromptIdx - 0)]}"
+                                        - buildPrompt_switchResult_6ad57200: "${buildGuidancePromptResult_318543d[(buildPromptIdx - 0)]}"
                           - buildPrompt_updateResult:
                               assign:
-                              - buildPromptResult_302630f2: "${list.concat(buildPromptResult_302630f2, buildPrompt_switchResult_69a883ce)}"
+                              - buildPromptResult_397a67c6: "${list.concat(buildPromptResult_397a67c6, buildPrompt_switchResult_6ad57200)}"
                 - buildPromptsWithTasks_updateResult:
                     assign:
-                    - buildPromptsWithTasksResult_5549a1b1: "${buildPromptResult_302630f2}"
+                    - buildPromptsWithTasksResult_6dd68a67: "${buildPromptResult_397a67c6}"
               except:
                 as: "buildPromptsWithTasksError"
                 steps:
@@ -493,37 +504,37 @@ main:
                     retry: "${http.default_retry}"
                 - buildPromptsWithTasks_updateResultError:
                     assign:
-                    - buildPromptsWithTasksResult_5549a1b1: "${null}"
+                    - buildPromptsWithTasksResult_6dd68a67: "${null}"
       - joinSteps_2:
           steps:
           - joinSteps_initResult_1:
               assign:
-              - joinStepsResult_69cd950d: []
+              - joinStepsResult_68d51892: []
           - joinSteps_steps_1:
               for:
                 value: "joinStepsIdx"
-                range: "${[0, (((0 + len(joinStepsResult_ef7ff63)) + len(buildPromptsWithTasksResult_5549a1b1)) - 1)]}"
+                range: "${[0, (((0 + len(joinStepsResult_53d5d9fd)) + len(buildPromptsWithTasksResult_6dd68a67)) - 1)]}"
                 steps:
                 - joinSteps_switch_1:
                     steps:
                     - joinSteps_switch_initResult_1:
                         assign:
-                        - joinSteps_switchResult_63d4598d: {}
+                        - joinSteps_switchResult_69170361: {}
                     - joinSteps_switch_steps_1:
                         switch:
-                        - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_ef7ff63)))}"
+                        - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_53d5d9fd)))}"
                           steps:
                           - joinSteps_switch_updateResult_0_1:
                               assign:
-                              - joinSteps_switchResult_63d4598d: "${buildPromptsWithTasksResult_5549a1b1[(joinStepsIdx - (0 + len(joinStepsResult_ef7ff63)))]}"
+                              - joinSteps_switchResult_69170361: "${buildPromptsWithTasksResult_6dd68a67[(joinStepsIdx - (0 + len(joinStepsResult_53d5d9fd)))]}"
                         - condition: "${(joinStepsIdx >= 0)}"
                           steps:
                           - joinSteps_switch_updateResult_1_1:
                               assign:
-                              - joinSteps_switchResult_63d4598d: "${joinStepsResult_ef7ff63[(joinStepsIdx - 0)]}"
+                              - joinSteps_switchResult_69170361: "${joinStepsResult_53d5d9fd[(joinStepsIdx - 0)]}"
                 - joinSteps_updateResult_1:
                     assign:
-                    - joinStepsResult_69cd950d: "${list.concat(joinStepsResult_69cd950d, joinSteps_switchResult_63d4598d)}"
+                    - joinStepsResult_68d51892: "${list.concat(joinStepsResult_68d51892, joinSteps_switchResult_69170361)}"
   - return:
       return:
-        prompts: "${joinStepsResult_69cd950d}"
+        prompts: "${joinStepsResult_68d51892}"

@@ -6,7 +6,7 @@ main:
       steps:
       - select_task_tool_initResult:
           assign:
-          - select_task_toolResult_7d504cfe: {}
+          - select_task_toolResult_72ede37d: {}
       - select_task_tool_steps:
           switch:
           - condition: "${(string(input.tool_call.function.name) == \"CREATE_TASK\")}"
@@ -17,7 +17,7 @@ main:
                     steps:
                     - tryCreateTask_initResult:
                         assign:
-                        - tryCreateTaskResult_1346ba43: {}
+                        - tryCreateTaskResult_767d81e6: {}
                     - tryCreateTask_steps:
                         try:
                           steps:
@@ -27,7 +27,7 @@ main:
                                 - createTaskCall_call:
                                     call: "http.post"
                                     args:
-                                      url: "${((input.env.BASE_URL + \"/jobs/\") + \"tasks\")}"
+                                      url: "${((input.env.BASE_URL + \"/\") + \"tasks\")}"
                                       body:
                                         sessionId: "${input.env.sessionId}"
                                         title: "${map.get(json.decode(input.tool_call.function.arguments), \"title\")}"
@@ -35,24 +35,24 @@ main:
                                         status: "${default(map.get(json.decode(input.tool_call.function.arguments), \"status\"), \"In Progress\")}"
                                       auth:
                                         type: "OIDC"
-                                        audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                        audience: "${input.env.BASE_URL}"
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "createTaskCallResult_64313e10"
+                                    result: "createTaskCallResult_65959203"
                               retry: "${http.default_retry}"
                           - tryCreateTask_updateResult:
                               assign:
-                              - tryCreateTaskResult_1346ba43: "${(((((((((\"Created task\" + \": id=\") + string(createTaskCallResult_64313e10.body.task.id)) + \" | \") + string(createTaskCallResult_64313e10.body.task.title)) + \" — \") + string(createTaskCallResult_64313e10.body.task.description)) + \" [status=\") + string(createTaskCallResult_64313e10.body.task.status)) + \"]\")}"
+                              - tryCreateTaskResult_767d81e6: "${(((((((((\"Created task\" + \": id=\") + string(createTaskCallResult_65959203.body.task.id)) + \" | \") + string(createTaskCallResult_65959203.body.task.title)) + \" — \") + string(createTaskCallResult_65959203.body.task.description)) + \" [status=\") + string(createTaskCallResult_65959203.body.task.status)) + \"]\")}"
                         except:
                           as: "tryCreateTaskError"
                           steps:
                           - tryCreateTask_updateResultError:
                               assign:
-                              - tryCreateTaskResult_1346ba43: "${(\"Task create failed: \" + string(tryCreateTaskError))}"
+                              - tryCreateTaskResult_767d81e6: "${(\"Task create failed: \" + string(tryCreateTaskError))}"
             - select_task_tool_updateResult_0:
                 assign:
-                - select_task_toolResult_7d504cfe: "${tryCreateTaskResult_1346ba43}"
+                - select_task_toolResult_72ede37d: "${tryCreateTaskResult_767d81e6}"
           - condition: "${(string(input.tool_call.function.name) == \"UPDATE_TASK\")}"
             steps:
             - run_update_task:
@@ -63,7 +63,7 @@ main:
                       - updateTaskCall_call:
                           call: "http.patch"
                           args:
-                            url: "${((input.env.BASE_URL + \"/jobs/\") + (\"tasks/\" + map.get(json.decode(input.tool_call.function.arguments), \"id\")))}"
+                            url: "${((input.env.BASE_URL + \"/\") + (\"tasks/\" + map.get(json.decode(input.tool_call.function.arguments), \"id\")))}"
                             body:
                               sessionId: "${input.env.sessionId}"
                               title: "${map.get(json.decode(input.tool_call.function.arguments), \"title\")}"
@@ -71,37 +71,37 @@ main:
                               status: "${map.get(json.decode(input.tool_call.function.arguments), \"status\")}"
                             auth:
                               type: "OIDC"
-                              audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                              audience: "${input.env.BASE_URL}"
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "updateTaskCallResult_23d099f7"
+                          result: "updateTaskCallResult_5a44476f"
                     retry: "${http.default_retry}"
                 - tryUpdateTask:
                     steps:
                     - tryUpdateTask_initResult:
                         assign:
-                        - tryUpdateTaskResult_22c6cac8: {}
+                        - tryUpdateTaskResult_4b7379dd: {}
                     - tryUpdateTask_steps:
                         try:
                           steps:
                           - tryUpdateTask_updateResult:
                               assign:
-                              - tryUpdateTaskResult_22c6cac8: "${(((((((((\"Updated task\" + \": id=\") + string(updateTaskCallResult_23d099f7.body.task.id)) + \" | \") + string(updateTaskCallResult_23d099f7.body.task.title)) + \" — \") + string(updateTaskCallResult_23d099f7.body.task.description)) + \" [status=\") + string(updateTaskCallResult_23d099f7.body.task.status)) + \"]\")}"
+                              - tryUpdateTaskResult_4b7379dd: "${(((((((((\"Updated task\" + \": id=\") + string(updateTaskCallResult_5a44476f.body.task.id)) + \" | \") + string(updateTaskCallResult_5a44476f.body.task.title)) + \" — \") + string(updateTaskCallResult_5a44476f.body.task.description)) + \" [status=\") + string(updateTaskCallResult_5a44476f.body.task.status)) + \"]\")}"
                         except:
                           as: "tryUpdateTaskError"
                           steps:
                           - tryUpdateTask_updateResultError:
                               assign:
-                              - tryUpdateTaskResult_22c6cac8: "${(\"Task update failed: \" + string(tryUpdateTaskError))}"
+                              - tryUpdateTaskResult_4b7379dd: "${(\"Task update failed: \" + string(tryUpdateTaskError))}"
                 - maybe_promote_next:
                     steps:
                     - maybe_promote_next_initResult:
                         assign:
-                        - maybe_promote_nextResult_3bca864: {}
+                        - maybe_promote_nextResult_7f1405da: {}
                     - maybe_promote_next_steps:
                         switch:
-                        - condition: "${(string(updateTaskCallResult_23d099f7.body.task.status) == \"Done\")}"
+                        - condition: "${(string(updateTaskCallResult_5a44476f.body.task.status) == \"Done\")}"
                           steps:
                           - promote_no_current_block:
                               steps:
@@ -111,23 +111,23 @@ main:
                                     - promote_get_in_progress_call:
                                         call: "http.get"
                                         args:
-                                          url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"In%20Progress\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
+                                          url: "${((input.env.BASE_URL + \"/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"In%20Progress\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
                                           auth:
                                             type: "OIDC"
-                                            audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                            audience: "${input.env.BASE_URL}"
                                           headers:
                                             x-user-id: "${input.env.userId}"
                                             x-project-id: "${input.env.projectId}"
-                                        result: "promote_get_in_progressResult_15227496"
+                                        result: "promote_get_in_progressResult_10c7e23d"
                                   retry: "${http.default_retry}"
                               - promote_if_no_current_in_progress:
                                   steps:
                                   - promote_if_no_current_in_progress_initResult:
                                       assign:
-                                      - promote_if_no_current_in_progressResult_723992e7: {}
+                                      - promote_if_no_current_in_progressResult_3cf046b7: {}
                                   - promote_if_no_current_in_progress_steps:
                                       switch:
-                                      - condition: "${(len(promote_get_in_progressResult_15227496.body.tasks) == 0)}"
+                                      - condition: "${(len(promote_get_in_progressResult_10c7e23d.body.tasks) == 0)}"
                                         steps:
                                         - promote_has_queued_block:
                                             steps:
@@ -137,23 +137,23 @@ main:
                                                   - promote_get_oldest_queued_call:
                                                       call: "http.get"
                                                       args:
-                                                        url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Queued\") + \"&limit=\") + 1) + \"&order=\") + \"asc\")))}"
+                                                        url: "${((input.env.BASE_URL + \"/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Queued\") + \"&limit=\") + 1) + \"&order=\") + \"asc\")))}"
                                                         auth:
                                                           type: "OIDC"
-                                                          audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                                          audience: "${input.env.BASE_URL}"
                                                         headers:
                                                           x-user-id: "${input.env.userId}"
                                                           x-project-id: "${input.env.projectId}"
-                                                      result: "promote_get_oldest_queuedResult_6691d119"
+                                                      result: "promote_get_oldest_queuedResult_64832408"
                                                 retry: "${http.default_retry}"
                                             - promote_if_has_queued:
                                                 steps:
                                                 - promote_if_has_queued_initResult:
                                                     assign:
-                                                    - promote_if_has_queuedResult_37350622: {}
+                                                    - promote_if_has_queuedResult_2f811dd5: {}
                                                 - promote_if_has_queued_steps:
                                                     switch:
-                                                    - condition: "${(len(promote_get_oldest_queuedResult_6691d119.body.tasks) > 0)}"
+                                                    - condition: "${(len(promote_get_oldest_queuedResult_64832408.body.tasks) > 0)}"
                                                       steps:
                                                       - promote_update_next:
                                                           try:
@@ -161,7 +161,7 @@ main:
                                                             - promote_update_next_call:
                                                                 call: "http.patch"
                                                                 args:
-                                                                  url: "${((input.env.BASE_URL + \"/jobs/\") + (\"tasks/\" + promote_get_oldest_queuedResult_6691d119.body.tasks[0].id))}"
+                                                                  url: "${((input.env.BASE_URL + \"/\") + (\"tasks/\" + promote_get_oldest_queuedResult_64832408.body.tasks[0].id))}"
                                                                   body:
                                                                     sessionId: "${input.env.sessionId}"
                                                                     title: "${null}"
@@ -169,45 +169,45 @@ main:
                                                                     status: "${\"In Progress\"}"
                                                                   auth:
                                                                     type: "OIDC"
-                                                                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                                                                    audience: "${input.env.BASE_URL}"
                                                                   headers:
                                                                     x-user-id: "${input.env.userId}"
                                                                     x-project-id: "${input.env.projectId}"
-                                                                result: "promote_update_nextResult_10fc8207"
+                                                                result: "promote_update_nextResult_6e86d585"
                                                           retry: "${http.default_retry}"
                                                       - promote_if_has_queued_updateResult_0:
                                                           assign:
-                                                          - promote_if_has_queuedResult_37350622: "${(((((((((\"Promoted next task\" + \": id=\") + string(promote_update_nextResult_10fc8207.body.task.id)) + \" | \") + string(promote_update_nextResult_10fc8207.body.task.title)) + \" — \") + string(promote_update_nextResult_10fc8207.body.task.description)) + \" [status=\") + string(promote_update_nextResult_10fc8207.body.task.status)) + \"]\")}"
+                                                          - promote_if_has_queuedResult_2f811dd5: "${(((((((((\"Promoted next task\" + \": id=\") + string(promote_update_nextResult_6e86d585.body.task.id)) + \" | \") + string(promote_update_nextResult_6e86d585.body.task.title)) + \" — \") + string(promote_update_nextResult_6e86d585.body.task.description)) + \" [status=\") + string(promote_update_nextResult_6e86d585.body.task.status)) + \"]\")}"
                                                     - condition: "${true}"
                                                       steps:
                                                       - promote_if_has_queued_updateResult_1:
                                                           assign:
-                                                          - promote_if_has_queuedResult_37350622: "${\"No queued tasks to promote\"}"
+                                                          - promote_if_has_queuedResult_2f811dd5: "${\"No queued tasks to promote\"}"
                                         - promote_if_no_current_in_progress_updateResult_0:
                                             assign:
-                                            - promote_if_no_current_in_progressResult_723992e7: "${promote_if_has_queuedResult_37350622}"
+                                            - promote_if_no_current_in_progressResult_3cf046b7: "${promote_if_has_queuedResult_2f811dd5}"
                                       - condition: "${true}"
                                         steps:
                                         - promote_if_no_current_in_progress_updateResult_1:
                                             assign:
-                                            - promote_if_no_current_in_progressResult_723992e7: "${\"Task marked Done, but another task is already In Progress; no promotion performed\"}"
+                                            - promote_if_no_current_in_progressResult_3cf046b7: "${\"Task marked Done, but another task is already In Progress; no promotion performed\"}"
                           - maybe_promote_next_updateResult_0:
                               assign:
-                              - maybe_promote_nextResult_3bca864: "${promote_if_no_current_in_progressResult_723992e7}"
+                              - maybe_promote_nextResult_7f1405da: "${promote_if_no_current_in_progressResult_3cf046b7}"
                         - condition: "${true}"
                           steps:
                           - maybe_promote_next_updateResult_1:
                               assign:
-                              - maybe_promote_nextResult_3bca864: "${\"\"}"
+                              - maybe_promote_nextResult_7f1405da: "${\"\"}"
             - select_task_tool_updateResult_1:
                 assign:
-                - select_task_toolResult_7d504cfe: "${((tryUpdateTaskResult_22c6cac8 + \"\r\") + maybe_promote_nextResult_3bca864)}"
+                - select_task_toolResult_72ede37d: "${((tryUpdateTaskResult_4b7379dd + \"\r\") + maybe_promote_nextResult_7f1405da)}"
           - condition: "${true}"
             steps:
             - select_task_tool_updateResult_2:
                 assign:
-                - select_task_toolResult_7d504cfe: "${(\"Unsupported tool: \" + string(input.tool_call.function.name))}"
+                - select_task_toolResult_72ede37d: "${(\"Unsupported tool: \" + string(input.tool_call.function.name))}"
   - return:
       return:
-        encoded: "${select_task_toolResult_7d504cfe}"
+        encoded: "${select_task_toolResult_72ede37d}"
         cost: "${0}"

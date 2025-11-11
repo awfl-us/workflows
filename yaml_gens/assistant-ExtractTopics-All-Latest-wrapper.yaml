@@ -10,7 +10,7 @@ main:
             - segmentsForSession_fetch_call:
                 call: "http.post"
                 args:
-                  url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/segmentsForSession\")}"
+                  url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
                   body:
                     collection: "${(((\"convo.sessions/\" + input.arg1) + \"/\") + \"messages\")}"
                     windowSeconds: "${default(input.arg3, 1200)}"
@@ -18,21 +18,21 @@ main:
                     userId: "${input.env.userId}"
                   auth:
                     type: "OIDC"
-                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                    audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "segmentsForSession_fetchResult_7fb6a0dc"
+                result: "segmentsForSession_fetchResult_6b53622e"
           retry: "${http.default_retry}"
       - segmentsForSession_convert:
           steps:
           - segmentsForSession_convert_initResult:
               assign:
-              - segmentsForSession_convertResult_40d021a7: []
+              - segmentsForSession_convertResult_40df1c18: []
           - segmentsForSession_convert_steps:
               for:
                 value: "segmentsForSession_convertValue"
-                in: "${segmentsForSession_fetchResult_7fb6a0dc.body.segments}"
+                in: "${segmentsForSession_fetchResult_6b53622e.body.segments}"
                 steps:
                 - segmentsForSession_convert_assignIterResult:
                     assign:
@@ -42,7 +42,7 @@ main:
                         windowSeconds: "${default(input.arg3, 1200)}"
                 - segmentsForSession_convert_updateResult:
                     assign:
-                    - segmentsForSession_convertResult_40d021a7: "${list.concat(segmentsForSession_convertResult_40d021a7, segmentsForSession_convert_assignIterResultVar)}"
+                    - segmentsForSession_convertResult_40df1c18: "${list.concat(segmentsForSession_convertResult_40df1c18, segmentsForSession_convert_assignIterResultVar)}"
   - All_Latest_run:
       try:
         steps:
@@ -52,7 +52,7 @@ main:
               workflow_id: "${\"assistant-ExtractTopics-All${WORKFLOW_ENV}\"}"
               argument:
                 arg1: "${input.arg1}"
-                arg2: "${segmentsForSession_convertResult_40d021a7[(len(segmentsForSession_convertResult_40d021a7) - 1)].end}"
+                arg2: "${segmentsForSession_convertResult_40df1c18[(len(segmentsForSession_convertResult_40df1c18) - 1)].end}"
                 arg3: "${1200}"
                 arg4: "${240}"
                 env:
@@ -67,9 +67,9 @@ main:
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "All_Latest_runResult_4759ab06"
+            result: "All_Latest_runResult_5d04ec53"
       retry: "${http.default_retry}"
   - returnLatest:
-      return: "${All_Latest_runResult_4759ab06}"
+      return: "${All_Latest_runResult_5d04ec53}"
   - return:
-      return: "${All_Latest_runResult_4759ab06}"
+      return: "${All_Latest_runResult_5d04ec53}"

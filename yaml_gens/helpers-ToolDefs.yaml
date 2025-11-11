@@ -23,15 +23,15 @@ main:
             - getToolDefs_call:
                 call: "http.get"
                 args:
-                  url: "${((input.env.BASE_URL + \"/jobs/\") + (\"tools/list?names=\" + getToolDefs_foldNamesResult_1e3e50a4))}"
+                  url: "${((input.env.BASE_URL + \"/\") + (\"tools/list?names=\" + getToolDefs_foldNamesResult_1e3e50a4))}"
                   auth:
                     type: "OIDC"
-                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                    audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "getToolDefsResult_2d042294"
+                result: "getToolDefsResult_392e80eb"
           retry: "${http.default_retry}"
   - return:
       return:
-        defs: "${getToolDefsResult_2d042294.body.items}"
+        defs: "${getToolDefsResult_392e80eb.body.items}"

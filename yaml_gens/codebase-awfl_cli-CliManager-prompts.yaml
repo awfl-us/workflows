@@ -148,7 +148,7 @@ main:
           steps:
           - buildPromptsWithTasks_initResult:
               assign:
-              - buildPromptsWithTasksResult_596e814a: {}
+              - buildPromptsWithTasksResult_2eae7e3: {}
           - buildPromptsWithTasks_steps:
               try:
                 steps:
@@ -178,24 +178,24 @@ main:
                     steps:
                     - buildGuidancePrompt_initResult:
                         assign:
-                        - buildGuidancePromptResult_1cf24fb8: []
+                        - buildGuidancePromptResult_318543d: []
                     - buildGuidancePrompt_steps:
                         for:
                           value: "buildGuidancePromptIdx"
-                          range: "${[0, (2 - 1)]}"
+                          range: "${[0, (3 - 1)]}"
                           steps:
                           - buildGuidancePrompt_switch:
                               steps:
                               - buildGuidancePrompt_switch_initResult:
                                   assign:
-                                  - buildGuidancePrompt_switchResult_5f72ce93: {}
+                                  - buildGuidancePrompt_switchResult_5b194610: {}
                               - buildGuidancePrompt_switch_steps:
                                   switch:
                                   - condition: "${(buildGuidancePromptIdx == 0)}"
                                     steps:
                                     - buildGuidancePrompt_switch_updateResult_0:
                                         assign:
-                                        - buildGuidancePrompt_switchResult_5f72ce93:
+                                        - buildGuidancePrompt_switchResult_5b194610:
                                             role: "system"
                                             content: "${\"Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.\"}"
                                             tool_calls: "${[]}"
@@ -206,49 +206,60 @@ main:
                                     steps:
                                     - buildGuidancePrompt_switch_updateResult_1:
                                         assign:
-                                        - buildGuidancePrompt_switchResult_5f72ce93:
+                                        - buildGuidancePrompt_switchResult_5b194610:
                                             role: "system"
                                             content: "${\"Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.\"}"
                                             tool_calls: "${[]}"
                                             tool_call_id: "${null}"
                                             create_time: "${sys.now()}"
                                             docId: "${null}"
+                                  - condition: "${(buildGuidancePromptIdx == 2)}"
+                                    steps:
+                                    - buildGuidancePrompt_switch_updateResult_2:
+                                        assign:
+                                        - buildGuidancePrompt_switchResult_5b194610:
+                                            role: "system"
+                                            content: "${\"For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)\"}"
+                                            tool_calls: "${[]}"
+                                            tool_call_id: "${null}"
+                                            create_time: "${sys.now()}"
+                                            docId: "${null}"
                           - buildGuidancePrompt_updateResult:
                               assign:
-                              - buildGuidancePromptResult_1cf24fb8: "${list.concat(buildGuidancePromptResult_1cf24fb8, buildGuidancePrompt_switchResult_5f72ce93)}"
+                              - buildGuidancePromptResult_318543d: "${list.concat(buildGuidancePromptResult_318543d, buildGuidancePrompt_switchResult_5b194610)}"
                 - buildPrompt:
                     steps:
                     - buildPrompt_initResult:
                         assign:
-                        - buildPromptResult_302630f2: []
+                        - buildPromptResult_397a67c6: []
                     - buildPrompt_steps:
                         for:
                           value: "buildPromptIdx"
-                          range: "${[0, (((0 + len(buildGuidancePromptResult_1cf24fb8)) + len(tasksResult_1edf9d6d.tasks)) - 1)]}"
+                          range: "${[0, (((0 + len(buildGuidancePromptResult_318543d)) + len(tasksResult_1edf9d6d.tasks)) - 1)]}"
                           steps:
                           - buildPrompt_switch:
                               steps:
                               - buildPrompt_switch_initResult:
                                   assign:
-                                  - buildPrompt_switchResult_69a883ce: {}
+                                  - buildPrompt_switchResult_6ad57200: {}
                               - buildPrompt_switch_steps:
                                   switch:
-                                  - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_1cf24fb8)))}"
+                                  - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_318543d)))}"
                                     steps:
                                     - buildPrompt_switch_updateResult_0:
                                         assign:
-                                        - buildPrompt_switchResult_69a883ce: "${tasksResult_1edf9d6d.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_1cf24fb8)))]}"
+                                        - buildPrompt_switchResult_6ad57200: "${tasksResult_1edf9d6d.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_318543d)))]}"
                                   - condition: "${(buildPromptIdx >= 0)}"
                                     steps:
                                     - buildPrompt_switch_updateResult_1:
                                         assign:
-                                        - buildPrompt_switchResult_69a883ce: "${buildGuidancePromptResult_1cf24fb8[(buildPromptIdx - 0)]}"
+                                        - buildPrompt_switchResult_6ad57200: "${buildGuidancePromptResult_318543d[(buildPromptIdx - 0)]}"
                           - buildPrompt_updateResult:
                               assign:
-                              - buildPromptResult_302630f2: "${list.concat(buildPromptResult_302630f2, buildPrompt_switchResult_69a883ce)}"
+                              - buildPromptResult_397a67c6: "${list.concat(buildPromptResult_397a67c6, buildPrompt_switchResult_6ad57200)}"
                 - buildPromptsWithTasks_updateResult:
                     assign:
-                    - buildPromptsWithTasksResult_596e814a: "${buildPromptResult_302630f2}"
+                    - buildPromptsWithTasksResult_2eae7e3: "${buildPromptResult_397a67c6}"
               except:
                 as: "buildPromptsWithTasksError"
                 steps:
@@ -263,37 +274,37 @@ main:
                     retry: "${http.default_retry}"
                 - buildPromptsWithTasks_updateResultError:
                     assign:
-                    - buildPromptsWithTasksResult_596e814a: "${null}"
+                    - buildPromptsWithTasksResult_2eae7e3: "${null}"
       - joinSteps_2:
           steps:
           - joinSteps_initResult_1:
               assign:
-              - joinStepsResult_7e29a3a1: []
+              - joinStepsResult_268e4ce8: []
           - joinSteps_steps_1:
               for:
                 value: "joinStepsIdx"
-                range: "${[0, (((0 + len(joinStepsResult_33a6a8b)) + len(buildPromptsWithTasksResult_596e814a)) - 1)]}"
+                range: "${[0, (((0 + len(joinStepsResult_33a6a8b)) + len(buildPromptsWithTasksResult_2eae7e3)) - 1)]}"
                 steps:
                 - joinSteps_switch_1:
                     steps:
                     - joinSteps_switch_initResult_1:
                         assign:
-                        - joinSteps_switchResult_16edca31: {}
+                        - joinSteps_switchResult_5e2e4f80: {}
                     - joinSteps_switch_steps_1:
                         switch:
                         - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_33a6a8b)))}"
                           steps:
                           - joinSteps_switch_updateResult_0_1:
                               assign:
-                              - joinSteps_switchResult_16edca31: "${buildPromptsWithTasksResult_596e814a[(joinStepsIdx - (0 + len(joinStepsResult_33a6a8b)))]}"
+                              - joinSteps_switchResult_5e2e4f80: "${buildPromptsWithTasksResult_2eae7e3[(joinStepsIdx - (0 + len(joinStepsResult_33a6a8b)))]}"
                         - condition: "${(joinStepsIdx >= 0)}"
                           steps:
                           - joinSteps_switch_updateResult_1_1:
                               assign:
-                              - joinSteps_switchResult_16edca31: "${joinStepsResult_33a6a8b[(joinStepsIdx - 0)]}"
+                              - joinSteps_switchResult_5e2e4f80: "${joinStepsResult_33a6a8b[(joinStepsIdx - 0)]}"
                 - joinSteps_updateResult_1:
                     assign:
-                    - joinStepsResult_7e29a3a1: "${list.concat(joinStepsResult_7e29a3a1, joinSteps_switchResult_16edca31)}"
+                    - joinStepsResult_268e4ce8: "${list.concat(joinStepsResult_268e4ce8, joinSteps_switchResult_5e2e4f80)}"
   - return:
       return:
-        prompts: "${joinStepsResult_7e29a3a1}"
+        prompts: "${joinStepsResult_268e4ce8}"

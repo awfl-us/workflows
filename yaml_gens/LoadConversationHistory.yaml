@@ -8,17 +8,17 @@ main:
         - postLoadConvoHistory_call:
             call: "http.post"
             args:
-              url: "${((input.env.BASE_URL + \"/jobs/\") + \"convo-history/loadConvoHistory\")}"
+              url: "${((input.env.BASE_URL + \"/\") + \"convo-history/loadConvoHistory\")}"
               body:
                 objectName: "${input.arg1}"
                 userId: "${input.arg2}"
               auth:
                 type: "OIDC"
-                audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                audience: "${input.env.BASE_URL}"
               headers:
                 x-user-id: "${input.env.userId}"
                 x-project-id: "${input.env.projectId}"
-            result: "postLoadConvoHistoryResult_79c47f86"
+            result: "postLoadConvoHistoryResult_7399854"
       retry: "${http.default_retry}"
   - return:
       return:

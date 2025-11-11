@@ -10,7 +10,7 @@ main:
             - segmentsForSession_fetch_call:
                 call: "http.post"
                 args:
-                  url: "${((input.env.BASE_URL + \"/jobs/\") + \"firebase/segmentsForSession\")}"
+                  url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
                   body:
                     collection: "${(((\"convo.sessions/\" + input.arg1) + \"/\") + \"messages\")}"
                     windowSeconds: "${default(input.arg3, 1200)}"
@@ -18,21 +18,21 @@ main:
                     userId: "${input.env.userId}"
                   auth:
                     type: "OIDC"
-                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                    audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "segmentsForSession_fetchResult_7fb6a0dc"
+                result: "segmentsForSession_fetchResult_6b53622e"
           retry: "${http.default_retry}"
       - segmentsForSession_convert:
           steps:
           - segmentsForSession_convert_initResult:
               assign:
-              - segmentsForSession_convertResult_40d021a7: []
+              - segmentsForSession_convertResult_40df1c18: []
           - segmentsForSession_convert_steps:
               for:
                 value: "segmentsForSession_convertValue"
-                in: "${segmentsForSession_fetchResult_7fb6a0dc.body.segments}"
+                in: "${segmentsForSession_fetchResult_6b53622e.body.segments}"
                 steps:
                 - segmentsForSession_convert_assignIterResult:
                     assign:
@@ -42,16 +42,16 @@ main:
                         windowSeconds: "${default(input.arg3, 1200)}"
                 - segmentsForSession_convert_updateResult:
                     assign:
-                    - segmentsForSession_convertResult_40d021a7: "${list.concat(segmentsForSession_convertResult_40d021a7, segmentsForSession_convert_assignIterResultVar)}"
+                    - segmentsForSession_convertResult_40df1c18: "${list.concat(segmentsForSession_convertResult_40df1c18, segmentsForSession_convert_assignIterResultVar)}"
   - forEachSegment:
       steps:
       - forEachSegment_initResult:
           assign:
-          - forEachSegmentResult_18e70219: []
+          - forEachSegmentResult_2e38f85: []
       - forEachSegment_steps:
           for:
             value: "forEachSegmentValue"
-            in: "${segmentsForSession_convertResult_40d021a7}"
+            in: "${segmentsForSession_convertResult_40df1c18}"
             steps:
             - All_Backfill_run:
                 try:
@@ -81,8 +81,8 @@ main:
                 retry: "${http.default_retry}"
             - forEachSegment_updateResult:
                 assign:
-                - forEachSegmentResult_18e70219: "${list.concat(forEachSegmentResult_18e70219, All_Backfill_runResult_70b3c1f9)}"
+                - forEachSegmentResult_2e38f85: "${list.concat(forEachSegmentResult_2e38f85, All_Backfill_runResult_70b3c1f9)}"
   - returnBackfill:
-      return: "${forEachSegmentResult_18e70219}"
+      return: "${forEachSegmentResult_2e38f85}"
   - return:
-      return: "${forEachSegmentResult_18e70219}"
+      return: "${forEachSegmentResult_2e38f85}"

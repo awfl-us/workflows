@@ -21,7 +21,7 @@ AWFL Workflows is a Scala 3 toolkit for building, generating, and deploying Goog
 
 ## Prerequisites
 - Java 17+
-- sbt 1.9+
+- sbt 1.11+
 - gcloud CLI authenticated to your GCP project (for deployment)
 - Optional but recommended: pipx to install the awfl CLI for watch-and-deploy
 
@@ -115,6 +115,36 @@ See AGENT.md for detailed guidance and end-to-end examples, including the EventH
 
 ## Advanced documentation
 - See AGENT.md for agent construction details and links to reference implementations (ProjectManager, CliManager)
+
+## Publishing to Maven Central (sbt-ci-release)
+This repository is configured to publish to Maven Central using sbt-ci-release and sbt-dynver.
+
+Prerequisites (GitHub repository secrets):
+- SONATYPE_USERNAME, SONATYPE_PASSWORD
+- PGP_SECRET (ASCII-armored private key), PGP_PASSPHRASE
+
+How to publish a release:
+1) Create an annotated tag for the release commit, e.g.:
+
+```bash
+git tag -a v0.1.0 -m "v0.1.0"
+git push origin v0.1.0
+```
+
+2) Create and publish a GitHub Release for that tag. The CI workflow will run on release publish and invoke:
+
+```bash
+sbt -no-colors -Dsbt.supershell=false ci-release
+```
+
+Versioning notes:
+- Versions are derived from Git tags via sbt-dynver.
+- The default expects tags prefixed with "v" (e.g., v0.1.0). If you prefer unprefixed tags, uncomment the dynverTagPrefix setting in build.sbt.
+
+Other notes:
+- Do not set publishTo or credentials in build.sbt; sbt-ci-release manages Sonatype credentials from CI environment variables.
+- The POM metadata (organization/name, description, homepage, licenses, scmInfo, developers) is included for Maven Central requirements.
+- Ensure your release does not depend on -SNAPSHOT artifacts; Maven Central rejects releases with snapshot dependencies.
 
 ## License
 MIT (see LICENSE)

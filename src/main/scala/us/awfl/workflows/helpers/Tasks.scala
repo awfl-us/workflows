@@ -15,7 +15,8 @@ object Tasks extends us.awfl.core.Workflow {
   // Keep concise; system-level instruction.
   val managementGuidanceText: List[String] = List(
     "Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.",
-    "Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete."
+    "Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.",
+    "For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)"
   )
   val managementGuidance: List[ChatMessage] = managementGuidanceText.map(msg => ChatMessage("system", str(msg)))
 

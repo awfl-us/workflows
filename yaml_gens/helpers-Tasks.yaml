@@ -10,38 +10,38 @@ main:
             - current_get_call:
                 call: "http.get"
                 args:
-                  url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"In%20Progress\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
+                  url: "${((input.env.BASE_URL + \"/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"In%20Progress\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
                   auth:
                     type: "OIDC"
-                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                    audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "current_getResult_5809bf50"
+                result: "current_getResult_2223049d"
           retry: "${http.default_retry}"
       - current_content:
           steps:
           - current_content_initResult:
               assign:
-              - current_contentResult_1e8a9790: {}
+              - current_contentResult_b0405a: {}
           - current_content_steps:
               switch:
-              - condition: "${((get_type(current_getResult_5809bf50.body) == \"map\") and (len(current_getResult_5809bf50.body.tasks) > 0))}"
+              - condition: "${((get_type(current_getResult_2223049d.body) == \"map\") and (len(current_getResult_2223049d.body.tasks) > 0))}"
                 steps:
                 - current_content_updateResult_0:
                     assign:
-                    - current_contentResult_1e8a9790:
+                    - current_contentResult_b0405a:
                         role: "system"
-                        content: "${(((((((((\"Current task\" + \": id=\") + string(current_getResult_5809bf50.body.tasks[0].id)) + \" | \") + string(current_getResult_5809bf50.body.tasks[0].title)) + \" — \") + string(current_getResult_5809bf50.body.tasks[0].description)) + \" [status=\") + string(current_getResult_5809bf50.body.tasks[0].status)) + \"]\")}"
+                        content: "${(((((((((\"Current task\" + \": id=\") + string(current_getResult_2223049d.body.tasks[0].id)) + \" | \") + string(current_getResult_2223049d.body.tasks[0].title)) + \" — \") + string(current_getResult_2223049d.body.tasks[0].description)) + \" [status=\") + string(current_getResult_2223049d.body.tasks[0].status)) + \"]\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
                         docId: "${null}"
-              - condition: "${(get_type(current_getResult_5809bf50.body) == \"map\")}"
+              - condition: "${(get_type(current_getResult_2223049d.body) == \"map\")}"
                 steps:
                 - current_content_updateResult_1:
                     assign:
-                    - current_contentResult_1e8a9790:
+                    - current_contentResult_b0405a:
                         role: "system"
                         content: "${((\"Current task\" + \": \") + \"None found for session\")}"
                         tool_calls: "${[]}"
@@ -52,9 +52,9 @@ main:
                 steps:
                 - current_content_updateResult_2:
                     assign:
-                    - current_contentResult_1e8a9790:
+                    - current_contentResult_b0405a:
                         role: "system"
-                        content: "${(((((\"Current task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(current_getResult_5809bf50.body)) + \", body=\") + string(current_getResult_5809bf50.body))}"
+                        content: "${(((((\"Current task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(current_getResult_2223049d.body)) + \", body=\") + string(current_getResult_2223049d.body))}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
@@ -67,38 +67,38 @@ main:
             - pending_get_call:
                 call: "http.get"
                 args:
-                  url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Queued\") + \"&limit=\") + 1) + \"&order=\") + \"asc\")))}"
+                  url: "${((input.env.BASE_URL + \"/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Queued\") + \"&limit=\") + 1) + \"&order=\") + \"asc\")))}"
                   auth:
                     type: "OIDC"
-                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                    audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "pending_getResult_a565e64"
+                result: "pending_getResult_3cc078ae"
           retry: "${http.default_retry}"
       - pending_content:
           steps:
           - pending_content_initResult:
               assign:
-              - pending_contentResult_70aad327: {}
+              - pending_contentResult_7b1d2f60: {}
           - pending_content_steps:
               switch:
-              - condition: "${((get_type(pending_getResult_a565e64.body) == \"map\") and (len(pending_getResult_a565e64.body.tasks) > 0))}"
+              - condition: "${((get_type(pending_getResult_3cc078ae.body) == \"map\") and (len(pending_getResult_3cc078ae.body.tasks) > 0))}"
                 steps:
                 - pending_content_updateResult_0:
                     assign:
-                    - pending_contentResult_70aad327:
+                    - pending_contentResult_7b1d2f60:
                         role: "system"
-                        content: "${(((((((((\"Oldest pending task\" + \": id=\") + string(pending_getResult_a565e64.body.tasks[0].id)) + \" | \") + string(pending_getResult_a565e64.body.tasks[0].title)) + \" — \") + string(pending_getResult_a565e64.body.tasks[0].description)) + \" [status=\") + string(pending_getResult_a565e64.body.tasks[0].status)) + \"]\")}"
+                        content: "${(((((((((\"Oldest pending task\" + \": id=\") + string(pending_getResult_3cc078ae.body.tasks[0].id)) + \" | \") + string(pending_getResult_3cc078ae.body.tasks[0].title)) + \" — \") + string(pending_getResult_3cc078ae.body.tasks[0].description)) + \" [status=\") + string(pending_getResult_3cc078ae.body.tasks[0].status)) + \"]\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
                         docId: "${null}"
-              - condition: "${(get_type(pending_getResult_a565e64.body) == \"map\")}"
+              - condition: "${(get_type(pending_getResult_3cc078ae.body) == \"map\")}"
                 steps:
                 - pending_content_updateResult_1:
                     assign:
-                    - pending_contentResult_70aad327:
+                    - pending_contentResult_7b1d2f60:
                         role: "system"
                         content: "${((\"Oldest pending task\" + \": \") + \"None found for session\")}"
                         tool_calls: "${[]}"
@@ -109,9 +109,9 @@ main:
                 steps:
                 - pending_content_updateResult_2:
                     assign:
-                    - pending_contentResult_70aad327:
+                    - pending_contentResult_7b1d2f60:
                         role: "system"
-                        content: "${(((((\"Oldest pending task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(pending_getResult_a565e64.body)) + \", body=\") + string(pending_getResult_a565e64.body))}"
+                        content: "${(((((\"Oldest pending task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(pending_getResult_3cc078ae.body)) + \", body=\") + string(pending_getResult_3cc078ae.body))}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
@@ -124,38 +124,38 @@ main:
             - done_get_call:
                 call: "http.get"
                 args:
-                  url: "${((input.env.BASE_URL + \"/jobs/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Done\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
+                  url: "${((input.env.BASE_URL + \"/\") + ((\"tasks/by-session/\" + input.env.sessionId) + (((((\"?status=\" + \"Done\") + \"&limit=\") + 1) + \"&order=\") + \"desc\")))}"
                   auth:
                     type: "OIDC"
-                    audience: "${(input.env.BASE_URL + \"/jobs\")}"
+                    audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "done_getResult_34e966e5"
+                result: "done_getResult_729ce304"
           retry: "${http.default_retry}"
       - done_content:
           steps:
           - done_content_initResult:
               assign:
-              - done_contentResult_19b0ddd0: {}
+              - done_contentResult_6d660df2: {}
           - done_content_steps:
               switch:
-              - condition: "${((get_type(done_getResult_34e966e5.body) == \"map\") and (len(done_getResult_34e966e5.body.tasks) > 0))}"
+              - condition: "${((get_type(done_getResult_729ce304.body) == \"map\") and (len(done_getResult_729ce304.body.tasks) > 0))}"
                 steps:
                 - done_content_updateResult_0:
                     assign:
-                    - done_contentResult_19b0ddd0:
+                    - done_contentResult_6d660df2:
                         role: "system"
-                        content: "${(((((((((\"Newest complete task\" + \": id=\") + string(done_getResult_34e966e5.body.tasks[0].id)) + \" | \") + string(done_getResult_34e966e5.body.tasks[0].title)) + \" — \") + string(done_getResult_34e966e5.body.tasks[0].description)) + \" [status=\") + string(done_getResult_34e966e5.body.tasks[0].status)) + \"]\")}"
+                        content: "${(((((((((\"Newest complete task\" + \": id=\") + string(done_getResult_729ce304.body.tasks[0].id)) + \" | \") + string(done_getResult_729ce304.body.tasks[0].title)) + \" — \") + string(done_getResult_729ce304.body.tasks[0].description)) + \" [status=\") + string(done_getResult_729ce304.body.tasks[0].status)) + \"]\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
                         docId: "${null}"
-              - condition: "${(get_type(done_getResult_34e966e5.body) == \"map\")}"
+              - condition: "${(get_type(done_getResult_729ce304.body) == \"map\")}"
                 steps:
                 - done_content_updateResult_1:
                     assign:
-                    - done_contentResult_19b0ddd0:
+                    - done_contentResult_6d660df2:
                         role: "system"
                         content: "${((\"Newest complete task\" + \": \") + \"None found for session\")}"
                         tool_calls: "${[]}"
@@ -166,9 +166,9 @@ main:
                 steps:
                 - done_content_updateResult_2:
                     assign:
-                    - done_contentResult_19b0ddd0:
+                    - done_contentResult_6d660df2:
                         role: "system"
-                        content: "${(((((\"Newest complete task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(done_getResult_34e966e5.body)) + \", body=\") + string(done_getResult_34e966e5.body))}"
+                        content: "${(((((\"Newest complete task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(done_getResult_729ce304.body)) + \", body=\") + string(done_getResult_729ce304.body))}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
@@ -177,7 +177,7 @@ main:
       steps:
       - buildList_initResult:
           assign:
-          - buildListResult_2d748648: []
+          - buildListResult_f1a63d9: []
       - buildList_steps:
           for:
             value: "buildListIdx"
@@ -187,27 +187,27 @@ main:
                 steps:
                 - buildList_switch_initResult:
                     assign:
-                    - buildList_switchResult_424cb0da: {}
+                    - buildList_switchResult_326a51b5: {}
                 - buildList_switch_steps:
                     switch:
                     - condition: "${(buildListIdx == 0)}"
                       steps:
                       - buildList_switch_updateResult_0:
                           assign:
-                          - buildList_switchResult_424cb0da: "${current_contentResult_1e8a9790}"
+                          - buildList_switchResult_326a51b5: "${current_contentResult_b0405a}"
                     - condition: "${(buildListIdx == 1)}"
                       steps:
                       - buildList_switch_updateResult_1:
                           assign:
-                          - buildList_switchResult_424cb0da: "${pending_contentResult_70aad327}"
+                          - buildList_switchResult_326a51b5: "${pending_contentResult_7b1d2f60}"
                     - condition: "${(buildListIdx == 2)}"
                       steps:
                       - buildList_switch_updateResult_2:
                           assign:
-                          - buildList_switchResult_424cb0da: "${done_contentResult_19b0ddd0}"
+                          - buildList_switchResult_326a51b5: "${done_contentResult_6d660df2}"
             - buildList_updateResult:
                 assign:
-                - buildListResult_2d748648: "${list.concat(buildListResult_2d748648, buildList_switchResult_424cb0da)}"
+                - buildListResult_f1a63d9: "${list.concat(buildListResult_f1a63d9, buildList_switchResult_326a51b5)}"
   - return:
       return:
-        tasks: "${buildListResult_2d748648}"
+        tasks: "${buildListResult_f1a63d9}"
