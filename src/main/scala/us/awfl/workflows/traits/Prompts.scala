@@ -15,7 +15,7 @@ trait Prompts extends us.awfl.core.Workflow {
   def buildPrompts: Step[ChatMessage, ListValue[ChatMessage]] =
     buildList(
       "buildPromptList",
-      ChatMessage("system", str(prompt)) :: CliActions.cliStatusPrompt ::
+      ChatMessage("system", str(prompt)) ::
         Nil
     )
 

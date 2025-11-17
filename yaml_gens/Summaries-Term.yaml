@@ -8,7 +8,7 @@ main:
           steps:
           - lock_acquire_try_initResult:
               assign:
-              - lock_acquire_tryResult_31d3feac: {}
+              - lock_acquire_tryResult_2b6cc6a2: {}
           - lock_acquire_try_steps:
               try:
                 steps:
@@ -35,7 +35,7 @@ main:
                     retry: "${http.default_retry}"
                 - lock_acquire_try_updateResult:
                     assign:
-                    - lock_acquire_tryResult_31d3feac: "${lock_acquireResult_13b49493.body.acquired}"
+                    - lock_acquire_tryResult_2b6cc6a2: "${lock_acquireResult_13b49493.body.acquired}"
               except:
                 as: "lock_acquire_tryError"
                 steps:
@@ -69,15 +69,15 @@ main:
                               - lock_acquire_errResult_34a448ba: "${false}"
                 - lock_acquire_try_updateResultError:
                     assign:
-                    - lock_acquire_tryResult_31d3feac: "${lock_acquire_errResult_34a448ba}"
+                    - lock_acquire_tryResult_2b6cc6a2: "${lock_acquire_errResult_34a448ba}"
       - lock_switch:
           steps:
           - lock_switch_initResult:
               assign:
-              - lock_switchResult_7a64e17a: {}
+              - lock_switchResult_74dff92: {}
           - lock_switch_steps:
               switch:
-              - condition: "${(lock_acquire_tryResult_31d3feac == true)}"
+              - condition: "${(lock_acquire_tryResult_2b6cc6a2 == true)}"
                 steps:
                 - work_block:
                     steps:
@@ -85,7 +85,7 @@ main:
                         steps:
                         - messagesInWindow_initResult:
                             assign:
-                            - messagesInWindowResult_1f33d383: {}
+                            - messagesInWindowResult_381f5010: {}
                         - messagesInWindow_steps:
                             try:
                               steps:
@@ -125,7 +125,7 @@ main:
                                       steps:
                                       - messages_model_SegKala_initResult:
                                           assign:
-                                          - messages_model_SegKalaResult_11ae8e93: {}
+                                          - messages_model_SegKalaResult_5706ab6e: {}
                                       - messages_model_SegKala_steps:
                                           try:
                                             steps:
@@ -161,7 +161,7 @@ main:
                                                           - messages_components_SegKalaResult_199b06bc: "${list.concat(messages_components_SegKalaResult_199b06bc, messages_components_SegKala_switchResult_41cb83f2)}"
                                             - messages_model_SegKala_updateResult:
                                                 assign:
-                                                - messages_model_SegKalaResult_11ae8e93:
+                                                - messages_model_SegKalaResult_5706ab6e:
                                                     intro: "${null}"
                                                     promoteUpstream: false
                                                     components: "${messages_components_SegKalaResult_199b06bc}"
@@ -180,7 +180,7 @@ main:
                                                 retry: "${http.default_retry}"
                                             - messages_model_SegKala_updateResultError:
                                                 assign:
-                                                - messages_model_SegKalaResult_11ae8e93: "${null}"
+                                                - messages_model_SegKalaResult_5706ab6e: "${null}"
                                   - TopicContextYoj_run_with_model:
                                       try:
                                         steps:
@@ -199,31 +199,31 @@ main:
                                                   begin: "${null}"
                                                 presetId: "${null}"
                                                 includeDocId: "${true}"
-                                                model: "${messages_model_SegKalaResult_11ae8e93}"
+                                                model: "${messages_model_SegKalaResult_5706ab6e}"
                                               auth:
                                                 type: "OIDC"
                                                 audience: "${input.env.BASE_URL}"
                                               headers:
                                                 x-user-id: "${input.env.userId}"
                                                 x-project-id: "${input.env.projectId}"
-                                            result: "TopicContextYoj_run_with_modelResult_1ffe7506"
+                                            result: "TopicContextYoj_run_with_modelResult_1e86977e"
                                       retry: "${http.default_retry}"
                                   - for_messages_items_SegKala:
                                       steps:
                                       - for_messages_items_SegKala_initResult:
                                           assign:
-                                          - for_messages_items_SegKalaResult_67d69b82: []
+                                          - for_messages_items_SegKalaResult_25e86e27: []
                                       - for_messages_items_SegKala_steps:
                                           for:
                                             value: "for_messages_items_SegKalaValue"
-                                            in: "${TopicContextYoj_run_with_modelResult_1ffe7506.body.yoj}"
+                                            in: "${TopicContextYoj_run_with_modelResult_1e86977e.body.yoj}"
                                             steps:
                                             - for_messages_items_SegKala_updateResult:
                                                 assign:
-                                                - for_messages_items_SegKalaResult_67d69b82: "${list.concat(for_messages_items_SegKalaResult_67d69b82, for_messages_items_SegKalaValue)}"
+                                                - for_messages_items_SegKalaResult_25e86e27: "${list.concat(for_messages_items_SegKalaResult_25e86e27, for_messages_items_SegKalaValue)}"
                               - messagesInWindow_updateResult:
                                   assign:
-                                  - messagesInWindowResult_1f33d383: "${for_messages_items_SegKalaResult_67d69b82}"
+                                  - messagesInWindowResult_381f5010: "${for_messages_items_SegKalaResult_25e86e27}"
                             except:
                               as: "messagesInWindowError"
                               steps:
@@ -238,7 +238,7 @@ main:
                                   retry: "${http.default_retry}"
                               - messagesInWindow_updateResultError:
                                   assign:
-                                  - messagesInWindowResult_1f33d383: "${null}"
+                                  - messagesInWindowResult_381f5010: "${null}"
                     - summaries_readIstaBlock:
                         steps:
                         - read_summariesIsta_logKala:
@@ -296,10 +296,10 @@ main:
                         steps:
                         - ista_write_switch_initResult:
                             assign:
-                            - ista_write_switchResult_3148ecc7: {}
+                            - ista_write_switchResult_46c659f7: {}
                         - ista_write_switch_steps:
                             switch:
-                            - condition: "${((len(messagesInWindowResult_1f33d383) > 0) and ((len(for_summariesIstaResult_624b506e) == 0) or (for_summariesIstaResult_624b506e[(len(for_summariesIstaResult_624b506e) - 1)].create_time < input.arg2)))}"
+                            - condition: "${((len(messagesInWindowResult_381f5010) > 0) and ((len(for_summariesIstaResult_624b506e) == 0) or (for_summariesIstaResult_624b506e[(len(for_summariesIstaResult_624b506e) - 1)].create_time < input.arg2)))}"
                               steps:
                               - TopicContextYoj_run_with_docId:
                                   try:
@@ -550,7 +550,7 @@ main:
                                             - writeIstaResult_switchResult_14d9e276: "${null}"
                               - ista_write_switch_updateResult_0:
                                   assign:
-                                  - ista_write_switchResult_3148ecc7: "${complete_switchResult_5bba47e5.result}"
+                                  - ista_write_switchResult_46c659f7: "${complete_switchResult_5bba47e5.result}"
                             - condition: "${true}"
                               steps:
                               - write_skipped:
@@ -564,7 +564,7 @@ main:
                                   retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_1:
                                   assign:
-                                  - ista_write_switchResult_3148ecc7: "${null}"
+                                  - ista_write_switchResult_46c659f7: "${null}"
                 - lock_release:
                     try:
                       steps:
@@ -587,11 +587,11 @@ main:
                     retry: "${http.default_retry}"
                 - lock_switch_updateResult_0:
                     assign:
-                    - lock_switchResult_7a64e17a: "${ista_write_switchResult_3148ecc7}"
+                    - lock_switchResult_74dff92: "${ista_write_switchResult_46c659f7}"
               - condition: "${true}"
                 steps:
                 - lock_switch_updateResult_1:
                     assign:
-                    - lock_switchResult_7a64e17a: "${null}"
+                    - lock_switchResult_74dff92: "${null}"
   - return:
-      return: "${lock_switchResult_7a64e17a}"
+      return: "${lock_switchResult_74dff92}"

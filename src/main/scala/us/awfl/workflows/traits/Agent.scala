@@ -6,7 +6,7 @@ import us.awfl.workflows.EventHandler
 import us.awfl.services.Llm.ChatToolResponse
 import us.awfl.utils.Env
 
-trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks {
+trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks with Cli {
   override type Result = ChatToolResponse
 
   def apply(name: String, query: BaseValue[String], fund: BaseValue[Double]): Call[RunWorkflowArgs[Input], ChatToolResponse] = {

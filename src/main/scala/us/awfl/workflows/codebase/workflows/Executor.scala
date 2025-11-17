@@ -15,7 +15,7 @@ object Executor extends us.awfl.workflows.traits.Agent {
       |Prefer idempotent, defensive changes and keep backwards compatibility.""".stripMargin
 
   // Keep tools aligned with original usage (ContextAgent only)
-  override def buildTools = buildList("buildTools", List(
+  override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(
     "ContextAgent"
-  ))
+  )))
 }

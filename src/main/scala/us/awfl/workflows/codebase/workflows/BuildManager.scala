@@ -30,5 +30,5 @@ object BuildManager extends us.awfl.workflows.traits.Agent {
       |Also preload the project's build.sbt so you can reason about build settings and dependencies.
       |Leverage specialized tools (e.g., Sutradhara, ContextAgent) when necessary.""".stripMargin
 
-  override def buildTools = buildList("buildTools", List("Sutradhara", "ContextAgent"))
+  override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List("Sutradhara", "ContextAgent")))
 }

@@ -19,8 +19,8 @@ object WorkflowBuilder extends us.awfl.workflows.traits.Agent {
       |You bootstrap your own context by reading your Scala definition file and appending it to the system prompt.
       |Leverage specialized tools (e.g., Sutradhara) when necessary.""".stripMargin
 
-  override def buildTools = buildList("buildTools", List(
+  override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(
     "Sutradhara",
     "ContextAgent"
-  ))
+  )))
 }

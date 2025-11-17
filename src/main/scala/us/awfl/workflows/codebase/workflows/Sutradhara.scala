@@ -21,8 +21,8 @@ object Sutradhara extends us.awfl.workflows.traits.Agent {
       |Choose among THINK, READ_FILE, UPDATE_FILE, RUN_COMMAND, or RESPOND with minimal, safe, idempotent actions.
       |Leverage specialized tools (e.g., Sutradhara, ContextAgent) when necessary.""".stripMargin
 
-  override def buildTools = buildList("buildTools", List(
+  override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(
     "Sutradhara",
     "ContextAgent"
-  ))
+  )))
 }

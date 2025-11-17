@@ -27,12 +27,6 @@ object ToolDefs extends us.awfl.core.Workflow {
   // Envelope for service response: we avoid returning a bare list so PostResult[T] wraps an object
   case class ServiceResp(items: ListValue[ToolWithWorkflow])
 
-  // Local fallback defs (standard + default custom families like Tasks)
-  // private def localDefsStep(name: String): Step[ToolWithWorkflow, ListValue[ToolWithWorkflow]] = {
-  //   val allRunners = Tools.all(Tasks.runners)
-  //   buildList(name, Tools.defs(allRunners).map(t => ToolWithWorkflow(t.`type`, t.function, str("tools-CliTools"))))
-  // }
-
   // Fetch tool defs from service with optional names filter (CSV supported by service)
   // Return an object envelope so PostResult[T] is PostResult[ServiceResp] (T is an object), not a list
   private def fetchDefsFromService(name: String, toolNames: ListValue[String]): Step[PostResult[ServiceResp], Resolved[PostResult[ServiceResp]]] with ValueStep[PostResult[ServiceResp]] = {

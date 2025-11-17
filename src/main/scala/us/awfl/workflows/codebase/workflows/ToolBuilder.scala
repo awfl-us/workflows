@@ -21,8 +21,8 @@ object ToolBuilder extends us.awfl.workflows.traits.Agent {
       |Favor idempotent operations, environment isolation, and defensive checks.
       |Leverage specialized tools (e.g., Sutradhara, ContextAgent) when necessary.""".stripMargin
 
-  override def buildTools = buildList("buildTools", List(
+  override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(
     "Sutradhara",
     "ContextAgent"
-  ))
+  )))
 }

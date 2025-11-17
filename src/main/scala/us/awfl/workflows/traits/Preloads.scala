@@ -14,7 +14,7 @@ trait Preloads extends EventHandler {
 
   def preloads: List[PreloadItem] = List()
 
-  override def buildPrompts: Step[ChatMessage, ListValue[ChatMessage]] = joinSteps(super.buildPrompts, {
+  override def buildPrompts: Step[ChatMessage, ListValue[ChatMessage]] = joinSteps("preloads", super.buildPrompts, {
     val runPreloads = preloads.map {
       case PreloadFile(filename) => Context.preloadFile(
         "preloadFile",

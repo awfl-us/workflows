@@ -38,7 +38,6 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
   )
 
   override val inputVal: BaseValue[Input] = init[Input]("input")
-  override def workflows = super.workflows
 
   // Workflows callback request wrapper
   case class CallbackRequest(http_request: BaseValue[us.awfl.utils.PostRequest[NoValueT]])

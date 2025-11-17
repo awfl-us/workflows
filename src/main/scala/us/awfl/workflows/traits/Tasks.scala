@@ -7,7 +7,7 @@ import us.awfl.workflows.helpers
 import us.awfl.workflows.tools.Tasks as TasksTool
 
 trait Tasks extends Prompts with Tools {
-  override def buildPrompts: Step[ChatMessage, ListValue[ChatMessage]] = joinSteps(super.buildPrompts, {
+  override def buildPrompts: Step[ChatMessage, ListValue[ChatMessage]] = joinSteps("taskPrompts", super.buildPrompts, {
     // val buildPromptList = buildValueList("builList", prompts.map(obj))
     // Add task context prompts: current in-progress, oldest queued, newest done
     val taskPrompts = helpers.Tasks("tasks")
@@ -25,5 +25,5 @@ trait Tasks extends Prompts with Tools {
     )
   })
 
-  override def buildTools = joinSteps(super.buildTools, buildList("buildTaskTools", TasksTool.supported))
+  override def buildTools = joinSteps("taskTools", super.buildTools, buildList("buildTaskTools", TasksTool.supported))
 }

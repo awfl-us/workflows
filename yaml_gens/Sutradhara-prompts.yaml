@@ -2,539 +2,591 @@ main:
   params:
   - "input"
   steps:
-  - joinSteps_3:
+  - cli_joinSteps_1:
       steps:
-      - joinSteps_1:
+      - taskPrompts_joinSteps_1:
           steps:
-          - buildPromptList:
+          - preloads_joinSteps_1:
               steps:
-              - buildPromptList_initResult:
-                  assign:
-                  - buildPromptListResult_26576898: []
-              - buildPromptList_steps:
-                  for:
-                    value: "buildPromptListIdx"
-                    range: "${[0, (2 - 1)]}"
-                    steps:
-                    - buildPromptList_switch:
-                        steps:
-                        - buildPromptList_switch_initResult:
-                            assign:
-                            - buildPromptList_switchResult_4aa5a59f: {}
-                        - buildPromptList_switch_steps:
-                            switch:
-                            - condition: "${(buildPromptListIdx == 0)}"
-                              steps:
-                              - buildPromptList_switch_updateResult_0:
-                                  assign:
-                                  - buildPromptList_switchResult_4aa5a59f:
-                                      role: "system"
-                                      content: "${\"You are Sutradhāra, the orchestration agent for prakriyā (process).\nBootstrap by reading AGENT.md, your own Scala file, and utils/Prakriya.scala; append them to the system prompt.\nUnify arrangement (yojanā) with intended outcomes (iṣṭa) across kālavibhāga (Seg/Session/Week/Term).\nChoose among THINK, READ_FILE, UPDATE_FILE, RUN_COMMAND, or RESPOND with minimal, safe, idempotent actions.\nLeverage specialized tools (e.g., Sutradhara, ContextAgent) when necessary.\"}"
-                                      tool_calls: "${[]}"
-                                      tool_call_id: "${null}"
-                                      create_time: "${sys.now()}"
-                                      docId: "${null}"
-                            - condition: "${(buildPromptListIdx == 1)}"
-                              steps:
-                              - buildPromptList_switch_updateResult_1:
-                                  assign:
-                                  - buildPromptList_switchResult_4aa5a59f:
-                                      role: "system"
-                                      content: "${\"Here are the available tool calls.\nUse these tools:\n- THINK: private reflection, no side effects.\n- UPDATE_FILE: write a file with {filepath, content}.\n- READ_FILE: read a file with {filepath}.\n- RUN_COMMAND: execute a shell command with {command}.\n- QUERY: delegate to another workflow with {workflow, query}.\n      \"}"
-                                      tool_calls: "${[]}"
-                                      tool_call_id: "${null}"
-                                      create_time: "${sys.now()}"
-                                      docId: "${null}"
-                    - buildPromptList_updateResult:
-                        assign:
-                        - buildPromptListResult_26576898: "${list.concat(buildPromptListResult_26576898, buildPromptList_switchResult_4aa5a59f)}"
-          - preloadsBlock:
-              steps:
-              - preloadFile_block:
+              - buildPromptList:
                   steps:
-                  - preloadFile_preloadFile_callback_block:
-                      steps:
-                      - preloadFile_preloadFile_run_tools_CliTools:
-                          try:
-                            steps:
-                            - preloadFile_preloadFile_run_tools_CliTools_call:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    tool_call:
-                                      id: "${\"preload_file\"}"
-                                      type: "function"
-                                      function:
-                                        name: "${\"READ_FILE\"}"
-                                        arguments: "{\"filepath\": \"/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md\"}"
-                                    cost: 0.0
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(true, null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: false
-                                result: "preloadFile_preloadFile_run_tools_CliToolsResult_245a2caa"
-                          retry: "${http.default_retry}"
-              - preloadFile_block_1:
-                  steps:
-                  - preloadFile_preloadFile_callback_block_1:
-                      steps:
-                      - preloadFile_preloadFile_run_tools_CliTools_1:
-                          try:
-                            steps:
-                            - preloadFile_preloadFile_run_tools_CliTools_call_1:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    tool_call:
-                                      id: "${\"preload_file\"}"
-                                      type: "function"
-                                      function:
-                                        name: "${\"READ_FILE\"}"
-                                        arguments: "{\"filepath\": \"/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/Sutradhara.scala\"}"
-                                    cost: 0.0
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(true, null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: false
-                                result: "preloadFile_preloadFile_run_tools_CliToolsResult_4faae236"
-                          retry: "${http.default_retry}"
-              - preloadFile_block_2:
-                  steps:
-                  - preloadFile_preloadFile_callback_block_2:
-                      steps:
-                      - preloadFile_preloadFile_run_tools_CliTools_2:
-                          try:
-                            steps:
-                            - preloadFile_preloadFile_run_tools_CliTools_call_2:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    tool_call:
-                                      id: "${\"preload_file\"}"
-                                      type: "function"
-                                      function:
-                                        name: "${\"READ_FILE\"}"
-                                        arguments: "{\"filepath\": \"/Users/paul/github/TopAigents/workflows/src/main/scala/utils/Prakriya.scala\"}"
-                                    cost: 0.0
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(true, null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: false
-                                result: "preloadFile_preloadFile_run_tools_CliToolsResult_25a7f4e3"
-                          retry: "${http.default_retry}"
-              - preloadCommand_block:
-                  steps:
-                  - preloadCommand_paramJson:
-                      steps:
-                      - preloadCommand_paramJson_initResult:
-                          assign:
-                          - preloadCommand_paramJsonResult_51f15c3e: {}
-                      - preloadCommand_paramJson_steps:
-                          try:
-                            steps:
-                            - preloadCommand_paramJson_updateResult:
-                                assign:
-                                - preloadCommand_paramJsonResult_51f15c3e:
-                                    command: "bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \"# workflows/yaml_gens (sorted by mtime)\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \"No workflows/yaml_gens directory\"; fi'"
-                          except:
-                            as: "preloadCommand_paramJsonError"
-                            steps:
-                            - preloadCommand_paramJson_logError:
-                                try:
-                                  steps:
-                                  - preloadCommand_paramJson_logError_call:
-                                      call: "sys.log"
-                                      args:
-                                        text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
-                                      result: "preloadCommand_paramJson_logErrorResult_5f978326"
-                                retry: "${http.default_retry}"
-                            - preloadCommand_paramJson_updateResultError:
-                                assign:
-                                - preloadCommand_paramJsonResult_51f15c3e: "${null}"
-                  - preloadCommand_preloadCommand_callback_block:
-                      steps:
-                      - preloadCommand_preloadCommand_run_tools_CliTools:
-                          try:
-                            steps:
-                            - preloadCommand_preloadCommand_run_tools_CliTools_call:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    tool_call:
-                                      id: "${\"preload_command\"}"
-                                      type: "function"
-                                      function:
-                                        name: "${\"RUN_COMMAND\"}"
-                                        arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_51f15c3e)}"
-                                    cost: 0.0
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(true, null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: false
-                                result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_4e7ebcf6"
-                          retry: "${http.default_retry}"
-              - preloadCommand_block_1:
-                  steps:
-                  - preloadCommand_paramJson_1:
-                      steps:
-                      - preloadCommand_paramJson_initResult_1:
-                          assign:
-                          - preloadCommand_paramJsonResult_1c520d03: {}
-                      - preloadCommand_paramJson_steps_1:
-                          try:
-                            steps:
-                            - preloadCommand_paramJson_updateResult_1:
-                                assign:
-                                - preloadCommand_paramJsonResult_1c520d03:
-                                    command: "bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'"
-                          except:
-                            as: "preloadCommand_paramJsonError"
-                            steps:
-                            - preloadCommand_paramJson_logError_1:
-                                try:
-                                  steps:
-                                  - preloadCommand_paramJson_logError_call_1:
-                                      call: "sys.log"
-                                      args:
-                                        text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
-                                      result: "preloadCommand_paramJson_logErrorResult_5f978326"
-                                retry: "${http.default_retry}"
-                            - preloadCommand_paramJson_updateResultError_1:
-                                assign:
-                                - preloadCommand_paramJsonResult_1c520d03: "${null}"
-                  - preloadCommand_preloadCommand_callback_block_1:
-                      steps:
-                      - preloadCommand_preloadCommand_run_tools_CliTools_1:
-                          try:
-                            steps:
-                            - preloadCommand_preloadCommand_run_tools_CliTools_call_1:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    tool_call:
-                                      id: "${\"preload_command\"}"
-                                      type: "function"
-                                      function:
-                                        name: "${\"RUN_COMMAND\"}"
-                                        arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_1c520d03)}"
-                                    cost: 0.0
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(true, null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: false
-                                result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_f002be4"
-                          retry: "${http.default_retry}"
-              - joinPreloads:
-                  steps:
-                  - joinPreloads_initResult:
+                  - buildPromptList_initResult:
                       assign:
-                      - joinPreloadsResult_325f8e6c: []
-                  - joinPreloads_steps:
+                      - buildPromptListResult_685dc47f: []
+                  - buildPromptList_steps:
                       for:
-                        value: "joinPreloadsIdx"
-                        range: "${[0, (5 - 1)]}"
+                        value: "buildPromptListIdx"
+                        range: "${[0, (1 - 1)]}"
                         steps:
-                        - joinPreloads_switch:
+                        - buildPromptList_switch:
                             steps:
-                            - joinPreloads_switch_initResult:
+                            - buildPromptList_switch_initResult:
                                 assign:
-                                - joinPreloads_switchResult_40f168f5: {}
-                            - joinPreloads_switch_steps:
+                                - buildPromptList_switchResult_1923d23: {}
+                            - buildPromptList_switch_steps:
                                 switch:
-                                - condition: "${(joinPreloadsIdx == 0)}"
+                                - condition: "${(buildPromptListIdx == 0)}"
                                   steps:
-                                  - joinPreloads_switch_updateResult_0:
+                                  - buildPromptList_switch_updateResult_0:
                                       assign:
-                                      - joinPreloads_switchResult_40f168f5:
+                                      - buildPromptList_switchResult_1923d23:
                                           role: "system"
-                                          content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_245a2caa.encoded)}"
+                                          content: "${\"You are Sutradhāra, the orchestration agent for prakriyā (process).\nBootstrap by reading AGENT.md, your own Scala file, and utils/Prakriya.scala; append them to the system prompt.\nUnify arrangement (yojanā) with intended outcomes (iṣṭa) across kālavibhāga (Seg/Session/Week/Term).\nChoose among THINK, READ_FILE, UPDATE_FILE, RUN_COMMAND, or RESPOND with minimal, safe, idempotent actions.\nLeverage specialized tools (e.g., Sutradhara, ContextAgent) when necessary.\"}"
                                           tool_calls: "${[]}"
                                           tool_call_id: "${null}"
                                           create_time: "${sys.now()}"
                                           docId: "${null}"
-                                - condition: "${(joinPreloadsIdx == 1)}"
-                                  steps:
-                                  - joinPreloads_switch_updateResult_1:
-                                      assign:
-                                      - joinPreloads_switchResult_40f168f5:
-                                          role: "system"
-                                          content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/Sutradhara.scala]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_4faae236.encoded)}"
-                                          tool_calls: "${[]}"
-                                          tool_call_id: "${null}"
-                                          create_time: "${sys.now()}"
-                                          docId: "${null}"
-                                - condition: "${(joinPreloadsIdx == 2)}"
-                                  steps:
-                                  - joinPreloads_switch_updateResult_2:
-                                      assign:
-                                      - joinPreloads_switchResult_40f168f5:
-                                          role: "system"
-                                          content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/utils/Prakriya.scala]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_25a7f4e3.encoded)}"
-                                          tool_calls: "${[]}"
-                                          tool_call_id: "${null}"
-                                          create_time: "${sys.now()}"
-                                          docId: "${null}"
-                                - condition: "${(joinPreloadsIdx == 3)}"
-                                  steps:
-                                  - joinPreloads_switch_updateResult_3:
-                                      assign:
-                                      - joinPreloads_switchResult_40f168f5:
-                                          role: "system"
-                                          content: "${(\"[Preload bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \\\"# workflows/yaml_gens (sorted by mtime)\\\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \\\"No workflows/yaml_gens directory\\\"; fi']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_4e7ebcf6.encoded)}"
-                                          tool_calls: "${[]}"
-                                          tool_call_id: "${null}"
-                                          create_time: "${sys.now()}"
-                                          docId: "${null}"
-                                - condition: "${(joinPreloadsIdx == 4)}"
-                                  steps:
-                                  - joinPreloads_switch_updateResult_4:
-                                      assign:
-                                      - joinPreloads_switchResult_40f168f5:
-                                          role: "system"
-                                          content: "${(\"[Preload bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_f002be4.encoded)}"
-                                          tool_calls: "${[]}"
-                                          tool_call_id: "${null}"
-                                          create_time: "${sys.now()}"
-                                          docId: "${null}"
-                        - joinPreloads_updateResult:
+                        - buildPromptList_updateResult:
                             assign:
-                            - joinPreloadsResult_325f8e6c: "${list.concat(joinPreloadsResult_325f8e6c, joinPreloads_switchResult_40f168f5)}"
-          - joinSteps:
-              steps:
-              - joinSteps_initResult:
-                  assign:
-                  - joinStepsResult_53d5d9fd: []
-              - joinSteps_steps:
-                  for:
-                    value: "joinStepsIdx"
-                    range: "${[0, (((0 + len(buildPromptListResult_26576898)) + len(joinPreloadsResult_325f8e6c)) - 1)]}"
-                    steps:
-                    - joinSteps_switch:
+                            - buildPromptListResult_685dc47f: "${list.concat(buildPromptListResult_685dc47f, buildPromptList_switchResult_1923d23)}"
+              - preloadsBlock:
+                  steps:
+                  - preloadFile_block:
+                      steps:
+                      - preloadFile_preloadFile_callback_block:
+                          steps:
+                          - preloadFile_preloadFile_run_tools_CliTools:
+                              try:
+                                steps:
+                                - preloadFile_preloadFile_run_tools_CliTools_call:
+                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                    args:
+                                      workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                      argument:
+                                        tool_call:
+                                          id: "${\"preload_file\"}"
+                                          type: "function"
+                                          function:
+                                            name: "${\"READ_FILE\"}"
+                                            arguments: "{\"filepath\": \"/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md\"}"
+                                        cost: 0.0
+                                        env:
+                                          userId: "${input.env.userId}"
+                                          model: "${input.env.model}"
+                                          callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                          BASE_URL: "${input.env.BASE_URL}"
+                                          background: "${default(true, null)}"
+                                          projectId: "${input.env.projectId}"
+                                          sessionId: "${input.env.sessionId}"
+                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                      connector_params:
+                                        skip_polling: false
+                                    result: "preloadFile_preloadFile_run_tools_CliToolsResult_245a2caa"
+                              retry: "${http.default_retry}"
+                  - preloadFile_block_1:
+                      steps:
+                      - preloadFile_preloadFile_callback_block_1:
+                          steps:
+                          - preloadFile_preloadFile_run_tools_CliTools_1:
+                              try:
+                                steps:
+                                - preloadFile_preloadFile_run_tools_CliTools_call_1:
+                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                    args:
+                                      workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                      argument:
+                                        tool_call:
+                                          id: "${\"preload_file\"}"
+                                          type: "function"
+                                          function:
+                                            name: "${\"READ_FILE\"}"
+                                            arguments: "{\"filepath\": \"/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/Sutradhara.scala\"}"
+                                        cost: 0.0
+                                        env:
+                                          userId: "${input.env.userId}"
+                                          model: "${input.env.model}"
+                                          callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                          BASE_URL: "${input.env.BASE_URL}"
+                                          background: "${default(true, null)}"
+                                          projectId: "${input.env.projectId}"
+                                          sessionId: "${input.env.sessionId}"
+                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                      connector_params:
+                                        skip_polling: false
+                                    result: "preloadFile_preloadFile_run_tools_CliToolsResult_4faae236"
+                              retry: "${http.default_retry}"
+                  - preloadFile_block_2:
+                      steps:
+                      - preloadFile_preloadFile_callback_block_2:
+                          steps:
+                          - preloadFile_preloadFile_run_tools_CliTools_2:
+                              try:
+                                steps:
+                                - preloadFile_preloadFile_run_tools_CliTools_call_2:
+                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                    args:
+                                      workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                      argument:
+                                        tool_call:
+                                          id: "${\"preload_file\"}"
+                                          type: "function"
+                                          function:
+                                            name: "${\"READ_FILE\"}"
+                                            arguments: "{\"filepath\": \"/Users/paul/github/TopAigents/workflows/src/main/scala/utils/Prakriya.scala\"}"
+                                        cost: 0.0
+                                        env:
+                                          userId: "${input.env.userId}"
+                                          model: "${input.env.model}"
+                                          callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                          BASE_URL: "${input.env.BASE_URL}"
+                                          background: "${default(true, null)}"
+                                          projectId: "${input.env.projectId}"
+                                          sessionId: "${input.env.sessionId}"
+                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                      connector_params:
+                                        skip_polling: false
+                                    result: "preloadFile_preloadFile_run_tools_CliToolsResult_25a7f4e3"
+                              retry: "${http.default_retry}"
+                  - preloadCommand_block:
+                      steps:
+                      - preloadCommand_paramJson:
+                          steps:
+                          - preloadCommand_paramJson_initResult:
+                              assign:
+                              - preloadCommand_paramJsonResult_6154cedc: {}
+                          - preloadCommand_paramJson_steps:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_updateResult:
+                                    assign:
+                                    - preloadCommand_paramJsonResult_6154cedc:
+                                        command: "bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \"# workflows/yaml_gens (sorted by mtime)\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \"No workflows/yaml_gens directory\"; fi'"
+                              except:
+                                as: "preloadCommand_paramJsonError"
+                                steps:
+                                - preloadCommand_paramJson_logError:
+                                    try:
+                                      steps:
+                                      - preloadCommand_paramJson_logError_call:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                          result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_paramJson_updateResultError:
+                                    assign:
+                                    - preloadCommand_paramJsonResult_6154cedc: "${null}"
+                      - preloadCommand_preloadCommand_callback_block:
+                          steps:
+                          - preloadCommand_preloadCommand_run_tools_CliTools:
+                              try:
+                                steps:
+                                - preloadCommand_preloadCommand_run_tools_CliTools_call:
+                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                    args:
+                                      workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                      argument:
+                                        tool_call:
+                                          id: "${\"preload_command\"}"
+                                          type: "function"
+                                          function:
+                                            name: "${\"RUN_COMMAND\"}"
+                                            arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_6154cedc)}"
+                                        cost: 0.0
+                                        env:
+                                          userId: "${input.env.userId}"
+                                          model: "${input.env.model}"
+                                          callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                          BASE_URL: "${input.env.BASE_URL}"
+                                          background: "${default(true, null)}"
+                                          projectId: "${input.env.projectId}"
+                                          sessionId: "${input.env.sessionId}"
+                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                      connector_params:
+                                        skip_polling: false
+                                    result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_75d63778"
+                              retry: "${http.default_retry}"
+                  - preloadCommand_block_1:
+                      steps:
+                      - preloadCommand_paramJson_1:
+                          steps:
+                          - preloadCommand_paramJson_initResult_1:
+                              assign:
+                              - preloadCommand_paramJsonResult_1775c437: {}
+                          - preloadCommand_paramJson_steps_1:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_updateResult_1:
+                                    assign:
+                                    - preloadCommand_paramJsonResult_1775c437:
+                                        command: "bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'"
+                              except:
+                                as: "preloadCommand_paramJsonError"
+                                steps:
+                                - preloadCommand_paramJson_logError_1:
+                                    try:
+                                      steps:
+                                      - preloadCommand_paramJson_logError_call_1:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                          result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_paramJson_updateResultError_1:
+                                    assign:
+                                    - preloadCommand_paramJsonResult_1775c437: "${null}"
+                      - preloadCommand_preloadCommand_callback_block_1:
+                          steps:
+                          - preloadCommand_preloadCommand_run_tools_CliTools_1:
+                              try:
+                                steps:
+                                - preloadCommand_preloadCommand_run_tools_CliTools_call_1:
+                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                    args:
+                                      workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                      argument:
+                                        tool_call:
+                                          id: "${\"preload_command\"}"
+                                          type: "function"
+                                          function:
+                                            name: "${\"RUN_COMMAND\"}"
+                                            arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_1775c437)}"
+                                        cost: 0.0
+                                        env:
+                                          userId: "${input.env.userId}"
+                                          model: "${input.env.model}"
+                                          callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                          BASE_URL: "${input.env.BASE_URL}"
+                                          background: "${default(true, null)}"
+                                          projectId: "${input.env.projectId}"
+                                          sessionId: "${input.env.sessionId}"
+                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                      connector_params:
+                                        skip_polling: false
+                                    result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_36ddc079"
+                              retry: "${http.default_retry}"
+                  - joinPreloads:
+                      steps:
+                      - joinPreloads_initResult:
+                          assign:
+                          - joinPreloadsResult_23a1f89a: []
+                      - joinPreloads_steps:
+                          for:
+                            value: "joinPreloadsIdx"
+                            range: "${[0, (5 - 1)]}"
+                            steps:
+                            - joinPreloads_switch:
+                                steps:
+                                - joinPreloads_switch_initResult:
+                                    assign:
+                                    - joinPreloads_switchResult_7174eda7: {}
+                                - joinPreloads_switch_steps:
+                                    switch:
+                                    - condition: "${(joinPreloadsIdx == 0)}"
+                                      steps:
+                                      - joinPreloads_switch_updateResult_0:
+                                          assign:
+                                          - joinPreloads_switchResult_7174eda7:
+                                              role: "system"
+                                              content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_245a2caa.encoded)}"
+                                              tool_calls: "${[]}"
+                                              tool_call_id: "${null}"
+                                              create_time: "${sys.now()}"
+                                              docId: "${null}"
+                                    - condition: "${(joinPreloadsIdx == 1)}"
+                                      steps:
+                                      - joinPreloads_switch_updateResult_1:
+                                          assign:
+                                          - joinPreloads_switchResult_7174eda7:
+                                              role: "system"
+                                              content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/Sutradhara.scala]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_4faae236.encoded)}"
+                                              tool_calls: "${[]}"
+                                              tool_call_id: "${null}"
+                                              create_time: "${sys.now()}"
+                                              docId: "${null}"
+                                    - condition: "${(joinPreloadsIdx == 2)}"
+                                      steps:
+                                      - joinPreloads_switch_updateResult_2:
+                                          assign:
+                                          - joinPreloads_switchResult_7174eda7:
+                                              role: "system"
+                                              content: "${(\"[Preload /Users/paul/github/TopAigents/workflows/src/main/scala/utils/Prakriya.scala]\r\" + preloadFile_preloadFile_run_tools_CliToolsResult_25a7f4e3.encoded)}"
+                                              tool_calls: "${[]}"
+                                              tool_call_id: "${null}"
+                                              create_time: "${sys.now()}"
+                                              docId: "${null}"
+                                    - condition: "${(joinPreloadsIdx == 3)}"
+                                      steps:
+                                      - joinPreloads_switch_updateResult_3:
+                                          assign:
+                                          - joinPreloads_switchResult_7174eda7:
+                                              role: "system"
+                                              content: "${(\"[Preload bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \\\"# workflows/yaml_gens (sorted by mtime)\\\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \\\"No workflows/yaml_gens directory\\\"; fi']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_75d63778.encoded)}"
+                                              tool_calls: "${[]}"
+                                              tool_call_id: "${null}"
+                                              create_time: "${sys.now()}"
+                                              docId: "${null}"
+                                    - condition: "${(joinPreloadsIdx == 4)}"
+                                      steps:
+                                      - joinPreloads_switch_updateResult_4:
+                                          assign:
+                                          - joinPreloads_switchResult_7174eda7:
+                                              role: "system"
+                                              content: "${(\"[Preload bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ']\\r\" + preloadCommand_preloadCommand_run_tools_CliToolsResult_36ddc079.encoded)}"
+                                              tool_calls: "${[]}"
+                                              tool_call_id: "${null}"
+                                              create_time: "${sys.now()}"
+                                              docId: "${null}"
+                            - joinPreloads_updateResult:
+                                assign:
+                                - joinPreloadsResult_23a1f89a: "${list.concat(joinPreloadsResult_23a1f89a, joinPreloads_switchResult_7174eda7)}"
+              - preloads_joinSteps:
+                  steps:
+                  - preloads_joinSteps_initResult:
+                      assign:
+                      - preloads_joinStepsResult_2b02bd6d: []
+                  - preloads_joinSteps_steps:
+                      for:
+                        value: "preloads_joinStepsIdx"
+                        range: "${[0, (((0 + len(buildPromptListResult_685dc47f)) + len(joinPreloadsResult_23a1f89a)) - 1)]}"
                         steps:
-                        - joinSteps_switch_initResult:
+                        - preloads_joinSteps_switch:
+                            steps:
+                            - preloads_joinSteps_switch_initResult:
+                                assign:
+                                - preloads_joinSteps_switchResult_637a430b: {}
+                            - preloads_joinSteps_switch_steps:
+                                switch:
+                                - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_685dc47f)))}"
+                                  steps:
+                                  - preloads_joinSteps_switch_updateResult_0:
+                                      assign:
+                                      - preloads_joinSteps_switchResult_637a430b: "${joinPreloadsResult_23a1f89a[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_685dc47f)))]}"
+                                - condition: "${(preloads_joinStepsIdx >= 0)}"
+                                  steps:
+                                  - preloads_joinSteps_switch_updateResult_1:
+                                      assign:
+                                      - preloads_joinSteps_switchResult_637a430b: "${buildPromptListResult_685dc47f[(preloads_joinStepsIdx - 0)]}"
+                        - preloads_joinSteps_updateResult:
                             assign:
-                            - joinSteps_switchResult_51ef14d4: {}
-                        - joinSteps_switch_steps:
+                            - preloads_joinStepsResult_2b02bd6d: "${list.concat(preloads_joinStepsResult_2b02bd6d, preloads_joinSteps_switchResult_637a430b)}"
+          - buildPromptsWithTasks:
+              steps:
+              - buildPromptsWithTasks_initResult:
+                  assign:
+                  - buildPromptsWithTasksResult_bf75988: {}
+              - buildPromptsWithTasks_steps:
+                  try:
+                    steps:
+                    - tasks:
+                        try:
+                          steps:
+                          - tasks_call:
+                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                              args:
+                                workflow_id: "${\"helpers-Tasks${WORKFLOW_ENV}\"}"
+                                argument:
+                                  env:
+                                    userId: "${input.env.userId}"
+                                    model: "${input.env.model}"
+                                    callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                    BASE_URL: "${input.env.BASE_URL}"
+                                    background: "${default(map.get(input.env, \"background\"), null)}"
+                                    projectId: "${input.env.projectId}"
+                                    sessionId: "${input.env.sessionId}"
+                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                connector_params:
+                                  skip_polling: false
+                              result: "tasksResult_1edf9d6d"
+                        retry: "${http.default_retry}"
+                    - buildGuidancePrompt:
+                        steps:
+                        - buildGuidancePrompt_initResult:
+                            assign:
+                            - buildGuidancePromptResult_318543d: []
+                        - buildGuidancePrompt_steps:
+                            for:
+                              value: "buildGuidancePromptIdx"
+                              range: "${[0, (3 - 1)]}"
+                              steps:
+                              - buildGuidancePrompt_switch:
+                                  steps:
+                                  - buildGuidancePrompt_switch_initResult:
+                                      assign:
+                                      - buildGuidancePrompt_switchResult_5b194610: {}
+                                  - buildGuidancePrompt_switch_steps:
+                                      switch:
+                                      - condition: "${(buildGuidancePromptIdx == 0)}"
+                                        steps:
+                                        - buildGuidancePrompt_switch_updateResult_0:
+                                            assign:
+                                            - buildGuidancePrompt_switchResult_5b194610:
+                                                role: "system"
+                                                content: "${\"Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.\"}"
+                                                tool_calls: "${[]}"
+                                                tool_call_id: "${null}"
+                                                create_time: "${sys.now()}"
+                                                docId: "${null}"
+                                      - condition: "${(buildGuidancePromptIdx == 1)}"
+                                        steps:
+                                        - buildGuidancePrompt_switch_updateResult_1:
+                                            assign:
+                                            - buildGuidancePrompt_switchResult_5b194610:
+                                                role: "system"
+                                                content: "${\"Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.\"}"
+                                                tool_calls: "${[]}"
+                                                tool_call_id: "${null}"
+                                                create_time: "${sys.now()}"
+                                                docId: "${null}"
+                                      - condition: "${(buildGuidancePromptIdx == 2)}"
+                                        steps:
+                                        - buildGuidancePrompt_switch_updateResult_2:
+                                            assign:
+                                            - buildGuidancePrompt_switchResult_5b194610:
+                                                role: "system"
+                                                content: "${\"For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)\"}"
+                                                tool_calls: "${[]}"
+                                                tool_call_id: "${null}"
+                                                create_time: "${sys.now()}"
+                                                docId: "${null}"
+                              - buildGuidancePrompt_updateResult:
+                                  assign:
+                                  - buildGuidancePromptResult_318543d: "${list.concat(buildGuidancePromptResult_318543d, buildGuidancePrompt_switchResult_5b194610)}"
+                    - buildPrompt:
+                        steps:
+                        - buildPrompt_initResult:
+                            assign:
+                            - buildPromptResult_397a67c6: []
+                        - buildPrompt_steps:
+                            for:
+                              value: "buildPromptIdx"
+                              range: "${[0, (((0 + len(buildGuidancePromptResult_318543d)) + len(tasksResult_1edf9d6d.tasks)) - 1)]}"
+                              steps:
+                              - buildPrompt_switch:
+                                  steps:
+                                  - buildPrompt_switch_initResult:
+                                      assign:
+                                      - buildPrompt_switchResult_6ad57200: {}
+                                  - buildPrompt_switch_steps:
+                                      switch:
+                                      - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_318543d)))}"
+                                        steps:
+                                        - buildPrompt_switch_updateResult_0:
+                                            assign:
+                                            - buildPrompt_switchResult_6ad57200: "${tasksResult_1edf9d6d.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_318543d)))]}"
+                                      - condition: "${(buildPromptIdx >= 0)}"
+                                        steps:
+                                        - buildPrompt_switch_updateResult_1:
+                                            assign:
+                                            - buildPrompt_switchResult_6ad57200: "${buildGuidancePromptResult_318543d[(buildPromptIdx - 0)]}"
+                              - buildPrompt_updateResult:
+                                  assign:
+                                  - buildPromptResult_397a67c6: "${list.concat(buildPromptResult_397a67c6, buildPrompt_switchResult_6ad57200)}"
+                    - buildPromptsWithTasks_updateResult:
+                        assign:
+                        - buildPromptsWithTasksResult_bf75988: "${buildPromptResult_397a67c6}"
+                  except:
+                    as: "buildPromptsWithTasksError"
+                    steps:
+                    - buildPromptsWithTasks_logError:
+                        try:
+                          steps:
+                          - buildPromptsWithTasks_logError_call:
+                              call: "sys.log"
+                              args:
+                                text: "${(\"[buildPromptsWithTasks_logError] \" + buildPromptsWithTasksError.message)}"
+                              result: "buildPromptsWithTasks_logErrorResult_2de34d5f"
+                        retry: "${http.default_retry}"
+                    - buildPromptsWithTasks_updateResultError:
+                        assign:
+                        - buildPromptsWithTasksResult_bf75988: "${null}"
+          - taskPrompts_joinSteps:
+              steps:
+              - taskPrompts_joinSteps_initResult:
+                  assign:
+                  - taskPrompts_joinStepsResult_59e3c7d: []
+              - taskPrompts_joinSteps_steps:
+                  for:
+                    value: "taskPrompts_joinStepsIdx"
+                    range: "${[0, (((0 + len(preloads_joinStepsResult_2b02bd6d)) + len(buildPromptsWithTasksResult_bf75988)) - 1)]}"
+                    steps:
+                    - taskPrompts_joinSteps_switch:
+                        steps:
+                        - taskPrompts_joinSteps_switch_initResult:
+                            assign:
+                            - taskPrompts_joinSteps_switchResult_4489987d: {}
+                        - taskPrompts_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(joinStepsIdx >= (0 + len(buildPromptListResult_26576898)))}"
+                            - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_2b02bd6d)))}"
                               steps:
-                              - joinSteps_switch_updateResult_0:
+                              - taskPrompts_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - joinSteps_switchResult_51ef14d4: "${joinPreloadsResult_325f8e6c[(joinStepsIdx - (0 + len(buildPromptListResult_26576898)))]}"
-                            - condition: "${(joinStepsIdx >= 0)}"
+                                  - taskPrompts_joinSteps_switchResult_4489987d: "${buildPromptsWithTasksResult_bf75988[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_2b02bd6d)))]}"
+                            - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                               steps:
-                              - joinSteps_switch_updateResult_1:
+                              - taskPrompts_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - joinSteps_switchResult_51ef14d4: "${buildPromptListResult_26576898[(joinStepsIdx - 0)]}"
-                    - joinSteps_updateResult:
+                                  - taskPrompts_joinSteps_switchResult_4489987d: "${preloads_joinStepsResult_2b02bd6d[(taskPrompts_joinStepsIdx - 0)]}"
+                    - taskPrompts_joinSteps_updateResult:
                         assign:
-                        - joinStepsResult_53d5d9fd: "${list.concat(joinStepsResult_53d5d9fd, joinSteps_switchResult_51ef14d4)}"
-      - buildPromptsWithTasks:
+                        - taskPrompts_joinStepsResult_59e3c7d: "${list.concat(taskPrompts_joinStepsResult_59e3c7d, taskPrompts_joinSteps_switchResult_4489987d)}"
+      - cliPrompt:
           steps:
-          - buildPromptsWithTasks_initResult:
+          - cliPrompt_initResult:
               assign:
-              - buildPromptsWithTasksResult_6dd68a67: {}
-          - buildPromptsWithTasks_steps:
-              try:
-                steps:
-                - tasks:
-                    try:
-                      steps:
-                      - tasks_call:
-                          call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                          args:
-                            workflow_id: "${\"helpers-Tasks${WORKFLOW_ENV}\"}"
-                            argument:
-                              env:
-                                userId: "${input.env.userId}"
-                                model: "${input.env.model}"
-                                callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
-                                BASE_URL: "${input.env.BASE_URL}"
-                                background: "${default(map.get(input.env, \"background\"), null)}"
-                                projectId: "${input.env.projectId}"
-                                sessionId: "${input.env.sessionId}"
-                            location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                            project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                            connector_params:
-                              skip_polling: false
-                          result: "tasksResult_1edf9d6d"
-                    retry: "${http.default_retry}"
-                - buildGuidancePrompt:
-                    steps:
-                    - buildGuidancePrompt_initResult:
-                        assign:
-                        - buildGuidancePromptResult_318543d: []
-                    - buildGuidancePrompt_steps:
-                        for:
-                          value: "buildGuidancePromptIdx"
-                          range: "${[0, (3 - 1)]}"
-                          steps:
-                          - buildGuidancePrompt_switch:
-                              steps:
-                              - buildGuidancePrompt_switch_initResult:
-                                  assign:
-                                  - buildGuidancePrompt_switchResult_5b194610: {}
-                              - buildGuidancePrompt_switch_steps:
-                                  switch:
-                                  - condition: "${(buildGuidancePromptIdx == 0)}"
-                                    steps:
-                                    - buildGuidancePrompt_switch_updateResult_0:
-                                        assign:
-                                        - buildGuidancePrompt_switchResult_5b194610:
-                                            role: "system"
-                                            content: "${\"Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.\"}"
-                                            tool_calls: "${[]}"
-                                            tool_call_id: "${null}"
-                                            create_time: "${sys.now()}"
-                                            docId: "${null}"
-                                  - condition: "${(buildGuidancePromptIdx == 1)}"
-                                    steps:
-                                    - buildGuidancePrompt_switch_updateResult_1:
-                                        assign:
-                                        - buildGuidancePrompt_switchResult_5b194610:
-                                            role: "system"
-                                            content: "${\"Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.\"}"
-                                            tool_calls: "${[]}"
-                                            tool_call_id: "${null}"
-                                            create_time: "${sys.now()}"
-                                            docId: "${null}"
-                                  - condition: "${(buildGuidancePromptIdx == 2)}"
-                                    steps:
-                                    - buildGuidancePrompt_switch_updateResult_2:
-                                        assign:
-                                        - buildGuidancePrompt_switchResult_5b194610:
-                                            role: "system"
-                                            content: "${\"For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)\"}"
-                                            tool_calls: "${[]}"
-                                            tool_call_id: "${null}"
-                                            create_time: "${sys.now()}"
-                                            docId: "${null}"
-                          - buildGuidancePrompt_updateResult:
-                              assign:
-                              - buildGuidancePromptResult_318543d: "${list.concat(buildGuidancePromptResult_318543d, buildGuidancePrompt_switchResult_5b194610)}"
-                - buildPrompt:
-                    steps:
-                    - buildPrompt_initResult:
-                        assign:
-                        - buildPromptResult_397a67c6: []
-                    - buildPrompt_steps:
-                        for:
-                          value: "buildPromptIdx"
-                          range: "${[0, (((0 + len(buildGuidancePromptResult_318543d)) + len(tasksResult_1edf9d6d.tasks)) - 1)]}"
-                          steps:
-                          - buildPrompt_switch:
-                              steps:
-                              - buildPrompt_switch_initResult:
-                                  assign:
-                                  - buildPrompt_switchResult_6ad57200: {}
-                              - buildPrompt_switch_steps:
-                                  switch:
-                                  - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_318543d)))}"
-                                    steps:
-                                    - buildPrompt_switch_updateResult_0:
-                                        assign:
-                                        - buildPrompt_switchResult_6ad57200: "${tasksResult_1edf9d6d.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_318543d)))]}"
-                                  - condition: "${(buildPromptIdx >= 0)}"
-                                    steps:
-                                    - buildPrompt_switch_updateResult_1:
-                                        assign:
-                                        - buildPrompt_switchResult_6ad57200: "${buildGuidancePromptResult_318543d[(buildPromptIdx - 0)]}"
-                          - buildPrompt_updateResult:
-                              assign:
-                              - buildPromptResult_397a67c6: "${list.concat(buildPromptResult_397a67c6, buildPrompt_switchResult_6ad57200)}"
-                - buildPromptsWithTasks_updateResult:
-                    assign:
-                    - buildPromptsWithTasksResult_6dd68a67: "${buildPromptResult_397a67c6}"
-              except:
-                as: "buildPromptsWithTasksError"
-                steps:
-                - buildPromptsWithTasks_logError:
-                    try:
-                      steps:
-                      - buildPromptsWithTasks_logError_call:
-                          call: "sys.log"
-                          args:
-                            text: "${(\"[buildPromptsWithTasks_logError] \" + buildPromptsWithTasksError.message)}"
-                          result: "buildPromptsWithTasks_logErrorResult_2de34d5f"
-                    retry: "${http.default_retry}"
-                - buildPromptsWithTasks_updateResultError:
-                    assign:
-                    - buildPromptsWithTasksResult_6dd68a67: "${null}"
-      - joinSteps_2:
-          steps:
-          - joinSteps_initResult_1:
-              assign:
-              - joinStepsResult_68d51892: []
-          - joinSteps_steps_1:
+              - cliPromptResult_70605a79: []
+          - cliPrompt_steps:
               for:
-                value: "joinStepsIdx"
-                range: "${[0, (((0 + len(joinStepsResult_53d5d9fd)) + len(buildPromptsWithTasksResult_6dd68a67)) - 1)]}"
+                value: "cliPromptIdx"
+                range: "${[0, (1 - 1)]}"
                 steps:
-                - joinSteps_switch_1:
+                - cliPrompt_switch:
                     steps:
-                    - joinSteps_switch_initResult_1:
+                    - cliPrompt_switch_initResult:
                         assign:
-                        - joinSteps_switchResult_69170361: {}
-                    - joinSteps_switch_steps_1:
+                        - cliPrompt_switchResult_7e84594b: {}
+                    - cliPrompt_switch_steps:
                         switch:
-                        - condition: "${(joinStepsIdx >= (0 + len(joinStepsResult_53d5d9fd)))}"
+                        - condition: "${(cliPromptIdx == 0)}"
                           steps:
-                          - joinSteps_switch_updateResult_0_1:
+                          - cliPrompt_switch_updateResult_0:
                               assign:
-                              - joinSteps_switchResult_69170361: "${buildPromptsWithTasksResult_6dd68a67[(joinStepsIdx - (0 + len(joinStepsResult_53d5d9fd)))]}"
-                        - condition: "${(joinStepsIdx >= 0)}"
-                          steps:
-                          - joinSteps_switch_updateResult_1_1:
-                              assign:
-                              - joinSteps_switchResult_69170361: "${joinStepsResult_53d5d9fd[(joinStepsIdx - 0)]}"
-                - joinSteps_updateResult_1:
+                              - cliPrompt_switchResult_7e84594b:
+                                  role: "system"
+                                  content: "${\"You can only view seven files at a time. So, if you want to update files in batch, read only three and then update them before moving on.\"}"
+                                  tool_calls: "${[]}"
+                                  tool_call_id: "${null}"
+                                  create_time: "${sys.now()}"
+                                  docId: "${null}"
+                - cliPrompt_updateResult:
                     assign:
-                    - joinStepsResult_68d51892: "${list.concat(joinStepsResult_68d51892, joinSteps_switchResult_69170361)}"
+                    - cliPromptResult_70605a79: "${list.concat(cliPromptResult_70605a79, cliPrompt_switchResult_7e84594b)}"
+      - cli_joinSteps:
+          steps:
+          - cli_joinSteps_initResult:
+              assign:
+              - cli_joinStepsResult_759a3c7e: []
+          - cli_joinSteps_steps:
+              for:
+                value: "cli_joinStepsIdx"
+                range: "${[0, (((0 + len(taskPrompts_joinStepsResult_59e3c7d)) + len(cliPromptResult_70605a79)) - 1)]}"
+                steps:
+                - cli_joinSteps_switch:
+                    steps:
+                    - cli_joinSteps_switch_initResult:
+                        assign:
+                        - cli_joinSteps_switchResult_5303b0b: {}
+                    - cli_joinSteps_switch_steps:
+                        switch:
+                        - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_59e3c7d)))}"
+                          steps:
+                          - cli_joinSteps_switch_updateResult_0:
+                              assign:
+                              - cli_joinSteps_switchResult_5303b0b: "${cliPromptResult_70605a79[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_59e3c7d)))]}"
+                        - condition: "${(cli_joinStepsIdx >= 0)}"
+                          steps:
+                          - cli_joinSteps_switch_updateResult_1:
+                              assign:
+                              - cli_joinSteps_switchResult_5303b0b: "${taskPrompts_joinStepsResult_59e3c7d[(cli_joinStepsIdx - 0)]}"
+                - cli_joinSteps_updateResult:
+                    assign:
+                    - cli_joinStepsResult_759a3c7e: "${list.concat(cli_joinStepsResult_759a3c7e, cli_joinSteps_switchResult_5303b0b)}"
   - return:
       return:
-        prompts: "${joinStepsResult_68d51892}"
+        prompts: "${cli_joinStepsResult_759a3c7e}"

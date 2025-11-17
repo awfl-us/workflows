@@ -4,10 +4,74 @@ AWFL Workflows is a Scala 3 toolkit for building, generating, and deploying Goog
 
 ## Features
 - Tool-enabled chat router (EventHandler) with prompts, preloads, and task guidance
+- Mixin-based agents: compose behavior with small traits (Prompts, Preloads, Tasks, Cli, Tools)
 - CLI/tool runners: READ_FILE, UPDATE_FILE, RUN_COMMAND, lightweight task helpers
 - Helpers: ToolDispatcher, ToolDefs resolution, context preloads, task utilities, queueing
 - Example workflows for reference (builders, dispatchers, domain samples)
 - YAML generation to yaml_gens/ for direct deployment to Google Cloud Workflows
+
+## Agent composition via mixins (traits)
+The core design uses Scala traits so you can compose agent behavior declaratively. The built-in Agent trait wires together the chat workflow, prompts, preloads, task guidance, and CLI tools using the DSL.
+
+- Composition stack
+  - Agent extends Workflow with EventHandler with Preloads with Tasks with Cli
+  - Prompts are layered by traits (Prompts → Cli → Tasks → Preloads output)
+  - Tools are aggregated similarly (Tools → Cli tools → Task tools)
+- Output workflows
+  - Every Agent produces two workflows automatically:
+    - {AgentName}: tool-enabled chat handler
+    - {AgentName}-prompts: returns the composed prompt list for inspection/testing
+
+Minimal agent example
+
+```scala
+import us.awfl.workflows.traits.Agent
+
+object HelloAgent extends Agent {
+  override def preloads = List(
+    // Inject file/command output as additional system context
+    PreloadFile("AGENT.md"),
+    PreloadCommand("date -u")
+  )
+
+  override def prompt =
+    """You are a helpful assistant for the Hello project.
+       Respond succinctly and use the preloaded docs as context.""".stripMargin
+}
+```
+
+Customizing tools and prompts
+
+You can refine the allowed toolset or prompts by overriding the trait builders. For example, restrict to read-only CLI access by overriding buildTools:
+
+```scala
+import us.awfl.workflows.traits.Agent
+import us.awfl.dsl.*
+import us.awfl.dsl.auto.given
+
+object ReadOnlyAgent extends Agent {
+  override def prompt = "Read-only assistant"
+
+  // Keep only READ_FILE; drop UPDATE_FILE and RUN_COMMAND
+  override def buildTools = joinSteps(
+    "readOnlyTools",
+    super.buildTools,
+    buildList("limitCliTools", List("READ_FILE"))
+  )
+}
+```
+
+Prompts are composed similarly. The Cli trait injects a small system note about file view limits; the Tasks trait appends task-management guidance and current task context. You can add your own guidance, e.g.:
+
+```scala
+override def buildPrompts = joinSteps(
+  "extraGuidance",
+  super.buildPrompts,
+  buildList("myGuidance", List(ChatMessage("system", str("Prefer small, incremental changes."))))
+)
+```
+
+Under the hood, EventHandler resolves the agent for the session, determines the allowed tool names, and executes tool calls via helpers.ToolDispatcher. See AGENT.md for a deeper walkthrough of routing, locking, and post-processing.
 
 ## Repository layout
 - build.sbt – Scala 3, sbt build
@@ -15,7 +79,7 @@ AWFL Workflows is a Scala 3 toolkit for building, generating, and deploying Goog
   - EventHandler.scala – tool-enabled chat router
   - helpers/ – ToolDispatcher, ToolDefs, Context, Tasks, Queue
   - tools/ – CLI and task tools
-  - traits/ – Agent, Tools, Tasks, Preloads, Prompts, ToolWorkflow
+  - traits/ – Agent, Tools, Tasks, Preloads, Prompts, Cli, ToolWorkflow
   - codebase/ – ProjectManager, AWFL CLI examples, builder workflows, domain samples
 - yaml_gens/ – generated workflow YAML
 
@@ -43,19 +107,27 @@ gcloud services enable workflows.googleapis.com
 sbt clean compile
 ```
 
-2) Generate YAML for one or more workflows
+2) Generate YAML for one or more workflows (agents included)
 
 This project uses the AWFL compiler to emit YAML. Pass fully qualified workflow class names to sbt run, for example:
 
 ```bash
 sbt "run us.awfl.workflows.EventHandler"
 sbt "run us.awfl.workflows.helpers.ToolDispatcher"
-sbt "run us.awfl.workflows.codebase.ProjectManager"
+sbt "run us.awfl.workflows.codebase.ProjectManager"  # generates ProjectManager.yaml and ProjectManager-prompts.yaml
 ```
 
 Outputs are written to yaml_gens/ (e.g., EventHandler.yaml, helpers-ToolDispatcher.yaml, ProjectManager.yaml, plus any companion -prompts workflows).
 
-3) Deploy manually with gcloud (example)
+3) Inspect prompts (optional)
+
+The -prompts workflow returns the fully composed prompt list (system prompt + CLI status + preloads + task guidance). After deployment, you can run it directly to review:
+
+```bash
+gcloud workflows run ProjectManager-prompts --location us-central1
+```
+
+4) Deploy manually with gcloud (example)
 
 ```bash
 gcloud workflows deploy EventHandler \
