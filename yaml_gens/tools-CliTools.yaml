@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_763d7b69: {}
+          - mainTryResult_6bfd9f9e: {}
       - mainTry_steps:
           try:
             steps:
@@ -267,6 +267,23 @@ main:
                         text: "${(\"[logIngest] \" + (\"Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_54a167a2)))}"
                       result: "logIngestResult_2081cdf7"
                 retry: "${http.default_retry}"
+            - maybeStartProducer:
+                try:
+                  steps:
+                  - maybeStartProducer_call:
+                      call: "http.post"
+                      args:
+                        url: "${((input.env.BASE_URL + \"/\") + \"producer/start\")}"
+                        body:
+                          sessionId: "${input.env.sessionId}"
+                        auth:
+                          type: "OIDC"
+                          audience: "${input.env.BASE_URL}"
+                        headers:
+                          x-user-id: "${input.env.userId}"
+                          x-project-id: "${input.env.projectId}"
+                      result: "maybeStartProducerResult_27b7ab7e"
+                retry: "${http.default_retry}"
             - awaitCallback:
                 try:
                   steps:
@@ -279,7 +296,7 @@ main:
                 retry: "${http.default_retry}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_763d7b69:
+                - mainTryResult_6bfd9f9e:
                     encoded: "${json.encode_to_string(awaitCallbackResult_2ca32d82.http_request.body)}"
                     cost: "${0}"
           except:
@@ -289,6 +306,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_763d7b69: "${null}"
+                - mainTryResult_6bfd9f9e: "${null}"
   - return:
-      return: "${mainTryResult_763d7b69}"
+      return: "${mainTryResult_6bfd9f9e}"

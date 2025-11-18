@@ -24,6 +24,8 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
   case class CreateJobsCallbackBody(callback_url: BaseValue[String])
   case class CreateCallbackResponse(id: BaseValue[String])
 
+  case class ProducerRequest(sessionId: Value[String] = Env.sessionId)
+
   val toolNames = List("READ_FILE", "UPDATE_FILE", "RUN_COMMAND")
 
   // Standalone workflow to handle tool calls: create callback, persist it with an ID, enqueue via relay ingest, and await callback
@@ -57,6 +59,8 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       source = Field.str("workflows.tools.CliTools")
     )
 
+    val maybeStartProducer = post[ProducerRequest, NoValueT]("maybeStartProducer", "producer/start", obj(ProducerRequest()))
+
     val awaitCallback = Call[AwaitCallbackArgs, CallbackRequest](
       s"awaitCallback",
       "events.await_callback",
@@ -77,6 +81,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
         Log("logSavedCallback", str(("Saved callback: id=": Cel) + saveCallback.result.body.get.id)),
         ingest,
         Log("logIngest", str(("Post event result: ": Cel) + CelFunc("json.encode_to_string", ingest.resultValue.cel))),
+        maybeStartProducer,
         awaitCallback
       ) -> obj(ToolWorkflow.Result(encodedCallback, Value(0))),
       _ => List() -> Value.nil[Result]

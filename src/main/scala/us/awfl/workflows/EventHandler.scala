@@ -159,7 +159,8 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
             val remainingFunds = Value[Double](input.fund.cel - totalCost)
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
-              obj(Input(str("Tool calls completed"), remainingFunds))
+              obj(Input(str("Tool calls completed"), remainingFunds)),
+              connector_params = ConnectorParams(true)
             )
             Call[RunWorkflowArgs[Input], ChatToolResponse](
               "toolCallsCompleted",
@@ -167,23 +168,24 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
               obj(toolFeedbackArgs)
             ).fn
           },
-          (true: Cel) -> (List() -> complete.resultValue)
+          (true: Cel) -> {
+            val statusDone = Exec.updateExecStatus(
+              "statusDone",
+              triggeredExecId,
+              str("Done"),
+              Value(true)
+            )
+            val enqueueDone = Exec.enqueueExecStatus(
+              "enqueueStatusDone",
+              str("Done")
+            )
+            List[Step[_, _]](statusDone, enqueueDone) -> complete.resultValue
+          }
         ))
 
         val summaries = Summaries("runSummaries", sessionId)
         val extract = ExtractTopics("extractTopics", sessionId)
         val collapse = ContextCollapser("collapseMessages", sessionId, 60 * 4, 48)
-
-        val statusDone = Exec.updateExecStatus(
-          "statusDone",
-          triggeredExecId,
-          str("Done"),
-          Value(true)
-        )
-        val enqueueDone = Exec.enqueueExecStatus(
-          "enqueueStatusDone",
-          str("Done")
-        )
 
         val whenAcquired = Switch("maybeRespond", List(
           // If lock acquired: build context, get response, save it, then release the lock.
@@ -202,9 +204,7 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
               maybeToolFeedback,
               summaries,
               extract,
-              collapse,
-              statusDone,
-              enqueueDone
+              collapse
             ) -> maybeToolFeedback.resultValue
           },
           // If busy: exit without fetching a response (query message is already saved).
@@ -220,7 +220,19 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
         ) -> whenAcquired.resultValue
       },
       err => {
-        val errMsg = str(CelFunc("default", CelFunc("map.get", err.cel, "message"), "Unknown error"))
+        val errMsg = str(CelFunc(
+          "default",
+          CelFunc(
+            "default",
+            CelFunc(
+              "default",
+              CelFunc("map.get", err.cel, CelConst("""["body", "error", "message"]""")),
+              CelFunc("map.get", err.cel, CelConst("""["body", "error"]"""))
+            ),
+            CelFunc("map.get", err.cel, "message")
+          ),
+          "Unknown error"
+        ))
         val statusFailed = Exec.updateExecStatus(
           "statusFailed",
           triggeredExecId,

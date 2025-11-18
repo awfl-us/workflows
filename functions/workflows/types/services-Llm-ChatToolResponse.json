@@ -4,42 +4,16 @@
   "schema" : {
     "type" : "object",
     "properties" : {
-      "groups" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "description" : {
-            "type" : "string"
-          },
-          "items" : {
-            "type" : "object",
-            "properties" : {
-              "type" : {
-                "type" : "string"
-              },
-              "id" : {
-                "type" : "string"
-              }
-            },
-            "required" : [
-              "type",
-              "id"
-            ],
-            "additionalProperties" : true
-          }
-        },
-        "required" : [
-          "name",
-          "description",
-          "items"
-        ],
-        "additionalProperties" : true
+      "encoded" : {
+        "type" : "string"
+      },
+      "cost" : {
+        "type" : "integer"
       }
     },
     "required" : [
-      "groups"
+      "encoded",
+      "cost"
     ],
     "additionalProperties" : true,
     "$id" : "https://topaigents.dev/workflows/types/services-Llm-ChatToolResponse.json"
