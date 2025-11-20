@@ -32,6 +32,7 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
   override case class Input(
     query: BaseValue[String],
     fund: BaseValue[Double],
+    spent: OptValue[Double],
     // Optional task payload to seed a task for this session (title/description/status)
     task: Field = Field("null"),
     env: BaseValue[Env] = ENV
@@ -156,10 +157,10 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
 
         val maybeToolFeedback = Switch("maybeToolFeedback", List(
           (CelFunc("len", processToolCalls.result.results) > 0) -> {
-            val remainingFunds = Value[Double](input.fund.cel - totalCost)
+            val newSpent = Value[Double](input.spent.getOrElse(Value(0)).cel + totalCost)
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
-              obj(Input(str("Tool calls completed"), remainingFunds)),
+              obj(Input(str("Tool calls completed"), input.fund, OptValue(newSpent))),
               connector_params = ConnectorParams(true)
             )
             Call[RunWorkflowArgs[Input], ChatToolResponse](

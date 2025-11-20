@@ -47,6 +47,7 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
         ehInstance.Input(
           query = query,
           fund = fund,
+          spent = OptValue.nil[Double],
           task = taskField,
           env = obj(Env.get.copy(sessionId = Value(nameStr)))
         )
