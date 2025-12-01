@@ -4,6 +4,7 @@ import us.awfl.dsl._
 import us.awfl.dsl.CelOps._
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ChatMessage
+import us.awfl.services.Llm.ToolChoice
 import us.awfl.utils.Convo
 import us.awfl.utils.KalaVibhaga
 import us.awfl.utils.SegKala
@@ -16,7 +17,7 @@ import us.awfl.utils.Yoj
 import us.awfl.utils.Exec
 import us.awfl.workflows.assistant.TopicContext
 import us.awfl.utils.Locks
-import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents}
+import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents, Chain}
 import us.awfl.utils.{Env, ENV}
 import us.awfl.utils.Events
 import us.awfl.workflows.cli.CliActions
@@ -27,16 +28,12 @@ import us.awfl.workflows.traits.Agent
 import us.awfl.workflows.traits.Tools
 import us.awfl.workflows.traits.Prompts
 import us.awfl.workflows.traits.Preloads
+import us.awfl.utils.strider.StriderInput
+import us.awfl.workflows.helpers.links.SaveReflection
+import us.awfl.utils.PostResult
 
 trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
-  override case class Input(
-    query: BaseValue[String],
-    fund: BaseValue[Double],
-    spent: OptValue[Double],
-    // Optional task payload to seed a task for this session (title/description/status)
-    task: Field = Field("null"),
-    env: BaseValue[Env] = ENV
-  )
+  override type Input = EventHandler.Input
 
   override val inputVal: BaseValue[Input] = init[Input]("input")
 
@@ -87,11 +84,21 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
     // Service-first tool defs with names filtering
     val toolDefs = ToolDefs("toolDefs", sessionId, candidateNames.resultValue)
 
+    val sideCall = input.sideCall.getOrElse(Value(false))
+    val bypassLock = sideCall
+    val skipToolFeedback = sideCall
+
     val owner: Value[String] = Exec.currentExecId
     // Use a session-scoped lock to prevent concurrent completions
     val lockKey = Locks.sessionKey("Convo")
-    val acquiredTry = Locks.acquireBool("acquireResponseLock", lockKey, owner)
-    val release = Locks.release("releaseResponseLock", lockKey, owner)
+    val acquiredTry = Switch("maybeBypassAquire", List(
+      bypassLock.cel -> (List() -> Value[Boolean](true)),
+      (true: Cel) -> Locks.acquireBool("acquireResponseLock", lockKey, owner).fn
+    ))
+    val release = Switch("maybeNBypassRelease", List(
+      bypassLock.cel -> (List() -> Value.nil[PostResult[NoValueT]]),
+      (true: Cel) -> Locks.release("releaseResponseLock", lockKey, owner).fn
+    ))
 
     // Main body wrapped in Try so we can update status to Done or Failed
     val mainTry = buildSteps(
@@ -112,6 +119,7 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
             Convo.Prompt(promptsWorkflow.flatMap(_.prompts)),
             buildYojStep.resultValue,
             tools = ListValue(toolDefs.result.defs.cel),
+            toolChoice = input.toolChoice.getOrElse(ToolChoice.auto),
             model = model
           )
           val responseMessage = completeStep.result.message
@@ -156,11 +164,11 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
         val totalCost = complete.result.total_cost.cel + toolsCost.resultValue.cel
 
         val maybeToolFeedback = Switch("maybeToolFeedback", List(
-          (CelFunc("len", processToolCalls.result.results) > 0) -> {
+          ((CelFunc("len", processToolCalls.result.results) > 0) && !skipToolFeedback) -> {
             val newSpent = Value[Double](input.spent.getOrElse(Value(0)).cel + totalCost)
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
-              obj(Input(str("Tool calls completed"), input.fund, OptValue(newSpent))),
+              obj(EventHandler.Input(str("Tool calls completed"), input.fund, OptValue(newSpent))),
               connector_params = ConnectorParams(true)
             )
             Call[RunWorkflowArgs[Input], ChatToolResponse](
@@ -184,9 +192,13 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
           }
         ))
 
-        val summaries = Summaries("runSummaries", sessionId)
-        val extract = ExtractTopics("extractTopics", sessionId)
-        val collapse = ContextCollapser("collapseMessages", sessionId, 60 * 4, 48)
+        val summaries = Summaries("runSummaries")
+        val extract = Chain(
+          ExtractTopics
+            .runSync(obj(StriderInput()))
+            .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
+        )
+        val collapse = ContextCollapser("collapseMessages", 60 * 4, 48)
 
         val whenAcquired = Switch("maybeRespond", List(
           // If lock acquired: build context, get response, save it, then release the lock.
@@ -254,4 +266,16 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
       mainTry
     )
   }
+}
+object EventHandler {
+  case class Input(
+    query: BaseValue[String],
+    fund: BaseValue[Double],
+    spent: OptValue[Double],
+    // Optional task payload to seed a task for this session (title/description/status)
+    task: Field = Field("null"),
+    toolChoice: OptValue[ToolChoice] = OptValue.nil,
+    sideCall: OptValue[Boolean] = OptValue(false),
+    env: BaseValue[Env] = ENV
+  )
 }

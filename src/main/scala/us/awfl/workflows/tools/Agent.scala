@@ -38,13 +38,11 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
     val modelField: Field = Field(CelFunc("default", fn.arg("model").cel, "gpt-5"))
     val fund = Value[Double](CelFunc("default", fn.arg("fund").cel, 0))
 
-    val ehInstance = new EventHandler { def prompt = "" }
-
     val args = RunWorkflowArgs(
       // Invoke the workflow whose name matches the tool name directly
       str(nameStr + "${WORKFLOW_ENV}"),
       obj(
-        ehInstance.Input(
+        EventHandler.Input(
           query = query,
           fund = fund,
           spent = OptValue.nil[Double],
@@ -54,7 +52,7 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
       )
     )
 
-    val run = Call[RunWorkflowArgs[ehInstance.Input], ChatToolResponse](
+    val run = Call[RunWorkflowArgs[EventHandler.Input], ChatToolResponse](
       "run_agent_workflow",
       "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
       obj(args)

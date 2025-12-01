@@ -1,0 +1,54 @@
+main:
+  params:
+  - "input"
+  steps:
+  - maybeSaveReflection:
+      steps:
+      - maybeSaveReflection_initResult:
+          assign:
+          - maybeSaveReflectionResult_4988da3: {}
+      - maybeSaveReflection_steps:
+          switch:
+          - condition: "${((input.input != null) and input.input.shouldSaveReflection)}"
+            steps:
+            - callAgent:
+                try:
+                  steps:
+                  - callAgent_call:
+                      call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                      args:
+                        workflow_id: "${input.params.agentWorkflow}"
+                        argument:
+                          query: "${\"The current conversation has been marked to save reflection.\nAnalyze what general, widely applicable learnings can be reaped and remembered in order to pay dividends in the future in terms of saved time and quicker, better results going forward.\nDon't polute the file with information that is only narrowly applicable to a specific recent task or project. Only general development guidelines.\nFeel free to cleanup anything messy or out of date with the latest state of the project.\nKeep you changes minimal, agent files should be stable for the most part (except at the very begining of a project).\n      \"}"
+                          fund: "${0}"
+                          spent: "${default(null, null)}"
+                          task: "${null}"
+                          toolChoice:
+                            function:
+                              name: "UPDATE_FILE"
+                            type: "function"
+                          sideCall: "${default(true, null)}"
+                          env:
+                            userId: "${input.env.userId}"
+                            model: "${input.env.model}"
+                            callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                            BASE_URL: "${input.env.BASE_URL}"
+                            background: "${default(map.get(input.env, \"background\"), null)}"
+                            projectId: "${input.env.projectId}"
+                            sessionId: "${input.env.sessionId}"
+                        location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                        project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                        connector_params:
+                          skip_polling: false
+                      result: "callAgentResult_34242044"
+                retry: "${http.default_retry}"
+            - maybeSaveReflection_updateResult_0:
+                assign:
+                - maybeSaveReflectionResult_4988da3: "${callAgentResult_34242044}"
+          - condition: "${true}"
+            steps:
+            - maybeSaveReflection_updateResult_1:
+                assign:
+                - maybeSaveReflectionResult_4988da3: "${null}"
+  - return:
+      return: "${maybeSaveReflectionResult_4988da3}"

@@ -72,7 +72,7 @@ main:
           steps:
           - cacheReportIfStale_initResult:
               assign:
-              - cacheReportIfStaleResult_ebc2f29: {}
+              - cacheReportIfStaleResult_33ecc76e: {}
           - cacheReportIfStale_steps:
               switch:
               - condition: "${(((not  (\"body\" in cacheReportRead_tryReadResult_5b4e3c8d)) or (not  (\"updatedAt\" in cacheReportRead_tryReadResult_5b4e3c8d.body))) or ((sys.now() - cacheReportRead_tryReadResult_5b4e3c8d.body.updatedAt) > 86400000))}"
@@ -567,14 +567,14 @@ main:
                                       response_format:
                                         type: "json_object"
                                       tools: "${[]}"
-                                      tool_choice: "${null}"
+                                      tool_choice: "${\"auto\"}"
                                     auth:
                                       type: "OIDC"
                                       audience: "${input.env.BASE_URL}"
                                     headers:
                                       x-user-id: "${input.env.userId}"
                                       x-project-id: "${input.env.projectId}"
-                                  result: "analyze_business_postResult_7722c3e"
+                                  result: "analyze_business_postResult_158e5850"
                             retry: "${http.default_retry}"
                 - cacheReportWrite:
                     try:
@@ -593,7 +593,7 @@ main:
                                   marketAnalysis:
                                     totalCompetitors: "${len(generateKeywordsResult_3540a02f.body.competitors)}"
                                     topCompetitors: "${generateKeywordsResult_3540a02f.body.competitors}"
-                                  analysis: "${json.decode(analyze_business_postResult_7722c3e.body.message.content)}"
+                                  analysis: "${json.decode(analyze_business_postResult_158e5850.body.message.content)}"
                                   reviews: "${cacheReviews_businessReviewsIfStaleResult_75ac6297.reviews}"
                               userId: "${input.env.userId}"
                             auth:
@@ -602,22 +602,22 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "cacheReportWriteResult_2dc4252"
+                          result: "cacheReportWriteResult_33204e4b"
                     retry: "${http.default_retry}"
                 - cacheReportIfStale_updateResult_0:
                     assign:
-                    - cacheReportIfStaleResult_ebc2f29:
+                    - cacheReportIfStaleResult_33ecc76e:
                         businessInfo: "${generateKeywordsResult_3540a02f.body.businessInfo}"
                         marketAnalysis:
                           totalCompetitors: "${len(generateKeywordsResult_3540a02f.body.competitors)}"
                           topCompetitors: "${generateKeywordsResult_3540a02f.body.competitors}"
-                        analysis: "${json.decode(analyze_business_postResult_7722c3e.body.message.content)}"
+                        analysis: "${json.decode(analyze_business_postResult_158e5850.body.message.content)}"
                         reviews: "${cacheReviews_businessReviewsIfStaleResult_75ac6297.reviews}"
               - condition: "${(\"body\" in cacheReportRead_tryReadResult_5b4e3c8d)}"
                 steps:
                 - cacheReportIfStale_updateResult_1:
                     assign:
-                    - cacheReportIfStaleResult_ebc2f29: "${cacheReportRead_tryReadResult_5b4e3c8d.body.result}"
+                    - cacheReportIfStaleResult_33ecc76e: "${cacheReportRead_tryReadResult_5b4e3c8d.body.result}"
               - condition: "${true}"
                 steps:
                 - cacheReport_raiseFailedCache:
@@ -626,12 +626,12 @@ main:
                       code: ""
                 - cacheReportIfStale_updateResult_2:
                     assign:
-                    - cacheReportIfStaleResult_ebc2f29:
+                    - cacheReportIfStaleResult_33ecc76e:
                         businessInfo: "${generateKeywordsResult_3540a02f.body.businessInfo}"
                         marketAnalysis:
                           totalCompetitors: "${len(generateKeywordsResult_3540a02f.body.competitors)}"
                           topCompetitors: "${generateKeywordsResult_3540a02f.body.competitors}"
-                        analysis: "${json.decode(analyze_business_postResult_7722c3e.body.message.content)}"
+                        analysis: "${json.decode(analyze_business_postResult_158e5850.body.message.content)}"
                         reviews: "${cacheReviews_businessReviewsIfStaleResult_75ac6297.reviews}"
   - Status_done:
       try:

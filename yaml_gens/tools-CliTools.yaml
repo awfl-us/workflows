@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_6bfd9f9e: {}
+          - mainTryResult_77a14fca: {}
       - mainTry_steps:
           try:
             steps:
@@ -275,14 +275,14 @@ main:
                       args:
                         url: "${((input.env.BASE_URL + \"/\") + \"producer/start\")}"
                         body:
-                          sessionId: "${input.env.sessionId}"
+                          sessionId: "${null}"
                         auth:
                           type: "OIDC"
                           audience: "${input.env.BASE_URL}"
                         headers:
                           x-user-id: "${input.env.userId}"
                           x-project-id: "${input.env.projectId}"
-                      result: "maybeStartProducerResult_27b7ab7e"
+                      result: "maybeStartProducerResult_271252b"
                 retry: "${http.default_retry}"
             - awaitCallback:
                 try:
@@ -296,7 +296,7 @@ main:
                 retry: "${http.default_retry}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_6bfd9f9e:
+                - mainTryResult_77a14fca:
                     encoded: "${json.encode_to_string(awaitCallbackResult_2ca32d82.http_request.body)}"
                     cost: "${0}"
           except:
@@ -306,6 +306,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_6bfd9f9e: "${null}"
+                - mainTryResult_77a14fca: "${null}"
   - return:
-      return: "${mainTryResult_6bfd9f9e}"
+      return: "${mainTryResult_77a14fca}"

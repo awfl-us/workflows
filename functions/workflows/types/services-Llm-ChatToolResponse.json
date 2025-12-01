@@ -4,16 +4,9 @@
   "schema" : {
     "type" : "object",
     "properties" : {
-      "encoded" : {
-        "type" : "string"
-      },
-      "cost" : {
-        "type" : "integer"
-      }
+      
     },
     "required" : [
-      "encoded",
-      "cost"
     ],
     "additionalProperties" : true,
     "$id" : "https://topaigents.dev/workflows/types/services-Llm-ChatToolResponse.json"

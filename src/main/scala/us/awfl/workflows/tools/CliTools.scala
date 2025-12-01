@@ -24,7 +24,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
   case class CreateJobsCallbackBody(callback_url: BaseValue[String])
   case class CreateCallbackResponse(id: BaseValue[String])
 
-  case class ProducerRequest(sessionId: Value[String] = Env.sessionId)
+  case class ProducerRequest(sessionId: Value[String] = Value.nil)
 
   val toolNames = List("READ_FILE", "UPDATE_FILE", "RUN_COMMAND")
 

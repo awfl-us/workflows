@@ -72,8 +72,6 @@ object CollapserMessages {
 object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMessages, CollapseResponse] {
 
   override def name: String = "context-ContextCollapser"
-  // Enable post-write hook for child Strider workflows via Latest -> All plumbing
-  override protected def enablePostWrite: Boolean = true
 
   // Collapse indexer request/response payloads
   case class CollapseIndexerArgs(
@@ -89,7 +87,7 @@ object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMess
   )
 
   // Fire the indexer only when a new SegKala child document was created
-  override protected def postWriteSteps(sessionId: Value[String], responseId: BaseValue[String], at: BaseValue[Double]) = {
+  override protected def postWriteSteps(sessionId: Value[String], responseId: BaseValue[String], response: BaseValue[CollapseResponse], at: BaseValue[Double]) = {
     val call = post[CollapseIndexerArgs, CollapseIndexerResult](
       "collapse_indexer_run",
       "context/collapse/indexer/run",

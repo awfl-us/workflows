@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "https://topaigents.dev/workflows/defs/us.awfl.workflows.helpers.links.SaveReflection.json",
+  "name" : "us.awfl.workflows.helpers.links.SaveReflection",
+  "description" : "Auto-generated workflow definition.",
+  "inputSchema" : "us-awfl-workflows-helpers-links-SaveReflection-Input",
+  "outputSchema" : "services-Llm-ChatToolResponse",
+  "inputType" : "us.awfl.workflows.helpers.links.SaveReflection.Input",
+  "outputType" : "services.Llm.ChatToolResponse"
+}

@@ -10,16 +10,15 @@ main:
             args:
               workflow_id: "${\"Summaries-Convo${WORKFLOW_ENV}\"}"
               argument:
-                arg1: "${input.arg1}"
-                arg2: "${input.arg2}"
-                arg3: "${input.arg3}"
-                arg4: "${input.arg4}"
+                segmentEnd: "${input.segmentEnd}"
+                windowSeconds: "${input.windowSeconds}"
+                overlapSeconds: "${input.overlapSeconds}"
                 env: "${input.env}"
               location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "Convo_runResult_f91691f"
+            result: "Convo_runResult_7db7b0ef"
       retry: "${http.default_retry}"
   - Session_run:
       try:
@@ -29,16 +28,15 @@ main:
             args:
               workflow_id: "${\"Summaries-Session${WORKFLOW_ENV}\"}"
               argument:
-                arg1: "${input.arg1}"
-                arg2: "${input.arg2}"
-                arg3: "${input.arg3}"
-                arg4: "${input.arg4}"
+                segmentEnd: "${input.segmentEnd}"
+                windowSeconds: "${input.windowSeconds}"
+                overlapSeconds: "${input.overlapSeconds}"
                 env: "${input.env}"
               location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "Session_runResult_23a7b31a"
+            result: "Session_runResult_1d8a4c3c"
       retry: "${http.default_retry}"
   - Week_run:
       try:
@@ -48,16 +46,15 @@ main:
             args:
               workflow_id: "${\"Summaries-Week${WORKFLOW_ENV}\"}"
               argument:
-                arg1: "${input.arg1}"
-                arg2: "${input.arg2}"
-                arg3: "${input.arg3}"
-                arg4: "${input.arg4}"
+                segmentEnd: "${input.segmentEnd}"
+                windowSeconds: "${input.windowSeconds}"
+                overlapSeconds: "${input.overlapSeconds}"
                 env: "${input.env}"
               location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "Week_runResult_eaf8e9e"
+            result: "Week_runResult_19985207"
       retry: "${http.default_retry}"
   - Term_run:
       try:
@@ -67,18 +64,17 @@ main:
             args:
               workflow_id: "${\"Summaries-Term${WORKFLOW_ENV}\"}"
               argument:
-                arg1: "${input.arg1}"
-                arg2: "${input.arg2}"
-                arg3: "${input.arg3}"
-                arg4: "${input.arg4}"
+                segmentEnd: "${input.segmentEnd}"
+                windowSeconds: "${input.windowSeconds}"
+                overlapSeconds: "${input.overlapSeconds}"
                 env: "${input.env}"
               location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "Term_runResult_7d2fcb12"
+            result: "Term_runResult_2007c01f"
       retry: "${http.default_retry}"
   - return:
-      return: "${Convo_runResult_f91691f}"
+      return: "${Convo_runResult_7db7b0ef}"
   - return_1:
-      return: "${Convo_runResult_f91691f}"
+      return: "${Convo_runResult_7db7b0ef}"

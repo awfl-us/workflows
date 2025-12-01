@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_361671b7: {}
+          - mainTryResult_3d90f87d: {}
       - mainTry_steps:
           try:
             steps:
@@ -403,80 +403,97 @@ main:
                               x-project-id: "${input.env.projectId}"
                           result: "addMessage_update_session_update_timeResult_798659fd"
                     retry: "${http.default_retry}"
-            - acquireResponseLock_try:
+            - maybeBypassAquire:
                 steps:
-                - acquireResponseLock_try_initResult:
+                - maybeBypassAquire_initResult:
                     assign:
-                    - acquireResponseLock_tryResult_a6f4e78: {}
-                - acquireResponseLock_try_steps:
-                    try:
+                    - maybeBypassAquireResult_7c2c8385: {}
+                - maybeBypassAquire_steps:
+                    switch:
+                    - condition: "${default(map.get(input, \"sideCall\"), false)}"
                       steps:
-                      - acquireResponseLock:
-                          try:
-                            steps:
-                            - acquireResponseLock_call:
-                                call: "http.post"
-                                args:
-                                  url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/acquire\")}"
-                                  body:
-                                    collection: "${\"locks.Convo.Session\"}"
-                                    id: "${input.env.sessionId}"
-                                    ttlSeconds: 300
-                                    owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                    userId: "${input.env.userId}"
-                                  auth:
-                                    type: "OIDC"
-                                    audience: "${input.env.BASE_URL}"
-                                  headers:
-                                    x-user-id: "${input.env.userId}"
-                                    x-project-id: "${input.env.projectId}"
-                                result: "acquireResponseLockResult_2f6bf6cd"
-                          retry: "${http.default_retry}"
-                      - acquireResponseLock_try_updateResult:
+                      - maybeBypassAquire_updateResult_0:
                           assign:
-                          - acquireResponseLock_tryResult_a6f4e78: "${acquireResponseLockResult_2f6bf6cd.body.acquired}"
-                    except:
-                      as: "acquireResponseLock_tryError"
+                          - maybeBypassAquireResult_7c2c8385: "${true}"
+                    - condition: "${true}"
                       steps:
-                      - acquireResponseLock_err:
+                      - acquireResponseLock_try:
                           steps:
-                          - acquireResponseLock_err_initResult:
+                          - acquireResponseLock_try_initResult:
                               assign:
-                              - acquireResponseLock_errResult_7f9c383c: {}
-                          - acquireResponseLock_err_steps:
-                              switch:
-                              - condition: "${((\"code\" in acquireResponseLock_tryError) and (acquireResponseLock_tryError.code == 409))}"
+                              - acquireResponseLock_tryResult_a6f4e78: {}
+                          - acquireResponseLock_try_steps:
+                              try:
                                 steps:
-                                - acquireResponseLock_busy:
+                                - acquireResponseLock:
                                     try:
                                       steps:
-                                      - acquireResponseLock_busy_call:
-                                          call: "sys.log"
+                                      - acquireResponseLock_call:
+                                          call: "http.post"
                                           args:
-                                            text: "${(\"[acquireResponseLock_busy] \" + \"Lock exists, skipping work.\")}"
-                                          result: "acquireResponseLock_busyResult_76441e5c"
+                                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/acquire\")}"
+                                            body:
+                                              collection: "${\"locks.Convo.Session\"}"
+                                              id: "${input.env.sessionId}"
+                                              ttlSeconds: 300
+                                              owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                              userId: "${input.env.userId}"
+                                            auth:
+                                              type: "OIDC"
+                                              audience: "${input.env.BASE_URL}"
+                                            headers:
+                                              x-user-id: "${input.env.userId}"
+                                              x-project-id: "${input.env.projectId}"
+                                          result: "acquireResponseLockResult_2f6bf6cd"
                                     retry: "${http.default_retry}"
-                                - acquireResponseLock_err_updateResult_0:
+                                - acquireResponseLock_try_updateResult:
                                     assign:
-                                    - acquireResponseLock_errResult_7f9c383c: "${false}"
-                              - condition: "${true}"
+                                    - acquireResponseLock_tryResult_a6f4e78: "${acquireResponseLockResult_2f6bf6cd.body.acquired}"
+                              except:
+                                as: "acquireResponseLock_tryError"
                                 steps:
-                                - acquireResponseLock_rethrow:
-                                    raise: "${acquireResponseLock_tryError}"
-                                - acquireResponseLock_err_updateResult_1:
+                                - acquireResponseLock_err:
+                                    steps:
+                                    - acquireResponseLock_err_initResult:
+                                        assign:
+                                        - acquireResponseLock_errResult_7f9c383c: {}
+                                    - acquireResponseLock_err_steps:
+                                        switch:
+                                        - condition: "${((\"code\" in acquireResponseLock_tryError) and (acquireResponseLock_tryError.code == 409))}"
+                                          steps:
+                                          - acquireResponseLock_busy:
+                                              try:
+                                                steps:
+                                                - acquireResponseLock_busy_call:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[acquireResponseLock_busy] \" + \"Lock exists, skipping work.\")}"
+                                                    result: "acquireResponseLock_busyResult_76441e5c"
+                                              retry: "${http.default_retry}"
+                                          - acquireResponseLock_err_updateResult_0:
+                                              assign:
+                                              - acquireResponseLock_errResult_7f9c383c: "${false}"
+                                        - condition: "${true}"
+                                          steps:
+                                          - acquireResponseLock_rethrow:
+                                              raise: "${acquireResponseLock_tryError}"
+                                          - acquireResponseLock_err_updateResult_1:
+                                              assign:
+                                              - acquireResponseLock_errResult_7f9c383c: "${false}"
+                                - acquireResponseLock_try_updateResultError:
                                     assign:
-                                    - acquireResponseLock_errResult_7f9c383c: "${false}"
-                      - acquireResponseLock_try_updateResultError:
+                                    - acquireResponseLock_tryResult_a6f4e78: "${acquireResponseLock_errResult_7f9c383c}"
+                      - maybeBypassAquire_updateResult_1:
                           assign:
-                          - acquireResponseLock_tryResult_a6f4e78: "${acquireResponseLock_errResult_7f9c383c}"
+                          - maybeBypassAquireResult_7c2c8385: "${acquireResponseLock_tryResult_a6f4e78}"
             - maybeRespond:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_159ff3bb: {}
+                    - maybeRespondResult_607836ea: {}
                 - maybeRespond_steps:
                     switch:
-                    - condition: "${acquireResponseLock_tryResult_a6f4e78}"
+                    - condition: "${maybeBypassAquireResult_7c2c8385}"
                       steps:
                       - sessionAgent_1:
                           steps:
@@ -780,7 +797,7 @@ main:
                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                   connector_params:
                                     skip_polling: false
-                                result: "toolDefsResult_5bb9b072"
+                                result: "toolDefsResult_aff4168"
                           retry: "${http.default_retry}"
                       - inSession:
                           steps:
@@ -963,7 +980,7 @@ main:
                                   steps:
                                   - complete_switch_initResult:
                                       assign:
-                                      - complete_switchResult_3a91ffe: {}
+                                      - complete_switchResult_66a86aec: {}
                                   - complete_switch_steps:
                                       switch:
                                       - condition: "${(len(for_topicContext_items_SegKalaResult_55db9122) > 0)}"
@@ -1026,19 +1043,19 @@ main:
                                                       max_completion_tokens: "${null}"
                                                       response_format:
                                                         type: "text"
-                                                      tools: "${toolDefsResult_5bb9b072.defs}"
-                                                      tool_choice: "${if(((toolDefsResult_5bb9b072.defs != null) and (len(toolDefsResult_5bb9b072.defs) > 0)), \"auto\", null)}"
+                                                      tools: "${toolDefsResult_aff4168.defs}"
+                                                      tool_choice: "${if(((toolDefsResult_aff4168.defs != null) and (len(toolDefsResult_aff4168.defs) > 0)), default(map.get(input, \"toolChoice\"), \"auto\"), null)}"
                                                     auth:
                                                       type: "OIDC"
                                                       audience: "${input.env.BASE_URL}"
                                                     headers:
                                                       x-user-id: "${input.env.userId}"
                                                       x-project-id: "${input.env.projectId}"
-                                                  result: "complete_chatResult_78c797a2"
+                                                  result: "complete_chatResult_26cf3e4d"
                                             retry: "${http.default_retry}"
                                         - complete_switch_updateResult_0:
                                             assign:
-                                            - complete_switchResult_3a91ffe: "${complete_chatResult_78c797a2.body}"
+                                            - complete_switchResult_66a86aec: "${complete_chatResult_26cf3e4d.body}"
                                       - condition: "${true}"
                                         steps:
                                         - emptyYoj:
@@ -1047,7 +1064,7 @@ main:
                                               code: "${400}"
                                         - complete_switch_updateResult_1:
                                             assign:
-                                            - complete_switchResult_3a91ffe: "${null}"
+                                            - complete_switchResult_66a86aec: "${null}"
                           - addResponse_seg_write_with_session_update:
                               steps:
                               - addResponse_newId:
@@ -1088,14 +1105,14 @@ main:
                                             id: "${addResponse_newIdResult_677c84db}"
                                             contents:
                                               value:
-                                                role: "${complete_switchResult_3a91ffe.message.role}"
-                                                content: "${complete_switchResult_3a91ffe.message.content}"
-                                                tool_calls: "${map.get(complete_switchResult_3a91ffe.message, \"tool_calls\")}"
+                                                role: "${complete_switchResult_66a86aec.message.role}"
+                                                content: "${complete_switchResult_66a86aec.message.content}"
+                                                tool_calls: "${map.get(complete_switchResult_66a86aec.message, \"tool_calls\")}"
                                                 tool_call_id: "${null}"
                                                 create_time: "${sys.now()}"
                                                 docId: "${null}"
                                               create_time: "${sys.now()}"
-                                              cost: "${complete_switchResult_3a91ffe.total_cost}"
+                                              cost: "${complete_switchResult_66a86aec.total_cost}"
                                               execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                             userId: "${input.env.userId}"
                                           auth:
@@ -1104,7 +1121,7 @@ main:
                                           headers:
                                             x-user-id: "${input.env.userId}"
                                             x-project-id: "${input.env.projectId}"
-                                        result: "addResponse_write_messagesIsta_SegKalaResult_64122556"
+                                        result: "addResponse_write_messagesIsta_SegKalaResult_541166c2"
                                   retry: "${http.default_retry}"
                               - addResponse_update_session_update_time:
                                   try:
@@ -1131,10 +1148,10 @@ main:
                           steps:
                           - sendContents_initResult:
                               assign:
-                              - sendContentsResult_7bfd119e: {}
+                              - sendContentsResult_2595ce6e: {}
                           - sendContents_steps:
                               switch:
-                              - condition: "${(\"content\" in complete_switchResult_3a91ffe.message)}"
+                              - condition: "${(\"content\" in complete_switchResult_66a86aec.message)}"
                                 steps:
                                 - enqueueContent_enqueue_block:
                                     steps:
@@ -1151,9 +1168,9 @@ main:
                                                   data:
                                                     create_time: "${sys.now()}"
                                                     callback_id: "${null}"
-                                                    content: "${complete_switchResult_3a91ffe.message.content}"
+                                                    content: "${complete_switchResult_66a86aec.message.content}"
                                                     tool_call: "${null}"
-                                                    cost: "${complete_switchResult_3a91ffe.total_cost}"
+                                                    cost: "${complete_switchResult_66a86aec.total_cost}"
                                                     background: "${default(map.get(input.env, \"background\"), false)}"
                                                     status: "${\"\"}"
                                                     error: "${null}"
@@ -1166,16 +1183,16 @@ main:
                                                 headers:
                                                   x-user-id: "${input.env.userId}"
                                                   x-project-id: "${input.env.projectId}"
-                                              result: "relay_ingest_tool_callResult_4b3018ba"
+                                              result: "relay_ingest_tool_callResult_1d7051a"
                                         retry: "${http.default_retry}"
                                 - sendContents_updateResult_0:
                                     assign:
-                                    - sendContentsResult_7bfd119e: "${null}"
+                                    - sendContentsResult_2595ce6e: "${null}"
                               - condition: "${true}"
                                 steps:
                                 - sendContents_updateResult_1:
                                     assign:
-                                    - sendContentsResult_7bfd119e: "${null}"
+                                    - sendContentsResult_2595ce6e: "${null}"
                       - processToolCalls:
                           try:
                             steps:
@@ -1184,9 +1201,9 @@ main:
                                 args:
                                   workflow_id: "${\"helpers-ToolDispatcher${WORKFLOW_ENV}\"}"
                                   argument:
-                                    totalCost: "${complete_switchResult_3a91ffe.total_cost}"
-                                    toolCalls: "${default(map.get(complete_switchResult_3a91ffe.message, \"tool_calls\"), [])}"
-                                    toolDefs: "${toolDefsResult_5bb9b072.defs}"
+                                    totalCost: "${complete_switchResult_66a86aec.total_cost}"
+                                    toolCalls: "${default(map.get(complete_switchResult_66a86aec.message, \"tool_calls\"), [])}"
+                                    toolDefs: "${toolDefsResult_aff4168.defs}"
                                     env:
                                       userId: "${input.env.userId}"
                                       model: "${input.env.model}"
@@ -1199,49 +1216,66 @@ main:
                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                   connector_params:
                                     skip_polling: false
-                                result: "processToolCallsResult_30b7e92d"
+                                result: "processToolCallsResult_24fdd9c5"
                           retry: "${http.default_retry}"
-                      - releaseResponseLock:
-                          try:
-                            steps:
-                            - releaseResponseLock_call:
-                                call: "http.post"
-                                args:
-                                  url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
-                                  body:
-                                    collection: "${\"locks.Convo.Session\"}"
-                                    id: "${input.env.sessionId}"
-                                    owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                    userId: "${input.env.userId}"
-                                  auth:
-                                    type: "OIDC"
-                                    audience: "${input.env.BASE_URL}"
-                                  headers:
-                                    x-user-id: "${input.env.userId}"
-                                    x-project-id: "${input.env.projectId}"
-                                result: "releaseResponseLockResult_2fdba835"
-                          retry: "${http.default_retry}"
+                      - maybeNBypassRelease:
+                          steps:
+                          - maybeNBypassRelease_initResult:
+                              assign:
+                              - maybeNBypassReleaseResult_c408470: {}
+                          - maybeNBypassRelease_steps:
+                              switch:
+                              - condition: "${default(map.get(input, \"sideCall\"), false)}"
+                                steps:
+                                - maybeNBypassRelease_updateResult_0:
+                                    assign:
+                                    - maybeNBypassReleaseResult_c408470: "${null}"
+                              - condition: "${true}"
+                                steps:
+                                - releaseResponseLock:
+                                    try:
+                                      steps:
+                                      - releaseResponseLock_call:
+                                          call: "http.post"
+                                          args:
+                                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
+                                            body:
+                                              collection: "${\"locks.Convo.Session\"}"
+                                              id: "${input.env.sessionId}"
+                                              owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                              userId: "${input.env.userId}"
+                                            auth:
+                                              type: "OIDC"
+                                              audience: "${input.env.BASE_URL}"
+                                            headers:
+                                              x-user-id: "${input.env.userId}"
+                                              x-project-id: "${input.env.projectId}"
+                                          result: "releaseResponseLockResult_2fdba835"
+                                    retry: "${http.default_retry}"
+                                - maybeNBypassRelease_updateResult_1:
+                                    assign:
+                                    - maybeNBypassReleaseResult_c408470: "${releaseResponseLockResult_2fdba835}"
                       - toolsCost:
                           steps:
                           - toolsCost_initResult:
                               assign:
-                              - toolsCostResult_5ebd0b0f: "${0}"
+                              - toolsCostResult_30cc4245: "${0}"
                           - toolsCost_steps:
                               for:
                                 value: "toolsCostValue"
-                                in: "${processToolCallsResult_30b7e92d.results}"
+                                in: "${processToolCallsResult_24fdd9c5.results}"
                                 steps:
                                 - toolsCost_updateResult:
                                     assign:
-                                    - toolsCostResult_5ebd0b0f: "${(toolsCostResult_5ebd0b0f + toolsCostValue.cost)}"
+                                    - toolsCostResult_30cc4245: "${(toolsCostResult_30cc4245 + toolsCostValue.cost)}"
                       - maybeToolFeedback:
                           steps:
                           - maybeToolFeedback_initResult:
                               assign:
-                              - maybeToolFeedbackResult_23098561: {}
+                              - maybeToolFeedbackResult_17253966: {}
                           - maybeToolFeedback_steps:
                               switch:
-                              - condition: "${(len(processToolCallsResult_30b7e92d.results) > 0)}"
+                              - condition: "${((len(processToolCallsResult_24fdd9c5.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
                                 steps:
                                 - toolCallsCompleted:
                                     try:
@@ -1252,8 +1286,11 @@ main:
                                             workflow_id: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                                             argument:
                                               query: "${\"Tool calls completed\"}"
-                                              fund: "${(input.fund - (complete_switchResult_3a91ffe.total_cost + toolsCostResult_5ebd0b0f))}"
+                                              fund: "${input.fund}"
+                                              spent: "${default((default(map.get(input, \"spent\"), 0) + (complete_switchResult_66a86aec.total_cost + toolsCostResult_30cc4245)), null)}"
                                               task: "${null}"
+                                              toolChoice: "${default(null, null)}"
+                                              sideCall: "${default(false, null)}"
                                               env:
                                                 userId: "${input.env.userId}"
                                                 model: "${input.env.model}"
@@ -1265,29 +1302,82 @@ main:
                                             location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
-                                              skip_polling: false
-                                          result: "toolCallsCompletedResult_2d4b474c"
+                                              skip_polling: true
+                                          result: "toolCallsCompletedResult_45e62f91"
                                     retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_0:
                                     assign:
-                                    - maybeToolFeedbackResult_23098561: "${toolCallsCompletedResult_2d4b474c}"
+                                    - maybeToolFeedbackResult_17253966: "${toolCallsCompletedResult_45e62f91}"
                               - condition: "${true}"
                                 steps:
+                                - statusDone:
+                                    try:
+                                      steps:
+                                      - statusDone_call:
+                                          call: "http.post"
+                                          args:
+                                            url: "${((input.env.BASE_URL + \"/\") + \"workflows/exec/status/update\")}"
+                                            body:
+                                              execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                              status: "${\"Done\"}"
+                                              ended: "${true}"
+                                              workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
+                                              updated: "${sys.now()}"
+                                              error: "${null}"
+                                            auth:
+                                              type: "OIDC"
+                                              audience: "${input.env.BASE_URL}"
+                                            headers:
+                                              x-user-id: "${input.env.userId}"
+                                              x-project-id: "${input.env.projectId}"
+                                          result: "statusDoneResult_5e4d68b"
+                                    retry: "${http.default_retry}"
+                                - enqueueStatusDone_enqueue_block:
+                                    steps:
+                                    - relay_ingest_tool_call_2:
+                                        try:
+                                          steps:
+                                          - relay_ingest_tool_call_call_2:
+                                              call: "http.post"
+                                              args:
+                                                url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
+                                                body:
+                                                  sessionId: "${input.env.sessionId}"
+                                                  projectId: "${input.env.projectId}"
+                                                  data:
+                                                    create_time: "${sys.now()}"
+                                                    callback_id: "${null}"
+                                                    content: "${null}"
+                                                    tool_call: "${null}"
+                                                    cost: "${0.0}"
+                                                    background: "${default(map.get(input.env, \"background\"), false)}"
+                                                    status: "${\"Done\"}"
+                                                    error: "${null}"
+                                                  background: "${default(map.get(input.env, \"background\"), false)}"
+                                                  type: "${\"message\"}"
+                                                  source: "${\"workflows.tools.CliTools\"}"
+                                                auth:
+                                                  type: "OIDC"
+                                                  audience: "${input.env.BASE_URL}"
+                                                headers:
+                                                  x-user-id: "${input.env.userId}"
+                                                  x-project-id: "${input.env.projectId}"
+                                              result: "relay_ingest_tool_callResult_6afa578b"
+                                        retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_1:
                                     assign:
-                                    - maybeToolFeedbackResult_23098561: "${complete_switchResult_3a91ffe}"
+                                    - maybeToolFeedbackResult_17253966: "${complete_switchResult_66a86aec}"
                       - runSummaries:
                           try:
                             steps:
                             - runSummaries_call:
                                 call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
                                 args:
-                                  workflow_id: "${\"Summaries-All-Latest-wrapper${WORKFLOW_ENV}\"}"
+                                  workflow_id: "${\"Summaries${WORKFLOW_ENV}\"}"
                                   argument:
-                                    arg1: "${input.env.sessionId}"
-                                    arg2: "${null}"
-                                    arg3: "${1200}"
-                                    arg4: "${240}"
+                                    segmentEnd: "${null}"
+                                    windowSeconds: "${1200}"
+                                    overlapSeconds: "${240}"
                                     env:
                                       userId: "${input.env.userId}"
                                       model: "${input.env.model}"
@@ -1300,39 +1390,79 @@ main:
                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                   connector_params:
                                     skip_polling: true
-                                result: "runSummariesResult_b17dd34"
+                                result: "runSummariesResult_194b4f5a"
                           retry: "${http.default_retry}"
-                      - extractTopics:
-                          try:
-                            steps:
-                            - extractTopics_call:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"assistant-ExtractTopics-All-Latest-wrapper${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    arg1: "${input.env.sessionId}"
-                                    arg2: "${null}"
-                                    arg3: "${1200}"
-                                    arg4: "${240}"
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(map.get(input.env, \"background\"), null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: true
-                                result: "extractTopicsResult_47da05d8"
-                          retry: "${http.default_retry}"
+                      - chainBlock:
+                          steps:
+                          - buildWorkflows:
+                              steps:
+                              - buildWorkflows_initResult:
+                                  assign:
+                                  - buildWorkflowsResult_a1deeb9: []
+                              - buildWorkflows_steps:
+                                  for:
+                                    value: "buildWorkflowsIdx"
+                                    range: "${[0, (1 - 1)]}"
+                                    steps:
+                                    - buildWorkflows_switch:
+                                        steps:
+                                        - buildWorkflows_switch_initResult:
+                                            assign:
+                                            - buildWorkflows_switchResult_205f4c72: {}
+                                        - buildWorkflows_switch_steps:
+                                            switch:
+                                            - condition: "${(buildWorkflowsIdx == 0)}"
+                                              steps:
+                                              - buildWorkflows_switch_updateResult_0:
+                                                  assign:
+                                                  - buildWorkflows_switchResult_205f4c72:
+                                                      workflowName: "${\"helpers-links-SaveReflection\"}"
+                                                      params:
+                                                        agentWorkflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
+                                    - buildWorkflows_updateResult:
+                                        assign:
+                                        - buildWorkflowsResult_a1deeb9: "${list.concat(buildWorkflowsResult_a1deeb9, buildWorkflows_switchResult_205f4c72)}"
+                          - callChain:
+                              try:
+                                steps:
+                                - callChain_call:
+                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                    args:
+                                      workflow_id: "${\"helpers-Chain${WORKFLOW_ENV}\"}"
+                                      argument:
+                                        input:
+                                          segmentEnd: "${null}"
+                                          windowSeconds: "${1200}"
+                                          overlapSeconds: "${240}"
+                                          env:
+                                            userId: "${input.env.userId}"
+                                            model: "${input.env.model}"
+                                            callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                            BASE_URL: "${input.env.BASE_URL}"
+                                            background: "${default(map.get(input.env, \"background\"), null)}"
+                                            projectId: "${input.env.projectId}"
+                                            sessionId: "${input.env.sessionId}"
+                                        headWorkflow: "${\"assistant-ExtractTopics\"}"
+                                        tail: "${buildWorkflowsResult_a1deeb9}"
+                                        env:
+                                          userId: "${input.env.userId}"
+                                          model: "${input.env.model}"
+                                          callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                          BASE_URL: "${input.env.BASE_URL}"
+                                          background: "${default(map.get(input.env, \"background\"), null)}"
+                                          projectId: "${input.env.projectId}"
+                                          sessionId: "${input.env.sessionId}"
+                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                      connector_params:
+                                        skip_polling: true
+                                    result: "callChainResult_1e09d4b5"
+                              retry: "${http.default_retry}"
                       - collapseMessages_try:
                           steps:
                           - collapseMessages_try_initResult:
                               assign:
-                              - collapseMessages_tryResult_2ee71180: {}
+                              - collapseMessages_tryResult_3246f3ae: {}
                           - collapseMessages_try_steps:
                               try:
                                 steps:
@@ -1356,17 +1486,17 @@ main:
                                                 headers:
                                                   x-user-id: "${input.env.userId}"
                                                   x-project-id: "${input.env.projectId}"
-                                              result: "segmentsForSession_fetchResult_72f793ad"
+                                              result: "segmentsForSession_fetchResult_279607df"
                                         retry: "${http.default_retry}"
                                     - segmentsForSession_convert:
                                         steps:
                                         - segmentsForSession_convert_initResult:
                                             assign:
-                                            - segmentsForSession_convertResult_62fb199b: []
+                                            - segmentsForSession_convertResult_4c505d16: []
                                         - segmentsForSession_convert_steps:
                                             for:
                                               value: "segmentsForSession_convertValue"
-                                              in: "${segmentsForSession_fetchResult_72f793ad.body.segments}"
+                                              in: "${segmentsForSession_fetchResult_279607df.body.segments}"
                                               steps:
                                               - segmentsForSession_convert_assignIterResult:
                                                   assign:
@@ -1376,7 +1506,7 @@ main:
                                                       windowSeconds: "${240}"
                                               - segmentsForSession_convert_updateResult:
                                                   assign:
-                                                  - segmentsForSession_convertResult_62fb199b: "${list.concat(segmentsForSession_convertResult_62fb199b, segmentsForSession_convert_assignIterResultVar)}"
+                                                  - segmentsForSession_convertResult_4c505d16: "${list.concat(segmentsForSession_convertResult_4c505d16, segmentsForSession_convert_assignIterResultVar)}"
                                 - collapseMessages:
                                     try:
                                       steps:
@@ -1385,10 +1515,9 @@ main:
                                           args:
                                             workflow_id: "${\"context-ContextCollapser-SegKala${WORKFLOW_ENV}\"}"
                                             argument:
-                                              arg1: "${input.env.sessionId}"
-                                              arg2: "${segmentsForSession_convertResult_62fb199b[(len(segmentsForSession_convertResult_62fb199b) - 1)].end}"
-                                              arg3: "${240}"
-                                              arg4: "${48}"
+                                              segmentEnd: "${segmentsForSession_convertResult_4c505d16[(len(segmentsForSession_convertResult_4c505d16) - 1)].end}"
+                                              windowSeconds: "${240}"
+                                              overlapSeconds: "${48}"
                                               env:
                                                 userId: "${input.env.userId}"
                                                 model: "${input.env.model}"
@@ -1401,11 +1530,11 @@ main:
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
                                               skip_polling: true
-                                          result: "collapseMessagesResult_428a6819"
+                                          result: "collapseMessagesResult_50f3ffb0"
                                     retry: "${http.default_retry}"
                                 - collapseMessages_try_updateResult:
                                     assign:
-                                    - collapseMessages_tryResult_2ee71180: "${collapseMessagesResult_428a6819}"
+                                    - collapseMessages_tryResult_3246f3ae: "${collapseMessagesResult_50f3ffb0}"
                               except:
                                 as: "collapseMessages_tryError"
                                 steps:
@@ -1420,95 +1549,58 @@ main:
                                     retry: "${http.default_retry}"
                                 - collapseMessages_try_updateResultError:
                                     assign:
-                                    - collapseMessages_tryResult_2ee71180: "${null}"
-                      - statusDone:
+                                    - collapseMessages_tryResult_3246f3ae: "${null}"
+                      - maybeRespond_updateResult_0:
+                          assign:
+                          - maybeRespondResult_607836ea: "${maybeToolFeedbackResult_17253966}"
+                    - condition: "${true}"
+                      steps:
+                      - maybeRespond_updateResult_1:
+                          assign:
+                          - maybeRespondResult_607836ea: "${null}"
+            - mainTry_updateResult:
+                assign:
+                - mainTryResult_3d90f87d: "${maybeRespondResult_607836ea}"
+          except:
+            as: "mainTryError"
+            steps:
+            - maybeNBypassRelease_1:
+                steps:
+                - maybeNBypassRelease_initResult_1:
+                    assign:
+                    - maybeNBypassReleaseResult_c408470: {}
+                - maybeNBypassRelease_steps_1:
+                    switch:
+                    - condition: "${default(map.get(input, \"sideCall\"), false)}"
+                      steps:
+                      - maybeNBypassRelease_updateResult_0_1:
+                          assign:
+                          - maybeNBypassReleaseResult_c408470: "${null}"
+                    - condition: "${true}"
+                      steps:
+                      - releaseResponseLock_1:
                           try:
                             steps:
-                            - statusDone_call:
+                            - releaseResponseLock_call_1:
                                 call: "http.post"
                                 args:
-                                  url: "${((input.env.BASE_URL + \"/\") + \"workflows/exec/status/update\")}"
+                                  url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
                                   body:
-                                    execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                    status: "${\"Done\"}"
-                                    ended: "${true}"
-                                    workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
-                                    updated: "${sys.now()}"
-                                    error: "${null}"
+                                    collection: "${\"locks.Convo.Session\"}"
+                                    id: "${input.env.sessionId}"
+                                    owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                    userId: "${input.env.userId}"
                                   auth:
                                     type: "OIDC"
                                     audience: "${input.env.BASE_URL}"
                                   headers:
                                     x-user-id: "${input.env.userId}"
                                     x-project-id: "${input.env.projectId}"
-                                result: "statusDoneResult_5e4d68b"
+                                result: "releaseResponseLockResult_2fdba835"
                           retry: "${http.default_retry}"
-                      - enqueueStatusDone_enqueue_block:
-                          steps:
-                          - relay_ingest_tool_call_2:
-                              try:
-                                steps:
-                                - relay_ingest_tool_call_call_2:
-                                    call: "http.post"
-                                    args:
-                                      url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
-                                      body:
-                                        sessionId: "${input.env.sessionId}"
-                                        projectId: "${input.env.projectId}"
-                                        data:
-                                          create_time: "${sys.now()}"
-                                          callback_id: "${null}"
-                                          content: "${null}"
-                                          tool_call: "${null}"
-                                          cost: "${0.0}"
-                                          background: "${default(map.get(input.env, \"background\"), false)}"
-                                          status: "${\"Done\"}"
-                                          error: "${null}"
-                                        background: "${default(map.get(input.env, \"background\"), false)}"
-                                        type: "${\"message\"}"
-                                        source: "${\"workflows.tools.CliTools\"}"
-                                      auth:
-                                        type: "OIDC"
-                                        audience: "${input.env.BASE_URL}"
-                                      headers:
-                                        x-user-id: "${input.env.userId}"
-                                        x-project-id: "${input.env.projectId}"
-                                    result: "relay_ingest_tool_callResult_6afa578b"
-                              retry: "${http.default_retry}"
-                      - maybeRespond_updateResult_0:
+                      - maybeNBypassRelease_updateResult_1_1:
                           assign:
-                          - maybeRespondResult_159ff3bb: "${maybeToolFeedbackResult_23098561}"
-                    - condition: "${true}"
-                      steps:
-                      - maybeRespond_updateResult_1:
-                          assign:
-                          - maybeRespondResult_159ff3bb: "${null}"
-            - mainTry_updateResult:
-                assign:
-                - mainTryResult_361671b7: "${maybeRespondResult_159ff3bb}"
-          except:
-            as: "mainTryError"
-            steps:
-            - releaseResponseLock_1:
-                try:
-                  steps:
-                  - releaseResponseLock_call_1:
-                      call: "http.post"
-                      args:
-                        url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
-                        body:
-                          collection: "${\"locks.Convo.Session\"}"
-                          id: "${input.env.sessionId}"
-                          owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                          userId: "${input.env.userId}"
-                        auth:
-                          type: "OIDC"
-                          audience: "${input.env.BASE_URL}"
-                        headers:
-                          x-user-id: "${input.env.userId}"
-                          x-project-id: "${input.env.projectId}"
-                      result: "releaseResponseLockResult_2fdba835"
-                retry: "${http.default_retry}"
+                          - maybeNBypassReleaseResult_c408470: "${releaseResponseLockResult_2fdba835}"
             - statusFailed:
                 try:
                   steps:
@@ -1522,14 +1614,14 @@ main:
                           ended: "${true}"
                           workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                           updated: "${sys.now()}"
-                          error: "${default(map.get(mainTryError, \"message\"), \"Unknown error\")}"
+                          error: "${default(default(default(map.get(mainTryError, [\"body\", \"error\", \"message\"]), map.get(mainTryError, [\"body\", \"error\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
                         auth:
                           type: "OIDC"
                           audience: "${input.env.BASE_URL}"
                         headers:
                           x-user-id: "${input.env.userId}"
                           x-project-id: "${input.env.projectId}"
-                      result: "statusFailedResult_6681e1c"
+                      result: "statusFailedResult_703a6fab"
                 retry: "${http.default_retry}"
             - enqueueStatusFailed_enqueue_block:
                 steps:
@@ -1551,7 +1643,7 @@ main:
                                 cost: "${0.0}"
                                 background: "${default(map.get(input.env, \"background\"), false)}"
                                 status: "${\"Failed\"}"
-                                error: "${default(map.get(mainTryError, \"message\"), \"Unknown error\")}"
+                                error: "${default(default(default(map.get(mainTryError, [\"body\", \"error\", \"message\"]), map.get(mainTryError, [\"body\", \"error\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
                               background: "${default(map.get(input.env, \"background\"), false)}"
                               type: "${\"message\"}"
                               source: "${\"workflows.tools.CliTools\"}"
@@ -1561,12 +1653,12 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "relay_ingest_tool_callResult_5e83c796"
+                          result: "relay_ingest_tool_callResult_4b739654"
                     retry: "${http.default_retry}"
             - ReRaise_error:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_361671b7: "${null}"
+                - mainTryResult_3d90f87d: "${null}"
   - return:
-      return: "${mainTryResult_361671b7}"
+      return: "${mainTryResult_3d90f87d}"

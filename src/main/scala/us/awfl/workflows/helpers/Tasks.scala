@@ -16,7 +16,8 @@ object Tasks extends us.awfl.core.Workflow {
   val managementGuidanceText: List[String] = List(
     "Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.",
     "Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.",
-    "For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)"
+    "For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)",
+    "RULE OF THUMB: Update the task after every six tools calls, at most. At the very least, add a note under an in-progress item about what information the investigation has revealed so far, or even which dead ends to avoid during further investigation."
   )
   val managementGuidance: List[ChatMessage] = managementGuidanceText.map(msg => ChatMessage("system", str(msg)))
 
@@ -155,10 +156,10 @@ object Tasks extends us.awfl.core.Workflow {
       val post = createTask(s"${name}_post", title, description, status)
       val body = post.resultValue.flatMap(_.body).flatMap(_.task)
       val line = taskToLine("Task created", body)
-      List(post) -> obj(ChatMessage("system", line))
+      List(post) -> obj(ChatMessage("system", line)).base
     }
 
-    val skip = List() -> obj(ChatMessage("system", str("No input.task provided")))
+    val skip = List() -> obj(ChatMessage("system", str("No input.task provided"))).base
 
     val sw = Switch(s"${name}_switch", List(
       isMap -> create,

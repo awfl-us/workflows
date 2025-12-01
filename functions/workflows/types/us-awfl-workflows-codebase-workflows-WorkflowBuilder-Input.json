@@ -4,14 +4,42 @@
   "schema" : {
     "type" : "object",
     "properties" : {
+      "task" : {
+        "type" : "string"
+      },
       "query" : {
         "type" : "string"
       },
       "fund" : {
         "type" : "integer"
       },
-      "task" : {
-        "type" : "string"
+      "toolChoice" : {
+        "type" : "object",
+        "properties" : {
+          "function" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string"
+              }
+            },
+            "required" : [
+              "name"
+            ],
+            "additionalProperties" : true
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "function",
+          "type"
+        ],
+        "additionalProperties" : true
+      },
+      "sideCall" : {
+        "type" : "boolean"
       },
       "env" : {
         "type" : "object",
@@ -48,12 +76,18 @@
           "sessionId"
         ],
         "additionalProperties" : true
+      },
+      "spent" : {
+        "type" : "integer"
       }
     },
     "required" : [
       "query",
       "fund",
+      "spent",
       "task",
+      "toolChoice",
+      "sideCall",
       "env"
     ],
     "additionalProperties" : true,

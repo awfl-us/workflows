@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "https://topaigents.dev/workflows/defs/us.awfl.workflows.helpers.Chain.json",
+  "name" : "us.awfl.workflows.helpers.Chain",
+  "description" : "Auto-generated workflow definition.",
+  "inputSchema" : "us-awfl-workflows-helpers-Chain-Input",
+  "outputSchema" : "services-Llm-ChatToolResponse",
+  "inputType" : "us.awfl.workflows.helpers.Chain.Input",
+  "outputType" : "services.Llm.ChatToolResponse"
+}

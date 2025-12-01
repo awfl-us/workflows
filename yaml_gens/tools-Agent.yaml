@@ -12,7 +12,10 @@ main:
               argument:
                 query: "${map.get(json.decode(input.tool_call.function.arguments), \"query\")}"
                 fund: "${default(map.get(json.decode(input.tool_call.function.arguments), \"fund\"), 0)}"
+                spent: "${default(null, null)}"
                 task: "${default(map.get(json.decode(input.tool_call.function.arguments), \"task\"), null)}"
+                toolChoice: "${default(null, null)}"
+                sideCall: "${default(false, null)}"
                 env:
                   userId: "${input.env.userId}"
                   model: "${input.env.model}"
@@ -25,9 +28,9 @@ main:
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "run_agent_workflowResult_59f34f57"
+            result: "run_agent_workflowResult_623f14ab"
       retry: "${http.default_retry}"
   - return:
       return:
-        encoded: "${json.encode_to_string(run_agent_workflowResult_59f34f57)}"
-        cost: "${run_agent_workflowResult_59f34f57.total_cost}"
+        encoded: "${json.encode_to_string(run_agent_workflowResult_623f14ab)}"
+        cost: "${run_agent_workflowResult_623f14ab.total_cost}"

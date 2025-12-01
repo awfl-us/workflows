@@ -145,7 +145,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
     buildPrompt,
     analyzeReport,
   ) ->
-    obj(WorkflowSummary(
+    (obj(WorkflowSummary(
       businessInfo = generateKeywords.resultValue.flatMap(_.businessInfo),
       marketAnalysis = obj(MarketAnalysis(
         totalCompetitors = str(len(generateKeywords.resultValue.flatMap(_.competitors))),
@@ -153,7 +153,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
       )),
       analysis = analyzeReport.resultValue.flatMap(_.result),
       reviews = reviews.resultValue.flatMap(_.reviews)
-    ))
+    )): BaseValue[WorkflowSummary])
   ))
 
   override def workflows = List(Workflow(List[Step[_, _]](

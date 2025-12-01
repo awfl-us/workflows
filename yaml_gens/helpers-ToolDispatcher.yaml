@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_c336390: {}
+          - mainTryResult_3434d9be: {}
       - mainTry_steps:
           try:
             steps:
@@ -197,7 +197,7 @@ main:
                 steps:
                 - forToolCall_initResult:
                     assign:
-                    - forToolCallResult_2c8a18ef: []
+                    - forToolCallResult_476286ec: []
                 - forToolCall_steps:
                     for:
                       value: "forToolCallValue"
@@ -207,7 +207,7 @@ main:
                           steps:
                           - fold_initResult:
                               assign:
-                              - foldResult_b47820d: "${null}"
+                              - foldResult_5bc52ec7: "${null}"
                           - fold_steps:
                               for:
                                 value: "foldValue"
@@ -217,7 +217,7 @@ main:
                                     steps:
                                     - matchFunction_initResult:
                                         assign:
-                                        - matchFunctionResult_4e3d41ba: {}
+                                        - matchFunctionResult_1938ffd0: {}
                                     - matchFunction_steps:
                                         switch:
                                         - condition: "${(forToolCallValue.function.name == foldValue.function.name)}"
@@ -244,19 +244,19 @@ main:
                                                       project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                       connector_params:
                                                         skip_polling: false
-                                                    result: "callToolWorkflowResult_2622bf3e"
+                                                    result: "callToolWorkflowResult_18b16236"
                                               retry: "${http.default_retry}"
                                           - matchFunction_updateResult_0:
                                               assign:
-                                              - matchFunctionResult_4e3d41ba: "${callToolWorkflowResult_2622bf3e}"
+                                              - matchFunctionResult_1938ffd0: "${callToolWorkflowResult_18b16236}"
                                         - condition: "${true}"
                                           steps:
                                           - matchFunction_updateResult_1:
                                               assign:
-                                              - matchFunctionResult_4e3d41ba: "${foldResult_b47820d}"
+                                              - matchFunctionResult_1938ffd0: "${foldResult_5bc52ec7}"
                                 - fold_updateResult:
                                     assign:
-                                    - foldResult_b47820d: "${matchFunctionResult_4e3d41ba}"
+                                    - foldResult_5bc52ec7: "${matchFunctionResult_1938ffd0}"
                       - saveResult_seg_write_with_session_update:
                           steps:
                           - saveResult_newId:
@@ -298,7 +298,7 @@ main:
                                         contents:
                                           value:
                                             role: "${\"tool\"}"
-                                            content: "${foldResult_b47820d.encoded}"
+                                            content: "${foldResult_5bc52ec7.encoded}"
                                             tool_calls: "${[]}"
                                             tool_call_id: "${forToolCallValue.id}"
                                             create_time: "${sys.now()}"
@@ -313,7 +313,7 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "saveResult_write_messagesIsta_SegKalaResult_6f0c6401"
+                                    result: "saveResult_write_messagesIsta_SegKalaResult_35bb2d45"
                               retry: "${http.default_retry}"
                           - saveResult_update_session_update_time:
                               try:
@@ -338,11 +338,11 @@ main:
                               retry: "${http.default_retry}"
                       - forToolCall_updateResult:
                           assign:
-                          - forToolCallResult_2c8a18ef: "${list.concat(forToolCallResult_2c8a18ef, foldResult_b47820d)}"
+                          - forToolCallResult_476286ec: "${list.concat(forToolCallResult_476286ec, foldResult_5bc52ec7)}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_c336390:
-                    results: "${forToolCallResult_2c8a18ef}"
+                - mainTryResult_3434d9be:
+                    results: "${forToolCallResult_476286ec}"
           except:
             as: "mainTryError"
             steps:
@@ -350,6 +350,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_c336390: "${null}"
+                - mainTryResult_3434d9be: "${null}"
   - return:
-      return: "${mainTryResult_c336390}"
+      return: "${mainTryResult_3434d9be}"

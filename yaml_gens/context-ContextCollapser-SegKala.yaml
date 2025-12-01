@@ -8,7 +8,7 @@ main:
           steps:
           - lock_acquire_try_initResult:
               assign:
-              - lock_acquire_tryResult_2f8fc65b: {}
+              - lock_acquire_tryResult_3ee7ea95: {}
           - lock_acquire_try_steps:
               try:
                 steps:
@@ -21,7 +21,7 @@ main:
                             url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/acquire\")}"
                             body:
                               collection: "${\"locks.collapsed.SegKala\"}"
-                              id: "${((input.arg1 + \":\") + string(input.arg2))}"
+                              id: "${((input.env.sessionId + \":\") + string(input.segmentEnd))}"
                               ttlSeconds: 300
                               owner: "${uuid.generate()}"
                               userId: "${input.env.userId}"
@@ -31,11 +31,11 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "lock_acquireResult_5b5f475b"
+                          result: "lock_acquireResult_3db7d1d3"
                     retry: "${http.default_retry}"
                 - lock_acquire_try_updateResult:
                     assign:
-                    - lock_acquire_tryResult_2f8fc65b: "${lock_acquireResult_5b5f475b.body.acquired}"
+                    - lock_acquire_tryResult_3ee7ea95: "${lock_acquireResult_3db7d1d3.body.acquired}"
               except:
                 as: "lock_acquire_tryError"
                 steps:
@@ -69,15 +69,15 @@ main:
                               - lock_acquire_errResult_34a448ba: "${false}"
                 - lock_acquire_try_updateResultError:
                     assign:
-                    - lock_acquire_tryResult_2f8fc65b: "${lock_acquire_errResult_34a448ba}"
+                    - lock_acquire_tryResult_3ee7ea95: "${lock_acquire_errResult_34a448ba}"
       - lock_switch:
           steps:
           - lock_switch_initResult:
               assign:
-              - lock_switchResult_3f3fc9d5: {}
+              - lock_switchResult_739eb654: {}
           - lock_switch_steps:
               switch:
-              - condition: "${(lock_acquire_tryResult_2f8fc65b == true)}"
+              - condition: "${(lock_acquire_tryResult_3ee7ea95 == true)}"
                 steps:
                 - work_block:
                     steps:
@@ -85,7 +85,7 @@ main:
                         steps:
                         - messagesInWindow_initResult:
                             assign:
-                            - messagesInWindowResult_381f5010: {}
+                            - messagesInWindowResult_5e24847c: {}
                         - messagesInWindow_steps:
                             try:
                               steps:
@@ -191,9 +191,9 @@ main:
                                               body:
                                                 kala:
                                                   kind: "${\"SegKala\"}"
-                                                  sessionId: "${input.arg1}"
-                                                  end: "${input.arg2}"
-                                                  windowSeconds: "${default(input.arg3, 1200)}"
+                                                  sessionId: "${input.env.sessionId}"
+                                                  end: "${input.segmentEnd}"
+                                                  windowSeconds: "${default(input.windowSeconds, 1200)}"
                                                   sessionEnd: "${null}"
                                                   weekEnd: "${null}"
                                                   begin: "${null}"
@@ -206,24 +206,24 @@ main:
                                               headers:
                                                 x-user-id: "${input.env.userId}"
                                                 x-project-id: "${input.env.projectId}"
-                                            result: "TopicContextYoj_run_with_modelResult_1e86977e"
+                                            result: "TopicContextYoj_run_with_modelResult_41997d95"
                                       retry: "${http.default_retry}"
                                   - for_messages_items_SegKala:
                                       steps:
                                       - for_messages_items_SegKala_initResult:
                                           assign:
-                                          - for_messages_items_SegKalaResult_25e86e27: []
+                                          - for_messages_items_SegKalaResult_11de797: []
                                       - for_messages_items_SegKala_steps:
                                           for:
                                             value: "for_messages_items_SegKalaValue"
-                                            in: "${TopicContextYoj_run_with_modelResult_1e86977e.body.yoj}"
+                                            in: "${TopicContextYoj_run_with_modelResult_41997d95.body.yoj}"
                                             steps:
                                             - for_messages_items_SegKala_updateResult:
                                                 assign:
-                                                - for_messages_items_SegKalaResult_25e86e27: "${list.concat(for_messages_items_SegKalaResult_25e86e27, for_messages_items_SegKalaValue)}"
+                                                - for_messages_items_SegKalaResult_11de797: "${list.concat(for_messages_items_SegKalaResult_11de797, for_messages_items_SegKalaValue)}"
                               - messagesInWindow_updateResult:
                                   assign:
-                                  - messagesInWindowResult_381f5010: "${for_messages_items_SegKalaResult_25e86e27}"
+                                  - messagesInWindowResult_5e24847c: "${for_messages_items_SegKalaResult_11de797}"
                             except:
                               as: "messagesInWindowError"
                               steps:
@@ -238,7 +238,7 @@ main:
                                   retry: "${http.default_retry}"
                               - messagesInWindow_updateResultError:
                                   assign:
-                                  - messagesInWindowResult_381f5010: "${null}"
+                                  - messagesInWindowResult_5e24847c: "${null}"
                     - collapsed_readIstaBlock:
                         steps:
                         - read_collapsedIsta_logKala:
@@ -247,8 +247,8 @@ main:
                               - read_collapsedIsta_logKala_call:
                                   call: "sys.log"
                                   args:
-                                    text: "${(\"[read_collapsedIsta_logKala] \" + (\"SegKala: \" + time.format(input.arg2, \"America/New_York\")))}"
-                                  result: "read_collapsedIsta_logKalaResult_24901978"
+                                    text: "${(\"[read_collapsedIsta_logKala] \" + (\"SegKala: \" + time.format(input.segmentEnd, \"America/New_York\")))}"
+                                  result: "read_collapsedIsta_logKalaResult_3332454d"
                             retry: "${http.default_retry}"
                         - read_collapsedIsta_convoSegKala:
                             try:
@@ -258,9 +258,9 @@ main:
                                   args:
                                     url: "${((input.env.BASE_URL + \"/\") + \"firebase/list\")}"
                                     body:
-                                      collection: "${(((\"convo.sessions/\" + input.arg1) + \"/\") + \"collapsed\")}"
-                                      start: "${(input.arg2 - default(input.arg3, 1200))}"
-                                      end: "${input.arg2}"
+                                      collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"collapsed\")}"
+                                      start: "${(input.segmentEnd - default(input.windowSeconds, 1200))}"
+                                      end: "${input.segmentEnd}"
                                       userId: "${input.env.userId}"
                                     auth:
                                       type: "OIDC"
@@ -268,17 +268,17 @@ main:
                                     headers:
                                       x-user-id: "${input.env.userId}"
                                       x-project-id: "${input.env.projectId}"
-                                  result: "read_collapsedIsta_convoSegKalaResult_73810566"
+                                  result: "read_collapsedIsta_convoSegKalaResult_74d07262"
                             retry: "${http.default_retry}"
                         - for_collapsedIsta:
                             steps:
                             - for_collapsedIsta_initResult:
                                 assign:
-                                - for_collapsedIstaResult_416f055b: []
+                                - for_collapsedIstaResult_71648ee4: []
                             - for_collapsedIsta_steps:
                                 for:
                                   value: "for_collapsedIstaValue"
-                                  in: "${read_collapsedIsta_convoSegKalaResult_73810566.body.documents}"
+                                  in: "${read_collapsedIsta_convoSegKalaResult_74d07262.body.documents}"
                                   steps:
                                   - log_collapsedIsta_read:
                                       try:
@@ -291,15 +291,15 @@ main:
                                       retry: "${http.default_retry}"
                                   - for_collapsedIsta_updateResult:
                                       assign:
-                                      - for_collapsedIstaResult_416f055b: "${list.concat(for_collapsedIstaResult_416f055b, for_collapsedIstaValue.data)}"
+                                      - for_collapsedIstaResult_71648ee4: "${list.concat(for_collapsedIstaResult_71648ee4, for_collapsedIstaValue.data)}"
                     - ista_write_switch:
                         steps:
                         - ista_write_switch_initResult:
                             assign:
-                            - ista_write_switchResult_24f88a99: {}
+                            - ista_write_switchResult_7938f27b: {}
                         - ista_write_switch_steps:
                             switch:
-                            - condition: "${(((len(messagesInWindowResult_381f5010) > 0) and ((len(for_collapsedIstaResult_416f055b) == 0) or (for_collapsedIstaResult_416f055b[(len(for_collapsedIstaResult_416f055b) - 1)].create_time < input.arg2))) == true)}"
+                            - condition: "${(((len(messagesInWindowResult_5e24847c) > 0) and ((len(for_collapsedIstaResult_71648ee4) == 0) or (for_collapsedIstaResult_71648ee4[(len(for_collapsedIstaResult_71648ee4) - 1)].create_time < input.segmentEnd))) == true)}"
                               steps:
                               - collapserYojBlock_SegKala:
                                   steps:
@@ -313,9 +313,9 @@ main:
                                               body:
                                                 kala:
                                                   kind: "${\"SegKala\"}"
-                                                  sessionId: "${input.arg1}"
-                                                  end: "${input.arg2}"
-                                                  windowSeconds: "${default(input.arg3, 1200)}"
+                                                  sessionId: "${input.env.sessionId}"
+                                                  end: "${input.segmentEnd}"
+                                                  windowSeconds: "${default(input.windowSeconds, 1200)}"
                                                   sessionEnd: "${null}"
                                                   weekEnd: "${null}"
                                                   begin: "${null}"
@@ -328,13 +328,13 @@ main:
                                               headers:
                                                 x-user-id: "${input.env.userId}"
                                                 x-project-id: "${input.env.projectId}"
-                                            result: "TopicContextYoj_run_with_docIdResult_59e145dc"
+                                            result: "TopicContextYoj_run_with_docIdResult_59258ee4"
                                       retry: "${http.default_retry}"
                                   - collapser_serialize_topicContext_SegKala:
                                       steps:
                                       - collapser_serialize_topicContext_SegKala_initResult:
                                           assign:
-                                          - collapser_serialize_topicContext_SegKalaResult_1354029: {}
+                                          - collapser_serialize_topicContext_SegKalaResult_7a58a268: {}
                                       - collapser_serialize_topicContext_SegKala_steps:
                                           try:
                                             steps:
@@ -348,9 +348,9 @@ main:
                                                         body:
                                                           kala:
                                                             kind: "${\"SegKala\"}"
-                                                            sessionId: "${input.arg1}"
-                                                            end: "${input.arg2}"
-                                                            windowSeconds: "${default(input.arg3, 1200)}"
+                                                            sessionId: "${input.env.sessionId}"
+                                                            end: "${input.segmentEnd}"
+                                                            windowSeconds: "${default(input.windowSeconds, 1200)}"
                                                             sessionEnd: "${null}"
                                                             weekEnd: "${null}"
                                                             begin: "${null}"
@@ -363,11 +363,11 @@ main:
                                                         headers:
                                                           x-user-id: "${input.env.userId}"
                                                           x-project-id: "${input.env.projectId}"
-                                                      result: "TopicContextYoj_run_with_docIdResult_59e145dc"
+                                                      result: "TopicContextYoj_run_with_docIdResult_59258ee4"
                                                 retry: "${http.default_retry}"
                                             - collapser_serialize_topicContext_SegKala_updateResult:
                                                 assign:
-                                                - collapser_serialize_topicContext_SegKalaResult_1354029: "${json.encode_to_string(TopicContextYoj_run_with_docIdResult_59e145dc.body.yoj)}"
+                                                - collapser_serialize_topicContext_SegKalaResult_7a58a268: "${json.encode_to_string(TopicContextYoj_run_with_docIdResult_59258ee4.body.yoj)}"
                                           except:
                                             as: "collapser_serialize_topicContext_SegKalaError"
                                             steps:
@@ -382,12 +382,12 @@ main:
                                                 retry: "${http.default_retry}"
                                             - collapser_serialize_topicContext_SegKala_updateResultError:
                                                 assign:
-                                                - collapser_serialize_topicContext_SegKalaResult_1354029: "${null}"
+                                                - collapser_serialize_topicContext_SegKalaResult_7a58a268: "${null}"
                                   - collapser_single_msg_SegKala:
                                       steps:
                                       - collapser_single_msg_SegKala_initResult:
                                           assign:
-                                          - collapser_single_msg_SegKalaResult_2e9d3f8d: []
+                                          - collapser_single_msg_SegKalaResult_67efedc7: []
                                       - collapser_single_msg_SegKala_steps:
                                           for:
                                             value: "collapser_single_msg_SegKalaIdx"
@@ -397,33 +397,33 @@ main:
                                                 steps:
                                                 - collapser_single_msg_SegKala_switch_initResult:
                                                     assign:
-                                                    - collapser_single_msg_SegKala_switchResult_7ee8a35c: {}
+                                                    - collapser_single_msg_SegKala_switchResult_448047ec: {}
                                                 - collapser_single_msg_SegKala_switch_steps:
                                                     switch:
                                                     - condition: "${(collapser_single_msg_SegKalaIdx == 0)}"
                                                       steps:
                                                       - collapser_single_msg_SegKala_switch_updateResult_0:
                                                           assign:
-                                                          - collapser_single_msg_SegKala_switchResult_7ee8a35c:
+                                                          - collapser_single_msg_SegKala_switchResult_448047ec:
                                                               role: "system"
-                                                              content: "${collapser_serialize_topicContext_SegKalaResult_1354029}"
+                                                              content: "${collapser_serialize_topicContext_SegKalaResult_7a58a268}"
                                                               tool_calls: "${[]}"
                                                               tool_call_id: "${null}"
                                                               create_time: "${sys.now()}"
                                                               docId: "${null}"
                                             - collapser_single_msg_SegKala_updateResult:
                                                 assign:
-                                                - collapser_single_msg_SegKalaResult_2e9d3f8d: "${list.concat(collapser_single_msg_SegKalaResult_2e9d3f8d, collapser_single_msg_SegKala_switchResult_7ee8a35c)}"
+                                                - collapser_single_msg_SegKalaResult_67efedc7: "${list.concat(collapser_single_msg_SegKalaResult_67efedc7, collapser_single_msg_SegKala_switchResult_448047ec)}"
                               - complete_block:
                                   steps:
                                   - complete_switch:
                                       steps:
                                       - complete_switch_initResult:
                                           assign:
-                                          - complete_switchResult_3e76091f: {}
+                                          - complete_switchResult_5fb1c1f9: {}
                                       - complete_switch_steps:
                                           switch:
-                                          - condition: "${(len(collapser_single_msg_SegKalaResult_2e9d3f8d) > 0)}"
+                                          - condition: "${(len(collapser_single_msg_SegKalaResult_67efedc7) > 0)}"
                                             steps:
                                             - buildCollapseIsta:
                                                 steps:
@@ -491,37 +491,37 @@ main:
                                                 steps:
                                                 - complete_joinMessages_initResult:
                                                     assign:
-                                                    - complete_joinMessagesResult_10d9cd5c: []
+                                                    - complete_joinMessagesResult_33e47d02: []
                                                 - complete_joinMessages_steps:
                                                     for:
                                                       value: "complete_joinMessagesIdx"
-                                                      range: "${[0, ((((0 + len(buildPromptResult_7a682c93)) + len(collapser_single_msg_SegKalaResult_2e9d3f8d)) + len(buildCollapseIstaResult_1c60d050)) - 1)]}"
+                                                      range: "${[0, ((((0 + len(buildPromptResult_7a682c93)) + len(collapser_single_msg_SegKalaResult_67efedc7)) + len(buildCollapseIstaResult_1c60d050)) - 1)]}"
                                                       steps:
                                                       - complete_joinMessages_switch:
                                                           steps:
                                                           - complete_joinMessages_switch_initResult:
                                                               assign:
-                                                              - complete_joinMessages_switchResult_4feed0a7: {}
+                                                              - complete_joinMessages_switchResult_47dc493: {}
                                                           - complete_joinMessages_switch_steps:
                                                               switch:
-                                                              - condition: "${(complete_joinMessagesIdx >= ((0 + len(buildPromptResult_7a682c93)) + len(collapser_single_msg_SegKalaResult_2e9d3f8d)))}"
+                                                              - condition: "${(complete_joinMessagesIdx >= ((0 + len(buildPromptResult_7a682c93)) + len(collapser_single_msg_SegKalaResult_67efedc7)))}"
                                                                 steps:
                                                                 - complete_joinMessages_switch_updateResult_0:
                                                                     assign:
-                                                                    - complete_joinMessages_switchResult_4feed0a7: "${buildCollapseIstaResult_1c60d050[(complete_joinMessagesIdx - ((0 + len(buildPromptResult_7a682c93)) + len(collapser_single_msg_SegKalaResult_2e9d3f8d)))]}"
+                                                                    - complete_joinMessages_switchResult_47dc493: "${buildCollapseIstaResult_1c60d050[(complete_joinMessagesIdx - ((0 + len(buildPromptResult_7a682c93)) + len(collapser_single_msg_SegKalaResult_67efedc7)))]}"
                                                               - condition: "${(complete_joinMessagesIdx >= (0 + len(buildPromptResult_7a682c93)))}"
                                                                 steps:
                                                                 - complete_joinMessages_switch_updateResult_1:
                                                                     assign:
-                                                                    - complete_joinMessages_switchResult_4feed0a7: "${collapser_single_msg_SegKalaResult_2e9d3f8d[(complete_joinMessagesIdx - (0 + len(buildPromptResult_7a682c93)))]}"
+                                                                    - complete_joinMessages_switchResult_47dc493: "${collapser_single_msg_SegKalaResult_67efedc7[(complete_joinMessagesIdx - (0 + len(buildPromptResult_7a682c93)))]}"
                                                               - condition: "${(complete_joinMessagesIdx >= 0)}"
                                                                 steps:
                                                                 - complete_joinMessages_switch_updateResult_2:
                                                                     assign:
-                                                                    - complete_joinMessages_switchResult_4feed0a7: "${buildPromptResult_7a682c93[(complete_joinMessagesIdx - 0)]}"
+                                                                    - complete_joinMessages_switchResult_47dc493: "${buildPromptResult_7a682c93[(complete_joinMessagesIdx - 0)]}"
                                                       - complete_joinMessages_updateResult:
                                                           assign:
-                                                          - complete_joinMessagesResult_10d9cd5c: "${list.concat(complete_joinMessagesResult_10d9cd5c, complete_joinMessages_switchResult_4feed0a7)}"
+                                                          - complete_joinMessagesResult_33e47d02: "${list.concat(complete_joinMessagesResult_33e47d02, complete_joinMessages_switchResult_47dc493)}"
                                             - complete_chat_block:
                                                 steps:
                                                 - complete_chat_buildSchemaList:
@@ -563,27 +563,27 @@ main:
                                                           args:
                                                             url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
                                                             body:
-                                                              messages: "${list.concat(complete_joinMessagesResult_10d9cd5c, complete_chat_buildSchemaListResult_76e19f27[0])}"
+                                                              messages: "${list.concat(complete_joinMessagesResult_33e47d02, complete_chat_buildSchemaListResult_76e19f27[0])}"
                                                               model: "${\"gpt-5\"}"
                                                               temperature: 0.8
                                                               max_completion_tokens: "${null}"
                                                               response_format:
                                                                 type: "json_object"
                                                               tools: "${[]}"
-                                                              tool_choice: "${null}"
+                                                              tool_choice: "${\"auto\"}"
                                                             auth:
                                                               type: "OIDC"
                                                               audience: "${input.env.BASE_URL}"
                                                             headers:
                                                               x-user-id: "${input.env.userId}"
                                                               x-project-id: "${input.env.projectId}"
-                                                          result: "complete_chat_postResult_a7855c1"
+                                                          result: "complete_chat_postResult_edd8c2b"
                                                     retry: "${http.default_retry}"
                                             - complete_switch_updateResult_0:
                                                 assign:
-                                                - complete_switchResult_3e76091f:
-                                                    result: "${json.decode(complete_chat_postResult_a7855c1.body.message.content)}"
-                                                    total_cost: "${complete_chat_postResult_a7855c1.body.total_cost}"
+                                                - complete_switchResult_5fb1c1f9:
+                                                    result: "${json.decode(complete_chat_postResult_edd8c2b.body.message.content)}"
+                                                    total_cost: "${complete_chat_postResult_edd8c2b.body.total_cost}"
                                           - condition: "${true}"
                                             steps:
                                             - emptyYoj:
@@ -592,7 +592,7 @@ main:
                                                   code: "${400}"
                                             - complete_switch_updateResult_1:
                                                 assign:
-                                                - complete_switchResult_3e76091f: "${null}"
+                                                - complete_switchResult_5fb1c1f9: "${null}"
                               - do_write_seg_block:
                                   steps:
                                   - ista_write_newId:
@@ -629,12 +629,12 @@ main:
                                             args:
                                               url: "${((input.env.BASE_URL + \"/\") + \"firebase/create\")}"
                                               body:
-                                                collection: "${(((\"convo.sessions/\" + input.arg1) + \"/\") + \"collapsed\")}"
+                                                collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"collapsed\")}"
                                                 id: "${ista_write_newIdResult_506281f1}"
                                                 contents:
-                                                  value: "${complete_switchResult_3e76091f.result}"
-                                                  create_time: "${input.arg2}"
-                                                  cost: "${complete_switchResult_3e76091f.total_cost}"
+                                                  value: "${complete_switchResult_5fb1c1f9.result}"
+                                                  create_time: "${input.segmentEnd}"
+                                                  cost: "${complete_switchResult_5fb1c1f9.total_cost}"
                                                   execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                                 userId: "${input.env.userId}"
                                               auth:
@@ -643,7 +643,7 @@ main:
                                               headers:
                                                 x-user-id: "${input.env.userId}"
                                                 x-project-id: "${input.env.projectId}"
-                                            result: "ista_write_create_childResult_716f4006"
+                                            result: "ista_write_create_childResult_5e9856e6"
                                       retry: "${http.default_retry}"
                                   - ista_write_update_parent_update_time:
                                       try:
@@ -654,9 +654,9 @@ main:
                                               url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
                                               body:
                                                 collection: "${\"convo.sessions\"}"
-                                                id: "${input.arg1}"
+                                                id: "${input.env.sessionId}"
                                                 contents:
-                                                  update_time: "${input.arg2}"
+                                                  update_time: "${input.segmentEnd}"
                                                 userId: "${input.env.userId}"
                                               auth:
                                                 type: "OIDC"
@@ -664,7 +664,7 @@ main:
                                               headers:
                                                 x-user-id: "${input.env.userId}"
                                                 x-project-id: "${input.env.projectId}"
-                                            result: "ista_write_update_parent_update_timeResult_5a28878c"
+                                            result: "ista_write_update_parent_update_timeResult_1339b097"
                                       retry: "${http.default_retry}"
                                   - post_write_block:
                                       steps:
@@ -676,7 +676,7 @@ main:
                                                 args:
                                                   url: "${((input.env.BASE_URL + \"/\") + \"context/collapse/indexer/run\")}"
                                                   body:
-                                                    sessionId: "${input.arg1}"
+                                                    sessionId: "${input.env.sessionId}"
                                                     responseId: "${ista_write_newIdResult_506281f1}"
                                                     includeResponseToGroups: "${true}"
                                                   auth:
@@ -685,11 +685,11 @@ main:
                                                   headers:
                                                     x-user-id: "${input.env.userId}"
                                                     x-project-id: "${input.env.projectId}"
-                                                result: "collapse_indexer_runResult_59ffe72f"
+                                                result: "collapse_indexer_runResult_24e0915e"
                                           retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_0:
                                   assign:
-                                  - ista_write_switchResult_24f88a99: "${complete_switchResult_3e76091f.result}"
+                                  - ista_write_switchResult_7938f27b: "${complete_switchResult_5fb1c1f9.result}"
                             - condition: "${true}"
                               steps:
                               - write_skipped:
@@ -703,7 +703,7 @@ main:
                                   retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_1:
                                   assign:
-                                  - ista_write_switchResult_24f88a99: "${null}"
+                                  - ista_write_switchResult_7938f27b: "${null}"
                 - lock_release:
                     try:
                       steps:
@@ -713,7 +713,7 @@ main:
                             url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
                             body:
                               collection: "${\"locks.collapsed.SegKala\"}"
-                              id: "${((input.arg1 + \":\") + string(input.arg2))}"
+                              id: "${((input.env.sessionId + \":\") + string(input.segmentEnd))}"
                               owner: "${uuid.generate()}"
                               userId: "${input.env.userId}"
                             auth:
@@ -722,15 +722,15 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "lock_releaseResult_2ae8c6f2"
+                          result: "lock_releaseResult_b04b322"
                     retry: "${http.default_retry}"
                 - lock_switch_updateResult_0:
                     assign:
-                    - lock_switchResult_3f3fc9d5: "${ista_write_switchResult_24f88a99}"
+                    - lock_switchResult_739eb654: "${ista_write_switchResult_7938f27b}"
               - condition: "${true}"
                 steps:
                 - lock_switch_updateResult_1:
                     assign:
-                    - lock_switchResult_3f3fc9d5: "${null}"
+                    - lock_switchResult_739eb654: "${null}"
   - return:
-      return: "${lock_switchResult_3f3fc9d5}"
+      return: "${lock_switchResult_739eb654}"

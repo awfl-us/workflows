@@ -41,7 +41,7 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
       "read_raw_params",
       List() -> obj(Map(
         "filepath" -> inPath
-      ))
+      )).base
     )
     val readCall = obj(ToolCall(
       id = str("read_raw"),
@@ -82,9 +82,9 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
       name = "plainify",
       messages = messages.resultValue,
       tools = ListValue.nil,
-      tool_choice = Field.str("none"),
+      tool_choice = Value.nil,
       model = Field.str("gpt-5"),
-      maxTokens = Value("null")
+      maxTokens = Value.nil
     )
 
     val explanation = chat.result.message.get.content
@@ -94,7 +94,7 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
       "mkdir_plain_params",
       List() -> obj(Map(
         "command" -> str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel)))
-      ))
+      )).base
     )
     val mkdirCall = obj(ToolCall(
       id = str("mkdir_plain"),
@@ -118,7 +118,7 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
       List() -> obj(Map(
         "filepath" -> outPath,
         "content"  -> explanation
-      ))
+      )).base
     )
     val writeCall = obj(ToolCall(
       id = str("write_plain"),

@@ -18,7 +18,7 @@ trait Preloads extends EventHandler {
     val runPreloads = preloads.map {
       case PreloadFile(filename) => Context.preloadFile(
         "preloadFile",
-        filename
+        str(filename)
       )
       case PreloadCommand(command) => Context.preloadCommand(
         "preloadCommand",

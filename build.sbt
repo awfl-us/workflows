@@ -37,10 +37,10 @@ libraryDependencies ++= Seq(
   "us.awfl" %% "compiler" % "0.1.2"
 )
 
-// dependencyOverrides += "us.awfl" %% "dsl" % "0.1.0-SNAPSHOT"
-// dependencyOverrides += "us.awfl" %% "compiler" % "0.1.0-SNAPSHOT"
-// dependencyOverrides += "us.awfl" %% "compiler-yaml" % "0.1.0-SNAPSHOT"
-// dependencyOverrides += "us.awfl" %% "workflow-utils" % "0.1.0-SNAPSHOT"
+dependencyOverrides += "us.awfl" %% "dsl" % "0.1.0-SNAPSHOT"
+dependencyOverrides += "us.awfl" %% "compiler" % "0.1.0-SNAPSHOT"
+dependencyOverrides += "us.awfl" %% "compiler-yaml" % "0.1.0-SNAPSHOT"
+dependencyOverrides += "us.awfl" %% "workflow-utils" % "0.1.0-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-language:implicitConversions")
 

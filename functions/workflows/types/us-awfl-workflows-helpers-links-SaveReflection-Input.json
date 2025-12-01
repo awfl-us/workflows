@@ -1,0 +1,164 @@
+{
+  "name" : "us-awfl-workflows-helpers-links-SaveReflection-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.helpers.links.SaveReflection.Input.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "input" : {
+        "type" : "object",
+        "properties" : {
+          "artifacts" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string"
+              },
+              "path" : {
+                "type" : "string"
+              },
+              "description" : {
+                "type" : "string"
+              },
+              "contents" : {
+                "type" : "string"
+              },
+              "type" : {
+                "type" : "string"
+              }
+            },
+            "required" : [
+              "name",
+              "path",
+              "type",
+              "contents",
+              "description"
+            ],
+            "additionalProperties" : true
+          },
+          "topics" : {
+            "type" : "object",
+            "properties" : {
+              "endingPoint" : {
+                "type" : "string"
+              },
+              "startingPoint" : {
+                "type" : "string"
+              },
+              "details" : {
+                "type" : "string"
+              },
+              "depth" : {
+                "type" : "string"
+              },
+              "topic" : {
+                "type" : "string"
+              },
+              "breadth" : {
+                "type" : "string"
+              }
+            },
+            "required" : [
+              "topic",
+              "breadth",
+              "depth",
+              "startingPoint",
+              "endingPoint",
+              "details"
+            ],
+            "additionalProperties" : true
+          },
+          "nuggets" : {
+            "type" : "object",
+            "properties" : {
+              "details" : {
+                "type" : "string"
+              }
+            },
+            "required" : [
+              "details"
+            ],
+            "additionalProperties" : true
+          },
+          "shouldSaveReflection" : {
+            "type" : "boolean"
+          },
+          "reflections" : {
+            "type" : "object",
+            "properties" : {
+              "critique" : {
+                "type" : "string"
+              }
+            },
+            "required" : [
+              "critique"
+            ],
+            "additionalProperties" : true
+          }
+        },
+        "required" : [
+          "topics",
+          "nuggets",
+          "reflections",
+          "artifacts",
+          "shouldSaveReflection"
+        ],
+        "additionalProperties" : true
+      },
+      "params" : {
+        "type" : "object",
+        "properties" : {
+          "agentWorkflow" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "agentWorkflow"
+        ],
+        "additionalProperties" : true
+      },
+      "env" : {
+        "type" : "object",
+        "properties" : {
+          "callingWorkflowExec" : {
+            "type" : "string"
+          },
+          "model" : {
+            "type" : "string"
+          },
+          "background" : {
+            "type" : "boolean"
+          },
+          "projectId" : {
+            "type" : "string"
+          },
+          "sessionId" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "BASE_URL" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "userId",
+          "model",
+          "callingWorkflowExec",
+          "BASE_URL",
+          "background",
+          "projectId",
+          "sessionId"
+        ],
+        "additionalProperties" : true
+      }
+    },
+    "required" : [
+      "input",
+      "params",
+      "env"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-helpers-links-SaveReflection-Input.json"
+  }
+}

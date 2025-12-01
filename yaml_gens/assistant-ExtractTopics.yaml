@@ -12,9 +12,9 @@ main:
                 args:
                   url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
                   body:
-                    collection: "${(((\"convo.sessions/\" + input.arg1) + \"/\") + \"messages\")}"
-                    windowSeconds: "${default(input.arg3, 1200)}"
-                    overlapSeconds: "${default(input.arg4, 240)}"
+                    collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
+                    windowSeconds: "${default(input.windowSeconds, 1200)}"
+                    overlapSeconds: "${default(input.overlapSeconds, 240)}"
                     userId: "${input.env.userId}"
                   auth:
                     type: "OIDC"
@@ -22,27 +22,27 @@ main:
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "segmentsForSession_fetchResult_6b53622e"
+                result: "segmentsForSession_fetchResult_50dfb871"
           retry: "${http.default_retry}"
       - segmentsForSession_convert:
           steps:
           - segmentsForSession_convert_initResult:
               assign:
-              - segmentsForSession_convertResult_40df1c18: []
+              - segmentsForSession_convertResult_51c53d2c: []
           - segmentsForSession_convert_steps:
               for:
                 value: "segmentsForSession_convertValue"
-                in: "${segmentsForSession_fetchResult_6b53622e.body.segments}"
+                in: "${segmentsForSession_fetchResult_50dfb871.body.segments}"
                 steps:
                 - segmentsForSession_convert_assignIterResult:
                     assign:
                     - segmentsForSession_convert_assignIterResultVar:
-                        sessionId: "${input.arg1}"
+                        sessionId: "${input.env.sessionId}"
                         end: "${segmentsForSession_convertValue.end}"
-                        windowSeconds: "${default(input.arg3, 1200)}"
+                        windowSeconds: "${default(input.windowSeconds, 1200)}"
                 - segmentsForSession_convert_updateResult:
                     assign:
-                    - segmentsForSession_convertResult_40df1c18: "${list.concat(segmentsForSession_convertResult_40df1c18, segmentsForSession_convert_assignIterResultVar)}"
+                    - segmentsForSession_convertResult_51c53d2c: "${list.concat(segmentsForSession_convertResult_51c53d2c, segmentsForSession_convert_assignIterResultVar)}"
   - All_Latest_run:
       try:
         steps:
@@ -51,10 +51,9 @@ main:
             args:
               workflow_id: "${\"assistant-ExtractTopics-All${WORKFLOW_ENV}\"}"
               argument:
-                arg1: "${input.arg1}"
-                arg2: "${segmentsForSession_convertResult_40df1c18[(len(segmentsForSession_convertResult_40df1c18) - 1)].end}"
-                arg3: "${1200}"
-                arg4: "${240}"
+                segmentEnd: "${segmentsForSession_convertResult_51c53d2c[(len(segmentsForSession_convertResult_51c53d2c) - 1)].end}"
+                windowSeconds: "${1200}"
+                overlapSeconds: "${240}"
                 env:
                   userId: "${input.env.userId}"
                   model: "${input.env.model}"
@@ -67,9 +66,9 @@ main:
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "All_Latest_runResult_5d04ec53"
+            result: "All_Latest_runResult_b9a8efb"
       retry: "${http.default_retry}"
   - returnLatest:
-      return: "${All_Latest_runResult_5d04ec53}"
+      return: "${All_Latest_runResult_b9a8efb}"
   - return:
-      return: "${All_Latest_runResult_5d04ec53}"
+      return: "${All_Latest_runResult_b9a8efb}"
