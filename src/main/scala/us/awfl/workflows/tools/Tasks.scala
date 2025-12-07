@@ -18,11 +18,11 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
   val supported = List("CREATE_TASK", "UPDATE_TASK")
 
   override def workflows = List({
-    val toolCall = input.tool_call
+    val toolCall = inputVal.flatMap(_.tool_call)
     val cost     = input.cost
 
-    val nameV: BaseValue[String] = toolCall.get.function.get.name
-    val nameStr: Cel = CelFunc("string", nameV.cel)
+    val nameV: Value[String] = toolCall.flatMap(_.function).get.name
+    val nameStr: Cel = CelFunc("string", nameV)
 
     // Build branches
     val (createSteps, createMsg) = TaskRunners.runCreate(toolCall = toolCall )

@@ -6,10 +6,10 @@ main:
       steps:
       - maybeSaveReflection_initResult:
           assign:
-          - maybeSaveReflectionResult_4988da3: {}
+          - maybeSaveReflectionResult_24882ced: {}
       - maybeSaveReflection_steps:
           switch:
-          - condition: "${((input.input != null) and input.input.shouldSaveReflection)}"
+          - condition: "${((\"input\" in input) and input.input.shouldSaveReflection)}"
             steps:
             - callAgent:
                 try:
@@ -31,7 +31,7 @@ main:
                           env:
                             userId: "${input.env.userId}"
                             model: "${input.env.model}"
-                            callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                            callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                             BASE_URL: "${input.env.BASE_URL}"
                             background: "${default(map.get(input.env, \"background\"), null)}"
                             projectId: "${input.env.projectId}"
@@ -40,15 +40,15 @@ main:
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "callAgentResult_34242044"
+                      result: "callAgentResult_49a9a739"
                 retry: "${http.default_retry}"
             - maybeSaveReflection_updateResult_0:
                 assign:
-                - maybeSaveReflectionResult_4988da3: "${callAgentResult_34242044}"
+                - maybeSaveReflectionResult_24882ced: "${callAgentResult_49a9a739}"
           - condition: "${true}"
             steps:
             - maybeSaveReflection_updateResult_1:
                 assign:
-                - maybeSaveReflectionResult_4988da3: "${null}"
+                - maybeSaveReflectionResult_24882ced: "${null}"
   - return:
-      return: "${maybeSaveReflectionResult_4988da3}"
+      return: "${maybeSaveReflectionResult_24882ced}"

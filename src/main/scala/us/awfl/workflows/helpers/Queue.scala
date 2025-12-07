@@ -13,7 +13,7 @@ import us.awfl.utils.Events.OperationEnvelope
 object Queue {
   // Pub/Sub request types
   case class MessageAttributes(sessionId: BaseValue[String])
-  case class PubSubMessage(data: Field, attributes: MessageAttributes = MessageAttributes(Field.str("")))
+  case class PubSubMessage(data: Value[String], attributes: MessageAttributes = MessageAttributes(str("")))
   case class PublishBody(messages: ListValue[PubSubMessage])
   case class PublishArgs(topic: BaseValue[String], body: PublishBody)
 
@@ -21,7 +21,7 @@ object Queue {
   case class Input(
     sessionId: Value[String],
     items: ListValue[OperationEnvelope],            // Each item is a JSON object to encode and publish
-    topic: BaseValue[String] = Field.str("projects/topaigents/topics/CliOperations")
+    topic: BaseValue[String] = str("projects/topaigents/topics/CliOperations")
   )
   case class Result(published: BaseValue[Int])
 
@@ -31,7 +31,7 @@ object Queue {
 
     // Map each JSON item to a PubSubMessage with base64-encoded data
     val buildMessages = For("buildMessages", input.items) { item =>
-      val dataField = Field(CelFunc("base64.encode", CelFunc("json.encode", item)))
+      val dataField = Value[String](CelFunc("base64.encode", CelFunc("json.encode", item)))
       List() -> obj(PubSubMessage(dataField, MessageAttributes(input.sessionId)))
     }
 
@@ -56,13 +56,13 @@ object Queue {
   })
 
   // Helper: run the Queue workflow with given items
-  def apply(name: String, sessionId: Value[String], items: ListValue[OperationEnvelope], topic: BaseValue[String] = Field.str("projects/topaigents/topics/CliOperations")): Call[RunWorkflowArgs[Input], Result] = {
+  def apply(name: String, sessionId: Value[String], items: ListValue[OperationEnvelope], topic: BaseValue[String] = str("projects/topaigents/topics/CliOperations")): Call[RunWorkflowArgs[Input], Result] = {
     val args = RunWorkflowArgs(str("helpers-Queue${WORKFLOW_ENV}"), obj(Input(sessionId, items, topic)))
     Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
   }
 
   // Helper: enqueue a single item by wrapping it into a one-element list
-  def one(name: String, sessionId: Value[String], item: OperationEnvelope, topic: BaseValue[String] = Field.str("projects/topaigents/topics/CliOperations")): Step[Result, BaseValue[Result]] = {
+  def one(name: String, sessionId: Value[String], item: OperationEnvelope, topic: BaseValue[String] = str("projects/topaigents/topics/CliOperations")): Step[Result, BaseValue[Result]] = {
     val items = buildList("singleItem", List(item))
     val args = RunWorkflowArgs(str("helpers-Queue${WORKFLOW_ENV}"), obj(Input(sessionId, items.resultValue, topic)))
     val call = Call[RunWorkflowArgs[Input], Result](name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))

@@ -43,7 +43,7 @@ object Tasks extends us.awfl.core.Workflow {
   }
 
   // Stringify a task in a single line (made public for reuse by runners)
-  def taskToLine(prefix: String, t: BaseValue[Task]): Value[String] = {
+  def taskToLine(prefix: String, t: Value[Task]): Value[String] = {
     // Safely stringify possibly-null fields via CEL string() conversion; build with Cels only
     val idCel: Cel      = CelFunc("string", t.flatMap(_.id).cel)
     val titleCel: Cel   = CelFunc("string", t.flatMap(_.title).cel)
@@ -54,7 +54,7 @@ object Tasks extends us.awfl.core.Workflow {
     str((prefix: Cel) + (": id=": Cel) + idCel + (" | ": Cel) + titleCel + (" — ": Cel) + descCel + (" [status=": Cel) + statusCel + ("]": Cel))
   }
 
-  private def firstOrNote(name: String, label: String, getStep: Step[PostResult[TasksList], Resolved[PostResult[TasksList]]]): Step[ChatMessage, BaseValue[ChatMessage]] = {
+  private def firstOrNote(name: String, label: String, getStep: Step[PostResult[TasksList], Value[PostResult[TasksList]]]): Step[ChatMessage, BaseValue[ChatMessage]] = {
     val body = getStep.resultValue.flatMap(_.body)
 
     // Defensive: detect non-object bodies before looking up fields.
@@ -89,7 +89,7 @@ object Tasks extends us.awfl.core.Workflow {
   case class Input(env: BaseValue[us.awfl.utils.Env] = us.awfl.utils.ENV)
   case class Result(tasks: ListValue[ChatMessage])
 
-  override val inputVal: BaseValue[Input] = init[Input]("input")
+  override val inputVal: Value[Input] = init[Input]("input")
 
   // Exposed helpers that each return a ChatMessage Step to be included in prompts
   def currentTaskPrompt(name: String): Step[ChatMessage, BaseValue[ChatMessage]] = {
@@ -135,7 +135,7 @@ object Tasks extends us.awfl.core.Workflow {
   }
 
   // PATCH /jobs/tasks/:id
-  def updateTask(name: String, id: BaseValue[String], title: BaseValue[String], description: BaseValue[String], status: BaseValue[String]) = {
+  def updateTask(name: String, id: Value[String], title: BaseValue[String], description: BaseValue[String], status: BaseValue[String]) = {
     us.awfl.utils.patchV[UpdateTaskBody, TaskEnvelope](
       name,
       str(("tasks/": Cel) + id.cel),
@@ -156,10 +156,10 @@ object Tasks extends us.awfl.core.Workflow {
       val post = createTask(s"${name}_post", title, description, status)
       val body = post.resultValue.flatMap(_.body).flatMap(_.task)
       val line = taskToLine("Task created", body)
-      List(post) -> obj(ChatMessage("system", line)).base
+      List(post) -> obj(ChatMessage("system", line))
     }
 
-    val skip = List() -> obj(ChatMessage("system", str("No input.task provided"))).base
+    val skip = List() -> obj(ChatMessage("system", str("No input.task provided")))
 
     val sw = Switch(s"${name}_switch", List(
       isMap -> create,

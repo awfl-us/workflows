@@ -17,13 +17,13 @@ object Agents {
 
   // Low-level GET helpers (Http helpers auto-prefix /job)
   def fetchSessionAgent(name: String, sessionId: Value[String])
-      : Step[PostResult[SessionAgentResp], Resolved[PostResult[SessionAgentResp]]] with ValueStep[PostResult[SessionAgentResp]] = {
+      : Step[PostResult[SessionAgentResp], Value[PostResult[SessionAgentResp]]] = {
     val relativePath = str((("agents/session/": Cel) + sessionId))
     get[SessionAgentResp](name, relativePath, Auth())
   }
 
   def fetchAgentTools(name: String, agentId: Value[String])
-      : Step[PostResult[AgentToolsResp], Resolved[PostResult[AgentToolsResp]]] with ValueStep[PostResult[AgentToolsResp]] = {
+      : Step[PostResult[AgentToolsResp], Value[PostResult[AgentToolsResp]]] = {
     val relativePath = str((("agents/": Cel) + agentId) + "/tools")
     get[AgentToolsResp](name, relativePath, Auth())
   }
@@ -44,5 +44,5 @@ object Agents {
   def toolsByAgent(name: String, agentId: Value[String]) =
     fetchAgentTools(name, agentId)
       .flatMap(_.body)
-      .flatMap(_.tools)
+      .flatMapList(_.tools)
 }

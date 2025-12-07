@@ -14,13 +14,13 @@ object CliActions {
 
   //   action: Resolved[String] = str("null": Cel),
   //   filepath: Resolved[String] = str("null": Cel),
-  //   content: Field = Field("null"),
-  //   command: Field = Field("null"),
-  //   workflow: Field = Field("null"),
+  //   content: Value[String] = Field("null"),
+  //   command: Value[String] = Field("null"),
+  //   workflow: Value[String] = Field("null"),
   //   query: Resolved[String] = str("null": Cel)
   // )
 
-  // case class StatusRecord(response: BaseValue[StatusUpdate], create_time: Field)
+  // case class StatusRecord(response: BaseValue[StatusUpdate], create_time: Value[String])
 
   // Tool-only instruction (primary)
   val cliStatusPrompt = {

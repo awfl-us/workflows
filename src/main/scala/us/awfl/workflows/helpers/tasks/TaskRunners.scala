@@ -23,10 +23,10 @@ object TaskRunners {
       // sessionId is implied by the current session context; agent should not provide it
       "title"       -> ToolDefProperty("string"),
       "description" -> ToolDefProperty("string"),
-      "status"      -> ToolDefProperty("string", Field("""["Queued", "In Progress", "Done", "Stuck"]"""))
+      "status"      -> ToolDefProperty("string", ListValue("""["Queued", "In Progress", "Done", "Stuck"]"""))
     ),
     // No required fields; session is injected by the runner
-    required = Field("[]")
+    required = str("[]")
   )
 
   private val updateParams = ToolDefParams(
@@ -36,14 +36,14 @@ object TaskRunners {
       // sessionId is not required or exposed; runner will not change session
       "title"       -> ToolDefProperty("string"),
       "description" -> ToolDefProperty("string"),
-      "status"      -> ToolDefProperty("string", Field("""["Queued", "In Progress", "Done", "Stuck"]"""))
+      "status"      -> ToolDefProperty("string", ListValue("""["Queued", "In Progress", "Done", "Stuck"]"""))
     ),
-    required = Field("""["id"]""")
+    required = str("""["id"]""")
   )
 
   // -------- CREATE_TASK exec --------
-  private val createRun: BaseValue[ToolCall] => (List[Step[_, _]], BaseValue[String]) = { toolCall =>
-    val fn = toolCall.get.function.get
+  private val createRun: Value[ToolCall] => (List[Step[_, _]], Value[String]) = { toolCall =>
+    val fn = toolCall.flatMap(_.function).get
     val title = fn.arg("title")
     val desc  = fn.arg("description")
     // Default to In Progress if omitted
@@ -64,8 +64,8 @@ object TaskRunners {
   }
 
   // -------- UPDATE_TASK exec --------
-  private val updateRun: BaseValue[ToolCall] => (List[Step[_, _]], BaseValue[String]) = { toolCall =>
-    val fn = toolCall.get.function.get
+  private val updateRun: Value[ToolCall] => (List[Step[_, _]], Value[String]) = { toolCall =>
+    val fn = toolCall.flatMap(_.function).get
     val id    = fn.arg("id")
 
     val titleV: BaseValue[String]   = fn.arg("title")
@@ -128,7 +128,7 @@ object TaskRunners {
             }
           ))
 
-          Block("promote_has_queued_block", List(getQueued, promoteIfHasQueued) -> promoteIfHasQueued.resultValue).fn
+          Block("promote_has_queued_block", List[Step[_, _]](getQueued, promoteIfHasQueued) -> promoteIfHasQueued.resultValue).fn
         },
         (true: Cel) -> {
           val msg = str("Task marked Done, but another task is already In Progress; no promotion performed")
@@ -136,7 +136,7 @@ object TaskRunners {
         }
       ))
 
-      Block("promote_no_current_block", List(getInProgress, promoteIfNoCurrent) -> promoteIfNoCurrent.resultValue)
+      Block("promote_no_current_block", List[Step[_, _]](getInProgress, promoteIfNoCurrent) -> promoteIfNoCurrent.resultValue)
     }
 
     val maybePromote = Switch[String, Value[String]]("maybe_promote_next", List(
@@ -152,13 +152,13 @@ object TaskRunners {
 
     val combinedMsg = str(tryUpdate.resultValue.cel + ("\r": Cel) + maybePromote.resultValue.cel)
 
-    (List(patch, tryUpdate, maybePromote), combinedMsg)
+    (List[Step[_, _]](patch, tryUpdate, maybePromote), combinedMsg)
   }
 
   // -------- Public exec helpers used by tools/Tasks workflow --------
-  def runCreate(toolCall: BaseValue[ToolCall]): (List[Step[_, _]], BaseValue[String]) =
+  def runCreate(toolCall: Value[ToolCall]): (List[Step[_, _]], Value[String]) =
     createRun(toolCall)
 
-  def runUpdate(toolCall: BaseValue[ToolCall]): (List[Step[_, _]], BaseValue[String]) =
+  def runUpdate(toolCall: Value[ToolCall]): (List[Step[_, _]], Value[String]) =
     updateRun(toolCall)
 }

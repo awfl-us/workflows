@@ -37,7 +37,7 @@ object ToolDispatcher extends us.awfl.core.Workflow {
   override def workflows = List({
     // val allRunners = Tools.all(Tasks.runners)
     val dispatch = For("forToolCall", input.toolCalls) { toolCall =>
-      val function = toolCall.get.function.get
+      val function = toolCall.flatMap(_.function).get
       val functionName = function.name
 
       val toolFold = Fold("fold", Value.nil[ToolWorkflow.Result], input.toolDefs) { case (b, d) =>

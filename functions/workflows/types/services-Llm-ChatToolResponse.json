@@ -4,9 +4,16 @@
   "schema" : {
     "type" : "object",
     "properties" : {
-      
+      "title" : {
+        "type" : "string"
+      },
+      "summary" : {
+        "type" : "string"
+      }
     },
     "required" : [
+      "title",
+      "summary"
     ],
     "additionalProperties" : true,
     "$id" : "https://topaigents.dev/workflows/types/services-Llm-ChatToolResponse.json"

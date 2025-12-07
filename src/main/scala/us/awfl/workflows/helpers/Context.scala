@@ -8,7 +8,7 @@ import us.awfl.workflows.tools.CliTools
 import us.awfl.workflows.EventHandler
 
 object Context {
-  def preloadFile(name: String, filename: BaseValue[String]) = {
+  def preloadFile(name: String, filename: Value[String]) = {
     val toolCall = obj(ToolCall(
       id = str("preload_file"),
       `type` = "function",
@@ -23,15 +23,15 @@ object Context {
     )
 
     // Keep the expression short to satisfy Cloud Workflows' 400-char expression limit.
-    Block(
+    Try(
       s"${name}_block",
-      List(contents) -> obj(ChatMessage("system", str((("[Preload ": Cel) + filename + "]\r" + contents.resultValue.cel)))).base
+      List(contents) -> obj(ChatMessage("system", str((("[Preload ": Cel) + filename + "]\r" + contents.resultValue.cel))))
     )
   }
 
   // Preload helper that runs a shell command and captures stdout for the system prompt
   def preloadCommand(name: String, command: String) = {
-    val paramJson = Try(s"${name}_paramJson", List() -> obj(Map("command" -> command)).base)
+    val paramJson = Try(s"${name}_paramJson", List() -> obj(Map("command" -> command)))
 
     val toolCall = obj(ToolCall(
       id = str("preload_command"),
@@ -46,9 +46,9 @@ object Context {
       background = Value(true)
     )
 
-    Block(
+    Try(
       s"${name}_block",
-      List(paramJson, contents) -> obj(ChatMessage("system", str((CelStr(s"[Preload ${command.takeRight(350)}]\r").safe + contents.resultValue.cel)))).base
+      List[Step[_, _]](paramJson, contents) -> obj(ChatMessage("system", str((CelStr(s"[Preload ${command.takeRight(350)}]\r").safe + contents.resultValue.cel))))
     )
   }
 }

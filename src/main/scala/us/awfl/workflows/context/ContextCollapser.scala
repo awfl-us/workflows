@@ -87,7 +87,7 @@ object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMess
   )
 
   // Fire the indexer only when a new SegKala child document was created
-  override protected def postWriteSteps(sessionId: Value[String], responseId: BaseValue[String], response: BaseValue[CollapseResponse], at: BaseValue[Double]) = {
+  override protected def postWriteSteps(sessionId: Value[String], responseId: Value[String], response: Value[CollapseResponse], at: Value[Double]) = {
     val call = post[CollapseIndexerArgs, CollapseIndexerResult](
       "collapse_indexer_run",
       "context/collapse/indexer/run",

@@ -21,7 +21,7 @@ object Tools {
       "filepath" -> ToolDefProperty("string"),
       "content"  -> ToolDefProperty("string")
     ),
-    required = Field("""["filepath", "content"]""")
+    required = str("""["filepath", "content"]""")
   )
 
   private val readFileParams = ToolDefParams(
@@ -29,7 +29,7 @@ object Tools {
     properties = Map(
       "filepath" -> ToolDefProperty("string")
     ),
-    required = Field("""["filepath"]""")
+    required = str("""["filepath"]""")
   )
 
   private val runCommandParams = ToolDefParams(
@@ -37,7 +37,7 @@ object Tools {
     properties = Map(
       "command" -> ToolDefProperty("string")
     ),
-    required = Field("""["command"]""")
+    required = str("""["command"]""")
   )
 
   // Public query-only params for simple "{ query }" tools
@@ -46,7 +46,7 @@ object Tools {
     properties = Map(
       "query" -> ToolDefProperty("string")
     ),
-    required = Field("""["query"]""")
+    required = str("""["query"]""")
   )
 
   // Public params for general workflow runner tools supporting an optional task seed
@@ -58,7 +58,7 @@ object Tools {
       // We intentionally keep task as a generic object; concrete fields are documented in the description
       "task"  -> ToolDefProperty("object")
     ),
-    required = Field("""["query"]""")
+    required = str("""["query"]""")
   )
 
   // Standard tools are executed via enqueueAndAwaitCallback

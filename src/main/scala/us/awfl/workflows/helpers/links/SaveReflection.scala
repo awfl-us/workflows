@@ -16,7 +16,7 @@ object SaveReflection extends Linkable {
   override type Input = ChainableInput[TopicInfo, Params]
   override type Result = NoValueT
 
-  override val inputVal: BaseValue[Input] = init("input")
+  override val inputVal: Value[Input] = init("input")
 
   override def workflows: List[Workflow[AnyValueT]] = List(Workflow {
     val query = str(
@@ -28,8 +28,8 @@ object SaveReflection extends Linkable {
       """.stripMargin
     )
     val args = RunWorkflowArgs(
-      input.params.get.agentWorkflow,
-      obj(EventHandler.Input(query, Value(0), OptValue.nil, toolChoice = OptValue(obj(ToolChoice.Function("UPDATE_FILE"))), sideCall = OptValue(Value[Boolean](true))))
+      inputVal.flatMap(_.params).get.agentWorkflow,
+      obj(EventHandler.Input(query, Value(0), OptValue.nil, toolChoice = OptObj(obj(ToolChoice.Function("UPDATE_FILE"))), sideCall = OptValue(Value[Boolean](true))))
     )
     val call = Call[RunWorkflowArgs[EventHandler.Input], AnyValueT](
       "callAgent",
@@ -37,7 +37,7 @@ object SaveReflection extends Linkable {
       obj(args)
     )
     Switch("maybeSaveReflection", List(
-      ((input.input.cel !== Cel.nil) && input.input.get.shouldSaveReflection) -> call.fn,
+      (("input" in inputVal.cel) && inputVal.flatMap(_.input).get.shouldSaveReflection) -> call.fn,
       (true: Cel) -> (List() -> Value.nil)
     )).fn
   })

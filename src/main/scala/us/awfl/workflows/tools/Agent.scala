@@ -25,17 +25,17 @@ import us.awfl.utils.Env
  */
 object Agent extends us.awfl.workflows.traits.ToolWorkflow {
   override def workflows = List({
-    val toolCall   = input.tool_call
+    val toolCall   = inputVal.flatMap(_.tool_call)
 
     // Target workflow name is the tool name itself (no prefixing); caller is responsible for matching deployment name
-    val nameV: BaseValue[String] = toolCall.get.function.get.name
+    val nameV: Value[String] = toolCall.flatMap(_.function).get.name
     val nameStr: Cel = CelFunc("string", nameV.cel)
 
-    val fn = toolCall.get.function.get
-    val query: BaseValue[String] = fn.arg("query")
-    val taskField: Field = Field(CelFunc("default", fn.arg("task").cel, CelConst("null")))
+    val fn = toolCall.flatMap(_.function).get
+    val query: Value[String] = fn.arg("query")
+    val taskField: Value[String] = str(CelFunc("default", fn.arg("task").cel, CelConst("null")))
     // Model is optional; provide a conservative default suitable for tooling if omitted
-    val modelField: Field = Field(CelFunc("default", fn.arg("model").cel, "gpt-5"))
+    val modelField: Value[String] = str(CelFunc("default", fn.arg("model").cel, "gpt-5"))
     val fund = Value[Double](CelFunc("default", fn.arg("fund").cel, 0))
 
     val args = RunWorkflowArgs(

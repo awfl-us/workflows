@@ -22,7 +22,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
 
   // jobs/callbacks service payloads
   case class CreateJobsCallbackBody(callback_url: BaseValue[String])
-  case class CreateCallbackResponse(id: BaseValue[String])
+  case class CreateCallbackResponse(id: Value[String])
 
   case class ProducerRequest(sessionId: Value[String] = Value.nil)
 
@@ -33,7 +33,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     val createCallback = Call[CreateCallbackArgs, CallbackDetails](
       s"createCallback",
       "events.create_callback_endpoint",
-      obj(CreateCallbackArgs(Field.str("POST")))
+      obj(CreateCallbackArgs(str("POST")))
     )
 
     // Save the callback on our server to receive a callback ID
@@ -56,7 +56,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     // POST to /workflows/events instead of Pub/Sub
     val ingest = Events.postEvent(
       data = envelope,
-      source = Field.str("workflows.tools.CliTools")
+      source = str("workflows.tools.CliTools")
     )
 
     val maybeStartProducer = post[ProducerRequest, NoValueT]("maybeStartProducer", "producer/start", obj(ProducerRequest()))
@@ -70,7 +70,10 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     val encodedCallback = str(
       CelFunc(
         "json.encode_to_string",
-        awaitCallback.resultValue.flatMap(_.http_request).flatMap(_.body).cel
+        awaitCallback.resultValue
+          .flatMap(_.http_request)
+          .flatMap(_.body)
+          .cel
       )
     )
 
@@ -94,7 +97,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     toolCall: BaseValue[ToolCall],
     cost: BaseValue[Double],
     sessionId: Value[String] = Env.sessionId,
-    background: BaseValue[Boolean] = Env.background.getOrElse(Value(false))
+    background: Value[Boolean] = Env.background.getOrElse(Value(false))
   ) = {
     val args = RunWorkflowArgs(str("tools-CliTools${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, cost, env = obj(Env.get.copy(sessionId = sessionId, background = OptValue(background))))))
     val run = Call[RunWorkflowArgs[Input], Result](

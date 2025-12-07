@@ -20,7 +20,7 @@ object ToolDefs extends us.awfl.core.Workflow {
   override val inputVal = init[Input]("input")
 
   // Service-facing variant that carries workflowName metadata alongside the LLM tool def
-  case class ToolWithWorkflow(`type`: String = "function", function: ToolFunctionDef, workflowName: BaseValue[String])
+  case class ToolWithWorkflow(`type`: String = "function", function: ToolFunctionDef, workflowName: Value[String])
   
   case class Result(defs: ListValue[ToolWithWorkflow])
 
@@ -29,7 +29,7 @@ object ToolDefs extends us.awfl.core.Workflow {
 
   // Fetch tool defs from service with optional names filter (CSV supported by service)
   // Return an object envelope so PostResult[T] is PostResult[ServiceResp] (T is an object), not a list
-  private def fetchDefsFromService(name: String, toolNames: ListValue[String]): Step[PostResult[ServiceResp], Resolved[PostResult[ServiceResp]]] with ValueStep[PostResult[ServiceResp]] = {
+  private def fetchDefsFromService(name: String, toolNames: ListValue[String]): Step[PostResult[ServiceResp], Value[PostResult[ServiceResp]]] = {
     // Http helpers prepend /jobs/ automatically; target /jobs/tools/list
     val names = Fold(s"${name}_foldNames", str(""), toolNames) { case (b, n) =>
       List() -> Value(b.cel + "," + n)
@@ -51,7 +51,7 @@ object ToolDefs extends us.awfl.core.Workflow {
     // Try service first; on failure use local fallback. Extract list from envelope.
     val fetchItems = fetchDefsFromService("getToolDefs", input.toolNames)
       .flatMap(_.body)
-      .flatMap(_.items)
+      .flatMapList(_.items)
 
     List(Workflow(List(fetchItems) -> obj(Result(fetchItems.resultValue))))
   }

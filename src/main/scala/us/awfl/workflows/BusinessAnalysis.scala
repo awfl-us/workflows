@@ -8,9 +8,9 @@ import us.awfl.utils._
 import us.awfl.ista.ChatMessage
 
 object BusinessAnalysis extends us.awfl.core.Workflow {
-  val inputVal: BaseValue[Input] = init[Input]("input")
+  val inputVal: Value[Input] = init[Input]("input")
 
-  opaque type PlaceId = Field
+  opaque type PlaceId = Value[String]
   override case class Input(placeId: PlaceId)
 
   case class Success(message: String)
@@ -19,14 +19,14 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
 
   case class Competitor(placeId: PlaceId) 
 
-  case class GenerateKeywordsResult(businessInfo: Field, competitors: ListValue[Competitor]) // extends Value[GenerateKeywordsResult] {
+  case class GenerateKeywordsResult(businessInfo: Value[String], competitors: ListValue[Competitor]) // extends Value[GenerateKeywordsResult] {
 
   case class StepParams(placeId: PlaceId)
   val params = obj(StepParams(input.placeId))
 
-  case class Reviews(reviews: Field)
+  case class Reviews(reviews: ListValue[String])
   implicit val reviewsSpec: Spec[Reviews] = Spec { resolver =>
-    Reviews(resolver.field("reviews"))
+    Reviews(resolver.list("reviews"))
   }
 
   val cacheTtl = 1000 * 60 * 60 * 24
@@ -47,46 +47,46 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
     List(cache) -> cache.resultValue
   }
 
-  case class CompetitorAndReviews(businessInfo: Field, reviews: Field)
+  case class CompetitorAndReviews(businessInfo: Value[Competitor], reviews: ListValue[String])
 
   val zipCompetitorReviews = us.awfl.utils.zip[Competitor, Reviews, CompetitorAndReviews](
     "zipCompetitorReviews",
     generateKeywords.result.competitors,
     competitorReviews.resultValue
   ) { case (competitor, reviews) =>
-    Nil -> obj(CompetitorAndReviews(competitor.field, reviews.flatMap(_.reviews)))
+    Nil -> obj(CompetitorAndReviews(competitor, reviews.flatMap(_.reviews)))
   }
 
   def status(s: String, msg: Cel) = us.awfl.services.Firebase.update(s"Status_${s}", str("businesses.report"), input.placeId, obj(Map("status" -> s, "statusMsg" -> str(msg))))
 
   case class ReviewHighlight(
-    author: Field,
-    rating: Field,
-    text: Field,
-    time: Field
+    author: Value[String],
+    rating: Value[String],
+    text: Value[String],
+    time: Value[String]
   )
 
   case class CompetitorReviewComparison(
-    name: Field,
-    priceLevel: Field,
-    rating: Field,
+    name: Value[String],
+    priceLevel: Value[String],
+    rating: Value[String],
     comparisonReview: ReviewHighlight
   )
 
   case class RankedCompetitor(
-    name: Field,
-    rating: Field,
-    priceLevel: Field,
-    weightedScore: Field
+    name: Value[String],
+    rating: Value[String],
+    priceLevel: Value[String],
+    weightedScore: Value[String]
   )
 
   case class AnalysisResponse(
-    targetBusinessSummary: Field,
-    competitorAnalysis: Field,
-    keyStrengths: Field,
-    areasForImprovement: Field,
-    marketPositioning: Field,
-    recommendations: Field,
+    targetBusinessSummary: Value[String],
+    competitorAnalysis: Value[String],
+    keyStrengths: Value[String],
+    areasForImprovement: Value[String],
+    marketPositioning: Value[String],
+    recommendations: Value[String],
     recentOrUrgentConcerns: ReviewHighlight,
     positiveHighlights: ReviewHighlight,
     negativeHighlights: ReviewHighlight,
@@ -96,7 +96,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
 
   val buildPrompt = buildList("buildPrompt", List(
     ChatMessage("system",
-      obj("""You are an expert business analyst specializing in customer feedback analysis.
+      str("""You are an expert business analyst specializing in customer feedback analysis.
           Analyze the provided business and competitor data to generate comprehensive insights.
           Focus on actionable insights and specific recommendations. 
           
@@ -126,13 +126,13 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
   )
 
   case class WorkflowSummary(
-    businessInfo: Field,
+    businessInfo: Value[String],
     marketAnalysis: BaseValue[MarketAnalysis],
     analysis: BaseValue[AnalysisResponse],
-    reviews: Field
+    reviews: ListValue[String]
   )
 
-  val cacheReport = us.awfl.utils.Cache("cacheReport", str("businesses.report"), input.placeId, cacheTtl, Block("cacheReportBlock", List[Step[_, _]](
+  val cacheReport = us.awfl.utils.Cache("cacheReport", str("businesses.report"), input.placeId, cacheTtl, Try("cacheReportBlock", List[Step[_, _]](
     status("started", "Generating keywords..."),
     generateKeywords,
     // us.awfl.services.Firebase.create("createRecord", "businesses", input.placeId, generateKeywords.resultValue),
@@ -145,15 +145,15 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
     buildPrompt,
     analyzeReport,
   ) ->
-    (obj(WorkflowSummary(
+    obj(WorkflowSummary(
       businessInfo = generateKeywords.resultValue.flatMap(_.businessInfo),
       marketAnalysis = obj(MarketAnalysis(
         totalCompetitors = str(len(generateKeywords.resultValue.flatMap(_.competitors))),
-        topCompetitors = generateKeywords.resultValue.flatMap[Competitor, ListValue[Competitor]](_.competitors)
+        topCompetitors = generateKeywords.resultValue.flatMap(_.competitors)
       )),
       analysis = analyzeReport.resultValue.flatMap(_.result),
       reviews = reviews.resultValue.flatMap(_.reviews)
-    )): BaseValue[WorkflowSummary])
+    ))
   ))
 
   override def workflows = List(Workflow(List[Step[_, _]](

@@ -26,7 +26,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
   case class Input(
     filepath: Value[String]
   )
-  override val inputVal: BaseValue[Input] = init[Input]("input")
+  override val inputVal: Value[Input] = init[Input]("input")
   override def workflows = List(
     apply()
   )
@@ -42,7 +42,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
       "read_plain_params",
       List() -> obj(Map(
         "filepath" -> plainPath
-      )).base
+      ))
     )
     val readCall = obj(ToolCall(
       id = str("read_plain"),
@@ -90,7 +90,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
       messages = messages.resultValue,
       tools = ListValue.nil,
       tool_choice = Value.nil,
-      model = Field.str("gpt-4o"),
+      model = str("gpt-4o"),
       temperature = 0.2,
       maxTokens = Value("null")
     )
@@ -102,7 +102,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
       "mkdir_code_params",
       List() -> obj(Map(
         "command" -> str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel)))
-      )).base
+      ))
     )
     val mkdirCall = obj(ToolCall(
       id = str("mkdir_code"),
@@ -126,7 +126,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
       List() -> obj(Map(
         "filepath" -> outPath,
         "content"  -> generatedCode
-      )).base
+      ))
     )
     val writeCall = obj(ToolCall(
       id = str("write_code"),

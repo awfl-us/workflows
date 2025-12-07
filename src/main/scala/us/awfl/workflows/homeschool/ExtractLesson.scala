@@ -18,7 +18,7 @@ case class ExtractLessonInput(arg1: Value[String]) {
 }
 private val input = init[ExtractLessonInput]("input").get
 
-object ExtractLesson extends ExtractLesson(using SegKala(input.sessionId, Value("sys.now()"), obj(15 * 60)))
+object ExtractLesson extends ExtractLesson(using SegKala(input.sessionId, Value("sys.now()"), Value(15 * 60)))
 
 trait ExtractLesson(using kala: SegKala) {
   case class LessonContext(prevTopics: ListValue[TopicInfo], convoContext: BaseValue[ConvoContext], lesson: ListValue[Lesson])

@@ -9,7 +9,7 @@ import us.awfl.utils.Env
 trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks with Cli with Funds {
   override type Result = ChatToolResponse
 
-  def apply(name: String, query: BaseValue[String], fund: BaseValue[Double], spent: BaseValue[Double]): Call[RunWorkflowArgs[Input], ChatToolResponse] = {
+  def apply(name: String, query: Value[String], fund: Value[Double], spent: Value[Double]): Call[RunWorkflowArgs[Input], ChatToolResponse] = {
     execute(workflowName, obj(EventHandler.Input(query, fund, OptValue(spent), env = obj(Env.get.copy(sessionId = str(workflowName))))))
   }
 

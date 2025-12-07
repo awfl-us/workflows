@@ -10,7 +10,7 @@ import us.awfl.utils.post
 object LoadConversationHistory extends us.awfl.core.Workflow {
   // The workflow now calls the API endpoint to load and ingest conversation history.
 
-  case class Input(arg1: Field, arg2: Field) {
+  case class Input(arg1: Value[String], arg2: Value[String]) {
     val objectName = arg1
     val userId = arg2
   }
@@ -19,7 +19,7 @@ object LoadConversationHistory extends us.awfl.core.Workflow {
   override type Result = Map[String, BaseValue[String]]
 
   // Define the step to POST to the loadConvoHistory endpoint
-  val postStep = post[Map[String, FieldValue], NoValueT](
+  val postStep = post[Map[String, Value[String]], NoValueT](
     "postLoadConvoHistory",
     "convo-history/loadConvoHistory",
     obj(Map("objectName" -> input.objectName, "userId" -> input.userId))

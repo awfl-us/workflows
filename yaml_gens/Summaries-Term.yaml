@@ -8,7 +8,7 @@ main:
           steps:
           - lock_acquire_try_initResult:
               assign:
-              - lock_acquire_tryResult_3933990b: {}
+              - lock_acquire_tryResult_1e0d9207: {}
           - lock_acquire_try_steps:
               try:
                 steps:
@@ -31,11 +31,11 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "lock_acquireResult_4de51719"
+                          result: "lock_acquireResult_4489b20"
                     retry: "${http.default_retry}"
                 - lock_acquire_try_updateResult:
                     assign:
-                    - lock_acquire_tryResult_3933990b: "${lock_acquireResult_4de51719.body.acquired}"
+                    - lock_acquire_tryResult_1e0d9207: "${lock_acquireResult_4489b20.body.acquired}"
               except:
                 as: "lock_acquire_tryError"
                 steps:
@@ -69,48 +69,78 @@ main:
                               - lock_acquire_errResult_34a448ba: "${false}"
                 - lock_acquire_try_updateResultError:
                     assign:
-                    - lock_acquire_tryResult_3933990b: "${lock_acquire_errResult_34a448ba}"
+                    - lock_acquire_tryResult_1e0d9207: "${lock_acquire_errResult_34a448ba}"
       - lock_switch:
           steps:
           - lock_switch_initResult:
               assign:
-              - lock_switchResult_1e645deb: {}
+              - lock_switchResult_35c9b7dd: {}
           - lock_switch_steps:
               switch:
-              - condition: "${(lock_acquire_tryResult_3933990b == true)}"
+              - condition: "${(lock_acquire_tryResult_1e0d9207 == true)}"
                 steps:
                 - work_block:
                     steps:
-                    - messagesInWindow:
+                    - messages_yoj_block_SegKala:
                         steps:
-                        - messagesInWindow_initResult:
-                            assign:
-                            - messagesInWindowResult_5e24847c: {}
-                        - messagesInWindow_steps:
-                            try:
-                              steps:
-                              - messages_yoj_block_SegKala:
+                        - messages_components_SegKala_1:
+                            steps:
+                            - messages_components_SegKala_initResult:
+                                assign:
+                                - messages_components_SegKalaResult_199b06bc: []
+                            - messages_components_SegKala_steps:
+                                for:
+                                  value: "messages_components_SegKalaIdx"
+                                  range: "${[0, (1 - 1)]}"
                                   steps:
-                                  - messages_components_SegKala_1:
+                                  - messages_components_SegKala_switch:
                                       steps:
-                                      - messages_components_SegKala_initResult:
+                                      - messages_components_SegKala_switch_initResult:
+                                          assign:
+                                          - messages_components_SegKala_switchResult_41cb83f2: {}
+                                      - messages_components_SegKala_switch_steps:
+                                          switch:
+                                          - condition: "${(messages_components_SegKalaIdx == 0)}"
+                                            steps:
+                                            - messages_components_SegKala_switch_updateResult_0:
+                                                assign:
+                                                - messages_components_SegKala_switchResult_41cb83f2:
+                                                    kind: "yoj"
+                                                    name: "messages"
+                                                    framing: ""
+                                                    value: "${null}"
+                                                    children: []
+                                  - messages_components_SegKala_updateResult:
+                                      assign:
+                                      - messages_components_SegKalaResult_199b06bc: "${list.concat(messages_components_SegKalaResult_199b06bc, messages_components_SegKala_switchResult_41cb83f2)}"
+                        - messages_model_SegKala:
+                            steps:
+                            - messages_model_SegKala_initResult:
+                                assign:
+                                - messages_model_SegKalaResult_5706ab6e: {}
+                            - messages_model_SegKala_steps:
+                                try:
+                                  steps:
+                                  - messages_components_SegKala:
+                                      steps:
+                                      - messages_components_SegKala_initResult_1:
                                           assign:
                                           - messages_components_SegKalaResult_199b06bc: []
-                                      - messages_components_SegKala_steps:
+                                      - messages_components_SegKala_steps_1:
                                           for:
                                             value: "messages_components_SegKalaIdx"
                                             range: "${[0, (1 - 1)]}"
                                             steps:
-                                            - messages_components_SegKala_switch:
+                                            - messages_components_SegKala_switch_1:
                                                 steps:
-                                                - messages_components_SegKala_switch_initResult:
+                                                - messages_components_SegKala_switch_initResult_1:
                                                     assign:
                                                     - messages_components_SegKala_switchResult_41cb83f2: {}
-                                                - messages_components_SegKala_switch_steps:
+                                                - messages_components_SegKala_switch_steps_1:
                                                     switch:
                                                     - condition: "${(messages_components_SegKalaIdx == 0)}"
                                                       steps:
-                                                      - messages_components_SegKala_switch_updateResult_0:
+                                                      - messages_components_SegKala_switch_updateResult_0_1:
                                                           assign:
                                                           - messages_components_SegKala_switchResult_41cb83f2:
                                                               kind: "yoj"
@@ -118,127 +148,71 @@ main:
                                                               framing: ""
                                                               value: "${null}"
                                                               children: []
-                                            - messages_components_SegKala_updateResult:
+                                            - messages_components_SegKala_updateResult_1:
                                                 assign:
                                                 - messages_components_SegKalaResult_199b06bc: "${list.concat(messages_components_SegKalaResult_199b06bc, messages_components_SegKala_switchResult_41cb83f2)}"
-                                  - messages_model_SegKala:
-                                      steps:
-                                      - messages_model_SegKala_initResult:
-                                          assign:
-                                          - messages_model_SegKalaResult_5706ab6e: {}
-                                      - messages_model_SegKala_steps:
-                                          try:
-                                            steps:
-                                            - messages_components_SegKala:
-                                                steps:
-                                                - messages_components_SegKala_initResult_1:
-                                                    assign:
-                                                    - messages_components_SegKalaResult_199b06bc: []
-                                                - messages_components_SegKala_steps_1:
-                                                    for:
-                                                      value: "messages_components_SegKalaIdx"
-                                                      range: "${[0, (1 - 1)]}"
-                                                      steps:
-                                                      - messages_components_SegKala_switch_1:
-                                                          steps:
-                                                          - messages_components_SegKala_switch_initResult_1:
-                                                              assign:
-                                                              - messages_components_SegKala_switchResult_41cb83f2: {}
-                                                          - messages_components_SegKala_switch_steps_1:
-                                                              switch:
-                                                              - condition: "${(messages_components_SegKalaIdx == 0)}"
-                                                                steps:
-                                                                - messages_components_SegKala_switch_updateResult_0_1:
-                                                                    assign:
-                                                                    - messages_components_SegKala_switchResult_41cb83f2:
-                                                                        kind: "yoj"
-                                                                        name: "messages"
-                                                                        framing: ""
-                                                                        value: "${null}"
-                                                                        children: []
-                                                      - messages_components_SegKala_updateResult_1:
-                                                          assign:
-                                                          - messages_components_SegKalaResult_199b06bc: "${list.concat(messages_components_SegKalaResult_199b06bc, messages_components_SegKala_switchResult_41cb83f2)}"
-                                            - messages_model_SegKala_updateResult:
-                                                assign:
-                                                - messages_model_SegKalaResult_5706ab6e:
-                                                    intro: "${null}"
-                                                    promoteUpstream: false
-                                                    components: "${messages_components_SegKalaResult_199b06bc}"
-                                                    filters: "${[]}"
-                                          except:
-                                            as: "messages_model_SegKalaError"
-                                            steps:
-                                            - messages_model_SegKala_logError:
-                                                try:
-                                                  steps:
-                                                  - messages_model_SegKala_logError_call:
-                                                      call: "sys.log"
-                                                      args:
-                                                        text: "${(\"[messages_model_SegKala_logError] \" + messages_model_SegKalaError.message)}"
-                                                      result: "messages_model_SegKala_logErrorResult_138f400f"
-                                                retry: "${http.default_retry}"
-                                            - messages_model_SegKala_updateResultError:
-                                                assign:
-                                                - messages_model_SegKalaResult_5706ab6e: "${null}"
-                                  - TopicContextYoj_run_with_model:
+                                  - messages_model_SegKala_updateResult:
+                                      assign:
+                                      - messages_model_SegKalaResult_5706ab6e:
+                                          intro: "${null}"
+                                          promoteUpstream: false
+                                          components: "${messages_components_SegKalaResult_199b06bc}"
+                                          filters: "${[]}"
+                                except:
+                                  as: "messages_model_SegKalaError"
+                                  steps:
+                                  - messages_model_SegKala_logError:
                                       try:
                                         steps:
-                                        - TopicContextYoj_run_with_model_call:
-                                            call: "http.post"
+                                        - messages_model_SegKala_logError_call:
+                                            call: "sys.log"
                                             args:
-                                              url: "${((input.env.BASE_URL + \"/\") + \"context/topicContextYoj/run\")}"
-                                              body:
-                                                kala:
-                                                  kind: "${\"SegKala\"}"
-                                                  sessionId: "${input.env.sessionId}"
-                                                  end: "${input.segmentEnd}"
-                                                  windowSeconds: "${default(input.windowSeconds, 1200)}"
-                                                  sessionEnd: "${null}"
-                                                  weekEnd: "${null}"
-                                                  begin: "${null}"
-                                                presetId: "${null}"
-                                                includeDocId: "${true}"
-                                                model: "${messages_model_SegKalaResult_5706ab6e}"
-                                              auth:
-                                                type: "OIDC"
-                                                audience: "${input.env.BASE_URL}"
-                                              headers:
-                                                x-user-id: "${input.env.userId}"
-                                                x-project-id: "${input.env.projectId}"
-                                            result: "TopicContextYoj_run_with_modelResult_41997d95"
+                                              text: "${(\"[messages_model_SegKala_logError] \" + messages_model_SegKalaError.message)}"
+                                            result: "messages_model_SegKala_logErrorResult_138f400f"
                                       retry: "${http.default_retry}"
-                                  - for_messages_items_SegKala:
-                                      steps:
-                                      - for_messages_items_SegKala_initResult:
-                                          assign:
-                                          - for_messages_items_SegKalaResult_11de797: []
-                                      - for_messages_items_SegKala_steps:
-                                          for:
-                                            value: "for_messages_items_SegKalaValue"
-                                            in: "${TopicContextYoj_run_with_modelResult_41997d95.body.yoj}"
-                                            steps:
-                                            - for_messages_items_SegKala_updateResult:
-                                                assign:
-                                                - for_messages_items_SegKalaResult_11de797: "${list.concat(for_messages_items_SegKalaResult_11de797, for_messages_items_SegKalaValue)}"
-                              - messagesInWindow_updateResult:
-                                  assign:
-                                  - messagesInWindowResult_5e24847c: "${for_messages_items_SegKalaResult_11de797}"
-                            except:
-                              as: "messagesInWindowError"
+                                  - messages_model_SegKala_updateResultError:
+                                      assign:
+                                      - messages_model_SegKalaResult_5706ab6e: "${null}"
+                        - TopicContextYoj_run_with_model:
+                            try:
                               steps:
-                              - messagesInWindow_logError:
-                                  try:
-                                    steps:
-                                    - messagesInWindow_logError_call:
-                                        call: "sys.log"
-                                        args:
-                                          text: "${(\"[messagesInWindow_logError] \" + messagesInWindowError.message)}"
-                                        result: "messagesInWindow_logErrorResult_6c688495"
-                                  retry: "${http.default_retry}"
-                              - messagesInWindow_updateResultError:
-                                  assign:
-                                  - messagesInWindowResult_5e24847c: "${null}"
+                              - TopicContextYoj_run_with_model_call:
+                                  call: "http.post"
+                                  args:
+                                    url: "${((input.env.BASE_URL + \"/\") + \"context/topicContextYoj/run\")}"
+                                    body:
+                                      kala:
+                                        kind: "${\"SegKala\"}"
+                                        sessionId: "${input.env.sessionId}"
+                                        end: "${input.segmentEnd}"
+                                        windowSeconds: "${default(input.windowSeconds, 1200)}"
+                                        sessionEnd: "${null}"
+                                        weekEnd: "${null}"
+                                        begin: "${null}"
+                                      presetId: "${null}"
+                                      includeDocId: "${true}"
+                                      model: "${messages_model_SegKalaResult_5706ab6e}"
+                                    auth:
+                                      type: "OIDC"
+                                      audience: "${input.env.BASE_URL}"
+                                    headers:
+                                      x-user-id: "${input.env.userId}"
+                                      x-project-id: "${input.env.projectId}"
+                                  result: "TopicContextYoj_run_with_modelResult_5ad00bda"
+                            retry: "${http.default_retry}"
+                        - for_messages_items_SegKala:
+                            steps:
+                            - for_messages_items_SegKala_initResult:
+                                assign:
+                                - for_messages_items_SegKalaResult_4f553fc4: []
+                            - for_messages_items_SegKala_steps:
+                                for:
+                                  value: "for_messages_items_SegKalaValue"
+                                  in: "${TopicContextYoj_run_with_modelResult_5ad00bda.body.yoj}"
+                                  steps:
+                                  - for_messages_items_SegKala_updateResult:
+                                      assign:
+                                      - for_messages_items_SegKalaResult_4f553fc4: "${list.concat(for_messages_items_SegKalaResult_4f553fc4, for_messages_items_SegKalaValue)}"
                     - summaries_readIstaBlock:
                         steps:
                         - read_summariesIsta_logKala:
@@ -268,17 +242,17 @@ main:
                                     headers:
                                       x-user-id: "${input.env.userId}"
                                       x-project-id: "${input.env.projectId}"
-                                  result: "read_summariesIsta_QuaterKalaResult_5dd5fa46"
+                                  result: "read_summariesIsta_QuaterKalaResult_70adb0e5"
                             retry: "${http.default_retry}"
                         - for_summariesIsta:
                             steps:
                             - for_summariesIsta_initResult:
                                 assign:
-                                - for_summariesIstaResult_6fa747b4: []
+                                - for_summariesIstaResult_29345ec1: []
                             - for_summariesIsta_steps:
                                 for:
                                   value: "for_summariesIstaValue"
-                                  in: "${read_summariesIsta_QuaterKalaResult_5dd5fa46.body.documents}"
+                                  in: "${read_summariesIsta_QuaterKalaResult_70adb0e5.body.documents}"
                                   steps:
                                   - log_summariesIsta_read:
                                       try:
@@ -291,15 +265,15 @@ main:
                                       retry: "${http.default_retry}"
                                   - for_summariesIsta_updateResult:
                                       assign:
-                                      - for_summariesIstaResult_6fa747b4: "${list.concat(for_summariesIstaResult_6fa747b4, for_summariesIstaValue.data)}"
+                                      - for_summariesIstaResult_29345ec1: "${list.concat(for_summariesIstaResult_29345ec1, for_summariesIstaValue.data)}"
                     - ista_write_switch:
                         steps:
                         - ista_write_switch_initResult:
                             assign:
-                            - ista_write_switchResult_c3c3ebd: {}
+                            - ista_write_switchResult_3070888f: {}
                         - ista_write_switch_steps:
                             switch:
-                            - condition: "${(((len(messagesInWindowResult_5e24847c) > 0) and ((len(for_summariesIstaResult_6fa747b4) == 0) or (for_summariesIstaResult_6fa747b4[(len(for_summariesIstaResult_6fa747b4) - 1)].create_time < input.segmentEnd))) == true)}"
+                            - condition: "${(((len(for_messages_items_SegKalaResult_4f553fc4) > 0) and ((len(for_summariesIstaResult_29345ec1) == 0) or (for_summariesIstaResult_29345ec1[(len(for_summariesIstaResult_29345ec1) - 1)].create_time < input.segmentEnd))) == true)}"
                               steps:
                               - convoContextYojBlock_TermKala:
                                   steps:
@@ -438,68 +412,79 @@ main:
                                               headers:
                                                 x-user-id: "${input.env.userId}"
                                                 x-project-id: "${input.env.projectId}"
-                                            result: "TopicContextYoj_run_with_modelResult_37759149"
+                                            result: "TopicContextYoj_run_with_modelResult_48a424eb"
                                       retry: "${http.default_retry}"
                                   - for_convoContext_items_TermKala:
                                       steps:
                                       - for_convoContext_items_TermKala_initResult:
                                           assign:
-                                          - for_convoContext_items_TermKalaResult_6370e345: []
+                                          - for_convoContext_items_TermKalaResult_4ffc6801: []
                                       - for_convoContext_items_TermKala_steps:
                                           for:
                                             value: "for_convoContext_items_TermKalaValue"
-                                            in: "${TopicContextYoj_run_with_modelResult_37759149.body.yoj}"
+                                            in: "${TopicContextYoj_run_with_modelResult_48a424eb.body.yoj}"
                                             steps:
                                             - for_convoContext_items_TermKala_updateResult:
                                                 assign:
-                                                - for_convoContext_items_TermKalaResult_6370e345: "${list.concat(for_convoContext_items_TermKalaResult_6370e345, for_convoContext_items_TermKalaValue)}"
+                                                - for_convoContext_items_TermKalaResult_4ffc6801: "${list.concat(for_convoContext_items_TermKalaResult_4ffc6801, for_convoContext_items_TermKalaValue)}"
                               - complete_block:
                                   steps:
                                   - complete_switch:
                                       steps:
                                       - complete_switch_initResult:
                                           assign:
-                                          - complete_switchResult_1d574ff9: {}
+                                          - complete_switchResult_4a30d73d: {}
                                       - complete_switch_steps:
                                           switch:
-                                          - condition: "${(len(for_convoContext_items_TermKalaResult_6370e345) > 0)}"
+                                          - condition: "${(len(for_convoContext_items_TermKalaResult_4ffc6801) > 0)}"
                                             steps:
                                             - buildConvoSummaryIsta:
                                                 steps:
                                                 - buildConvoSummaryIsta_initResult:
                                                     assign:
-                                                    - buildConvoSummaryIstaResult_6051daeb: []
+                                                    - buildConvoSummaryIstaResult_72487c21: []
                                                 - buildConvoSummaryIsta_steps:
                                                     for:
                                                       value: "buildConvoSummaryIstaIdx"
-                                                      range: "${[0, (1 - 1)]}"
+                                                      range: "${[0, (2 - 1)]}"
                                                       steps:
                                                       - buildConvoSummaryIsta_switch:
                                                           steps:
                                                           - buildConvoSummaryIsta_switch_initResult:
                                                               assign:
-                                                              - buildConvoSummaryIsta_switchResult_201771ae: {}
+                                                              - buildConvoSummaryIsta_switchResult_249421ce: {}
                                                           - buildConvoSummaryIsta_switch_steps:
                                                               switch:
                                                               - condition: "${(buildConvoSummaryIstaIdx == 0)}"
                                                                 steps:
                                                                 - buildConvoSummaryIsta_switch_updateResult_0:
                                                                     assign:
-                                                                    - buildConvoSummaryIsta_switchResult_201771ae:
-                                                                        role: "system"
-                                                                        content: "${\"Summarize the convo, return a JSON in this format:\n    { \"title\": \"(short title for the convo, ommit if no information is provided)\", \"summary\": \"(Summary here)\" }\n\n    Don't repeat information already contained in previous summaries and extracted info.\n    \"}"
+                                                                    - buildConvoSummaryIsta_switchResult_249421ce:
+                                                                        role: "${\"system\"}"
+                                                                        content: "${\"Summarize the convo, return a JSON in this format:\n    { \"title\": \"(short title for the convo, ommit if no information is provided)\", \"summary\": \"(Summary here)\" }\n    \"}"
+                                                                        tool_calls: "${[]}"
+                                                                        tool_call_id: "${null}"
+                                                                        create_time: "${sys.now()}"
+                                                                        docId: "${null}"
+                                                              - condition: "${(buildConvoSummaryIstaIdx == 1)}"
+                                                                steps:
+                                                                - buildConvoSummaryIsta_switch_updateResult_1:
+                                                                    assign:
+                                                                    - buildConvoSummaryIsta_switchResult_249421ce:
+                                                                        role: "${\"system\"}"
+                                                                        content: "${\"Refine (or initiate) the whole term summary.\"}"
                                                                         tool_calls: "${[]}"
                                                                         tool_call_id: "${null}"
                                                                         create_time: "${sys.now()}"
                                                                         docId: "${null}"
                                                       - buildConvoSummaryIsta_updateResult:
                                                           assign:
-                                                          - buildConvoSummaryIstaResult_6051daeb: "${list.concat(buildConvoSummaryIstaResult_6051daeb, buildConvoSummaryIsta_switchResult_201771ae)}"
+                                                          - buildConvoSummaryIstaResult_72487c21: "${list.concat(buildConvoSummaryIstaResult_72487c21, buildConvoSummaryIsta_switchResult_249421ce)}"
                                             - buildPrompt:
                                                 steps:
                                                 - buildPrompt_initResult:
                                                     assign:
-                                                    - buildPromptResult_73fde2b1: []
+                                                    - buildPromptResult_6afcda03: []
                                                 - buildPrompt_steps:
                                                     for:
                                                       value: "buildPromptIdx"
@@ -509,15 +494,15 @@ main:
                                                           steps:
                                                           - buildPrompt_switch_initResult:
                                                               assign:
-                                                              - buildPrompt_switchResult_2b2474e8: {}
+                                                              - buildPrompt_switchResult_7ab81398: {}
                                                           - buildPrompt_switch_steps:
                                                               switch:
                                                               - condition: "${(buildPromptIdx == 0)}"
                                                                 steps:
                                                                 - buildPrompt_switch_updateResult_0:
                                                                     assign:
-                                                                    - buildPrompt_switchResult_2b2474e8:
-                                                                        role: "system"
+                                                                    - buildPrompt_switchResult_7ab81398:
+                                                                        role: "${\"system\"}"
                                                                         content: "${\"You are a thoughtfull and pragmatic assistant. Plan and operate towards the most impactful, cost effective solutions.\"}"
                                                                         tool_calls: "${[]}"
                                                                         tool_call_id: "${null}"
@@ -525,49 +510,75 @@ main:
                                                                         docId: "${null}"
                                                       - buildPrompt_updateResult:
                                                           assign:
-                                                          - buildPromptResult_73fde2b1: "${list.concat(buildPromptResult_73fde2b1, buildPrompt_switchResult_2b2474e8)}"
+                                                          - buildPromptResult_6afcda03: "${list.concat(buildPromptResult_6afcda03, buildPrompt_switchResult_7ab81398)}"
                                             - complete_joinMessages:
                                                 steps:
                                                 - complete_joinMessages_initResult:
                                                     assign:
-                                                    - complete_joinMessagesResult_3913ea5f: []
+                                                    - complete_joinMessagesResult_4d695a4c: []
                                                 - complete_joinMessages_steps:
                                                     for:
                                                       value: "complete_joinMessagesIdx"
-                                                      range: "${[0, ((((0 + len(buildPromptResult_73fde2b1)) + len(for_convoContext_items_TermKalaResult_6370e345)) + len(buildConvoSummaryIstaResult_6051daeb)) - 1)]}"
+                                                      range: "${[0, ((((0 + len(buildPromptResult_6afcda03)) + len(for_convoContext_items_TermKalaResult_4ffc6801)) + len(buildConvoSummaryIstaResult_72487c21)) - 1)]}"
                                                       steps:
                                                       - complete_joinMessages_switch:
                                                           steps:
                                                           - complete_joinMessages_switch_initResult:
                                                               assign:
-                                                              - complete_joinMessages_switchResult_716bc283: {}
+                                                              - complete_joinMessages_switchResult_2ef7d993: {}
                                                           - complete_joinMessages_switch_steps:
                                                               switch:
-                                                              - condition: "${(complete_joinMessagesIdx >= ((0 + len(buildPromptResult_73fde2b1)) + len(for_convoContext_items_TermKalaResult_6370e345)))}"
+                                                              - condition: "${(complete_joinMessagesIdx >= ((0 + len(buildPromptResult_6afcda03)) + len(for_convoContext_items_TermKalaResult_4ffc6801)))}"
                                                                 steps:
                                                                 - complete_joinMessages_switch_updateResult_0:
                                                                     assign:
-                                                                    - complete_joinMessages_switchResult_716bc283: "${buildConvoSummaryIstaResult_6051daeb[(complete_joinMessagesIdx - ((0 + len(buildPromptResult_73fde2b1)) + len(for_convoContext_items_TermKalaResult_6370e345)))]}"
-                                                              - condition: "${(complete_joinMessagesIdx >= (0 + len(buildPromptResult_73fde2b1)))}"
+                                                                    - complete_joinMessages_switchResult_2ef7d993: "${buildConvoSummaryIstaResult_72487c21[(complete_joinMessagesIdx - ((0 + len(buildPromptResult_6afcda03)) + len(for_convoContext_items_TermKalaResult_4ffc6801)))]}"
+                                                              - condition: "${(complete_joinMessagesIdx >= (0 + len(buildPromptResult_6afcda03)))}"
                                                                 steps:
                                                                 - complete_joinMessages_switch_updateResult_1:
                                                                     assign:
-                                                                    - complete_joinMessages_switchResult_716bc283: "${for_convoContext_items_TermKalaResult_6370e345[(complete_joinMessagesIdx - (0 + len(buildPromptResult_73fde2b1)))]}"
+                                                                    - complete_joinMessages_switchResult_2ef7d993: "${for_convoContext_items_TermKalaResult_4ffc6801[(complete_joinMessagesIdx - (0 + len(buildPromptResult_6afcda03)))]}"
                                                               - condition: "${(complete_joinMessagesIdx >= 0)}"
                                                                 steps:
                                                                 - complete_joinMessages_switch_updateResult_2:
                                                                     assign:
-                                                                    - complete_joinMessages_switchResult_716bc283: "${buildPromptResult_73fde2b1[(complete_joinMessagesIdx - 0)]}"
+                                                                    - complete_joinMessages_switchResult_2ef7d993: "${buildPromptResult_6afcda03[(complete_joinMessagesIdx - 0)]}"
                                                       - complete_joinMessages_updateResult:
                                                           assign:
-                                                          - complete_joinMessagesResult_3913ea5f: "${list.concat(complete_joinMessagesResult_3913ea5f, complete_joinMessages_switchResult_716bc283)}"
+                                                          - complete_joinMessagesResult_4d695a4c: "${list.concat(complete_joinMessagesResult_4d695a4c, complete_joinMessages_switchResult_2ef7d993)}"
                                             - complete_chat_block:
                                                 steps:
+                                                - spec:
+                                                    steps:
+                                                    - spec_initResult:
+                                                        assign:
+                                                        - specResult_6767dd0b: {}
+                                                    - spec_steps:
+                                                        try:
+                                                          steps:
+                                                          - spec_updateResult:
+                                                              assign:
+                                                              - specResult_6767dd0b: "${{\n  \"title\" : \"${example.title}\",\n  \"summary\" : \"${example.summary}\"\n}}"
+                                                        except:
+                                                          as: "specError"
+                                                          steps:
+                                                          - spec_logError:
+                                                              try:
+                                                                steps:
+                                                                - spec_logError_call:
+                                                                    call: "sys.log"
+                                                                    args:
+                                                                      text: "${(\"[spec_logError] \" + specError.message)}"
+                                                                    result: "spec_logErrorResult_6261db2d"
+                                                              retry: "${http.default_retry}"
+                                                          - spec_updateResultError:
+                                                              assign:
+                                                              - specResult_6767dd0b: "${null}"
                                                 - complete_chat_buildSchemaList:
                                                     steps:
                                                     - complete_chat_buildSchemaList_initResult:
                                                         assign:
-                                                        - complete_chat_buildSchemaListResult_3f78a8c1: []
+                                                        - complete_chat_buildSchemaListResult_57eaab04: []
                                                     - complete_chat_buildSchemaList_steps:
                                                         for:
                                                           value: "complete_chat_buildSchemaListIdx"
@@ -577,23 +588,23 @@ main:
                                                               steps:
                                                               - complete_chat_buildSchemaList_switch_initResult:
                                                                   assign:
-                                                                  - complete_chat_buildSchemaList_switchResult_256b2e6b: {}
+                                                                  - complete_chat_buildSchemaList_switchResult_660e845d: {}
                                                               - complete_chat_buildSchemaList_switch_steps:
                                                                   switch:
                                                                   - condition: "${(complete_chat_buildSchemaListIdx == 0)}"
                                                                     steps:
                                                                     - complete_chat_buildSchemaList_switch_updateResult_0:
                                                                         assign:
-                                                                        - complete_chat_buildSchemaList_switchResult_256b2e6b:
-                                                                            role: "system"
-                                                                            content: "${(\"Respond with a JSON in this format:\r\" + {\n  \"title\" : \"${example.title}\",\n  \"summary\" : \"${example.summary}\"\n})}"
+                                                                        - complete_chat_buildSchemaList_switchResult_660e845d:
+                                                                            role: "${\"system\"}"
+                                                                            content: "${(\"Respond with a JSON in this format:\r\" + specResult_6767dd0b)}"
                                                                             tool_calls: "${[]}"
                                                                             tool_call_id: "${null}"
                                                                             create_time: "${sys.now()}"
                                                                             docId: "${null}"
                                                           - complete_chat_buildSchemaList_updateResult:
                                                               assign:
-                                                              - complete_chat_buildSchemaListResult_3f78a8c1: "${list.concat(complete_chat_buildSchemaListResult_3f78a8c1, complete_chat_buildSchemaList_switchResult_256b2e6b)}"
+                                                              - complete_chat_buildSchemaListResult_57eaab04: "${list.concat(complete_chat_buildSchemaListResult_57eaab04, complete_chat_buildSchemaList_switchResult_660e845d)}"
                                                 - complete_chat_post:
                                                     try:
                                                       steps:
@@ -602,7 +613,7 @@ main:
                                                           args:
                                                             url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
                                                             body:
-                                                              messages: "${list.concat(complete_joinMessagesResult_3913ea5f, complete_chat_buildSchemaListResult_3f78a8c1[0])}"
+                                                              messages: "${list.concat(complete_joinMessagesResult_4d695a4c, complete_chat_buildSchemaListResult_57eaab04[0])}"
                                                               model: "${\"gpt-5\"}"
                                                               temperature: 0.8
                                                               max_completion_tokens: "${null}"
@@ -616,13 +627,11 @@ main:
                                                             headers:
                                                               x-user-id: "${input.env.userId}"
                                                               x-project-id: "${input.env.projectId}"
-                                                          result: "complete_chat_postResult_5b114357"
+                                                          result: "complete_chat_postResult_3bd05ac6"
                                                     retry: "${http.default_retry}"
                                             - complete_switch_updateResult_0:
                                                 assign:
-                                                - complete_switchResult_1d574ff9:
-                                                    result: "${json.decode(complete_chat_postResult_5b114357.body.message.content)}"
-                                                    total_cost: "${complete_chat_postResult_5b114357.body.total_cost}"
+                                                - complete_switchResult_4a30d73d: "${decodedResult_3c9e6300}"
                                           - condition: "${true}"
                                             steps:
                                             - emptyYoj:
@@ -631,17 +640,17 @@ main:
                                                   code: "${400}"
                                             - complete_switch_updateResult_1:
                                                 assign:
-                                                - complete_switchResult_1d574ff9: "${null}"
+                                                - complete_switchResult_4a30d73d: "${null}"
                               - do_write_other_block:
                                   steps:
                                   - writeIstaResult_switch:
                                       steps:
                                       - writeIstaResult_switch_initResult:
                                           assign:
-                                          - writeIstaResult_switchResult_20af7a83: {}
+                                          - writeIstaResult_switchResult_70e6454a: {}
                                       - writeIstaResult_switch_steps:
                                           switch:
-                                          - condition: "${(complete_switchResult_1d574ff9.result != null)}"
+                                          - condition: "${(complete_switchResult_4a30d73d.result != null)}"
                                             steps:
                                             - writeIstaResult_write_summariesIsta_TermKala:
                                                 try:
@@ -654,9 +663,9 @@ main:
                                                           collection: "${(\"log.terms.\" + \"summaries\")}"
                                                           id: "${time.format((0 + ((((input.segmentEnd - 0) // 7888984.6104) + 1) * 7888984.6104)), \"America/New_York\")}"
                                                           contents:
-                                                            value: "${complete_switchResult_1d574ff9.result}"
+                                                            value: "${complete_switchResult_4a30d73d.result}"
                                                             create_time: "${input.segmentEnd}"
-                                                            cost: "${complete_switchResult_1d574ff9.total_cost}"
+                                                            cost: "${complete_switchResult_4a30d73d.total_cost}"
                                                             execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                                           userId: "${input.env.userId}"
                                                         auth:
@@ -665,19 +674,19 @@ main:
                                                         headers:
                                                           x-user-id: "${input.env.userId}"
                                                           x-project-id: "${input.env.projectId}"
-                                                      result: "writeIstaResult_write_summariesIsta_TermKalaResult_48479d"
+                                                      result: "writeIstaResult_write_summariesIsta_TermKalaResult_4757e69f"
                                                 retry: "${http.default_retry}"
                                             - writeIstaResult_switch_updateResult_0:
                                                 assign:
-                                                - writeIstaResult_switchResult_20af7a83: "${writeIstaResult_write_summariesIsta_TermKalaResult_48479d}"
+                                                - writeIstaResult_switchResult_70e6454a: "${writeIstaResult_write_summariesIsta_TermKalaResult_4757e69f}"
                                           - condition: "${true}"
                                             steps:
                                             - writeIstaResult_switch_updateResult_1:
                                                 assign:
-                                                - writeIstaResult_switchResult_20af7a83: "${null}"
+                                                - writeIstaResult_switchResult_70e6454a: "${null}"
                               - ista_write_switch_updateResult_0:
                                   assign:
-                                  - ista_write_switchResult_c3c3ebd: "${complete_switchResult_1d574ff9.result}"
+                                  - ista_write_switchResult_3070888f: "${complete_switchResult_4a30d73d.result}"
                             - condition: "${true}"
                               steps:
                               - write_skipped:
@@ -691,7 +700,7 @@ main:
                                   retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_1:
                                   assign:
-                                  - ista_write_switchResult_c3c3ebd: "${null}"
+                                  - ista_write_switchResult_3070888f: "${null}"
                 - lock_release:
                     try:
                       steps:
@@ -710,15 +719,15 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "lock_releaseResult_4b8914c8"
+                          result: "lock_releaseResult_205fef7f"
                     retry: "${http.default_retry}"
                 - lock_switch_updateResult_0:
                     assign:
-                    - lock_switchResult_1e645deb: "${ista_write_switchResult_c3c3ebd}"
+                    - lock_switchResult_35c9b7dd: "${ista_write_switchResult_3070888f}"
               - condition: "${true}"
                 steps:
                 - lock_switch_updateResult_1:
                     assign:
-                    - lock_switchResult_1e645deb: "${null}"
+                    - lock_switchResult_35c9b7dd: "${null}"
   - return:
-      return: "${lock_switchResult_1e645deb}"
+      return: "${lock_switchResult_35c9b7dd}"

@@ -22,17 +22,17 @@ main:
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "segmentsForSession_fetchResult_50dfb871"
+                result: "segmentsForSession_fetchResult_307e92ce"
           retry: "${http.default_retry}"
       - segmentsForSession_convert:
           steps:
           - segmentsForSession_convert_initResult:
               assign:
-              - segmentsForSession_convertResult_51c53d2c: []
+              - segmentsForSession_convertResult_429e1f51: []
           - segmentsForSession_convert_steps:
               for:
                 value: "segmentsForSession_convertValue"
-                in: "${segmentsForSession_fetchResult_50dfb871.body.segments}"
+                in: "${segmentsForSession_fetchResult_307e92ce.body.segments}"
                 steps:
                 - segmentsForSession_convert_assignIterResult:
                     assign:
@@ -42,16 +42,16 @@ main:
                         windowSeconds: "${default(input.windowSeconds, 1200)}"
                 - segmentsForSession_convert_updateResult:
                     assign:
-                    - segmentsForSession_convertResult_51c53d2c: "${list.concat(segmentsForSession_convertResult_51c53d2c, segmentsForSession_convert_assignIterResultVar)}"
+                    - segmentsForSession_convertResult_429e1f51: "${list.concat(segmentsForSession_convertResult_429e1f51, segmentsForSession_convert_assignIterResultVar)}"
   - forEachSegment:
       steps:
       - forEachSegment_initResult:
           assign:
-          - forEachSegmentResult_6d2f0315: []
+          - forEachSegmentResult_f5df224: []
       - forEachSegment_steps:
           for:
             value: "forEachSegmentValue"
-            in: "${segmentsForSession_convertResult_51c53d2c}"
+            in: "${segmentsForSession_convertResult_429e1f51}"
             steps:
             - All_Backfill_run:
                 try:
@@ -67,7 +67,7 @@ main:
                           env:
                             userId: "${input.env.userId}"
                             model: "${input.env.model}"
-                            callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                            callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                             BASE_URL: "${input.env.BASE_URL}"
                             background: "${default(map.get(input.env, \"background\"), null)}"
                             projectId: "${input.env.projectId}"
@@ -76,12 +76,12 @@ main:
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "All_Backfill_runResult_766c8497"
+                      result: "All_Backfill_runResult_6913ed00"
                 retry: "${http.default_retry}"
             - forEachSegment_updateResult:
                 assign:
-                - forEachSegmentResult_6d2f0315: "${list.concat(forEachSegmentResult_6d2f0315, All_Backfill_runResult_766c8497)}"
+                - forEachSegmentResult_f5df224: "${list.concat(forEachSegmentResult_f5df224, All_Backfill_runResult_6913ed00)}"
   - returnBackfill:
-      return: "${forEachSegmentResult_6d2f0315}"
+      return: "${forEachSegmentResult_f5df224}"
   - return:
-      return: "${forEachSegmentResult_6d2f0315}"
+      return: "${forEachSegmentResult_f5df224}"

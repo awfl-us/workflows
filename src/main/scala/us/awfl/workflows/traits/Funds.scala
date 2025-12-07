@@ -13,7 +13,7 @@ trait Funds extends EventHandler {
     val fundPrompts = buildList("fundPrompt", List(
       ChatMessage(str("system"), str(
         ("Original funds allocated for the current task: $": Cel) + input.fund.cel +
-        "\rSpent so far: $" + input.spent.getOrElse(Value(0)).cel
+        "\rSpent so far: $" + input.spent.getOrElse(Value[Double](0)).cel
       )),
       ChatMessage(str("system"), str(
         """Plan accordingly. If a third of the available funds have been spent: Make sure you're wrapping up investigation and have updated the task.

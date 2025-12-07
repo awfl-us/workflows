@@ -7,17 +7,17 @@ import us.awfl.utils.ChainableInput
 import us.awfl.utils.{Env, ENV}
 
 object Chain extends us.awfl.core.Workflow {
-  case class WorkflowArgs(workflowName: BaseValue[String], params: BaseValue[_])
+  case class WorkflowArgs(workflowName: Value[String], params: BaseValue[_])
   // given Spec[WorkflowArgs] = Spec(r => WorkflowArgs(r.in("workflowName"), r.in("params")))
 
-  case class Input(input: BaseValue[_], headWorkflow: BaseValue[String], tail: ListValue[WorkflowArgs], env: BaseValue[Env] = ENV)
+  case class Input(input: BaseValue[_], headWorkflow: Value[String], tail: ListValue[WorkflowArgs], env: BaseValue[Env] = ENV)
+  // override type Input = ChainInput
   override type Result = AnyValueT
 
-  override val inputVal: BaseValue[Input] = init("input")
+  override val inputVal: Value[Input] = init("input")
 
   override def workflows = List({
     val inputAs: BaseValue[AnyValueT] = input.input match {
-      case FieldValue(resolver) => Value(resolver)
       case Value(resolver) => Value(resolver)
       case ListValue(resolver) => ListValue(resolver)
       case Obj(value) => Obj(value.asInstanceOf[AnyValueT])
@@ -34,7 +34,7 @@ object Chain extends us.awfl.core.Workflow {
     val runTail = Fold("foldWorkflows", initCall.resultValue, input.tail) { case (b, wfArgs) =>
       val args = RunWorkflowArgs(
         str(wfArgs.get.workflowName.cel + "${WORKFLOW_ENV}"),
-        obj(ChainableInput(b, Value[AnyValueT](wfArgs.get.params.cel)))
+        obj(ChainableInput(b, wfArgs.flatMap(_.params.asInstanceOf[BaseValue[AnyValueT]])))
       )
       Call[RunWorkflowArgs[ChainableInput[AnyValueT, AnyValueT]], AnyValueT](
         "Run",

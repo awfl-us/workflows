@@ -35,7 +35,7 @@ import us.awfl.utils.PostResult
 trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
   override type Input = EventHandler.Input
 
-  override val inputVal: BaseValue[Input] = init[Input]("input")
+  override val inputVal: Value[Input] = init[Input]("input")
 
   // Workflows callback request wrapper
   case class CallbackRequest(http_request: BaseValue[us.awfl.utils.PostRequest[NoValueT]])
@@ -45,11 +45,11 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
     message: ChatMessage = ChatMessage("user", input.query),
     tools: List[String] = List()
   ): Workflow[ChatToolResponse] = {
-    val model = input.env.get.model
-    val userId = input.env.flatMap(_.userId)
-    val sessionId = input.env.get.sessionId
+    val model = inputVal.flatMap(_.env).get.model
+    val userId = inputVal.flatMap(_.env).flatMap(_.userId)
+    val sessionId = inputVal.flatMap(_.env).get.sessionId
 
-    given KalaVibhaga = SegKala(sessionId, Value("sys.now()"), obj(20 * 60))
+    given KalaVibhaga = SegKala(sessionId, Value("sys.now()"), Value(20 * 60))
 
     // Best-effort: if an input.task object is provided, create it for this session before completion logic
     val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", CelFunc("map.get", inputVal.cel, "task"))
@@ -76,7 +76,7 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
     // - if agentTools returned names, use them
     // - otherwise, use previous default list
     // - if input.toolNames was provided, it overrides both (ToolDefs helper preserves names filter contract)
-    val candidateNames = Switch("toolNamesCandidate", List(
+    val candidateNames = Switch.list("toolNamesCandidate", List(
       (CelFunc("len", agentTools.resultValue) > 0) -> (List() -> agentTools.resultValue),
       (true: Cel) -> (List() -> buildTools.resultValue)
     ))
@@ -87,6 +87,7 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
     val sideCall = input.sideCall.getOrElse(Value(false))
     val bypassLock = sideCall
     val skipToolFeedback = sideCall
+    val skipAddMessages = sideCall
 
     val owner: Value[String] = Exec.currentExecId
     // Use a session-scoped lock to prevent concurrent completions
@@ -109,30 +110,43 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
           List[Step[_, _]](statusRunning, enqueueRunning) -> Value.nil[NoValueT]
         )
 
-        val addMessage = Convo.addMessage("addMessage", obj(message))
+        val addMessage = Switch("maybeAddMessage", List(
+          skipAddMessages.cel -> (List() -> Value.nil[PostResult[Nothing]]),
+          (true: Cel) -> Convo.addMessage("addMessage", obj(message)).fn
+        ))
 
         // In-session operations: write the query message first; then try to acquire a lock for response generation.
         val complete = Convo.inSession[ChatToolResponse]("inSession", sessionId) {
           val buildYojStep = summon[Yoj[TopicContext]].build
+          val messages = Switch.list("messages", List(
+            skipAddMessages.cel -> {
+              val buildMessage = Try("buildMessage", List() -> obj(message))
+              List(buildMessage) -> ListValue[ChatMessage](CelFunc("list.concat", buildYojStep.resultValue, buildMessage.resultValue))
+            },
+            (true: Cel) -> (List() -> buildYojStep.resultValue)
+          ))
           val completeStep = Convo.completeWithTools(
             "complete",
-            Convo.Prompt(promptsWorkflow.flatMap(_.prompts)),
+            Convo.Prompt(promptsWorkflow.flatMapList(_.prompts)),
             buildYojStep.resultValue,
             tools = ListValue(toolDefs.result.defs.cel),
             toolChoice = input.toolChoice.getOrElse(ToolChoice.auto),
             model = model
           )
           val responseMessage = completeStep.result.message
-          val addResponse  = Convo.addMessage(
-            "addResponse",
-            obj(us.awfl.ista.ChatMessage(
-              role = responseMessage.flatMap(_.role),
-              content = responseMessage.flatMap(_.content),
-              tool_calls = ListValue(CelFunc("map.get", responseMessage, "tool_calls")),
-              create_time = Value("sys.now()")
-            )),
-            cost = completeStep.result.total_cost
-          )
+          val addResponse  = Switch("mayberAddResponse", List(
+            skipAddMessages.cel -> (List() -> Value.nil[PostResult[Nothing]]),
+            (true: Cel) -> Convo.addMessage(
+              "addResponse",
+              obj(us.awfl.ista.ChatMessage(
+                role = responseMessage.flatMap(_.role),
+                content = responseMessage.flatMap(_.content),
+                tool_calls = ListValue(CelFunc("map.get", responseMessage, "tool_calls")),
+                create_time = Value("sys.now()")
+              )),
+              cost = completeStep.result.total_cost
+            ).fn
+          ))
           List[Step[_, _]](buildYojStep, completeStep, addResponse) -> completeStep.resultValue
         }
 
@@ -269,12 +283,12 @@ trait EventHandler extends us.awfl.core.Workflow with Prompts with Tools {
 }
 object EventHandler {
   case class Input(
-    query: BaseValue[String],
-    fund: BaseValue[Double],
+    query: Value[String],
+    fund: Value[Double],
     spent: OptValue[Double],
     // Optional task payload to seed a task for this session (title/description/status)
-    task: Field = Field("null"),
-    toolChoice: OptValue[ToolChoice] = OptValue.nil,
+    task: Value[String] = Value.nil,
+    toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
     sideCall: OptValue[Boolean] = OptValue(false),
     env: BaseValue[Env] = ENV
   )
