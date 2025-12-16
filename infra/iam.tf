@@ -27,3 +27,26 @@ resource "google_project_iam_member" "deploy_workflows_admin_existing" {
   role    = "roles/workflows.admin"
   member  = "serviceAccount:${var.deploy_sa_email}"
 }
+
+# -----------------------------------------------------------------------------------
+# Allow the deploy SA to ActAs the runtime service account used by Workflows
+# Since our workflows do not specify serviceAccount, GCP defaults to the Compute
+# Engine default SA: {PROJECT_NUMBER}-compute@developer.gserviceaccount.com
+# Workflows creation requires iam.serviceAccounts.actAs on that SA.
+# -----------------------------------------------------------------------------------
+
+data "google_project" "current" {
+  project_id = var.project_id
+}
+
+locals {
+  compute_default_sa_email = "${data.google_project.current.number}-compute@developer.gserviceaccount.com"
+}
+
+# Grant ActAs on the default compute SA to the deployer (one-time per project)
+resource "google_service_account_iam_member" "deploy_actas_compute_default" {
+  count              = local.deploy_sa_member != null ? 1 : 0
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${local.compute_default_sa_email}"
+  role               = "roles/iam.serviceAccountUser"
+  member             = local.deploy_sa_member
+}
