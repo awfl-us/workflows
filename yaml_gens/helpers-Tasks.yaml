@@ -17,32 +17,32 @@ main:
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "current_getResult_2223049d"
+                result: "current_getResult_1c6f9d8b"
           retry: "${http.default_retry}"
       - current_content:
           steps:
           - current_content_initResult:
               assign:
-              - current_contentResult_b0405a: {}
+              - current_contentResult_68ec6987: {}
           - current_content_steps:
               switch:
-              - condition: "${((get_type(current_getResult_2223049d.body) == \"map\") and (len(current_getResult_2223049d.body.tasks) > 0))}"
+              - condition: "${((get_type(current_getResult_1c6f9d8b.body) == \"map\") and (len(current_getResult_1c6f9d8b.body.tasks) > 0))}"
                 steps:
                 - current_content_updateResult_0:
                     assign:
-                    - current_contentResult_b0405a:
-                        role: "system"
-                        content: "${(((((((((\"Current task\" + \": id=\") + string(current_getResult_2223049d.body.tasks[0].id)) + \" | \") + string(current_getResult_2223049d.body.tasks[0].title)) + \" — \") + string(current_getResult_2223049d.body.tasks[0].description)) + \" [status=\") + string(current_getResult_2223049d.body.tasks[0].status)) + \"]\")}"
+                    - current_contentResult_68ec6987:
+                        role: "${\"system\"}"
+                        content: "${(((((((((\"Current task\" + \": id=\") + string(current_getResult_1c6f9d8b.body.tasks[0].id)) + \" | \") + string(current_getResult_1c6f9d8b.body.tasks[0].title)) + \" — \") + string(current_getResult_1c6f9d8b.body.tasks[0].description)) + \" [status=\") + string(current_getResult_1c6f9d8b.body.tasks[0].status)) + \"]\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
                         docId: "${null}"
-              - condition: "${(get_type(current_getResult_2223049d.body) == \"map\")}"
+              - condition: "${(get_type(current_getResult_1c6f9d8b.body) == \"map\")}"
                 steps:
                 - current_content_updateResult_1:
                     assign:
-                    - current_contentResult_b0405a:
-                        role: "system"
+                    - current_contentResult_68ec6987:
+                        role: "${\"system\"}"
                         content: "${((\"Current task\" + \": \") + \"None found for session\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
@@ -52,9 +52,9 @@ main:
                 steps:
                 - current_content_updateResult_2:
                     assign:
-                    - current_contentResult_b0405a:
-                        role: "system"
-                        content: "${(((((\"Current task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(current_getResult_2223049d.body)) + \", body=\") + string(current_getResult_2223049d.body))}"
+                    - current_contentResult_68ec6987:
+                        role: "${\"system\"}"
+                        content: "${(((((\"Current task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(current_getResult_1c6f9d8b.body)) + \", body=\") + string(current_getResult_1c6f9d8b.body))}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
@@ -74,32 +74,32 @@ main:
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "pending_getResult_3cc078ae"
+                result: "pending_getResult_3bd34d1f"
           retry: "${http.default_retry}"
       - pending_content:
           steps:
           - pending_content_initResult:
               assign:
-              - pending_contentResult_7b1d2f60: {}
+              - pending_contentResult_724e3634: {}
           - pending_content_steps:
               switch:
-              - condition: "${((get_type(pending_getResult_3cc078ae.body) == \"map\") and (len(pending_getResult_3cc078ae.body.tasks) > 0))}"
+              - condition: "${((get_type(pending_getResult_3bd34d1f.body) == \"map\") and (len(pending_getResult_3bd34d1f.body.tasks) > 0))}"
                 steps:
                 - pending_content_updateResult_0:
                     assign:
-                    - pending_contentResult_7b1d2f60:
-                        role: "system"
-                        content: "${(((((((((\"Oldest pending task\" + \": id=\") + string(pending_getResult_3cc078ae.body.tasks[0].id)) + \" | \") + string(pending_getResult_3cc078ae.body.tasks[0].title)) + \" — \") + string(pending_getResult_3cc078ae.body.tasks[0].description)) + \" [status=\") + string(pending_getResult_3cc078ae.body.tasks[0].status)) + \"]\")}"
+                    - pending_contentResult_724e3634:
+                        role: "${\"system\"}"
+                        content: "${(((((((((\"Oldest pending task\" + \": id=\") + string(pending_getResult_3bd34d1f.body.tasks[0].id)) + \" | \") + string(pending_getResult_3bd34d1f.body.tasks[0].title)) + \" — \") + string(pending_getResult_3bd34d1f.body.tasks[0].description)) + \" [status=\") + string(pending_getResult_3bd34d1f.body.tasks[0].status)) + \"]\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
                         docId: "${null}"
-              - condition: "${(get_type(pending_getResult_3cc078ae.body) == \"map\")}"
+              - condition: "${(get_type(pending_getResult_3bd34d1f.body) == \"map\")}"
                 steps:
                 - pending_content_updateResult_1:
                     assign:
-                    - pending_contentResult_7b1d2f60:
-                        role: "system"
+                    - pending_contentResult_724e3634:
+                        role: "${\"system\"}"
                         content: "${((\"Oldest pending task\" + \": \") + \"None found for session\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
@@ -109,9 +109,9 @@ main:
                 steps:
                 - pending_content_updateResult_2:
                     assign:
-                    - pending_contentResult_7b1d2f60:
-                        role: "system"
-                        content: "${(((((\"Oldest pending task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(pending_getResult_3cc078ae.body)) + \", body=\") + string(pending_getResult_3cc078ae.body))}"
+                    - pending_contentResult_724e3634:
+                        role: "${\"system\"}"
+                        content: "${(((((\"Oldest pending task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(pending_getResult_3bd34d1f.body)) + \", body=\") + string(pending_getResult_3bd34d1f.body))}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
@@ -131,32 +131,32 @@ main:
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "done_getResult_729ce304"
+                result: "done_getResult_7d19ae4d"
           retry: "${http.default_retry}"
       - done_content:
           steps:
           - done_content_initResult:
               assign:
-              - done_contentResult_6d660df2: {}
+              - done_contentResult_7f22ae46: {}
           - done_content_steps:
               switch:
-              - condition: "${((get_type(done_getResult_729ce304.body) == \"map\") and (len(done_getResult_729ce304.body.tasks) > 0))}"
+              - condition: "${((get_type(done_getResult_7d19ae4d.body) == \"map\") and (len(done_getResult_7d19ae4d.body.tasks) > 0))}"
                 steps:
                 - done_content_updateResult_0:
                     assign:
-                    - done_contentResult_6d660df2:
-                        role: "system"
-                        content: "${(((((((((\"Newest complete task\" + \": id=\") + string(done_getResult_729ce304.body.tasks[0].id)) + \" | \") + string(done_getResult_729ce304.body.tasks[0].title)) + \" — \") + string(done_getResult_729ce304.body.tasks[0].description)) + \" [status=\") + string(done_getResult_729ce304.body.tasks[0].status)) + \"]\")}"
+                    - done_contentResult_7f22ae46:
+                        role: "${\"system\"}"
+                        content: "${(((((((((\"Newest complete task\" + \": id=\") + string(done_getResult_7d19ae4d.body.tasks[0].id)) + \" | \") + string(done_getResult_7d19ae4d.body.tasks[0].title)) + \" — \") + string(done_getResult_7d19ae4d.body.tasks[0].description)) + \" [status=\") + string(done_getResult_7d19ae4d.body.tasks[0].status)) + \"]\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
                         docId: "${null}"
-              - condition: "${(get_type(done_getResult_729ce304.body) == \"map\")}"
+              - condition: "${(get_type(done_getResult_7d19ae4d.body) == \"map\")}"
                 steps:
                 - done_content_updateResult_1:
                     assign:
-                    - done_contentResult_6d660df2:
-                        role: "system"
+                    - done_contentResult_7f22ae46:
+                        role: "${\"system\"}"
                         content: "${((\"Newest complete task\" + \": \") + \"None found for session\")}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
@@ -166,9 +166,9 @@ main:
                 steps:
                 - done_content_updateResult_2:
                     assign:
-                    - done_contentResult_6d660df2:
-                        role: "system"
-                        content: "${(((((\"Newest complete task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(done_getResult_729ce304.body)) + \", body=\") + string(done_getResult_729ce304.body))}"
+                    - done_contentResult_7f22ae46:
+                        role: "${\"system\"}"
+                        content: "${(((((\"Newest complete task\" + \": \") + \"Tasks endpoint returned non-object body. get_type=\") + get_type(done_getResult_7d19ae4d.body)) + \", body=\") + string(done_getResult_7d19ae4d.body))}"
                         tool_calls: "${[]}"
                         tool_call_id: "${null}"
                         create_time: "${sys.now()}"
@@ -177,7 +177,7 @@ main:
       steps:
       - buildList_initResult:
           assign:
-          - buildListResult_f1a63d9: []
+          - buildListResult_23a34b5f: []
       - buildList_steps:
           for:
             value: "buildListIdx"
@@ -187,27 +187,27 @@ main:
                 steps:
                 - buildList_switch_initResult:
                     assign:
-                    - buildList_switchResult_326a51b5: {}
+                    - buildList_switchResult_604959a3: {}
                 - buildList_switch_steps:
                     switch:
                     - condition: "${(buildListIdx == 0)}"
                       steps:
                       - buildList_switch_updateResult_0:
                           assign:
-                          - buildList_switchResult_326a51b5: "${current_contentResult_b0405a}"
+                          - buildList_switchResult_604959a3: "${current_contentResult_68ec6987}"
                     - condition: "${(buildListIdx == 1)}"
                       steps:
                       - buildList_switch_updateResult_1:
                           assign:
-                          - buildList_switchResult_326a51b5: "${pending_contentResult_7b1d2f60}"
+                          - buildList_switchResult_604959a3: "${pending_contentResult_724e3634}"
                     - condition: "${(buildListIdx == 2)}"
                       steps:
                       - buildList_switch_updateResult_2:
                           assign:
-                          - buildList_switchResult_326a51b5: "${done_contentResult_6d660df2}"
+                          - buildList_switchResult_604959a3: "${done_contentResult_7f22ae46}"
             - buildList_updateResult:
                 assign:
-                - buildListResult_f1a63d9: "${list.concat(buildListResult_f1a63d9, buildList_switchResult_326a51b5)}"
+                - buildListResult_23a34b5f: "${list.concat(buildListResult_23a34b5f, buildList_switchResult_604959a3)}"
   - return:
       return:
-        tasks: "${buildListResult_f1a63d9}"
+        tasks: "${buildListResult_23a34b5f}"

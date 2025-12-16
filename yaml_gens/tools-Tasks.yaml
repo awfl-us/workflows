@@ -6,7 +6,7 @@ main:
       steps:
       - select_task_tool_initResult:
           assign:
-          - select_task_toolResult_26216c1d: {}
+          - select_task_toolResult_241394d4: {}
       - select_task_tool_steps:
           switch:
           - condition: "${(string(input.tool_call.function.name) == \"CREATE_TASK\")}"
@@ -17,7 +17,7 @@ main:
                     steps:
                     - tryCreateTask_initResult:
                         assign:
-                        - tryCreateTaskResult_1e7decd6: {}
+                        - tryCreateTaskResult_4c0469d: {}
                     - tryCreateTask_steps:
                         try:
                           steps:
@@ -39,20 +39,20 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "createTaskCallResult_65959203"
+                                    result: "createTaskCallResult_9188af1"
                               retry: "${http.default_retry}"
                           - tryCreateTask_updateResult:
                               assign:
-                              - tryCreateTaskResult_1e7decd6: "${(((((((((\"Created task\" + \": id=\") + string(createTaskCallResult_65959203.body.task.id)) + \" | \") + string(createTaskCallResult_65959203.body.task.title)) + \" — \") + string(createTaskCallResult_65959203.body.task.description)) + \" [status=\") + string(createTaskCallResult_65959203.body.task.status)) + \"]\")}"
+                              - tryCreateTaskResult_4c0469d: "${(((((((((\"Created task\" + \": id=\") + string(createTaskCallResult_9188af1.body.task.id)) + \" | \") + string(createTaskCallResult_9188af1.body.task.title)) + \" — \") + string(createTaskCallResult_9188af1.body.task.description)) + \" [status=\") + string(createTaskCallResult_9188af1.body.task.status)) + \"]\")}"
                         except:
                           as: "tryCreateTaskError"
                           steps:
                           - tryCreateTask_updateResultError:
                               assign:
-                              - tryCreateTaskResult_1e7decd6: "${(\"Task create failed: \" + string(tryCreateTaskError))}"
+                              - tryCreateTaskResult_4c0469d: "${(\"Task create failed: \" + string(tryCreateTaskError))}"
             - select_task_tool_updateResult_0:
                 assign:
-                - select_task_toolResult_26216c1d: "${tryCreateTaskResult_1e7decd6}"
+                - select_task_toolResult_241394d4: "${tryCreateTaskResult_4c0469d}"
           - condition: "${(string(input.tool_call.function.name) == \"UPDATE_TASK\")}"
             steps:
             - run_update_task:
@@ -75,33 +75,33 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "updateTaskCallResult_5a44476f"
+                          result: "updateTaskCallResult_492df491"
                     retry: "${http.default_retry}"
                 - tryUpdateTask:
                     steps:
                     - tryUpdateTask_initResult:
                         assign:
-                        - tryUpdateTaskResult_68ccf45c: {}
+                        - tryUpdateTaskResult_6ead2e0b: {}
                     - tryUpdateTask_steps:
                         try:
                           steps:
                           - tryUpdateTask_updateResult:
                               assign:
-                              - tryUpdateTaskResult_68ccf45c: "${(((((((((\"Updated task\" + \": id=\") + string(updateTaskCallResult_5a44476f.body.task.id)) + \" | \") + string(updateTaskCallResult_5a44476f.body.task.title)) + \" — \") + string(updateTaskCallResult_5a44476f.body.task.description)) + \" [status=\") + string(updateTaskCallResult_5a44476f.body.task.status)) + \"]\")}"
+                              - tryUpdateTaskResult_6ead2e0b: "${(((((((((\"Updated task\" + \": id=\") + string(updateTaskCallResult_492df491.body.task.id)) + \" | \") + string(updateTaskCallResult_492df491.body.task.title)) + \" — \") + string(updateTaskCallResult_492df491.body.task.description)) + \" [status=\") + string(updateTaskCallResult_492df491.body.task.status)) + \"]\")}"
                         except:
                           as: "tryUpdateTaskError"
                           steps:
                           - tryUpdateTask_updateResultError:
                               assign:
-                              - tryUpdateTaskResult_68ccf45c: "${(\"Task update failed: \" + string(tryUpdateTaskError))}"
+                              - tryUpdateTaskResult_6ead2e0b: "${(\"Task update failed: \" + string(tryUpdateTaskError))}"
                 - maybe_promote_next:
                     steps:
                     - maybe_promote_next_initResult:
                         assign:
-                        - maybe_promote_nextResult_7f1405da: {}
+                        - maybe_promote_nextResult_5b0291f6: {}
                     - maybe_promote_next_steps:
                         switch:
-                        - condition: "${(string(updateTaskCallResult_5a44476f.body.task.status) == \"Done\")}"
+                        - condition: "${(string(updateTaskCallResult_492df491.body.task.status) == \"Done\")}"
                           steps:
                           - promote_no_current_block:
                               steps:
@@ -118,16 +118,16 @@ main:
                                           headers:
                                             x-user-id: "${input.env.userId}"
                                             x-project-id: "${input.env.projectId}"
-                                        result: "promote_get_in_progressResult_10c7e23d"
+                                        result: "promote_get_in_progressResult_405c0374"
                                   retry: "${http.default_retry}"
                               - promote_if_no_current_in_progress:
                                   steps:
                                   - promote_if_no_current_in_progress_initResult:
                                       assign:
-                                      - promote_if_no_current_in_progressResult_3cf046b7: {}
+                                      - promote_if_no_current_in_progressResult_30477248: {}
                                   - promote_if_no_current_in_progress_steps:
                                       switch:
-                                      - condition: "${(len(promote_get_in_progressResult_10c7e23d.body.tasks) == 0)}"
+                                      - condition: "${(len(promote_get_in_progressResult_405c0374.body.tasks) == 0)}"
                                         steps:
                                         - promote_has_queued_block:
                                             steps:
@@ -144,16 +144,16 @@ main:
                                                         headers:
                                                           x-user-id: "${input.env.userId}"
                                                           x-project-id: "${input.env.projectId}"
-                                                      result: "promote_get_oldest_queuedResult_64832408"
+                                                      result: "promote_get_oldest_queuedResult_580e46df"
                                                 retry: "${http.default_retry}"
                                             - promote_if_has_queued:
                                                 steps:
                                                 - promote_if_has_queued_initResult:
                                                     assign:
-                                                    - promote_if_has_queuedResult_2f811dd5: {}
+                                                    - promote_if_has_queuedResult_37f5bca6: {}
                                                 - promote_if_has_queued_steps:
                                                     switch:
-                                                    - condition: "${(len(promote_get_oldest_queuedResult_64832408.body.tasks) > 0)}"
+                                                    - condition: "${(len(promote_get_oldest_queuedResult_580e46df.body.tasks) > 0)}"
                                                       steps:
                                                       - promote_update_next:
                                                           try:
@@ -161,7 +161,7 @@ main:
                                                             - promote_update_next_call:
                                                                 call: "http.patch"
                                                                 args:
-                                                                  url: "${((input.env.BASE_URL + \"/\") + (\"tasks/\" + promote_get_oldest_queuedResult_64832408.body.tasks[0].id))}"
+                                                                  url: "${((input.env.BASE_URL + \"/\") + (\"tasks/\" + promote_get_oldest_queuedResult_580e46df.body.tasks[0].id))}"
                                                                   body:
                                                                     sessionId: "${input.env.sessionId}"
                                                                     title: "${null}"
@@ -173,41 +173,41 @@ main:
                                                                   headers:
                                                                     x-user-id: "${input.env.userId}"
                                                                     x-project-id: "${input.env.projectId}"
-                                                                result: "promote_update_nextResult_6e86d585"
+                                                                result: "promote_update_nextResult_6e3500df"
                                                           retry: "${http.default_retry}"
                                                       - promote_if_has_queued_updateResult_0:
                                                           assign:
-                                                          - promote_if_has_queuedResult_2f811dd5: "${(((((((((\"Promoted next task\" + \": id=\") + string(promote_update_nextResult_6e86d585.body.task.id)) + \" | \") + string(promote_update_nextResult_6e86d585.body.task.title)) + \" — \") + string(promote_update_nextResult_6e86d585.body.task.description)) + \" [status=\") + string(promote_update_nextResult_6e86d585.body.task.status)) + \"]\")}"
+                                                          - promote_if_has_queuedResult_37f5bca6: "${(((((((((\"Promoted next task\" + \": id=\") + string(promote_update_nextResult_6e3500df.body.task.id)) + \" | \") + string(promote_update_nextResult_6e3500df.body.task.title)) + \" — \") + string(promote_update_nextResult_6e3500df.body.task.description)) + \" [status=\") + string(promote_update_nextResult_6e3500df.body.task.status)) + \"]\")}"
                                                     - condition: "${true}"
                                                       steps:
                                                       - promote_if_has_queued_updateResult_1:
                                                           assign:
-                                                          - promote_if_has_queuedResult_2f811dd5: "${\"No queued tasks to promote\"}"
+                                                          - promote_if_has_queuedResult_37f5bca6: "${\"No queued tasks to promote\"}"
                                         - promote_if_no_current_in_progress_updateResult_0:
                                             assign:
-                                            - promote_if_no_current_in_progressResult_3cf046b7: "${promote_if_has_queuedResult_2f811dd5}"
+                                            - promote_if_no_current_in_progressResult_30477248: "${promote_if_has_queuedResult_37f5bca6}"
                                       - condition: "${true}"
                                         steps:
                                         - promote_if_no_current_in_progress_updateResult_1:
                                             assign:
-                                            - promote_if_no_current_in_progressResult_3cf046b7: "${\"Task marked Done, but another task is already In Progress; no promotion performed\"}"
+                                            - promote_if_no_current_in_progressResult_30477248: "${\"Task marked Done, but another task is already In Progress; no promotion performed\"}"
                           - maybe_promote_next_updateResult_0:
                               assign:
-                              - maybe_promote_nextResult_7f1405da: "${promote_if_no_current_in_progressResult_3cf046b7}"
+                              - maybe_promote_nextResult_5b0291f6: "${promote_if_no_current_in_progressResult_30477248}"
                         - condition: "${true}"
                           steps:
                           - maybe_promote_next_updateResult_1:
                               assign:
-                              - maybe_promote_nextResult_7f1405da: "${\"\"}"
+                              - maybe_promote_nextResult_5b0291f6: "${\"\"}"
             - select_task_tool_updateResult_1:
                 assign:
-                - select_task_toolResult_26216c1d: "${((tryUpdateTaskResult_68ccf45c + \"\r\") + maybe_promote_nextResult_7f1405da)}"
+                - select_task_toolResult_241394d4: "${((tryUpdateTaskResult_6ead2e0b + \"\r\") + maybe_promote_nextResult_5b0291f6)}"
           - condition: "${true}"
             steps:
             - select_task_tool_updateResult_2:
                 assign:
-                - select_task_toolResult_26216c1d: "${(\"Unsupported tool: \" + string(input.tool_call.function.name))}"
+                - select_task_toolResult_241394d4: "${(\"Unsupported tool: \" + string(input.tool_call.function.name))}"
   - return:
       return:
-        encoded: "${select_task_toolResult_26216c1d}"
+        encoded: "${select_task_toolResult_241394d4}"
         cost: "${0}"

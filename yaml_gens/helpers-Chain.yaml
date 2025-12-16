@@ -20,7 +20,7 @@ main:
       steps:
       - foldWorkflows_initResult:
           assign:
-          - foldWorkflowsResult_3a33c854: "${RunResult_8f1bf43}"
+          - foldWorkflowsResult_646dac17: "${RunResult_8f1bf43}"
       - foldWorkflows_steps:
           for:
             value: "foldWorkflowsValue"
@@ -34,12 +34,12 @@ main:
                       args:
                         workflow_id: "${(foldWorkflowsValue.workflowName + \"${WORKFLOW_ENV}\")}"
                         argument:
-                          input: "${foldWorkflowsResult_3a33c854}"
+                          input: "${foldWorkflowsResult_646dac17}"
                           params: "${foldWorkflowsValue.params}"
                           env:
                             userId: "${input.env.userId}"
                             model: "${input.env.model}"
-                            callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                            callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                             BASE_URL: "${input.env.BASE_URL}"
                             background: "${default(map.get(input.env, \"background\"), null)}"
                             projectId: "${input.env.projectId}"
@@ -48,10 +48,10 @@ main:
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "RunResult_3da63e97"
+                      result: "RunResult_353e7090"
                 retry: "${http.default_retry}"
             - foldWorkflows_updateResult:
                 assign:
-                - foldWorkflowsResult_3a33c854: "${RunResult_3da63e97}"
+                - foldWorkflowsResult_646dac17: "${RunResult_353e7090}"
   - return:
-      return: "${foldWorkflowsResult_3a33c854}"
+      return: "${foldWorkflowsResult_646dac17}"

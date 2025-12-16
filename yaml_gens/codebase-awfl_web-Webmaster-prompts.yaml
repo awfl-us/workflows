@@ -14,7 +14,7 @@ main:
                       steps:
                       - buildPromptList_initResult:
                           assign:
-                          - buildPromptListResult_48f8525f: []
+                          - buildPromptListResult_5ba132bc: []
                       - buildPromptList_steps:
                           for:
                             value: "buildPromptListIdx"
@@ -24,15 +24,15 @@ main:
                                 steps:
                                 - buildPromptList_switch_initResult:
                                     assign:
-                                    - buildPromptList_switchResult_c69116a: {}
+                                    - buildPromptList_switchResult_4212f05: {}
                                 - buildPromptList_switch_steps:
                                     switch:
                                     - condition: "${(buildPromptListIdx == 0)}"
                                       steps:
                                       - buildPromptList_switch_updateResult_0:
                                           assign:
-                                          - buildPromptList_switchResult_c69116a:
-                                              role: "system"
+                                          - buildPromptList_switchResult_4212f05:
+                                              role: "${\"system\"}"
                                               content: "${\"You are the webmaster in charge of the project under awfl_web\n    \"}"
                                               tool_calls: "${[]}"
                                               tool_call_id: "${null}"
@@ -40,7 +40,7 @@ main:
                                               docId: "${null}"
                             - buildPromptList_updateResult:
                                 assign:
-                                - buildPromptListResult_48f8525f: "${list.concat(buildPromptListResult_48f8525f, buildPromptList_switchResult_c69116a)}"
+                                - buildPromptListResult_5ba132bc: "${list.concat(buildPromptListResult_5ba132bc, buildPromptList_switchResult_4212f05)}"
                   - preloadsBlock:
                       steps:
                       - joinPreloads:
@@ -67,37 +67,37 @@ main:
                       steps:
                       - preloads_joinSteps_initResult:
                           assign:
-                          - preloads_joinStepsResult_50292cff: []
+                          - preloads_joinStepsResult_29b3a348: []
                       - preloads_joinSteps_steps:
                           for:
                             value: "preloads_joinStepsIdx"
-                            range: "${[0, (((0 + len(buildPromptListResult_48f8525f)) + len(joinPreloadsResult_23a3e113)) - 1)]}"
+                            range: "${[0, (((0 + len(buildPromptListResult_5ba132bc)) + len(joinPreloadsResult_23a3e113)) - 1)]}"
                             steps:
                             - preloads_joinSteps_switch:
                                 steps:
                                 - preloads_joinSteps_switch_initResult:
                                     assign:
-                                    - preloads_joinSteps_switchResult_5ed44fc3: {}
+                                    - preloads_joinSteps_switchResult_3b391c29: {}
                                 - preloads_joinSteps_switch_steps:
                                     switch:
-                                    - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_48f8525f)))}"
+                                    - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_5ba132bc)))}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_0:
                                           assign:
-                                          - preloads_joinSteps_switchResult_5ed44fc3: "${joinPreloadsResult_23a3e113[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_48f8525f)))]}"
+                                          - preloads_joinSteps_switchResult_3b391c29: "${joinPreloadsResult_23a3e113[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_5ba132bc)))]}"
                                     - condition: "${(preloads_joinStepsIdx >= 0)}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_1:
                                           assign:
-                                          - preloads_joinSteps_switchResult_5ed44fc3: "${buildPromptListResult_48f8525f[(preloads_joinStepsIdx - 0)]}"
+                                          - preloads_joinSteps_switchResult_3b391c29: "${buildPromptListResult_5ba132bc[(preloads_joinStepsIdx - 0)]}"
                             - preloads_joinSteps_updateResult:
                                 assign:
-                                - preloads_joinStepsResult_50292cff: "${list.concat(preloads_joinStepsResult_50292cff, preloads_joinSteps_switchResult_5ed44fc3)}"
+                                - preloads_joinStepsResult_29b3a348: "${list.concat(preloads_joinStepsResult_29b3a348, preloads_joinSteps_switchResult_3b391c29)}"
               - buildPromptsWithTasks:
                   steps:
                   - buildPromptsWithTasks_initResult:
                       assign:
-                      - buildPromptsWithTasksResult_7ae29e47: {}
+                      - buildPromptsWithTasksResult_6fd9235: {}
                   - buildPromptsWithTasks_steps:
                       try:
                         steps:
@@ -112,7 +112,7 @@ main:
                                       env:
                                         userId: "${input.env.userId}"
                                         model: "${input.env.model}"
-                                        callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                        callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                                         BASE_URL: "${input.env.BASE_URL}"
                                         background: "${default(map.get(input.env, \"background\"), null)}"
                                         projectId: "${input.env.projectId}"
@@ -121,13 +121,13 @@ main:
                                     project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                     connector_params:
                                       skip_polling: false
-                                  result: "tasksResult_6c514545"
+                                  result: "tasksResult_3b7132cd"
                             retry: "${http.default_retry}"
                         - buildGuidancePrompt:
                             steps:
                             - buildGuidancePrompt_initResult:
                                 assign:
-                                - buildGuidancePromptResult_165aab31: []
+                                - buildGuidancePromptResult_12fddc70: []
                             - buildGuidancePrompt_steps:
                                 for:
                                   value: "buildGuidancePromptIdx"
@@ -137,15 +137,15 @@ main:
                                       steps:
                                       - buildGuidancePrompt_switch_initResult:
                                           assign:
-                                          - buildGuidancePrompt_switchResult_5abf9c31: {}
+                                          - buildGuidancePrompt_switchResult_363e434e: {}
                                       - buildGuidancePrompt_switch_steps:
                                           switch:
                                           - condition: "${(buildGuidancePromptIdx == 0)}"
                                             steps:
                                             - buildGuidancePrompt_switch_updateResult_0:
                                                 assign:
-                                                - buildGuidancePrompt_switchResult_5abf9c31:
-                                                    role: "system"
+                                                - buildGuidancePrompt_switchResult_363e434e:
+                                                    role: "${\"system\"}"
                                                     content: "${\"Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.\"}"
                                                     tool_calls: "${[]}"
                                                     tool_call_id: "${null}"
@@ -155,8 +155,8 @@ main:
                                             steps:
                                             - buildGuidancePrompt_switch_updateResult_1:
                                                 assign:
-                                                - buildGuidancePrompt_switchResult_5abf9c31:
-                                                    role: "system"
+                                                - buildGuidancePrompt_switchResult_363e434e:
+                                                    role: "${\"system\"}"
                                                     content: "${\"Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.\"}"
                                                     tool_calls: "${[]}"
                                                     tool_call_id: "${null}"
@@ -166,8 +166,8 @@ main:
                                             steps:
                                             - buildGuidancePrompt_switch_updateResult_2:
                                                 assign:
-                                                - buildGuidancePrompt_switchResult_5abf9c31:
-                                                    role: "system"
+                                                - buildGuidancePrompt_switchResult_363e434e:
+                                                    role: "${\"system\"}"
                                                     content: "${\"For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)\"}"
                                                     tool_calls: "${[]}"
                                                     tool_call_id: "${null}"
@@ -177,8 +177,8 @@ main:
                                             steps:
                                             - buildGuidancePrompt_switch_updateResult_3:
                                                 assign:
-                                                - buildGuidancePrompt_switchResult_5abf9c31:
-                                                    role: "system"
+                                                - buildGuidancePrompt_switchResult_363e434e:
+                                                    role: "${\"system\"}"
                                                     content: "${\"RULE OF THUMB: Update the task after every six tools calls, at most. At the very least, add a note under an in-progress item about what information the investigation has revealed so far, or even which dead ends to avoid during further investigation.\"}"
                                                     tool_calls: "${[]}"
                                                     tool_call_id: "${null}"
@@ -186,40 +186,40 @@ main:
                                                     docId: "${null}"
                                   - buildGuidancePrompt_updateResult:
                                       assign:
-                                      - buildGuidancePromptResult_165aab31: "${list.concat(buildGuidancePromptResult_165aab31, buildGuidancePrompt_switchResult_5abf9c31)}"
+                                      - buildGuidancePromptResult_12fddc70: "${list.concat(buildGuidancePromptResult_12fddc70, buildGuidancePrompt_switchResult_363e434e)}"
                         - buildPrompt:
                             steps:
                             - buildPrompt_initResult:
                                 assign:
-                                - buildPromptResult_765f2aef: []
+                                - buildPromptResult_372f0357: []
                             - buildPrompt_steps:
                                 for:
                                   value: "buildPromptIdx"
-                                  range: "${[0, (((0 + len(buildGuidancePromptResult_165aab31)) + len(tasksResult_6c514545.tasks)) - 1)]}"
+                                  range: "${[0, (((0 + len(buildGuidancePromptResult_12fddc70)) + len(tasksResult_3b7132cd.tasks)) - 1)]}"
                                   steps:
                                   - buildPrompt_switch:
                                       steps:
                                       - buildPrompt_switch_initResult:
                                           assign:
-                                          - buildPrompt_switchResult_5fb250d8: {}
+                                          - buildPrompt_switchResult_1c9d293e: {}
                                       - buildPrompt_switch_steps:
                                           switch:
-                                          - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_165aab31)))}"
+                                          - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_12fddc70)))}"
                                             steps:
                                             - buildPrompt_switch_updateResult_0:
                                                 assign:
-                                                - buildPrompt_switchResult_5fb250d8: "${tasksResult_6c514545.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_165aab31)))]}"
+                                                - buildPrompt_switchResult_1c9d293e: "${tasksResult_3b7132cd.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_12fddc70)))]}"
                                           - condition: "${(buildPromptIdx >= 0)}"
                                             steps:
                                             - buildPrompt_switch_updateResult_1:
                                                 assign:
-                                                - buildPrompt_switchResult_5fb250d8: "${buildGuidancePromptResult_165aab31[(buildPromptIdx - 0)]}"
+                                                - buildPrompt_switchResult_1c9d293e: "${buildGuidancePromptResult_12fddc70[(buildPromptIdx - 0)]}"
                                   - buildPrompt_updateResult:
                                       assign:
-                                      - buildPromptResult_765f2aef: "${list.concat(buildPromptResult_765f2aef, buildPrompt_switchResult_5fb250d8)}"
+                                      - buildPromptResult_372f0357: "${list.concat(buildPromptResult_372f0357, buildPrompt_switchResult_1c9d293e)}"
                         - buildPromptsWithTasks_updateResult:
                             assign:
-                            - buildPromptsWithTasksResult_7ae29e47: "${buildPromptResult_765f2aef}"
+                            - buildPromptsWithTasksResult_6fd9235: "${buildPromptResult_372f0357}"
                       except:
                         as: "buildPromptsWithTasksError"
                         steps:
@@ -234,42 +234,42 @@ main:
                             retry: "${http.default_retry}"
                         - buildPromptsWithTasks_updateResultError:
                             assign:
-                            - buildPromptsWithTasksResult_7ae29e47: "${null}"
+                            - buildPromptsWithTasksResult_6fd9235: "${\"null\"}"
               - taskPrompts_joinSteps:
                   steps:
                   - taskPrompts_joinSteps_initResult:
                       assign:
-                      - taskPrompts_joinStepsResult_5c4b6573: []
+                      - taskPrompts_joinStepsResult_519410a8: []
                   - taskPrompts_joinSteps_steps:
                       for:
                         value: "taskPrompts_joinStepsIdx"
-                        range: "${[0, (((0 + len(preloads_joinStepsResult_50292cff)) + len(buildPromptsWithTasksResult_7ae29e47)) - 1)]}"
+                        range: "${[0, (((0 + len(preloads_joinStepsResult_29b3a348)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
                         steps:
                         - taskPrompts_joinSteps_switch:
                             steps:
                             - taskPrompts_joinSteps_switch_initResult:
                                 assign:
-                                - taskPrompts_joinSteps_switchResult_369ddcbd: {}
+                                - taskPrompts_joinSteps_switchResult_467bfcf5: {}
                             - taskPrompts_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_50292cff)))}"
+                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_29b3a348)))}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_369ddcbd: "${buildPromptsWithTasksResult_7ae29e47[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_50292cff)))]}"
+                                      - taskPrompts_joinSteps_switchResult_467bfcf5: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_29b3a348)))]}"
                                 - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_369ddcbd: "${preloads_joinStepsResult_50292cff[(taskPrompts_joinStepsIdx - 0)]}"
+                                      - taskPrompts_joinSteps_switchResult_467bfcf5: "${preloads_joinStepsResult_29b3a348[(taskPrompts_joinStepsIdx - 0)]}"
                         - taskPrompts_joinSteps_updateResult:
                             assign:
-                            - taskPrompts_joinStepsResult_5c4b6573: "${list.concat(taskPrompts_joinStepsResult_5c4b6573, taskPrompts_joinSteps_switchResult_369ddcbd)}"
+                            - taskPrompts_joinStepsResult_519410a8: "${list.concat(taskPrompts_joinStepsResult_519410a8, taskPrompts_joinSteps_switchResult_467bfcf5)}"
           - cliPrompt:
               steps:
               - cliPrompt_initResult:
                   assign:
-                  - cliPromptResult_70605a79: []
+                  - cliPromptResult_5f0a7bcb: []
               - cliPrompt_steps:
                   for:
                     value: "cliPromptIdx"
@@ -279,15 +279,15 @@ main:
                         steps:
                         - cliPrompt_switch_initResult:
                             assign:
-                            - cliPrompt_switchResult_7e84594b: {}
+                            - cliPrompt_switchResult_3bcc548: {}
                         - cliPrompt_switch_steps:
                             switch:
                             - condition: "${(cliPromptIdx == 0)}"
                               steps:
                               - cliPrompt_switch_updateResult_0:
                                   assign:
-                                  - cliPrompt_switchResult_7e84594b:
-                                      role: "system"
+                                  - cliPrompt_switchResult_3bcc548:
+                                      role: "${\"system\"}"
                                       content: "${\"You can only view seven files at a time. So, if you want to update files in batch, read only three and then update them before moving on.\"}"
                                       tool_calls: "${[]}"
                                       tool_call_id: "${null}"
@@ -295,37 +295,37 @@ main:
                                       docId: "${null}"
                     - cliPrompt_updateResult:
                         assign:
-                        - cliPromptResult_70605a79: "${list.concat(cliPromptResult_70605a79, cliPrompt_switchResult_7e84594b)}"
+                        - cliPromptResult_5f0a7bcb: "${list.concat(cliPromptResult_5f0a7bcb, cliPrompt_switchResult_3bcc548)}"
           - cli_joinSteps:
               steps:
               - cli_joinSteps_initResult:
                   assign:
-                  - cli_joinStepsResult_40185077: []
+                  - cli_joinStepsResult_9cd167a: []
               - cli_joinSteps_steps:
                   for:
                     value: "cli_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_5c4b6573)) + len(cliPromptResult_70605a79)) - 1)]}"
+                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_519410a8)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
                     steps:
                     - cli_joinSteps_switch:
                         steps:
                         - cli_joinSteps_switch_initResult:
                             assign:
-                            - cli_joinSteps_switchResult_36753dd0: {}
+                            - cli_joinSteps_switchResult_317ec2cb: {}
                         - cli_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_5c4b6573)))}"
+                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_519410a8)))}"
                               steps:
                               - cli_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cli_joinSteps_switchResult_36753dd0: "${cliPromptResult_70605a79[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_5c4b6573)))]}"
+                                  - cli_joinSteps_switchResult_317ec2cb: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_519410a8)))]}"
                             - condition: "${(cli_joinStepsIdx >= 0)}"
                               steps:
                               - cli_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cli_joinSteps_switchResult_36753dd0: "${taskPrompts_joinStepsResult_5c4b6573[(cli_joinStepsIdx - 0)]}"
+                                  - cli_joinSteps_switchResult_317ec2cb: "${taskPrompts_joinStepsResult_519410a8[(cli_joinStepsIdx - 0)]}"
                     - cli_joinSteps_updateResult:
                         assign:
-                        - cli_joinStepsResult_40185077: "${list.concat(cli_joinStepsResult_40185077, cli_joinSteps_switchResult_36753dd0)}"
+                        - cli_joinStepsResult_9cd167a: "${list.concat(cli_joinStepsResult_9cd167a, cli_joinSteps_switchResult_317ec2cb)}"
       - fundPrompt:
           steps:
           - fundPrompt_initResult:
@@ -372,32 +372,32 @@ main:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_27f8f846: []
+              - fundsPrompts_joinStepsResult_a5646fa: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_40185077)) + len(fundPromptResult_4aef8109)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_9cd167a)) + len(fundPromptResult_4aef8109)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_6b235136: {}
+                        - fundsPrompts_joinSteps_switchResult_5a74aadf: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_40185077)))}"
+                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_9cd167a)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_6b235136: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_40185077)))]}"
+                              - fundsPrompts_joinSteps_switchResult_5a74aadf: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_9cd167a)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_6b235136: "${cli_joinStepsResult_40185077[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_5a74aadf: "${cli_joinStepsResult_9cd167a[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_27f8f846: "${list.concat(fundsPrompts_joinStepsResult_27f8f846, fundsPrompts_joinSteps_switchResult_6b235136)}"
+                    - fundsPrompts_joinStepsResult_a5646fa: "${list.concat(fundsPrompts_joinStepsResult_a5646fa, fundsPrompts_joinSteps_switchResult_5a74aadf)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_27f8f846}"
+        prompts: "${fundsPrompts_joinStepsResult_a5646fa}"

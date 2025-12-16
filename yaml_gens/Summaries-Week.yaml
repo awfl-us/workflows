@@ -74,7 +74,7 @@ main:
           steps:
           - lock_switch_initResult:
               assign:
-              - lock_switchResult_55b5ab70: {}
+              - lock_switchResult_490b53a6: {}
           - lock_switch_steps:
               switch:
               - condition: "${(lock_acquire_tryResult_351ae956 == true)}"
@@ -270,7 +270,7 @@ main:
                         steps:
                         - ista_write_switch_initResult:
                             assign:
-                            - ista_write_switchResult_65494296: {}
+                            - ista_write_switchResult_4f11d6a1: {}
                         - ista_write_switch_steps:
                             switch:
                             - condition: "${(((len(for_messages_items_SegKalaResult_4f553fc4) > 0) and ((len(for_summariesIstaResult_78e8733f) == 0) or (for_summariesIstaResult_78e8733f[(len(for_summariesIstaResult_78e8733f) - 1)].create_time < input.segmentEnd))) == true)}"
@@ -433,7 +433,7 @@ main:
                                       steps:
                                       - complete_switch_initResult:
                                           assign:
-                                          - complete_switchResult_656e6f4: {}
+                                          - complete_switchResult_60316460: {}
                                       - complete_switch_steps:
                                           switch:
                                           - condition: "${(len(for_convoContext_items_WeekKalaResult_7e2e7325) > 0)}"
@@ -629,9 +629,37 @@ main:
                                                               x-project-id: "${input.env.projectId}"
                                                           result: "complete_chat_postResult_3b251e35"
                                                     retry: "${http.default_retry}"
+                                                - decoded:
+                                                    steps:
+                                                    - decoded_initResult:
+                                                        assign:
+                                                        - decodedResult_3626fafc: {}
+                                                    - decoded_steps:
+                                                        try:
+                                                          steps:
+                                                          - decoded_updateResult:
+                                                              assign:
+                                                              - decodedResult_3626fafc:
+                                                                  result: "${json.decode(complete_chat_postResult_3b251e35.body.message.content)}"
+                                                                  total_cost: "${complete_chat_postResult_3b251e35.body.total_cost}"
+                                                        except:
+                                                          as: "decodedError"
+                                                          steps:
+                                                          - decoded_logError:
+                                                              try:
+                                                                steps:
+                                                                - decoded_logError_call:
+                                                                    call: "sys.log"
+                                                                    args:
+                                                                      text: "${(\"[decoded_logError] \" + decodedError.message)}"
+                                                                    result: "decoded_logErrorResult_1b2bbd0f"
+                                                              retry: "${http.default_retry}"
+                                                          - decoded_updateResultError:
+                                                              assign:
+                                                              - decodedResult_3626fafc: "${null}"
                                             - complete_switch_updateResult_0:
                                                 assign:
-                                                - complete_switchResult_656e6f4: "${decodedResult_3626fafc}"
+                                                - complete_switchResult_60316460: "${decodedResult_3626fafc}"
                                           - condition: "${true}"
                                             steps:
                                             - emptyYoj:
@@ -640,17 +668,17 @@ main:
                                                   code: "${400}"
                                             - complete_switch_updateResult_1:
                                                 assign:
-                                                - complete_switchResult_656e6f4: "${null}"
+                                                - complete_switchResult_60316460: "${null}"
                               - do_write_other_block:
                                   steps:
                                   - writeIstaResult_switch:
                                       steps:
                                       - writeIstaResult_switch_initResult:
                                           assign:
-                                          - writeIstaResult_switchResult_6604a979: {}
+                                          - writeIstaResult_switchResult_22f29752: {}
                                       - writeIstaResult_switch_steps:
                                           switch:
-                                          - condition: "${(complete_switchResult_656e6f4.result != null)}"
+                                          - condition: "${(complete_switchResult_60316460.result != null)}"
                                             steps:
                                             - writeIstaResult_write_summariesIsta_WeekKala:
                                                 try:
@@ -663,9 +691,9 @@ main:
                                                           collection: "${(\"log.weekly.\" + \"summaries\")}"
                                                           id: "${time.format((259200 + ((((input.segmentEnd - 259200) // 604800) + 1) * 604800)), \"America/New_York\")}"
                                                           contents:
-                                                            value: "${complete_switchResult_656e6f4.result}"
+                                                            value: "${complete_switchResult_60316460.result}"
                                                             create_time: "${input.segmentEnd}"
-                                                            cost: "${complete_switchResult_656e6f4.total_cost}"
+                                                            cost: "${complete_switchResult_60316460.total_cost}"
                                                             execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                                           userId: "${input.env.userId}"
                                                         auth:
@@ -674,19 +702,19 @@ main:
                                                         headers:
                                                           x-user-id: "${input.env.userId}"
                                                           x-project-id: "${input.env.projectId}"
-                                                      result: "writeIstaResult_write_summariesIsta_WeekKalaResult_36dc77d6"
+                                                      result: "writeIstaResult_write_summariesIsta_WeekKalaResult_2c3bb70d"
                                                 retry: "${http.default_retry}"
                                             - writeIstaResult_switch_updateResult_0:
                                                 assign:
-                                                - writeIstaResult_switchResult_6604a979: "${writeIstaResult_write_summariesIsta_WeekKalaResult_36dc77d6}"
+                                                - writeIstaResult_switchResult_22f29752: "${writeIstaResult_write_summariesIsta_WeekKalaResult_2c3bb70d}"
                                           - condition: "${true}"
                                             steps:
                                             - writeIstaResult_switch_updateResult_1:
                                                 assign:
-                                                - writeIstaResult_switchResult_6604a979: "${null}"
+                                                - writeIstaResult_switchResult_22f29752: "${null}"
                               - ista_write_switch_updateResult_0:
                                   assign:
-                                  - ista_write_switchResult_65494296: "${complete_switchResult_656e6f4.result}"
+                                  - ista_write_switchResult_4f11d6a1: "${complete_switchResult_60316460.result}"
                             - condition: "${true}"
                               steps:
                               - write_skipped:
@@ -700,7 +728,7 @@ main:
                                   retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_1:
                                   assign:
-                                  - ista_write_switchResult_65494296: "${null}"
+                                  - ista_write_switchResult_4f11d6a1: "${null}"
                 - lock_release:
                     try:
                       steps:
@@ -723,11 +751,11 @@ main:
                     retry: "${http.default_retry}"
                 - lock_switch_updateResult_0:
                     assign:
-                    - lock_switchResult_55b5ab70: "${ista_write_switchResult_65494296}"
+                    - lock_switchResult_490b53a6: "${ista_write_switchResult_4f11d6a1}"
               - condition: "${true}"
                 steps:
                 - lock_switch_updateResult_1:
                     assign:
-                    - lock_switchResult_55b5ab70: "${null}"
+                    - lock_switchResult_490b53a6: "${null}"
   - return:
-      return: "${lock_switchResult_55b5ab70}"
+      return: "${lock_switchResult_490b53a6}"

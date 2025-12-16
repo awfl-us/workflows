@@ -28,9 +28,9 @@ main:
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "run_agent_workflowResult_623f14ab"
+            result: "run_agent_workflowResult_3474ba0b"
       retry: "${http.default_retry}"
   - return:
       return:
-        encoded: "${json.encode_to_string(run_agent_workflowResult_623f14ab)}"
-        cost: "${run_agent_workflowResult_623f14ab.total_cost}"
+        encoded: "${json.encode_to_string(run_agent_workflowResult_3474ba0b)}"
+        cost: "${run_agent_workflowResult_3474ba0b.total_cost}"

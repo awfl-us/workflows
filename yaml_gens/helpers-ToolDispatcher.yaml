@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_3434d9be: {}
+          - mainTryResult_73cefe4f: {}
       - mainTry_steps:
           try:
             steps:
@@ -14,7 +14,7 @@ main:
                 steps:
                 - registerExecForSessionTry_initResult:
                     assign:
-                    - registerExecForSessionTryResult_69a8c8f: {}
+                    - registerExecForSessionTryResult_7f775dc6: {}
                 - registerExecForSessionTry_steps:
                     try:
                       steps:
@@ -39,11 +39,11 @@ main:
                                   headers:
                                     x-user-id: "${input.env.userId}"
                                     x-project-id: "${input.env.projectId}"
-                                result: "registerExecForSessionCreateResult_4d550d78"
+                                result: "registerExecForSessionCreateResult_179a5d97"
                           retry: "${http.default_retry}"
                       - registerExecForSessionTry_updateResult:
                           assign:
-                          - registerExecForSessionTryResult_69a8c8f: "${\"ok\"}"
+                          - registerExecForSessionTryResult_7f775dc6: "${\"ok\"}"
                     except:
                       as: "registerExecForSessionTryError"
                       steps:
@@ -51,7 +51,7 @@ main:
                           steps:
                           - registerExecForSessionSwitch_initResult:
                               assign:
-                              - registerExecForSessionSwitchResult_60e5087c: {}
+                              - registerExecForSessionSwitchResult_390786ea: {}
                           - registerExecForSessionSwitch_steps:
                               switch:
                               - condition: "${((\"code\" in registerExecForSessionTryError) and (registerExecForSessionTryError.code == 409))}"
@@ -77,26 +77,26 @@ main:
                                             headers:
                                               x-user-id: "${input.env.userId}"
                                               x-project-id: "${input.env.projectId}"
-                                          result: "registerExecForSessionUpdateResult_722c896"
+                                          result: "registerExecForSessionUpdateResult_30808621"
                                     retry: "${http.default_retry}"
                                 - registerExecForSessionSwitch_updateResult_0:
                                     assign:
-                                    - registerExecForSessionSwitchResult_60e5087c: "${\"ok\"}"
+                                    - registerExecForSessionSwitchResult_390786ea: "${\"ok\"}"
                               - condition: "${true}"
                                 steps:
                                 - registerExecForSessionRethrow:
                                     raise: "${registerExecForSessionTryError}"
                                 - registerExecForSessionSwitch_updateResult_1:
                                     assign:
-                                    - registerExecForSessionSwitchResult_60e5087c: "${\"fail\"}"
+                                    - registerExecForSessionSwitchResult_390786ea: "${\"fail\"}"
                       - registerExecForSessionTry_updateResultError:
                           assign:
-                          - registerExecForSessionTryResult_69a8c8f: "${registerExecForSessionSwitchResult_60e5087c}"
+                          - registerExecForSessionTryResult_7f775dc6: "${registerExecForSessionSwitchResult_390786ea}"
             - registerWorkflowExecLink:
                 steps:
                 - registerWorkflowExecLink_initResult:
                     assign:
-                    - registerWorkflowExecLinkResult_32b10be6: {}
+                    - registerWorkflowExecLinkResult_29cc64bc: {}
                 - registerWorkflowExecLink_steps:
                     switch:
                     - condition: "${(len(default(default(map.get(input.env, \"callingWorkflowExec\"), null), \"\")) > 0)}"
@@ -105,7 +105,7 @@ main:
                           steps:
                           - registerWorkflowExecLinkTry_initResult:
                               assign:
-                              - registerWorkflowExecLinkTryResult_7e2deb69: {}
+                              - registerWorkflowExecLinkTryResult_23443234: {}
                           - registerWorkflowExecLinkTry_steps:
                               try:
                                 steps:
@@ -131,11 +131,11 @@ main:
                                             headers:
                                               x-user-id: "${input.env.userId}"
                                               x-project-id: "${input.env.projectId}"
-                                          result: "registerWorkflowExecLinkCreateResult_4f55d602"
+                                          result: "registerWorkflowExecLinkCreateResult_5dbf1641"
                                     retry: "${http.default_retry}"
                                 - registerWorkflowExecLinkTry_updateResult:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_7e2deb69: "${\"ok\"}"
+                                    - registerWorkflowExecLinkTryResult_23443234: "${\"ok\"}"
                               except:
                                 as: "registerWorkflowExecLinkTryError"
                                 steps:
@@ -143,7 +143,7 @@ main:
                                     steps:
                                     - registerWorkflowExecLinkSwitch_initResult:
                                         assign:
-                                        - registerWorkflowExecLinkSwitchResult_29ba20c7: {}
+                                        - registerWorkflowExecLinkSwitchResult_29990383: {}
                                     - registerWorkflowExecLinkSwitch_steps:
                                         switch:
                                         - condition: "${(registerWorkflowExecLinkTryError.code == 409)}"
@@ -170,34 +170,34 @@ main:
                                                       headers:
                                                         x-user-id: "${input.env.userId}"
                                                         x-project-id: "${input.env.projectId}"
-                                                    result: "registerWorkflowExecLinkUpdateResult_7823fde"
+                                                    result: "registerWorkflowExecLinkUpdateResult_1e83254c"
                                               retry: "${http.default_retry}"
                                           - registerWorkflowExecLinkSwitch_updateResult_0:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_29ba20c7: "${\"ok\"}"
+                                              - registerWorkflowExecLinkSwitchResult_29990383: "${\"ok\"}"
                                         - condition: "${true}"
                                           steps:
                                           - registerWorkflowExecLinkRethrow:
                                               raise: "${registerWorkflowExecLinkTryError}"
                                           - registerWorkflowExecLinkSwitch_updateResult_1:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_29ba20c7: "${\"fail\"}"
+                                              - registerWorkflowExecLinkSwitchResult_29990383: "${\"fail\"}"
                                 - registerWorkflowExecLinkTry_updateResultError:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_7e2deb69: "${registerWorkflowExecLinkSwitchResult_29ba20c7}"
+                                    - registerWorkflowExecLinkTryResult_23443234: "${registerWorkflowExecLinkSwitchResult_29990383}"
                       - registerWorkflowExecLink_updateResult_0:
                           assign:
-                          - registerWorkflowExecLinkResult_32b10be6: "${registerWorkflowExecLinkTryResult_7e2deb69}"
+                          - registerWorkflowExecLinkResult_29cc64bc: "${registerWorkflowExecLinkTryResult_23443234}"
                     - condition: "${true}"
                       steps:
                       - registerWorkflowExecLink_updateResult_1:
                           assign:
-                          - registerWorkflowExecLinkResult_32b10be6: "${\"skip\"}"
+                          - registerWorkflowExecLinkResult_29cc64bc: "${\"skip\"}"
             - forToolCall:
                 steps:
                 - forToolCall_initResult:
                     assign:
-                    - forToolCallResult_476286ec: []
+                    - forToolCallResult_494b9e60: []
                 - forToolCall_steps:
                     for:
                       value: "forToolCallValue"
@@ -207,7 +207,7 @@ main:
                           steps:
                           - fold_initResult:
                               assign:
-                              - foldResult_5bc52ec7: "${null}"
+                              - foldResult_5fc169e8: "${null}"
                           - fold_steps:
                               for:
                                 value: "foldValue"
@@ -217,7 +217,7 @@ main:
                                     steps:
                                     - matchFunction_initResult:
                                         assign:
-                                        - matchFunctionResult_1938ffd0: {}
+                                        - matchFunctionResult_9f6edf9: {}
                                     - matchFunction_steps:
                                         switch:
                                         - condition: "${(forToolCallValue.function.name == foldValue.function.name)}"
@@ -235,7 +235,7 @@ main:
                                                         env:
                                                           userId: "${input.env.userId}"
                                                           model: "${input.env.model}"
-                                                          callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                                          callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                                                           BASE_URL: "${input.env.BASE_URL}"
                                                           background: "${default(map.get(input.env, \"background\"), null)}"
                                                           projectId: "${input.env.projectId}"
@@ -244,19 +244,19 @@ main:
                                                       project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                       connector_params:
                                                         skip_polling: false
-                                                    result: "callToolWorkflowResult_18b16236"
+                                                    result: "callToolWorkflowResult_d62ee"
                                               retry: "${http.default_retry}"
                                           - matchFunction_updateResult_0:
                                               assign:
-                                              - matchFunctionResult_1938ffd0: "${callToolWorkflowResult_18b16236}"
+                                              - matchFunctionResult_9f6edf9: "${callToolWorkflowResult_d62ee}"
                                         - condition: "${true}"
                                           steps:
                                           - matchFunction_updateResult_1:
                                               assign:
-                                              - matchFunctionResult_1938ffd0: "${foldResult_5bc52ec7}"
+                                              - matchFunctionResult_9f6edf9: "${foldResult_5fc169e8}"
                                 - fold_updateResult:
                                     assign:
-                                    - foldResult_5bc52ec7: "${matchFunctionResult_1938ffd0}"
+                                    - foldResult_5fc169e8: "${matchFunctionResult_9f6edf9}"
                       - saveResult_seg_write_with_session_update:
                           steps:
                           - saveResult_newId:
@@ -298,7 +298,7 @@ main:
                                         contents:
                                           value:
                                             role: "${\"tool\"}"
-                                            content: "${foldResult_5bc52ec7.encoded}"
+                                            content: "${foldResult_5fc169e8.encoded}"
                                             tool_calls: "${[]}"
                                             tool_call_id: "${forToolCallValue.id}"
                                             create_time: "${sys.now()}"
@@ -313,7 +313,7 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "saveResult_write_messagesIsta_SegKalaResult_35bb2d45"
+                                    result: "saveResult_write_messagesIsta_SegKalaResult_4f65f6c8"
                               retry: "${http.default_retry}"
                           - saveResult_update_session_update_time:
                               try:
@@ -334,15 +334,15 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "saveResult_update_session_update_timeResult_18777e67"
+                                    result: "saveResult_update_session_update_timeResult_599a88eb"
                               retry: "${http.default_retry}"
                       - forToolCall_updateResult:
                           assign:
-                          - forToolCallResult_476286ec: "${list.concat(forToolCallResult_476286ec, foldResult_5bc52ec7)}"
+                          - forToolCallResult_494b9e60: "${list.concat(forToolCallResult_494b9e60, foldResult_5fc169e8)}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_3434d9be:
-                    results: "${forToolCallResult_476286ec}"
+                - mainTryResult_73cefe4f:
+                    results: "${forToolCallResult_494b9e60}"
           except:
             as: "mainTryError"
             steps:
@@ -350,6 +350,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_3434d9be: "${null}"
+                - mainTryResult_73cefe4f: "${null}"
   - return:
-      return: "${mainTryResult_3434d9be}"
+      return: "${mainTryResult_73cefe4f}"

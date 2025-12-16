@@ -8,7 +8,7 @@ main:
           steps:
           - getToolDefs_foldNames_initResult:
               assign:
-              - getToolDefs_foldNamesResult_1e3e50a4: "${\"\"}"
+              - getToolDefs_foldNamesResult_191a4cb2: "${\"\"}"
           - getToolDefs_foldNames_steps:
               for:
                 value: "getToolDefs_foldNamesValue"
@@ -16,22 +16,22 @@ main:
                 steps:
                 - getToolDefs_foldNames_updateResult:
                     assign:
-                    - getToolDefs_foldNamesResult_1e3e50a4: "${((getToolDefs_foldNamesResult_1e3e50a4 + \",\") + getToolDefs_foldNamesValue)}"
+                    - getToolDefs_foldNamesResult_191a4cb2: "${((getToolDefs_foldNamesResult_191a4cb2 + \",\") + getToolDefs_foldNamesValue)}"
       - getToolDefs:
           try:
             steps:
             - getToolDefs_call:
                 call: "http.get"
                 args:
-                  url: "${((input.env.BASE_URL + \"/\") + (\"tools/list?names=\" + getToolDefs_foldNamesResult_1e3e50a4))}"
+                  url: "${((input.env.BASE_URL + \"/\") + (\"tools/list?names=\" + getToolDefs_foldNamesResult_191a4cb2))}"
                   auth:
                     type: "OIDC"
                     audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "getToolDefsResult_392e80eb"
+                result: "getToolDefsResult_22ee4895"
           retry: "${http.default_retry}"
   - return:
       return:
-        defs: "${getToolDefsResult_392e80eb.body.items}"
+        defs: "${getToolDefsResult_22ee4895.body.items}"

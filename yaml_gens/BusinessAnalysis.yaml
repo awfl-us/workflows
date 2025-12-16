@@ -8,7 +8,7 @@ main:
           steps:
           - cacheReportRead_tryRead_initResult:
               assign:
-              - cacheReportRead_tryReadResult_5b4e3c8d: {}
+              - cacheReportRead_tryReadResult_2a58581d: {}
           - cacheReportRead_tryRead_steps:
               try:
                 steps:
@@ -29,11 +29,11 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "cacheReportReadResult_1eb1111b"
+                          result: "cacheReportReadResult_3da4cae5"
                     retry: "${http.default_retry}"
                 - cacheReportRead_tryRead_updateResult:
                     assign:
-                    - cacheReportRead_tryReadResult_5b4e3c8d: "${cacheReportReadResult_1eb1111b}"
+                    - cacheReportRead_tryReadResult_2a58581d: "${cacheReportReadResult_3da4cae5}"
               except:
                 as: "cacheReportRead_tryReadError"
                 steps:
@@ -41,7 +41,7 @@ main:
                     steps:
                     - cacheReportRead_switchRead_initResult:
                         assign:
-                        - cacheReportRead_switchReadResult_2460f04b: {}
+                        - cacheReportRead_switchReadResult_217ba320: {}
                     - cacheReportRead_switchRead_steps:
                         switch:
                         - condition: "${(cacheReportRead_tryReadError.code == 404)}"
@@ -53,529 +53,613 @@ main:
                                     call: "sys.log"
                                     args:
                                       text: "${(\"[cacheReportRead_log404] \" + \"404 - File not found\")}"
-                                    result: "cacheReportRead_log404Result_477e1fa9"
+                                    result: "cacheReportRead_log404Result_e35461d"
                               retry: "${http.default_retry}"
                           - cacheReportRead_switchRead_updateResult_0:
                               assign:
-                              - cacheReportRead_switchReadResult_2460f04b: "${cacheReportReadResult_1eb1111b}"
+                              - cacheReportRead_switchReadResult_217ba320: "${cacheReportReadResult_3da4cae5}"
                         - condition: "${true}"
                           steps:
                           - cacheReportRead_rethrow:
                               raise: "${cacheReportRead_tryReadError}"
                           - cacheReportRead_switchRead_updateResult_1:
                               assign:
-                              - cacheReportRead_switchReadResult_2460f04b: "${cacheReportReadResult_1eb1111b}"
+                              - cacheReportRead_switchReadResult_217ba320: "${cacheReportReadResult_3da4cae5}"
                 - cacheReportRead_tryRead_updateResultError:
                     assign:
-                    - cacheReportRead_tryReadResult_5b4e3c8d: "${cacheReportRead_switchReadResult_2460f04b}"
+                    - cacheReportRead_tryReadResult_2a58581d: "${cacheReportRead_switchReadResult_217ba320}"
       - cacheReportIfStale:
           steps:
           - cacheReportIfStale_initResult:
               assign:
-              - cacheReportIfStaleResult_33ecc76e: {}
+              - cacheReportIfStaleResult_4edd0b70: {}
           - cacheReportIfStale_steps:
               switch:
-              - condition: "${(((not  (\"body\" in cacheReportRead_tryReadResult_5b4e3c8d)) or (not  (\"updatedAt\" in cacheReportRead_tryReadResult_5b4e3c8d.body))) or ((sys.now() - cacheReportRead_tryReadResult_5b4e3c8d.body.updatedAt) > 86400000))}"
+              - condition: "${(((not  (\"body\" in cacheReportRead_tryReadResult_2a58581d)) or (not  (\"updatedAt\" in cacheReportRead_tryReadResult_2a58581d.body))) or ((sys.now() - cacheReportRead_tryReadResult_2a58581d.body.updatedAt) > 86400000))}"
                 steps:
                 - cacheReportBlock:
                     steps:
-                    - Status_started:
+                    - cacheReportBlock_initResult:
+                        assign:
+                        - cacheReportBlockResult_394e48fc: {}
+                    - cacheReportBlock_steps:
                         try:
                           steps:
-                          - Status_started_call:
-                              call: "http.post"
-                              args:
-                                url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                body:
-                                  collection: "${\"businesses.report\"}"
-                                  id: "${input.placeId}"
-                                  contents:
-                                    status: "started"
-                                    statusMsg: "${\"Generating keywords...\"}"
-                                  userId: "${input.env.userId}"
-                                auth:
-                                  type: "OIDC"
-                                  audience: "${input.env.BASE_URL}"
-                                headers:
-                                  x-user-id: "${input.env.userId}"
-                                  x-project-id: "${input.env.projectId}"
-                              result: "Status_startedResult_10328324"
-                        retry: "${http.default_retry}"
-                    - generateKeywords:
-                        try:
-                          steps:
-                          - generateKeywords_call:
-                              call: "http.post"
-                              args:
-                                url: "${((input.env.BASE_URL + \"/\") + \"business-report/generate-keywords\")}"
-                                body:
-                                  placeId: "${input.placeId}"
-                                auth:
-                                  type: "OIDC"
-                                  audience: "${input.env.BASE_URL}"
-                                headers:
-                                  x-user-id: "${input.env.userId}"
-                                  x-project-id: "${input.env.projectId}"
-                              result: "generateKeywordsResult_3540a02f"
-                        retry: "${http.default_retry}"
-                    - Status_reviews:
-                        try:
-                          steps:
-                          - Status_reviews_call:
-                              call: "http.post"
-                              args:
-                                url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                body:
-                                  collection: "${\"businesses.report\"}"
-                                  id: "${input.placeId}"
-                                  contents:
-                                    status: "reviews"
-                                    statusMsg: "${\"Scraping Google maps reviews...\"}"
-                                  userId: "${input.env.userId}"
-                                auth:
-                                  type: "OIDC"
-                                  audience: "${input.env.BASE_URL}"
-                                headers:
-                                  x-user-id: "${input.env.userId}"
-                                  x-project-id: "${input.env.projectId}"
-                              result: "Status_reviewsResult_7877d2b2"
-                        retry: "${http.default_retry}"
-                    - cacheReviews_businessReviews:
-                        steps:
-                        - cacheReviews_businessReviewsRead_tryRead:
-                            steps:
-                            - cacheReviews_businessReviewsRead_tryRead_initResult:
-                                assign:
-                                - cacheReviews_businessReviewsRead_tryReadResult_7f9eef65: {}
-                            - cacheReviews_businessReviewsRead_tryRead_steps:
-                                try:
+                          - Status_started:
+                              try:
+                                steps:
+                                - Status_started_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                                      body:
+                                        collection: "${\"businesses.report\"}"
+                                        id: "${input.placeId}"
+                                        contents:
+                                          status: "started"
+                                          statusMsg: "${\"Generating keywords...\"}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "OIDC"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "Status_startedResult_7cdeafbf"
+                              retry: "${http.default_retry}"
+                          - generateKeywords:
+                              try:
+                                steps:
+                                - generateKeywords_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"business-report/generate-keywords\")}"
+                                      body:
+                                        placeId: "${input.placeId}"
+                                      auth:
+                                        type: "OIDC"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "generateKeywordsResult_18208bfd"
+                              retry: "${http.default_retry}"
+                          - Status_reviews:
+                              try:
+                                steps:
+                                - Status_reviews_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                                      body:
+                                        collection: "${\"businesses.report\"}"
+                                        id: "${input.placeId}"
+                                        contents:
+                                          status: "reviews"
+                                          statusMsg: "${\"Scraping Google maps reviews...\"}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "OIDC"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "Status_reviewsResult_52702d8f"
+                              retry: "${http.default_retry}"
+                          - cacheReviews_businessReviews:
+                              steps:
+                              - cacheReviews_businessReviewsRead_tryRead:
                                   steps:
-                                  - cacheReviews_businessReviewsRead:
+                                  - cacheReviews_businessReviewsRead_tryRead_initResult:
+                                      assign:
+                                      - cacheReviews_businessReviewsRead_tryReadResult_1abcab9d: {}
+                                  - cacheReviews_businessReviewsRead_tryRead_steps:
                                       try:
                                         steps:
-                                        - cacheReviews_businessReviewsRead_call:
-                                            call: "http.post"
-                                            args:
-                                              url: "${((input.env.BASE_URL + \"/\") + \"firebase/read\")}"
-                                              body:
-                                                collection: "${\"businesses.reviews\"}"
-                                                id: "${input.placeId}"
-                                                userId: "${input.env.userId}"
-                                              auth:
-                                                type: "OIDC"
-                                                audience: "${input.env.BASE_URL}"
-                                              headers:
-                                                x-user-id: "${input.env.userId}"
-                                                x-project-id: "${input.env.projectId}"
-                                            result: "cacheReviews_businessReviewsReadResult_5422133a"
-                                      retry: "${http.default_retry}"
-                                  - cacheReviews_businessReviewsRead_tryRead_updateResult:
-                                      assign:
-                                      - cacheReviews_businessReviewsRead_tryReadResult_7f9eef65: "${cacheReviews_businessReviewsReadResult_5422133a}"
-                                except:
-                                  as: "cacheReviews_businessReviewsRead_tryReadError"
-                                  steps:
-                                  - cacheReviews_businessReviewsRead_switchRead:
-                                      steps:
-                                      - cacheReviews_businessReviewsRead_switchRead_initResult:
-                                          assign:
-                                          - cacheReviews_businessReviewsRead_switchReadResult_ef6d2d7: {}
-                                      - cacheReviews_businessReviewsRead_switchRead_steps:
-                                          switch:
-                                          - condition: "${(cacheReviews_businessReviewsRead_tryReadError.code == 404)}"
-                                            steps:
-                                            - cacheReviews_businessReviewsRead_log404:
-                                                try:
-                                                  steps:
-                                                  - cacheReviews_businessReviewsRead_log404_call:
-                                                      call: "sys.log"
-                                                      args:
-                                                        text: "${(\"[cacheReviews_businessReviewsRead_log404] \" + \"404 - File not found\")}"
-                                                      result: "cacheReviews_businessReviewsRead_log404Result_404526a5"
-                                                retry: "${http.default_retry}"
-                                            - cacheReviews_businessReviewsRead_switchRead_updateResult_0:
-                                                assign:
-                                                - cacheReviews_businessReviewsRead_switchReadResult_ef6d2d7: "${cacheReviews_businessReviewsReadResult_5422133a}"
-                                          - condition: "${true}"
-                                            steps:
-                                            - cacheReviews_businessReviewsRead_rethrow:
-                                                raise: "${cacheReviews_businessReviewsRead_tryReadError}"
-                                            - cacheReviews_businessReviewsRead_switchRead_updateResult_1:
-                                                assign:
-                                                - cacheReviews_businessReviewsRead_switchReadResult_ef6d2d7: "${cacheReviews_businessReviewsReadResult_5422133a}"
-                                  - cacheReviews_businessReviewsRead_tryRead_updateResultError:
-                                      assign:
-                                      - cacheReviews_businessReviewsRead_tryReadResult_7f9eef65: "${cacheReviews_businessReviewsRead_switchReadResult_ef6d2d7}"
-                        - cacheReviews_businessReviewsIfStale:
-                            steps:
-                            - cacheReviews_businessReviewsIfStale_initResult:
-                                assign:
-                                - cacheReviews_businessReviewsIfStaleResult_75ac6297: {}
-                            - cacheReviews_businessReviewsIfStale_steps:
-                                switch:
-                                - condition: "${(((not  (\"body\" in cacheReviews_businessReviewsRead_tryReadResult_7f9eef65)) or (not  (\"updatedAt\" in cacheReviews_businessReviewsRead_tryReadResult_7f9eef65.body))) or ((sys.now() - cacheReviews_businessReviewsRead_tryReadResult_7f9eef65.body.updatedAt) > 86400000))}"
-                                  steps:
-                                  - scrapeReviews_businessReviews:
-                                      try:
+                                        - cacheReviews_businessReviewsRead:
+                                            try:
+                                              steps:
+                                              - cacheReviews_businessReviewsRead_call:
+                                                  call: "http.post"
+                                                  args:
+                                                    url: "${((input.env.BASE_URL + \"/\") + \"firebase/read\")}"
+                                                    body:
+                                                      collection: "${\"businesses.reviews\"}"
+                                                      id: "${input.placeId}"
+                                                      userId: "${input.env.userId}"
+                                                    auth:
+                                                      type: "OIDC"
+                                                      audience: "${input.env.BASE_URL}"
+                                                    headers:
+                                                      x-user-id: "${input.env.userId}"
+                                                      x-project-id: "${input.env.projectId}"
+                                                  result: "cacheReviews_businessReviewsReadResult_6ca60dd2"
+                                            retry: "${http.default_retry}"
+                                        - cacheReviews_businessReviewsRead_tryRead_updateResult:
+                                            assign:
+                                            - cacheReviews_businessReviewsRead_tryReadResult_1abcab9d: "${cacheReviews_businessReviewsReadResult_6ca60dd2}"
+                                      except:
+                                        as: "cacheReviews_businessReviewsRead_tryReadError"
                                         steps:
-                                        - scrapeReviews_businessReviews_call:
-                                            call: "http.post"
-                                            args:
-                                              url: "${((input.env.BASE_URL + \"/\") + \"business-report/scrape-reviews\")}"
-                                              body:
-                                                placeId: "${input.placeId}"
-                                              auth:
-                                                type: "OIDC"
-                                                audience: "${input.env.BASE_URL}"
-                                              headers:
-                                                x-user-id: "${input.env.userId}"
-                                                x-project-id: "${input.env.projectId}"
-                                            result: "scrapeReviews_businessReviewsResult_6ca14a83"
-                                      retry: "${http.default_retry}"
-                                  - cacheReviews_businessReviewsWrite:
-                                      try:
-                                        steps:
-                                        - cacheReviews_businessReviewsWrite_call:
-                                            call: "http.post"
-                                            args:
-                                              url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                              body:
-                                                collection: "${\"businesses.reviews\"}"
-                                                id: "${input.placeId}"
-                                                contents:
-                                                  updatedAt: "${sys.now()}"
-                                                  result: "${scrapeReviews_businessReviewsResult_6ca14a83.body}"
-                                                userId: "${input.env.userId}"
-                                              auth:
-                                                type: "OIDC"
-                                                audience: "${input.env.BASE_URL}"
-                                              headers:
-                                                x-user-id: "${input.env.userId}"
-                                                x-project-id: "${input.env.projectId}"
-                                            result: "cacheReviews_businessReviewsWriteResult_16896291"
-                                      retry: "${http.default_retry}"
-                                  - cacheReviews_businessReviewsIfStale_updateResult_0:
-                                      assign:
-                                      - cacheReviews_businessReviewsIfStaleResult_75ac6297: "${scrapeReviews_businessReviewsResult_6ca14a83.body}"
-                                - condition: "${(\"body\" in cacheReviews_businessReviewsRead_tryReadResult_7f9eef65)}"
-                                  steps:
-                                  - cacheReviews_businessReviewsIfStale_updateResult_1:
-                                      assign:
-                                      - cacheReviews_businessReviewsIfStaleResult_75ac6297: "${cacheReviews_businessReviewsRead_tryReadResult_7f9eef65.body.result}"
-                                - condition: "${true}"
-                                  steps:
-                                  - cacheReviews_businessReviews_raiseFailedCache:
-                                      raise:
-                                        message: "Cache run failed"
-                                        code: ""
-                                  - cacheReviews_businessReviewsIfStale_updateResult_2:
-                                      assign:
-                                      - cacheReviews_businessReviewsIfStaleResult_75ac6297: "${scrapeReviews_businessReviewsResult_6ca14a83.body}"
-                    - Status_competitorReviews:
-                        try:
-                          steps:
-                          - Status_competitorReviews_call:
-                              call: "http.post"
-                              args:
-                                url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                body:
-                                  collection: "${\"businesses.report\"}"
-                                  id: "${input.placeId}"
-                                  contents:
-                                    status: "competitorReviews"
-                                    statusMsg: "${\"Scraping competitor's reviews...\"}"
-                                  userId: "${input.env.userId}"
-                                auth:
-                                  type: "OIDC"
-                                  audience: "${input.env.BASE_URL}"
-                                headers:
-                                  x-user-id: "${input.env.userId}"
-                                  x-project-id: "${input.env.projectId}"
-                              result: "Status_competitorReviewsResult_2727b32"
-                        retry: "${http.default_retry}"
-                    - scrapeReviewsForCompetitors:
-                        steps:
-                        - scrapeReviewsForCompetitors_initResult:
-                            assign:
-                            - scrapeReviewsForCompetitorsResult_2b186ccc: []
-                        - scrapeReviewsForCompetitors_steps:
-                            for:
-                              value: "scrapeReviewsForCompetitorsValue"
-                              in: "${generateKeywordsResult_3540a02f.body.competitors}"
-                              steps:
-                              - cacheReviews_competitorReviews:
-                                  steps:
-                                  - cacheReviews_competitorReviewsRead_tryRead:
-                                      steps:
-                                      - cacheReviews_competitorReviewsRead_tryRead_initResult:
-                                          assign:
-                                          - cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6: {}
-                                      - cacheReviews_competitorReviewsRead_tryRead_steps:
-                                          try:
+                                        - cacheReviews_businessReviewsRead_switchRead:
                                             steps:
-                                            - cacheReviews_competitorReviewsRead:
-                                                try:
+                                            - cacheReviews_businessReviewsRead_switchRead_initResult:
+                                                assign:
+                                                - cacheReviews_businessReviewsRead_switchReadResult_4f23eeed: {}
+                                            - cacheReviews_businessReviewsRead_switchRead_steps:
+                                                switch:
+                                                - condition: "${(cacheReviews_businessReviewsRead_tryReadError.code == 404)}"
                                                   steps:
-                                                  - cacheReviews_competitorReviewsRead_call:
-                                                      call: "http.post"
-                                                      args:
-                                                        url: "${((input.env.BASE_URL + \"/\") + \"firebase/read\")}"
-                                                        body:
-                                                          collection: "${\"businesses.reviews\"}"
-                                                          id: "${scrapeReviewsForCompetitorsValue.placeId}"
-                                                          userId: "${input.env.userId}"
-                                                        auth:
-                                                          type: "OIDC"
-                                                          audience: "${input.env.BASE_URL}"
-                                                        headers:
-                                                          x-user-id: "${input.env.userId}"
-                                                          x-project-id: "${input.env.projectId}"
-                                                      result: "cacheReviews_competitorReviewsReadResult_6ead6420"
-                                                retry: "${http.default_retry}"
-                                            - cacheReviews_competitorReviewsRead_tryRead_updateResult:
-                                                assign:
-                                                - cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6: "${cacheReviews_competitorReviewsReadResult_6ead6420}"
-                                          except:
-                                            as: "cacheReviews_competitorReviewsRead_tryReadError"
-                                            steps:
-                                            - cacheReviews_competitorReviewsRead_switchRead:
-                                                steps:
-                                                - cacheReviews_competitorReviewsRead_switchRead_initResult:
-                                                    assign:
-                                                    - cacheReviews_competitorReviewsRead_switchReadResult_4b9db87a: {}
-                                                - cacheReviews_competitorReviewsRead_switchRead_steps:
-                                                    switch:
-                                                    - condition: "${(cacheReviews_competitorReviewsRead_tryReadError.code == 404)}"
-                                                      steps:
-                                                      - cacheReviews_competitorReviewsRead_log404:
-                                                          try:
-                                                            steps:
-                                                            - cacheReviews_competitorReviewsRead_log404_call:
-                                                                call: "sys.log"
-                                                                args:
-                                                                  text: "${(\"[cacheReviews_competitorReviewsRead_log404] \" + \"404 - File not found\")}"
-                                                                result: "cacheReviews_competitorReviewsRead_log404Result_25183804"
-                                                          retry: "${http.default_retry}"
-                                                      - cacheReviews_competitorReviewsRead_switchRead_updateResult_0:
-                                                          assign:
-                                                          - cacheReviews_competitorReviewsRead_switchReadResult_4b9db87a: "${cacheReviews_competitorReviewsReadResult_6ead6420}"
-                                                    - condition: "${true}"
-                                                      steps:
-                                                      - cacheReviews_competitorReviewsRead_rethrow:
-                                                          raise: "${cacheReviews_competitorReviewsRead_tryReadError}"
-                                                      - cacheReviews_competitorReviewsRead_switchRead_updateResult_1:
-                                                          assign:
-                                                          - cacheReviews_competitorReviewsRead_switchReadResult_4b9db87a: "${cacheReviews_competitorReviewsReadResult_6ead6420}"
-                                            - cacheReviews_competitorReviewsRead_tryRead_updateResultError:
-                                                assign:
-                                                - cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6: "${cacheReviews_competitorReviewsRead_switchReadResult_4b9db87a}"
-                                  - cacheReviews_competitorReviewsIfStale:
-                                      steps:
-                                      - cacheReviews_competitorReviewsIfStale_initResult:
-                                          assign:
-                                          - cacheReviews_competitorReviewsIfStaleResult_36320c69: {}
-                                      - cacheReviews_competitorReviewsIfStale_steps:
-                                          switch:
-                                          - condition: "${(((not  (\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6)) or (not  (\"updatedAt\" in cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6.body))) or ((sys.now() - cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6.body.updatedAt) > 86400000))}"
-                                            steps:
-                                            - scrapeReviews_competitorReviews:
-                                                try:
+                                                  - cacheReviews_businessReviewsRead_log404:
+                                                      try:
+                                                        steps:
+                                                        - cacheReviews_businessReviewsRead_log404_call:
+                                                            call: "sys.log"
+                                                            args:
+                                                              text: "${(\"[cacheReviews_businessReviewsRead_log404] \" + \"404 - File not found\")}"
+                                                            result: "cacheReviews_businessReviewsRead_log404Result_35d778a0"
+                                                      retry: "${http.default_retry}"
+                                                  - cacheReviews_businessReviewsRead_switchRead_updateResult_0:
+                                                      assign:
+                                                      - cacheReviews_businessReviewsRead_switchReadResult_4f23eeed: "${cacheReviews_businessReviewsReadResult_6ca60dd2}"
+                                                - condition: "${true}"
                                                   steps:
-                                                  - scrapeReviews_competitorReviews_call:
-                                                      call: "http.post"
-                                                      args:
-                                                        url: "${((input.env.BASE_URL + \"/\") + \"business-report/scrape-reviews\")}"
-                                                        body:
-                                                          placeId: "${scrapeReviewsForCompetitorsValue.placeId}"
-                                                        auth:
-                                                          type: "OIDC"
-                                                          audience: "${input.env.BASE_URL}"
-                                                        headers:
-                                                          x-user-id: "${input.env.userId}"
-                                                          x-project-id: "${input.env.projectId}"
-                                                      result: "scrapeReviews_competitorReviewsResult_67e8da47"
-                                                retry: "${http.default_retry}"
-                                            - cacheReviews_competitorReviewsWrite:
-                                                try:
-                                                  steps:
-                                                  - cacheReviews_competitorReviewsWrite_call:
-                                                      call: "http.post"
-                                                      args:
-                                                        url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                                        body:
-                                                          collection: "${\"businesses.reviews\"}"
-                                                          id: "${scrapeReviewsForCompetitorsValue.placeId}"
-                                                          contents:
-                                                            updatedAt: "${sys.now()}"
-                                                            result: "${scrapeReviews_competitorReviewsResult_67e8da47.body}"
-                                                          userId: "${input.env.userId}"
-                                                        auth:
-                                                          type: "OIDC"
-                                                          audience: "${input.env.BASE_URL}"
-                                                        headers:
-                                                          x-user-id: "${input.env.userId}"
-                                                          x-project-id: "${input.env.projectId}"
-                                                      result: "cacheReviews_competitorReviewsWriteResult_493e5e97"
-                                                retry: "${http.default_retry}"
-                                            - cacheReviews_competitorReviewsIfStale_updateResult_0:
-                                                assign:
-                                                - cacheReviews_competitorReviewsIfStaleResult_36320c69: "${scrapeReviews_competitorReviewsResult_67e8da47.body}"
-                                          - condition: "${(\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6)}"
-                                            steps:
-                                            - cacheReviews_competitorReviewsIfStale_updateResult_1:
-                                                assign:
-                                                - cacheReviews_competitorReviewsIfStaleResult_36320c69: "${cacheReviews_competitorReviewsRead_tryReadResult_6ed2d4d6.body.result}"
-                                          - condition: "${true}"
-                                            steps:
-                                            - cacheReviews_competitorReviews_raiseFailedCache:
-                                                raise:
-                                                  message: "Cache run failed"
-                                                  code: ""
-                                            - cacheReviews_competitorReviewsIfStale_updateResult_2:
-                                                assign:
-                                                - cacheReviews_competitorReviewsIfStaleResult_36320c69: "${scrapeReviews_competitorReviewsResult_67e8da47.body}"
-                              - scrapeReviewsForCompetitors_updateResult:
-                                  assign:
-                                  - scrapeReviewsForCompetitorsResult_2b186ccc: "${list.concat(scrapeReviewsForCompetitorsResult_2b186ccc, cacheReviews_competitorReviewsIfStaleResult_36320c69)}"
-                    - zipCompetitorReviews:
-                        steps:
-                        - zipCompetitorReviews_initResult:
-                            assign:
-                            - zipCompetitorReviewsResult_709a2f63: []
-                        - zipCompetitorReviews_steps:
-                            for:
-                              value: "zipCompetitorReviewsIdx"
-                              range: "${[0, (len(generateKeywordsResult_3540a02f.body.competitors) - 1)]}"
-                              steps:
-                              - zipCompetitorReviews_assignIterResult:
-                                  assign:
-                                  - zipCompetitorReviews_assignIterResultVar:
-                                      businessInfo: "${generateKeywordsResult_3540a02f.body.competitors[zipCompetitorReviewsIdx]}"
-                                      reviews: "${scrapeReviewsForCompetitorsResult_2b186ccc[zipCompetitorReviewsIdx].reviews}"
-                              - zipCompetitorReviews_updateResult:
-                                  assign:
-                                  - zipCompetitorReviewsResult_709a2f63: "${list.concat(zipCompetitorReviewsResult_709a2f63, zipCompetitorReviews_assignIterResultVar)}"
-                    - Status_analyze:
-                        try:
-                          steps:
-                          - Status_analyze_call:
-                              call: "http.post"
-                              args:
-                                url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                body:
-                                  collection: "${\"businesses.report\"}"
-                                  id: "${input.placeId}"
-                                  contents:
-                                    status: "analyze"
-                                    statusMsg: "${\"Analyzing business and competitors...\"}"
-                                  userId: "${input.env.userId}"
-                                auth:
-                                  type: "OIDC"
-                                  audience: "${input.env.BASE_URL}"
-                                headers:
-                                  x-user-id: "${input.env.userId}"
-                                  x-project-id: "${input.env.projectId}"
-                              result: "Status_analyzeResult_3bba5515"
-                        retry: "${http.default_retry}"
-                    - buildPrompt:
-                        steps:
-                        - buildPrompt_initResult:
-                            assign:
-                            - buildPromptResult_4e2ab26b: []
-                        - buildPrompt_steps:
-                            for:
-                              value: "buildPromptIdx"
-                              range: "${[0, (2 - 1)]}"
-                              steps:
-                              - buildPrompt_switch:
+                                                  - cacheReviews_businessReviewsRead_rethrow:
+                                                      raise: "${cacheReviews_businessReviewsRead_tryReadError}"
+                                                  - cacheReviews_businessReviewsRead_switchRead_updateResult_1:
+                                                      assign:
+                                                      - cacheReviews_businessReviewsRead_switchReadResult_4f23eeed: "${cacheReviews_businessReviewsReadResult_6ca60dd2}"
+                                        - cacheReviews_businessReviewsRead_tryRead_updateResultError:
+                                            assign:
+                                            - cacheReviews_businessReviewsRead_tryReadResult_1abcab9d: "${cacheReviews_businessReviewsRead_switchReadResult_4f23eeed}"
+                              - cacheReviews_businessReviewsIfStale:
                                   steps:
-                                  - buildPrompt_switch_initResult:
+                                  - cacheReviews_businessReviewsIfStale_initResult:
                                       assign:
-                                      - buildPrompt_switchResult_7412521: {}
-                                  - buildPrompt_switch_steps:
+                                      - cacheReviews_businessReviewsIfStaleResult_2216c284: {}
+                                  - cacheReviews_businessReviewsIfStale_steps:
                                       switch:
-                                      - condition: "${(buildPromptIdx == 0)}"
+                                      - condition: "${(((not  (\"body\" in cacheReviews_businessReviewsRead_tryReadResult_1abcab9d)) or (not  (\"updatedAt\" in cacheReviews_businessReviewsRead_tryReadResult_1abcab9d.body))) or ((sys.now() - cacheReviews_businessReviewsRead_tryReadResult_1abcab9d.body.updatedAt) > 86400000))}"
                                         steps:
-                                        - buildPrompt_switch_updateResult_0:
+                                        - scrapeReviews_businessReviews:
+                                            try:
+                                              steps:
+                                              - scrapeReviews_businessReviews_call:
+                                                  call: "http.post"
+                                                  args:
+                                                    url: "${((input.env.BASE_URL + \"/\") + \"business-report/scrape-reviews\")}"
+                                                    body:
+                                                      placeId: "${input.placeId}"
+                                                    auth:
+                                                      type: "OIDC"
+                                                      audience: "${input.env.BASE_URL}"
+                                                    headers:
+                                                      x-user-id: "${input.env.userId}"
+                                                      x-project-id: "${input.env.projectId}"
+                                                  result: "scrapeReviews_businessReviewsResult_39aae060"
+                                            retry: "${http.default_retry}"
+                                        - cacheReviews_businessReviewsWrite:
+                                            try:
+                                              steps:
+                                              - cacheReviews_businessReviewsWrite_call:
+                                                  call: "http.post"
+                                                  args:
+                                                    url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                                                    body:
+                                                      collection: "${\"businesses.reviews\"}"
+                                                      id: "${input.placeId}"
+                                                      contents:
+                                                        updatedAt: "${sys.now()}"
+                                                        result: "${scrapeReviews_businessReviewsResult_39aae060.body}"
+                                                      userId: "${input.env.userId}"
+                                                    auth:
+                                                      type: "OIDC"
+                                                      audience: "${input.env.BASE_URL}"
+                                                    headers:
+                                                      x-user-id: "${input.env.userId}"
+                                                      x-project-id: "${input.env.projectId}"
+                                                  result: "cacheReviews_businessReviewsWriteResult_597719c0"
+                                            retry: "${http.default_retry}"
+                                        - cacheReviews_businessReviewsIfStale_updateResult_0:
                                             assign:
-                                            - buildPrompt_switchResult_7412521:
-                                                role: "system"
-                                                content: "You are an expert business analyst specializing in customer feedback analysis.\n          Analyze the provided business and competitor data to generate comprehensive insights.\n          Focus on actionable insights and specific recommendations. \n          \n          In addition to general analysis, return:\n          - Three recent reviews or urgent concerns.\n          - Two of the most notable positive and two most notable negative reviews.\n          - A ranked list of the target business among competitors based on rating and weighted by price level.\n          - The two most relatable competitors with a review from each to highlight comparison.\n\n          Use line breaks and markdown to format larger text blocks.\n          Really try to identify important pieces of information that the owner might not be aware of, especially when comparing with competitors as far as local market trends.\n      "
-                                                tool_calls: "${[]}"
-                                                tool_call_id: "${null}"
-                                                create_time: "${sys.now()}"
-                                                docId: "${null}"
-                                      - condition: "${(buildPromptIdx == 1)}"
+                                            - cacheReviews_businessReviewsIfStaleResult_2216c284: "${scrapeReviews_businessReviewsResult_39aae060.body}"
+                                      - condition: "${(\"body\" in cacheReviews_businessReviewsRead_tryReadResult_1abcab9d)}"
                                         steps:
-                                        - buildPrompt_switch_updateResult_1:
+                                        - cacheReviews_businessReviewsIfStale_updateResult_1:
                                             assign:
-                                            - buildPrompt_switchResult_7412521:
-                                                role: "user"
-                                                content: "${((((((\"\rTarget Business:\r\" + json.encode_to_string(generateKeywordsResult_3540a02f.body)) + \"\rTarget Business Reviews: \r\") + json.encode_to_string(cacheReviews_businessReviewsIfStaleResult_75ac6297.reviews)) + \"\rCompetitors: \r\") + json.encode_to_string(zipCompetitorReviewsResult_709a2f63)) + \"\r\rPlease provide a detailed analysis following the specified format.\")}"
-                                                tool_calls: "${[]}"
-                                                tool_call_id: "${null}"
-                                                create_time: "${sys.now()}"
-                                                docId: "${null}"
-                              - buildPrompt_updateResult:
-                                  assign:
-                                  - buildPromptResult_4e2ab26b: "${list.concat(buildPromptResult_4e2ab26b, buildPrompt_switchResult_7412521)}"
-                    - analyze_business_block:
-                        steps:
-                        - analyze_business_buildSchemaList:
-                            steps:
-                            - analyze_business_buildSchemaList_initResult:
-                                assign:
-                                - analyze_business_buildSchemaListResult_d9c3e3d: []
-                            - analyze_business_buildSchemaList_steps:
-                                for:
-                                  value: "analyze_business_buildSchemaListIdx"
-                                  range: "${[0, (1 - 1)]}"
-                                  steps:
-                                  - analyze_business_buildSchemaList_switch:
-                                      steps:
-                                      - analyze_business_buildSchemaList_switch_initResult:
-                                          assign:
-                                          - analyze_business_buildSchemaList_switchResult_7f088ce8: {}
-                                      - analyze_business_buildSchemaList_switch_steps:
-                                          switch:
-                                          - condition: "${(analyze_business_buildSchemaListIdx == 0)}"
-                                            steps:
-                                            - analyze_business_buildSchemaList_switch_updateResult_0:
-                                                assign:
-                                                - analyze_business_buildSchemaList_switchResult_7f088ce8:
-                                                    role: "system"
-                                                    content: "${(\"Respond with a JSON in this format:\r\" + {\n  \"targetBusinessSummary\" : \"${example.targetBusinessSummary}\",\n  \"competitorAnalysis\" : \"${example.competitorAnalysis}\",\n  \"keyStrengths\" : \"${example.keyStrengths}\",\n  \"areasForImprovement\" : \"${example.areasForImprovement}\",\n  \"marketPositioning\" : \"${example.marketPositioning}\",\n  \"recommendations\" : \"${example.recommendations}\",\n  \"recentOrUrgentConcerns\" : {\n    \"author\" : \"${example.recentOrUrgentConcerns.author}\",\n    \"rating\" : \"${example.recentOrUrgentConcerns.rating}\",\n    \"text\" : \"${example.recentOrUrgentConcerns.text}\",\n    \"time\" : \"${example.recentOrUrgentConcerns.time}\"\n  },\n  \"positiveHighlights\" : {\n    \"author\" : \"${example.positiveHighlights.author}\",\n    \"rating\" : \"${example.positiveHighlights.rating}\",\n    \"text\" : \"${example.positiveHighlights.text}\",\n    \"time\" : \"${example.positiveHighlights.time}\"\n  },\n  \"negativeHighlights\" : {\n    \"author\" : \"${example.negativeHighlights.author}\",\n    \"rating\" : \"${example.negativeHighlights.rating}\",\n    \"text\" : \"${example.negativeHighlights.text}\",\n    \"time\" : \"${example.negativeHighlights.time}\"\n  },\n  \"competitorRanking\" : {\n    \"name\" : \"${example.competitorRanking.name}\",\n    \"rating\" : \"${example.competitorRanking.rating}\",\n    \"priceLevel\" : \"${example.competitorRanking.priceLevel}\",\n    \"weightedScore\" : \"${example.competitorRanking.weightedScore}\"\n  },\n  \"competitorComparison\" : {\n    \"name\" : \"${example.competitorComparison.name}\",\n    \"priceLevel\" : \"${example.competitorComparison.priceLevel}\",\n    \"rating\" : \"${example.competitorComparison.rating}\",\n    \"comparisonReview\" : {\n      \"author\" : \"${example.competitorComparison.comparisonReview.author}\",\n      \"rating\" : \"${example.competitorComparison.comparisonReview.rating}\",\n      \"text\" : \"${example.competitorComparison.comparisonReview.text}\",\n      \"time\" : \"${example.competitorComparison.comparisonReview.time}\"\n    }\n  }\n})}"
-                                                    tool_calls: "${[]}"
-                                                    tool_call_id: "${null}"
-                                                    create_time: "${sys.now()}"
-                                                    docId: "${null}"
-                                  - analyze_business_buildSchemaList_updateResult:
-                                      assign:
-                                      - analyze_business_buildSchemaListResult_d9c3e3d: "${list.concat(analyze_business_buildSchemaListResult_d9c3e3d, analyze_business_buildSchemaList_switchResult_7f088ce8)}"
-                        - analyze_business_post:
-                            try:
+                                            - cacheReviews_businessReviewsIfStaleResult_2216c284: "${cacheReviews_businessReviewsRead_tryReadResult_1abcab9d.body.result}"
+                                      - condition: "${true}"
+                                        steps:
+                                        - cacheReviews_businessReviews_raiseFailedCache:
+                                            raise:
+                                              message: "${\"Cache run failed\"}"
+                                              code: "${500}"
+                                        - cacheReviews_businessReviewsIfStale_updateResult_2:
+                                            assign:
+                                            - cacheReviews_businessReviewsIfStaleResult_2216c284: "${scrapeReviews_businessReviewsResult_39aae060.body}"
+                          - Status_competitorReviews:
+                              try:
+                                steps:
+                                - Status_competitorReviews_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                                      body:
+                                        collection: "${\"businesses.report\"}"
+                                        id: "${input.placeId}"
+                                        contents:
+                                          status: "competitorReviews"
+                                          statusMsg: "${\"Scraping competitor's reviews...\"}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "OIDC"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "Status_competitorReviewsResult_14a4c146"
+                              retry: "${http.default_retry}"
+                          - scrapeReviewsForCompetitors:
                               steps:
-                              - analyze_business_post_call:
-                                  call: "http.post"
-                                  args:
-                                    url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
-                                    body:
-                                      messages: "${list.concat(buildPromptResult_4e2ab26b, analyze_business_buildSchemaListResult_d9c3e3d[0])}"
-                                      model: "${\"gpt-5\"}"
-                                      temperature: 0.8
-                                      max_completion_tokens: "${null}"
-                                      response_format:
-                                        type: "json_object"
-                                      tools: "${[]}"
-                                      tool_choice: "${\"auto\"}"
-                                    auth:
-                                      type: "OIDC"
-                                      audience: "${input.env.BASE_URL}"
-                                    headers:
-                                      x-user-id: "${input.env.userId}"
-                                      x-project-id: "${input.env.projectId}"
-                                  result: "analyze_business_postResult_158e5850"
-                            retry: "${http.default_retry}"
+                              - scrapeReviewsForCompetitors_initResult:
+                                  assign:
+                                  - scrapeReviewsForCompetitorsResult_74493ac9: []
+                              - scrapeReviewsForCompetitors_steps:
+                                  for:
+                                    value: "scrapeReviewsForCompetitorsValue"
+                                    in: "${generateKeywordsResult_18208bfd.body.competitors}"
+                                    steps:
+                                    - cacheReviews_competitorReviews:
+                                        steps:
+                                        - cacheReviews_competitorReviewsRead_tryRead:
+                                            steps:
+                                            - cacheReviews_competitorReviewsRead_tryRead_initResult:
+                                                assign:
+                                                - cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb: {}
+                                            - cacheReviews_competitorReviewsRead_tryRead_steps:
+                                                try:
+                                                  steps:
+                                                  - cacheReviews_competitorReviewsRead:
+                                                      try:
+                                                        steps:
+                                                        - cacheReviews_competitorReviewsRead_call:
+                                                            call: "http.post"
+                                                            args:
+                                                              url: "${((input.env.BASE_URL + \"/\") + \"firebase/read\")}"
+                                                              body:
+                                                                collection: "${\"businesses.reviews\"}"
+                                                                id: "${scrapeReviewsForCompetitorsValue.placeId}"
+                                                                userId: "${input.env.userId}"
+                                                              auth:
+                                                                type: "OIDC"
+                                                                audience: "${input.env.BASE_URL}"
+                                                              headers:
+                                                                x-user-id: "${input.env.userId}"
+                                                                x-project-id: "${input.env.projectId}"
+                                                            result: "cacheReviews_competitorReviewsReadResult_17ad6a9"
+                                                      retry: "${http.default_retry}"
+                                                  - cacheReviews_competitorReviewsRead_tryRead_updateResult:
+                                                      assign:
+                                                      - cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb: "${cacheReviews_competitorReviewsReadResult_17ad6a9}"
+                                                except:
+                                                  as: "cacheReviews_competitorReviewsRead_tryReadError"
+                                                  steps:
+                                                  - cacheReviews_competitorReviewsRead_switchRead:
+                                                      steps:
+                                                      - cacheReviews_competitorReviewsRead_switchRead_initResult:
+                                                          assign:
+                                                          - cacheReviews_competitorReviewsRead_switchReadResult_6993ce91: {}
+                                                      - cacheReviews_competitorReviewsRead_switchRead_steps:
+                                                          switch:
+                                                          - condition: "${(cacheReviews_competitorReviewsRead_tryReadError.code == 404)}"
+                                                            steps:
+                                                            - cacheReviews_competitorReviewsRead_log404:
+                                                                try:
+                                                                  steps:
+                                                                  - cacheReviews_competitorReviewsRead_log404_call:
+                                                                      call: "sys.log"
+                                                                      args:
+                                                                        text: "${(\"[cacheReviews_competitorReviewsRead_log404] \" + \"404 - File not found\")}"
+                                                                      result: "cacheReviews_competitorReviewsRead_log404Result_291c6c8b"
+                                                                retry: "${http.default_retry}"
+                                                            - cacheReviews_competitorReviewsRead_switchRead_updateResult_0:
+                                                                assign:
+                                                                - cacheReviews_competitorReviewsRead_switchReadResult_6993ce91: "${cacheReviews_competitorReviewsReadResult_17ad6a9}"
+                                                          - condition: "${true}"
+                                                            steps:
+                                                            - cacheReviews_competitorReviewsRead_rethrow:
+                                                                raise: "${cacheReviews_competitorReviewsRead_tryReadError}"
+                                                            - cacheReviews_competitorReviewsRead_switchRead_updateResult_1:
+                                                                assign:
+                                                                - cacheReviews_competitorReviewsRead_switchReadResult_6993ce91: "${cacheReviews_competitorReviewsReadResult_17ad6a9}"
+                                                  - cacheReviews_competitorReviewsRead_tryRead_updateResultError:
+                                                      assign:
+                                                      - cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb: "${cacheReviews_competitorReviewsRead_switchReadResult_6993ce91}"
+                                        - cacheReviews_competitorReviewsIfStale:
+                                            steps:
+                                            - cacheReviews_competitorReviewsIfStale_initResult:
+                                                assign:
+                                                - cacheReviews_competitorReviewsIfStaleResult_4e50587e: {}
+                                            - cacheReviews_competitorReviewsIfStale_steps:
+                                                switch:
+                                                - condition: "${(((not  (\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb)) or (not  (\"updatedAt\" in cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb.body))) or ((sys.now() - cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb.body.updatedAt) > 86400000))}"
+                                                  steps:
+                                                  - scrapeReviews_competitorReviews:
+                                                      try:
+                                                        steps:
+                                                        - scrapeReviews_competitorReviews_call:
+                                                            call: "http.post"
+                                                            args:
+                                                              url: "${((input.env.BASE_URL + \"/\") + \"business-report/scrape-reviews\")}"
+                                                              body:
+                                                                placeId: "${scrapeReviewsForCompetitorsValue.placeId}"
+                                                              auth:
+                                                                type: "OIDC"
+                                                                audience: "${input.env.BASE_URL}"
+                                                              headers:
+                                                                x-user-id: "${input.env.userId}"
+                                                                x-project-id: "${input.env.projectId}"
+                                                            result: "scrapeReviews_competitorReviewsResult_e08078b"
+                                                      retry: "${http.default_retry}"
+                                                  - cacheReviews_competitorReviewsWrite:
+                                                      try:
+                                                        steps:
+                                                        - cacheReviews_competitorReviewsWrite_call:
+                                                            call: "http.post"
+                                                            args:
+                                                              url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                                                              body:
+                                                                collection: "${\"businesses.reviews\"}"
+                                                                id: "${scrapeReviewsForCompetitorsValue.placeId}"
+                                                                contents:
+                                                                  updatedAt: "${sys.now()}"
+                                                                  result: "${scrapeReviews_competitorReviewsResult_e08078b.body}"
+                                                                userId: "${input.env.userId}"
+                                                              auth:
+                                                                type: "OIDC"
+                                                                audience: "${input.env.BASE_URL}"
+                                                              headers:
+                                                                x-user-id: "${input.env.userId}"
+                                                                x-project-id: "${input.env.projectId}"
+                                                            result: "cacheReviews_competitorReviewsWriteResult_34994636"
+                                                      retry: "${http.default_retry}"
+                                                  - cacheReviews_competitorReviewsIfStale_updateResult_0:
+                                                      assign:
+                                                      - cacheReviews_competitorReviewsIfStaleResult_4e50587e: "${scrapeReviews_competitorReviewsResult_e08078b.body}"
+                                                - condition: "${(\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb)}"
+                                                  steps:
+                                                  - cacheReviews_competitorReviewsIfStale_updateResult_1:
+                                                      assign:
+                                                      - cacheReviews_competitorReviewsIfStaleResult_4e50587e: "${cacheReviews_competitorReviewsRead_tryReadResult_31e99cfb.body.result}"
+                                                - condition: "${true}"
+                                                  steps:
+                                                  - cacheReviews_competitorReviews_raiseFailedCache:
+                                                      raise:
+                                                        message: "${\"Cache run failed\"}"
+                                                        code: "${500}"
+                                                  - cacheReviews_competitorReviewsIfStale_updateResult_2:
+                                                      assign:
+                                                      - cacheReviews_competitorReviewsIfStaleResult_4e50587e: "${scrapeReviews_competitorReviewsResult_e08078b.body}"
+                                    - scrapeReviewsForCompetitors_updateResult:
+                                        assign:
+                                        - scrapeReviewsForCompetitorsResult_74493ac9: "${list.concat(scrapeReviewsForCompetitorsResult_74493ac9, cacheReviews_competitorReviewsIfStaleResult_4e50587e)}"
+                          - zipCompetitorReviews:
+                              steps:
+                              - zipCompetitorReviews_initResult:
+                                  assign:
+                                  - zipCompetitorReviewsResult_6a181251: []
+                              - zipCompetitorReviews_steps:
+                                  for:
+                                    value: "zipCompetitorReviewsIdx"
+                                    range: "${[0, (len(generateKeywordsResult_18208bfd.body.competitors) - 1)]}"
+                                    steps:
+                                    - zipCompetitorReviews_assignIterResult:
+                                        assign:
+                                        - zipCompetitorReviews_assignIterResultVar:
+                                            businessInfo: "${generateKeywordsResult_18208bfd.body.competitors[zipCompetitorReviewsIdx]}"
+                                            reviews: "${scrapeReviewsForCompetitorsResult_74493ac9[zipCompetitorReviewsIdx].reviews}"
+                                    - zipCompetitorReviews_updateResult:
+                                        assign:
+                                        - zipCompetitorReviewsResult_6a181251: "${list.concat(zipCompetitorReviewsResult_6a181251, zipCompetitorReviews_assignIterResultVar)}"
+                          - Status_analyze:
+                              try:
+                                steps:
+                                - Status_analyze_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                                      body:
+                                        collection: "${\"businesses.report\"}"
+                                        id: "${input.placeId}"
+                                        contents:
+                                          status: "analyze"
+                                          statusMsg: "${\"Analyzing business and competitors...\"}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "OIDC"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "Status_analyzeResult_620cccbb"
+                              retry: "${http.default_retry}"
+                          - buildPrompt:
+                              steps:
+                              - buildPrompt_initResult:
+                                  assign:
+                                  - buildPromptResult_2a9402c0: []
+                              - buildPrompt_steps:
+                                  for:
+                                    value: "buildPromptIdx"
+                                    range: "${[0, (2 - 1)]}"
+                                    steps:
+                                    - buildPrompt_switch:
+                                        steps:
+                                        - buildPrompt_switch_initResult:
+                                            assign:
+                                            - buildPrompt_switchResult_39a4204a: {}
+                                        - buildPrompt_switch_steps:
+                                            switch:
+                                            - condition: "${(buildPromptIdx == 0)}"
+                                              steps:
+                                              - buildPrompt_switch_updateResult_0:
+                                                  assign:
+                                                  - buildPrompt_switchResult_39a4204a:
+                                                      role: "${\"system\"}"
+                                                      content: "${\"You are an expert business analyst specializing in customer feedback analysis.\n          Analyze the provided business and competitor data to generate comprehensive insights.\n          Focus on actionable insights and specific recommendations. \n          \n          In addition to general analysis, return:\n          - Three recent reviews or urgent concerns.\n          - Two of the most notable positive and two most notable negative reviews.\n          - A ranked list of the target business among competitors based on rating and weighted by price level.\n          - The two most relatable competitors with a review from each to highlight comparison.\n\n          Use line breaks and markdown to format larger text blocks.\n          Really try to identify important pieces of information that the owner might not be aware of, especially when comparing with competitors as far as local market trends.\n      \"}"
+                                                      tool_calls: "${[]}"
+                                                      tool_call_id: "${null}"
+                                                      create_time: "${sys.now()}"
+                                                      docId: "${null}"
+                                            - condition: "${(buildPromptIdx == 1)}"
+                                              steps:
+                                              - buildPrompt_switch_updateResult_1:
+                                                  assign:
+                                                  - buildPrompt_switchResult_39a4204a:
+                                                      role: "${\"user\"}"
+                                                      content: "${((((((\"\rTarget Business:\r\" + json.encode_to_string(generateKeywordsResult_18208bfd.body)) + \"\rTarget Business Reviews: \r\") + json.encode_to_string(cacheReviews_businessReviewsIfStaleResult_2216c284.reviews)) + \"\rCompetitors: \r\") + json.encode_to_string(zipCompetitorReviewsResult_6a181251)) + \"\r\rPlease provide a detailed analysis following the specified format.\")}"
+                                                      tool_calls: "${[]}"
+                                                      tool_call_id: "${null}"
+                                                      create_time: "${sys.now()}"
+                                                      docId: "${null}"
+                                    - buildPrompt_updateResult:
+                                        assign:
+                                        - buildPromptResult_2a9402c0: "${list.concat(buildPromptResult_2a9402c0, buildPrompt_switchResult_39a4204a)}"
+                          - analyze_business_block:
+                              steps:
+                              - spec:
+                                  steps:
+                                  - spec_initResult:
+                                      assign:
+                                      - specResult_55e4ec95: {}
+                                  - spec_steps:
+                                      try:
+                                        steps:
+                                        - spec_updateResult:
+                                            assign:
+                                            - specResult_55e4ec95: "${{\n  \"targetBusinessSummary\" : \"${example.targetBusinessSummary}\",\n  \"competitorAnalysis\" : \"${example.competitorAnalysis}\",\n  \"keyStrengths\" : \"${example.keyStrengths}\",\n  \"areasForImprovement\" : \"${example.areasForImprovement}\",\n  \"marketPositioning\" : \"${example.marketPositioning}\",\n  \"recommendations\" : \"${example.recommendations}\",\n  \"recentOrUrgentConcerns\" : {\n    \"author\" : \"${example.recentOrUrgentConcerns.author}\",\n    \"rating\" : \"${example.recentOrUrgentConcerns.rating}\",\n    \"text\" : \"${example.recentOrUrgentConcerns.text}\",\n    \"time\" : \"${example.recentOrUrgentConcerns.time}\"\n  },\n  \"positiveHighlights\" : {\n    \"author\" : \"${example.positiveHighlights.author}\",\n    \"rating\" : \"${example.positiveHighlights.rating}\",\n    \"text\" : \"${example.positiveHighlights.text}\",\n    \"time\" : \"${example.positiveHighlights.time}\"\n  },\n  \"negativeHighlights\" : {\n    \"author\" : \"${example.negativeHighlights.author}\",\n    \"rating\" : \"${example.negativeHighlights.rating}\",\n    \"text\" : \"${example.negativeHighlights.text}\",\n    \"time\" : \"${example.negativeHighlights.time}\"\n  },\n  \"competitorRanking\" : {\n    \"name\" : \"${example.competitorRanking.name}\",\n    \"rating\" : \"${example.competitorRanking.rating}\",\n    \"priceLevel\" : \"${example.competitorRanking.priceLevel}\",\n    \"weightedScore\" : \"${example.competitorRanking.weightedScore}\"\n  },\n  \"competitorComparison\" : {\n    \"name\" : \"${example.competitorComparison.name}\",\n    \"priceLevel\" : \"${example.competitorComparison.priceLevel}\",\n    \"rating\" : \"${example.competitorComparison.rating}\",\n    \"comparisonReview\" : {\n      \"author\" : \"${example.competitorComparison.comparisonReview.author}\",\n      \"rating\" : \"${example.competitorComparison.comparisonReview.rating}\",\n      \"text\" : \"${example.competitorComparison.comparisonReview.text}\",\n      \"time\" : \"${example.competitorComparison.comparisonReview.time}\"\n    }\n  }\n}}"
+                                      except:
+                                        as: "specError"
+                                        steps:
+                                        - spec_logError:
+                                            try:
+                                              steps:
+                                              - spec_logError_call:
+                                                  call: "sys.log"
+                                                  args:
+                                                    text: "${(\"[spec_logError] \" + specError.message)}"
+                                                  result: "spec_logErrorResult_6261db2d"
+                                            retry: "${http.default_retry}"
+                                        - spec_updateResultError:
+                                            assign:
+                                            - specResult_55e4ec95: "${null}"
+                              - analyze_business_buildSchemaList:
+                                  steps:
+                                  - analyze_business_buildSchemaList_initResult:
+                                      assign:
+                                      - analyze_business_buildSchemaListResult_32029a38: []
+                                  - analyze_business_buildSchemaList_steps:
+                                      for:
+                                        value: "analyze_business_buildSchemaListIdx"
+                                        range: "${[0, (1 - 1)]}"
+                                        steps:
+                                        - analyze_business_buildSchemaList_switch:
+                                            steps:
+                                            - analyze_business_buildSchemaList_switch_initResult:
+                                                assign:
+                                                - analyze_business_buildSchemaList_switchResult_3f9d6527: {}
+                                            - analyze_business_buildSchemaList_switch_steps:
+                                                switch:
+                                                - condition: "${(analyze_business_buildSchemaListIdx == 0)}"
+                                                  steps:
+                                                  - analyze_business_buildSchemaList_switch_updateResult_0:
+                                                      assign:
+                                                      - analyze_business_buildSchemaList_switchResult_3f9d6527:
+                                                          role: "${\"system\"}"
+                                                          content: "${(\"Respond with a JSON in this format:\r\" + specResult_55e4ec95)}"
+                                                          tool_calls: "${[]}"
+                                                          tool_call_id: "${null}"
+                                                          create_time: "${sys.now()}"
+                                                          docId: "${null}"
+                                        - analyze_business_buildSchemaList_updateResult:
+                                            assign:
+                                            - analyze_business_buildSchemaListResult_32029a38: "${list.concat(analyze_business_buildSchemaListResult_32029a38, analyze_business_buildSchemaList_switchResult_3f9d6527)}"
+                              - analyze_business_post:
+                                  try:
+                                    steps:
+                                    - analyze_business_post_call:
+                                        call: "http.post"
+                                        args:
+                                          url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
+                                          body:
+                                            messages: "${list.concat(buildPromptResult_2a9402c0, analyze_business_buildSchemaListResult_32029a38[0])}"
+                                            model: "${\"gpt-5\"}"
+                                            temperature: 0.8
+                                            max_completion_tokens: "${null}"
+                                            response_format:
+                                              type: "json_object"
+                                            tools: "${[]}"
+                                            tool_choice: "${\"auto\"}"
+                                          auth:
+                                            type: "OIDC"
+                                            audience: "${input.env.BASE_URL}"
+                                          headers:
+                                            x-user-id: "${input.env.userId}"
+                                            x-project-id: "${input.env.projectId}"
+                                        result: "analyze_business_postResult_d0a7e1c"
+                                  retry: "${http.default_retry}"
+                              - decoded:
+                                  steps:
+                                  - decoded_initResult:
+                                      assign:
+                                      - decodedResult_4cfa704a: {}
+                                  - decoded_steps:
+                                      try:
+                                        steps:
+                                        - decoded_updateResult:
+                                            assign:
+                                            - decodedResult_4cfa704a:
+                                                result: "${json.decode(analyze_business_postResult_d0a7e1c.body.message.content)}"
+                                                total_cost: "${analyze_business_postResult_d0a7e1c.body.total_cost}"
+                                      except:
+                                        as: "decodedError"
+                                        steps:
+                                        - decoded_logError:
+                                            try:
+                                              steps:
+                                              - decoded_logError_call:
+                                                  call: "sys.log"
+                                                  args:
+                                                    text: "${(\"[decoded_logError] \" + decodedError.message)}"
+                                                  result: "decoded_logErrorResult_1b2bbd0f"
+                                            retry: "${http.default_retry}"
+                                        - decoded_updateResultError:
+                                            assign:
+                                            - decodedResult_4cfa704a: "${null}"
+                          - cacheReportBlock_updateResult:
+                              assign:
+                              - cacheReportBlockResult_394e48fc:
+                                  businessInfo: "${generateKeywordsResult_18208bfd.body.businessInfo}"
+                                  marketAnalysis:
+                                    totalCompetitors: "${len(generateKeywordsResult_18208bfd.body.competitors)}"
+                                    topCompetitors: "${generateKeywordsResult_18208bfd.body.competitors}"
+                                  analysis: "${decodedResult_4cfa704a.result}"
+                                  reviews: "${cacheReviews_businessReviewsIfStaleResult_2216c284.reviews}"
+                        except:
+                          as: "cacheReportBlockError"
+                          steps:
+                          - cacheReportBlock_logError:
+                              try:
+                                steps:
+                                - cacheReportBlock_logError_call:
+                                    call: "sys.log"
+                                    args:
+                                      text: "${(\"[cacheReportBlock_logError] \" + cacheReportBlockError.message)}"
+                                    result: "cacheReportBlock_logErrorResult_79b9cd94"
+                              retry: "${http.default_retry}"
+                          - cacheReportBlock_updateResultError:
+                              assign:
+                              - cacheReportBlockResult_394e48fc: "${null}"
                 - cacheReportWrite:
                     try:
                       steps:
@@ -588,13 +672,7 @@ main:
                               id: "${input.placeId}"
                               contents:
                                 updatedAt: "${sys.now()}"
-                                result:
-                                  businessInfo: "${generateKeywordsResult_3540a02f.body.businessInfo}"
-                                  marketAnalysis:
-                                    totalCompetitors: "${len(generateKeywordsResult_3540a02f.body.competitors)}"
-                                    topCompetitors: "${generateKeywordsResult_3540a02f.body.competitors}"
-                                  analysis: "${json.decode(analyze_business_postResult_158e5850.body.message.content)}"
-                                  reviews: "${cacheReviews_businessReviewsIfStaleResult_75ac6297.reviews}"
+                                result: "${cacheReportBlockResult_394e48fc}"
                               userId: "${input.env.userId}"
                             auth:
                               type: "OIDC"
@@ -602,37 +680,25 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "cacheReportWriteResult_33204e4b"
+                          result: "cacheReportWriteResult_55c1f48d"
                     retry: "${http.default_retry}"
                 - cacheReportIfStale_updateResult_0:
                     assign:
-                    - cacheReportIfStaleResult_33ecc76e:
-                        businessInfo: "${generateKeywordsResult_3540a02f.body.businessInfo}"
-                        marketAnalysis:
-                          totalCompetitors: "${len(generateKeywordsResult_3540a02f.body.competitors)}"
-                          topCompetitors: "${generateKeywordsResult_3540a02f.body.competitors}"
-                        analysis: "${json.decode(analyze_business_postResult_158e5850.body.message.content)}"
-                        reviews: "${cacheReviews_businessReviewsIfStaleResult_75ac6297.reviews}"
-              - condition: "${(\"body\" in cacheReportRead_tryReadResult_5b4e3c8d)}"
+                    - cacheReportIfStaleResult_4edd0b70: "${cacheReportBlockResult_394e48fc}"
+              - condition: "${(\"body\" in cacheReportRead_tryReadResult_2a58581d)}"
                 steps:
                 - cacheReportIfStale_updateResult_1:
                     assign:
-                    - cacheReportIfStaleResult_33ecc76e: "${cacheReportRead_tryReadResult_5b4e3c8d.body.result}"
+                    - cacheReportIfStaleResult_4edd0b70: "${cacheReportRead_tryReadResult_2a58581d.body.result}"
               - condition: "${true}"
                 steps:
                 - cacheReport_raiseFailedCache:
                     raise:
-                      message: "Cache run failed"
-                      code: ""
+                      message: "${\"Cache run failed\"}"
+                      code: "${500}"
                 - cacheReportIfStale_updateResult_2:
                     assign:
-                    - cacheReportIfStaleResult_33ecc76e:
-                        businessInfo: "${generateKeywordsResult_3540a02f.body.businessInfo}"
-                        marketAnalysis:
-                          totalCompetitors: "${len(generateKeywordsResult_3540a02f.body.competitors)}"
-                          topCompetitors: "${generateKeywordsResult_3540a02f.body.competitors}"
-                        analysis: "${json.decode(analyze_business_postResult_158e5850.body.message.content)}"
-                        reviews: "${cacheReviews_businessReviewsIfStaleResult_75ac6297.reviews}"
+                    - cacheReportIfStaleResult_4edd0b70: "${cacheReportBlockResult_394e48fc}"
   - Status_done:
       try:
         steps:
@@ -653,7 +719,7 @@ main:
               headers:
                 x-user-id: "${input.env.userId}"
                 x-project-id: "${input.env.projectId}"
-            result: "Status_doneResult_1bf84dd2"
+            result: "Status_doneResult_5e4af330"
       retry: "${http.default_retry}"
   - return:
       return:

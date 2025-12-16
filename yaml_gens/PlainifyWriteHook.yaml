@@ -58,13 +58,13 @@ main:
                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                   connector_params:
                     skip_polling: false
-                result: "readRaw_run_tools_CliToolsResult_5f99b312"
+                result: "readRaw_run_tools_CliToolsResult_39e35687"
           retry: "${http.default_retry}"
   - plainifyMessages:
       steps:
       - plainifyMessages_initResult:
           assign:
-          - plainifyMessagesResult_1e8f48d6: []
+          - plainifyMessagesResult_4f39795e: []
       - plainifyMessages_steps:
           for:
             value: "plainifyMessagesIdx"
@@ -74,15 +74,15 @@ main:
                 steps:
                 - plainifyMessages_switch_initResult:
                     assign:
-                    - plainifyMessages_switchResult_31758985: {}
+                    - plainifyMessages_switchResult_55efbe8c: {}
                 - plainifyMessages_switch_steps:
                     switch:
                     - condition: "${(plainifyMessagesIdx == 0)}"
                       steps:
                       - plainifyMessages_switch_updateResult_0:
                           assign:
-                          - plainifyMessages_switchResult_31758985:
-                              role: "system"
+                          - plainifyMessages_switchResult_55efbe8c:
+                              role: "${\"system\"}"
                               content: "${(\"Translate the following code completely into precise, plain technical English. Include all types, methods, data flow, control flow, external interactions, and intent. No omissions. Include the full class signature in code, but the implementation and logic should be in plain English.\n\nTarget filepath: \" + input.filepath)}"
                               tool_calls: "${[]}"
                               tool_call_id: "${null}"
@@ -92,40 +92,59 @@ main:
                       steps:
                       - plainifyMessages_switch_updateResult_1:
                           assign:
-                          - plainifyMessages_switchResult_31758985:
-                              role: "user"
-                              content: "${(\"Code follows:\n\n\" + map.get(json.decode(readRaw_run_tools_CliToolsResult_5f99b312.encoded), \"content\"))}"
+                          - plainifyMessages_switchResult_55efbe8c:
+                              role: "${\"user\"}"
+                              content: "${(\"Code follows:\n\n\" + map.get(json.decode(readRaw_run_tools_CliToolsResult_39e35687.encoded), \"content\"))}"
                               tool_calls: "${[]}"
                               tool_call_id: "${null}"
                               create_time: "${sys.now()}"
                               docId: "${null}"
             - plainifyMessages_updateResult:
                 assign:
-                - plainifyMessagesResult_1e8f48d6: "${list.concat(plainifyMessagesResult_1e8f48d6, plainifyMessages_switchResult_31758985)}"
-  - plainify:
-      try:
-        steps:
-        - plainify_call:
-            call: "http.post"
-            args:
-              url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
-              body:
-                messages: "${plainifyMessagesResult_1e8f48d6}"
-                model: "${\"gpt-5\"}"
-                temperature: 0.8
-                max_completion_tokens: "${null}"
-                response_format:
-                  type: "text"
-                tools: "${null}"
-                tool_choice: "${if(((null != null) and (len(null) > 0)), null, null)}"
-              auth:
-                type: "OIDC"
-                audience: "${input.env.BASE_URL}"
-              headers:
-                x-user-id: "${input.env.userId}"
-                x-project-id: "${input.env.projectId}"
-            result: "plainifyResult_70096efd"
-      retry: "${http.default_retry}"
+                - plainifyMessagesResult_4f39795e: "${list.concat(plainifyMessagesResult_4f39795e, plainifyMessages_switchResult_55efbe8c)}"
+  - chatBlock:
+      steps:
+      - toolChoice:
+          steps:
+          - toolChoice_initResult:
+              assign:
+              - toolChoiceResult_1d02d1fa: {}
+          - toolChoice_steps:
+              switch:
+              - condition: "${((null != null) and (len(null) > 0))}"
+                steps:
+                - toolChoice_updateResult_0:
+                    assign:
+                    - toolChoiceResult_1d02d1fa: "${null}"
+              - condition: "${true}"
+                steps:
+                - toolChoice_updateResult_1:
+                    assign:
+                    - toolChoiceResult_1d02d1fa: "${null}"
+      - plainify:
+          try:
+            steps:
+            - plainify_call:
+                call: "http.post"
+                args:
+                  url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
+                  body:
+                    messages: "${plainifyMessagesResult_4f39795e}"
+                    model: "${\"gpt-5\"}"
+                    temperature: 0.8
+                    max_completion_tokens: "${null}"
+                    response_format:
+                      type: "text"
+                    tools: "${null}"
+                    tool_choice: "${toolChoiceResult_1d02d1fa}"
+                  auth:
+                    type: "OIDC"
+                    audience: "${input.env.BASE_URL}"
+                  headers:
+                    x-user-id: "${input.env.userId}"
+                    x-project-id: "${input.env.projectId}"
+                result: "plainifyResult_2e5ec938"
+          retry: "${http.default_retry}"
   - mkdir_plain_params:
       steps:
       - mkdir_plain_params_initResult:
@@ -182,21 +201,21 @@ main:
                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                   connector_params:
                     skip_polling: false
-                result: "mkdirPlain_run_tools_CliToolsResult_4ba3ef28"
+                result: "mkdirPlain_run_tools_CliToolsResult_2002855"
           retry: "${http.default_retry}"
   - write_plain_params:
       steps:
       - write_plain_params_initResult:
           assign:
-          - write_plain_paramsResult_5a9dbab3: {}
+          - write_plain_paramsResult_688d48b8: {}
       - write_plain_params_steps:
           try:
             steps:
             - write_plain_params_updateResult:
                 assign:
-                - write_plain_paramsResult_5a9dbab3:
+                - write_plain_paramsResult_688d48b8:
                     filepath: "${(\"plain/\" + input.filepath)}"
-                    content: "${plainifyResult_70096efd.body.message.content}"
+                    content: "${plainifyResult_2e5ec938.body.message.content}"
           except:
             as: "write_plain_paramsError"
             steps:
@@ -211,7 +230,7 @@ main:
                 retry: "${http.default_retry}"
             - write_plain_params_updateResultError:
                 assign:
-                - write_plain_paramsResult_5a9dbab3: "${null}"
+                - write_plain_paramsResult_688d48b8: "${null}"
   - writePlain_callback_block:
       steps:
       - writePlain_run_tools_CliTools:
@@ -227,7 +246,7 @@ main:
                       type: "function"
                       function:
                         name: "${\"UPDATE_FILE\"}"
-                        arguments: "${json.encode_to_string(write_plain_paramsResult_5a9dbab3)}"
+                        arguments: "${json.encode_to_string(write_plain_paramsResult_688d48b8)}"
                     cost: 0.0
                     env:
                       userId: "${input.env.userId}"
@@ -241,7 +260,7 @@ main:
                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                   connector_params:
                     skip_polling: false
-                result: "writePlain_run_tools_CliToolsResult_7c23d90a"
+                result: "writePlain_run_tools_CliToolsResult_4c275cd7"
           retry: "${http.default_retry}"
   - return:
       return: "${(\"plain/\" + input.filepath)}"
