@@ -9,8 +9,13 @@ import us.awfl.workflows.EventHandler
 
 trait Preloads extends EventHandler {
   trait PreloadItem
-  case class PreloadFile(filename: String) extends PreloadItem
-  case class PreloadCommand(command: String) extends PreloadItem
+  case class PreloadFile(filename: Cel) extends PreloadItem
+  object PreloadFile:
+    def apply(filename: String): PreloadFile = PreloadFile(CelStr(filename))
+
+  case class PreloadCommand(command: Cel) extends PreloadItem
+  object PreloadCommand:
+    def apply(command: String): PreloadCommand = PreloadCommand(CelStr(command))
 
   def preloads: List[PreloadItem] = List()
 

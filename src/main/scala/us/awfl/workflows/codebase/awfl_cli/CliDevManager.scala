@@ -4,7 +4,7 @@ import us.awfl.workflows.traits.Agent
 
 object CliDevManager extends Agent {
 
-  override def preloads = List(
+  override def preloads = super.preloads ++ List(
     PreloadFile(
       "cli/cmds/dev/AGENT.md"
     )

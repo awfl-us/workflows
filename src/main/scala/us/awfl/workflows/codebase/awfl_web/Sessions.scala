@@ -4,7 +4,7 @@ import us.awfl.workflows.traits.Agent
 
 object Sessions extends Agent {
 
-  override def preloads = List(
+  override def preloads = super.preloads ++ List(
     PreloadFile("/Users/paul/github/TopAigents/awfl-web/src/pages/Sessions.tsx"),
     PreloadFile("/Users/paul/github/TopAigents/awfl-web/src/pages/AGENT.md"),
     // PreloadFile("/Users/paul/github/TopAigents/awfl-web/PLAN.md")

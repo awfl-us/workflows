@@ -43,6 +43,192 @@ main:
                                 - buildPromptListResult_34f25e53: "${list.concat(buildPromptListResult_34f25e53, buildPromptList_switchResult_5eed81d6)}"
                   - preloadsBlock:
                       steps:
+                      - preloadCommand_block:
+                          steps:
+                          - preloadCommand_block_initResult:
+                              assign:
+                              - preloadCommand_blockResult_3303278b: {}
+                          - preloadCommand_block_steps:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_2e6b563d: {}
+                                    - preloadCommand_paramJson_steps:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_2e6b563d:
+                                                  command:
+                                                    content: "echo 'Files uploaded/specific to the current session:'"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_2e6b563d: "${null}"
+                                - preloadCommand_preloadCommand_callback_block:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_2e6b563d)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_31f73e36"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult:
+                                    assign:
+                                    - preloadCommand_blockResult_3303278b:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + \"echo 'Files uploaded/specific to the current session:'\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_31f73e36.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError:
+                                    assign:
+                                    - preloadCommand_blockResult_3303278b: "${null}"
+                      - preloadCommand_block_1:
+                          steps:
+                          - preloadCommand_block_initResult_1:
+                              assign:
+                              - preloadCommand_blockResult_2ee42894: {}
+                          - preloadCommand_block_steps_1:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_1:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult_1:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_77d6e251: {}
+                                    - preloadCommand_paramJson_steps_1:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult_1:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_77d6e251:
+                                                  command:
+                                                    left:
+                                                      content: "ls -la sessions/"
+                                                    op: "+"
+                                                    right:
+                                                      value: "${input.env.sessionId}"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError_1:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call_1:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError_1:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_77d6e251: "${null}"
+                                - preloadCommand_preloadCommand_callback_block_1:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_1:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_1:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_77d6e251)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_283e7a38"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult_1:
+                                    assign:
+                                    - preloadCommand_blockResult_2ee42894:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + (\"ls -la sessions/\" + input.env.sessionId)) + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_283e7a38.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError_1:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call_1:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError_1:
+                                    assign:
+                                    - preloadCommand_blockResult_2ee42894: "${null}"
                       - preloadFile_block:
                           steps:
                           - preloadFile_block_initResult:
@@ -110,57 +296,67 @@ main:
                           steps:
                           - joinPreloads_initResult:
                               assign:
-                              - joinPreloadsResult_12d383aa: []
+                              - joinPreloadsResult_63402756: []
                           - joinPreloads_steps:
                               for:
                                 value: "joinPreloadsIdx"
-                                range: "${[0, (1 - 1)]}"
+                                range: "${[0, (3 - 1)]}"
                                 steps:
                                 - joinPreloads_switch:
                                     steps:
                                     - joinPreloads_switch_initResult:
                                         assign:
-                                        - joinPreloads_switchResult_67c98665: {}
+                                        - joinPreloads_switchResult_661742e1: {}
                                     - joinPreloads_switch_steps:
                                         switch:
                                         - condition: "${(joinPreloadsIdx == 0)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_0:
                                               assign:
-                                              - joinPreloads_switchResult_67c98665: "${preloadFile_blockResult_4af56b45}"
+                                              - joinPreloads_switchResult_661742e1: "${preloadCommand_blockResult_3303278b}"
+                                        - condition: "${(joinPreloadsIdx == 1)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_1:
+                                              assign:
+                                              - joinPreloads_switchResult_661742e1: "${preloadCommand_blockResult_2ee42894}"
+                                        - condition: "${(joinPreloadsIdx == 2)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_2:
+                                              assign:
+                                              - joinPreloads_switchResult_661742e1: "${preloadFile_blockResult_4af56b45}"
                                 - joinPreloads_updateResult:
                                     assign:
-                                    - joinPreloadsResult_12d383aa: "${list.concat(joinPreloadsResult_12d383aa, joinPreloads_switchResult_67c98665)}"
+                                    - joinPreloadsResult_63402756: "${list.concat(joinPreloadsResult_63402756, joinPreloads_switchResult_661742e1)}"
                   - preloads_joinSteps:
                       steps:
                       - preloads_joinSteps_initResult:
                           assign:
-                          - preloads_joinStepsResult_2aaa2406: []
+                          - preloads_joinStepsResult_5c29fe60: []
                       - preloads_joinSteps_steps:
                           for:
                             value: "preloads_joinStepsIdx"
-                            range: "${[0, (((0 + len(buildPromptListResult_34f25e53)) + len(joinPreloadsResult_12d383aa)) - 1)]}"
+                            range: "${[0, (((0 + len(buildPromptListResult_34f25e53)) + len(joinPreloadsResult_63402756)) - 1)]}"
                             steps:
                             - preloads_joinSteps_switch:
                                 steps:
                                 - preloads_joinSteps_switch_initResult:
                                     assign:
-                                    - preloads_joinSteps_switchResult_5d613a96: {}
+                                    - preloads_joinSteps_switchResult_68b7dfee: {}
                                 - preloads_joinSteps_switch_steps:
                                     switch:
                                     - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_34f25e53)))}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_0:
                                           assign:
-                                          - preloads_joinSteps_switchResult_5d613a96: "${joinPreloadsResult_12d383aa[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_34f25e53)))]}"
+                                          - preloads_joinSteps_switchResult_68b7dfee: "${joinPreloadsResult_63402756[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_34f25e53)))]}"
                                     - condition: "${(preloads_joinStepsIdx >= 0)}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_1:
                                           assign:
-                                          - preloads_joinSteps_switchResult_5d613a96: "${buildPromptListResult_34f25e53[(preloads_joinStepsIdx - 0)]}"
+                                          - preloads_joinSteps_switchResult_68b7dfee: "${buildPromptListResult_34f25e53[(preloads_joinStepsIdx - 0)]}"
                             - preloads_joinSteps_updateResult:
                                 assign:
-                                - preloads_joinStepsResult_2aaa2406: "${list.concat(preloads_joinStepsResult_2aaa2406, preloads_joinSteps_switchResult_5d613a96)}"
+                                - preloads_joinStepsResult_5c29fe60: "${list.concat(preloads_joinStepsResult_5c29fe60, preloads_joinSteps_switchResult_68b7dfee)}"
               - buildPromptsWithTasks:
                   steps:
                   - buildPromptsWithTasks_initResult:
@@ -307,32 +503,32 @@ main:
                   steps:
                   - taskPrompts_joinSteps_initResult:
                       assign:
-                      - taskPrompts_joinStepsResult_7170af1e: []
+                      - taskPrompts_joinStepsResult_6a960e26: []
                   - taskPrompts_joinSteps_steps:
                       for:
                         value: "taskPrompts_joinStepsIdx"
-                        range: "${[0, (((0 + len(preloads_joinStepsResult_2aaa2406)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
+                        range: "${[0, (((0 + len(preloads_joinStepsResult_5c29fe60)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
                         steps:
                         - taskPrompts_joinSteps_switch:
                             steps:
                             - taskPrompts_joinSteps_switch_initResult:
                                 assign:
-                                - taskPrompts_joinSteps_switchResult_3cbce269: {}
+                                - taskPrompts_joinSteps_switchResult_76bfa9e6: {}
                             - taskPrompts_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_2aaa2406)))}"
+                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_5c29fe60)))}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_3cbce269: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_2aaa2406)))]}"
+                                      - taskPrompts_joinSteps_switchResult_76bfa9e6: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_5c29fe60)))]}"
                                 - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_3cbce269: "${preloads_joinStepsResult_2aaa2406[(taskPrompts_joinStepsIdx - 0)]}"
+                                      - taskPrompts_joinSteps_switchResult_76bfa9e6: "${preloads_joinStepsResult_5c29fe60[(taskPrompts_joinStepsIdx - 0)]}"
                         - taskPrompts_joinSteps_updateResult:
                             assign:
-                            - taskPrompts_joinStepsResult_7170af1e: "${list.concat(taskPrompts_joinStepsResult_7170af1e, taskPrompts_joinSteps_switchResult_3cbce269)}"
+                            - taskPrompts_joinStepsResult_6a960e26: "${list.concat(taskPrompts_joinStepsResult_6a960e26, taskPrompts_joinSteps_switchResult_76bfa9e6)}"
           - cliPrompt:
               steps:
               - cliPrompt_initResult:
@@ -368,32 +564,32 @@ main:
               steps:
               - cli_joinSteps_initResult:
                   assign:
-                  - cli_joinStepsResult_7b4a3ba: []
+                  - cli_joinStepsResult_310cac11: []
               - cli_joinSteps_steps:
                   for:
                     value: "cli_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_7170af1e)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
+                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_6a960e26)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
                     steps:
                     - cli_joinSteps_switch:
                         steps:
                         - cli_joinSteps_switch_initResult:
                             assign:
-                            - cli_joinSteps_switchResult_51aa5616: {}
+                            - cli_joinSteps_switchResult_4de9f42b: {}
                         - cli_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_7170af1e)))}"
+                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_6a960e26)))}"
                               steps:
                               - cli_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cli_joinSteps_switchResult_51aa5616: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_7170af1e)))]}"
+                                  - cli_joinSteps_switchResult_4de9f42b: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_6a960e26)))]}"
                             - condition: "${(cli_joinStepsIdx >= 0)}"
                               steps:
                               - cli_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cli_joinSteps_switchResult_51aa5616: "${taskPrompts_joinStepsResult_7170af1e[(cli_joinStepsIdx - 0)]}"
+                                  - cli_joinSteps_switchResult_4de9f42b: "${taskPrompts_joinStepsResult_6a960e26[(cli_joinStepsIdx - 0)]}"
                     - cli_joinSteps_updateResult:
                         assign:
-                        - cli_joinStepsResult_7b4a3ba: "${list.concat(cli_joinStepsResult_7b4a3ba, cli_joinSteps_switchResult_51aa5616)}"
+                        - cli_joinStepsResult_310cac11: "${list.concat(cli_joinStepsResult_310cac11, cli_joinSteps_switchResult_4de9f42b)}"
       - fundPrompt:
           steps:
           - fundPrompt_initResult:
@@ -440,32 +636,32 @@ main:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_58bbade: []
+              - fundsPrompts_joinStepsResult_10818301: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_7b4a3ba)) + len(fundPromptResult_4aef8109)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_310cac11)) + len(fundPromptResult_4aef8109)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_74568b2d: {}
+                        - fundsPrompts_joinSteps_switchResult_19ebeb12: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_7b4a3ba)))}"
+                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_310cac11)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_74568b2d: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_7b4a3ba)))]}"
+                              - fundsPrompts_joinSteps_switchResult_19ebeb12: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_310cac11)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_74568b2d: "${cli_joinStepsResult_7b4a3ba[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_19ebeb12: "${cli_joinStepsResult_310cac11[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_58bbade: "${list.concat(fundsPrompts_joinStepsResult_58bbade, fundsPrompts_joinSteps_switchResult_74568b2d)}"
+                    - fundsPrompts_joinStepsResult_10818301: "${list.concat(fundsPrompts_joinStepsResult_10818301, fundsPrompts_joinSteps_switchResult_19ebeb12)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_58bbade}"
+        prompts: "${fundsPrompts_joinStepsResult_10818301}"

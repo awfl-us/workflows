@@ -30,7 +30,7 @@ object Context {
   }
 
   // Preload helper that runs a shell command and captures stdout for the system prompt
-  def preloadCommand(name: String, command: String) = {
+  def preloadCommand(name: String, command: Cel) = {
     val paramJson = Try(s"${name}_paramJson", List() -> obj(Map("command" -> command)))
 
     val toolCall = obj(ToolCall(
@@ -46,9 +46,14 @@ object Context {
       background = Value(true)
     )
 
+    val right = command match {
+      case CelStr(str) => CelStr(str.takeRight(350)).safe
+      case other => other
+    }
+
     Try(
       s"${name}_block",
-      List[Step[_, _]](paramJson, contents) -> obj(ChatMessage("system", str((CelStr(s"[Preload ${command.takeRight(350)}]\r").safe + contents.resultValue.cel))))
+      List[Step[_, _]](paramJson, contents) -> obj(ChatMessage("system", str(CelStr(s"[Preload ") + right + "]\r" + contents.resultValue.cel)))
     )
   }
 }

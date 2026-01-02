@@ -3,7 +3,7 @@ package us.awfl.workflows.codebase.workflows
 import us.awfl.dsl.*
 
 object Executor extends us.awfl.workflows.traits.Agent {
-  override def preloads = List(
+  override def preloads = super.preloads ++ List(
     PreloadFile("workflows/src/main/scala/workflows/codebase/workflows/Executor.AGENT.md"),
     PreloadFile("workflows/src/main/scala/utils/Exec.scala")
   )

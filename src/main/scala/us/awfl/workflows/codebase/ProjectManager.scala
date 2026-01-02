@@ -3,7 +3,7 @@ package us.awfl.workflows.codebase
 import us.awfl.workflows.traits.Agent
 
 object ProjectManager extends Agent {
-  override def preloads = List(
+  override def preloads = super.preloads ++ List(
     // Preload the AGENT.md for the current project
     PreloadFile("AGENT.md")
   )

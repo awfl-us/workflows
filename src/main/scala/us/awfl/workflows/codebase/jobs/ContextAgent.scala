@@ -6,7 +6,7 @@ import us.awfl.workflows.traits.Agent
 // Preloads the Context AGENT.md for authoritative guidance.
 object ContextAgent extends Agent {
 
-  override def preloads = List(
+  override def preloads = super.preloads ++ List(
     // Preload the AGENT.md for the Context module
     PreloadFile("/Users/paul/github/awfl/server/workflows/context/AGENT.md"),
     // Preload the top-level functions plan for broader context

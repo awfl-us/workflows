@@ -3,7 +3,7 @@ package us.awfl.workflows.codebase.workflows
 import us.awfl.dsl.*
 
 object Sutradhara extends us.awfl.workflows.traits.Agent {
-  override def preloads = List(
+  override def preloads = super.preloads ++ List(
     PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md"),
     PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/Sutradhara.scala"),
     PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/utils/Prakriya.scala"),

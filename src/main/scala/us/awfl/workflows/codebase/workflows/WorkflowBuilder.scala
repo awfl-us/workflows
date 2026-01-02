@@ -3,7 +3,7 @@ package us.awfl.workflows.codebase.workflows
 import us.awfl.dsl.*
 
 object WorkflowBuilder extends us.awfl.workflows.traits.Agent {
-  override def preloads = List(
+  override def preloads = super.preloads ++ List(
     PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md"),
     PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/WorkflowBuilder.scala"),
     // PreloadFile("/Users/paul/github/TopAigents/scripts/PLAN.md")
