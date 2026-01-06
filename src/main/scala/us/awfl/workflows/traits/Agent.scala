@@ -11,7 +11,7 @@ trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with T
   override type Result = ChatToolResponse
 
   override def preloads = super.preloads ++ List(
-    PreloadCommand("echo 'Files uploaded/specific to the current session:'"),
+    // PreloadCommand("echo 'Files uploaded/specific to the current session:'"),
     PreloadCommand(("ls -la sessions/": Cel) + Env.sessionId.cel)
   )
 
