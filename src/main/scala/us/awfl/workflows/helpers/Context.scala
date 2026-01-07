@@ -31,7 +31,7 @@ object Context {
 
   // Preload helper that runs a shell command and captures stdout for the system prompt
   def preloadCommand(name: String, command: Cel) = {
-    val paramJson = Try(s"${name}_paramJson", List() -> obj(Map("command" -> command)))
+    val paramJson = Try(s"${name}_paramJson", List() -> obj(Map("command" -> str(command))))
 
     val toolCall = obj(ToolCall(
       id = str("preload_command"),
