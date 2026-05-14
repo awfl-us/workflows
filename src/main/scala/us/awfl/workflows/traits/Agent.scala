@@ -6,60 +6,39 @@ import us.awfl.dsl.CelOps._
 import us.awfl.workflows.EventHandler
 import us.awfl.services.Llm.ChatToolResponse
 import us.awfl.utils.Env
+import us.awfl.ista.ChatMessage
 
 trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks with Cli with Funds {
   override type Result = ChatToolResponse
 
-  private def configPreloadCommand: Cel =
-    CelStr("""python3 - <<'PY'
-import json
-import subprocess
-from pathlib import Path
-
-config_path = Path(".agent/config.json")
-default_config = {
-    "files": ["AGENT.md"],
-    "commands": [
-        "echo 'Files uploaded/specific to the current session:'",
-        "ls -la sessions/""").safe + Env.sessionId.cel + CelStr(""""
-    ]
-}
-
-if not config_path.exists():
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(json.dumps(default_config, indent=2) + "\n")
-
-try:
-    config = json.loads(config_path.read_text())
-except Exception as exc:
-    print(f"[Agent config preload] Failed to read {config_path}: {exc}")
-    raise
-
-print(f"[Agent config preload] {config_path}")
-
-for filename in config.get("files", []):
-    print(f"\n[Preload file: {filename}]")
-    try:
-        print(Path(filename).read_text())
-    except Exception as exc:
-        print(f"Failed to read {filename}: {exc}")
-
-for command in config.get("commands", []):
-    print(f"\n[Preload command: {command}]")
-    try:
-        result = subprocess.run(command, shell=True, text=True, capture_output=True)
-        if result.stdout:
-            print(result.stdout, end="")
-        if result.stderr:
-            print(result.stderr, end="")
-        if result.returncode != 0:
-            print(f"Command exited with status {result.returncode}")
-    except Exception as exc:
-        print(f"Failed to run command {command!r}: {exc}")
-PY""").safe
-
-  override def preloads = super.preloads ++ List(
-    PreloadCommand(configPreloadCommand)
+  // Keep commands short and simple; no Python. Ensure default config, then parse with sed/tr.
+  override def preloads: List[PreloadItem] = List(
+    // 1) Ensure default .agent/config.json with sessionId injected (kept well under 400 chars)
+    new PreloadCommand(
+      CelStr("sh -lc \"[ -f .agent/config.json ] || { mkdir -p .agent; printf '%s\\n' '{\\\"files\\\":[\\\"AGENT.md\\\"],\\\"commands\\\":[\\\"echo Files uploaded/specific to the current session:\\\",\\\"ls -la sessions/").safe +
+      Env.sessionId.cel +
+      CelStr("\\\"]}' > .agent/config.json; }\"").safe
+    ),
+    // 2) Flatten JSON to a single line to make sed robust across pretty-printed files
+    PreloadCommand(
+      CelStr("sh -lc \"tr -d '\\n' < .agent/config.json > .agent/config.min\"").safe
+    ),
+    // 3) Extract files -> .agent/files.list
+    PreloadCommand(
+      CelStr("sh -lc \"sed -n 's/.*\\\"files\\\"[^[]*\\[\\(.*\\)\\].*/\\1/p' .agent/config.min | sed 's/\\\",\\\"/\\n/g' | tr -d '[]\\\"' > .agent/files.list\"").safe
+    ),
+    // 4) Emit files
+    PreloadCommand(
+      CelStr("sh -lc \"while IFS= read -r f; do [ -n \\\"$f\\\" ] || continue; echo; echo \\\"[Preload file: $f]\\\"; [ -f \\\"$f\\\" ] && cat \\\"$f\\\" || echo \\\"Missing $f\\\"; done < .agent/files.list\"").safe
+    ),
+    // 5) Extract commands -> .agent/commands.list
+    PreloadCommand(
+      CelStr("sh -lc \"sed -n 's/.*\\\"commands\\\"[^[]*\\[\\(.*\\)\\].*/\\1/p' .agent/config.min | sed 's/\\\",\\\"/\\n/g' | tr -d '[]\\\"' > .agent/commands.list\"").safe
+    ),
+    // 6) Run commands
+    PreloadCommand(
+      CelStr("sh -lc \"while IFS= read -r c; do [ -n \\\"$c\\\" ] || continue; echo; echo \\\"[Preload command: $c]\\\"; bash -lc \\\"$c\\\"; done < .agent/commands.list\"").safe
+    )
   )
 
   def apply(name: String, query: Value[String], fund: Value[Double], spent: Value[Double]): Call[RunWorkflowArgs[Input], ChatToolResponse] = {

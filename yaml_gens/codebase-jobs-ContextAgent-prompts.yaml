@@ -43,6 +43,96 @@ main:
                                 - buildPromptListResult_54ce1528: "${list.concat(buildPromptListResult_54ce1528, buildPromptList_switchResult_7050336a)}"
                   - preloadsBlock:
                       steps:
+                      - preloadCommand_block:
+                          steps:
+                          - preloadCommand_block_initResult:
+                              assign:
+                              - preloadCommand_blockResult_7d20e399: {}
+                          - preloadCommand_block_steps:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_74eee2bc: {}
+                                    - preloadCommand_paramJson_steps:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_74eee2bc:
+                                                  command: "${((\"python3 - <<'PY'\\nimport json\\nimport subprocess\\nfrom pathlib import Path\\n\\nconfig_path = Path(\\\".agent/config.json\\\")\\ndefault_config = {\\n    \\\"files\\\": [\\\"AGENT.md\\\"],\\n    \\\"commands\\\": [\\n        \\\"echo 'Files uploaded/specific to the current session:'\\\",\\n        \\\"ls -la sessions/\" + input.env.sessionId) + \"\\\"\\n    ]\\n}\\n\\nif not config_path.exists():\\n    config_path.parent.mkdir(parents=True, exist_ok=True)\\n    config_path.write_text(json.dumps(default_config, indent=2) + \\\"\\\\n\\\")\\n\\ntry:\\n    config = json.loads(config_path.read_text())\\nexcept Exception as exc:\\n    print(f\\\"[Agent config preload] Failed to read {config_path}: {exc}\\\")\\n    raise\\n\\nprint(f\\\"[Agent config preload] {config_path}\\\")\\n\\nfor filename in config.get(\\\"files\\\", []):\\n    print(f\\\"\\\\n[Preload file: {filename}]\\\")\\n    try:\\n        print(Path(filename).read_text())\\n    except Exception as exc:\\n        print(f\\\"Failed to read {filename}: {exc}\\\")\\n\\nfor command in config.get(\\\"commands\\\", []):\\n    print(f\\\"\\\\n[Preload command: {command}]\\\")\\n    try:\\n        result = subprocess.run(command, shell=True, text=True, capture_output=True)\\n        if result.stdout:\\n            print(result.stdout, end=\\\"\\\")\\n        if result.stderr:\\n            print(result.stderr, end=\\\"\\\")\\n        if result.returncode != 0:\\n            print(f\\\"Command exited with status {result.returncode}\\\")\\n    except Exception as exc:\\n        print(f\\\"Failed to run command {command!r}: {exc}\\\")\\nPY\")}"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_74eee2bc: "${null}"
+                                - preloadCommand_preloadCommand_callback_block:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_74eee2bc)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_3a1ed3a9"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult:
+                                    assign:
+                                    - preloadCommand_blockResult_7d20e399:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + ((\"python3 - <<'PY'\\nimport json\\nimport subprocess\\nfrom pathlib import Path\\n\\nconfig_path = Path(\\\".agent/config.json\\\")\\ndefault_config = {\\n    \\\"files\\\": [\\\"AGENT.md\\\"],\\n    \\\"commands\\\": [\\n        \\\"echo 'Files uploaded/specific to the current session:'\\\",\\n        \\\"ls -la sessions/\" + input.env.sessionId) + \"\\\"\\n    ]\\n}\\n\\nif not config_path.exists():\\n    config_path.parent.mkdir(parents=True, exist_ok=True)\\n    config_path.write_text(json.dumps(default_config, indent=2) + \\\"\\\\n\\\")\\n\\ntry:\\n    config = json.loads(config_path.read_text())\\nexcept Exception as exc:\\n    print(f\\\"[Agent config preload] Failed to read {config_path}: {exc}\\\")\\n    raise\\n\\nprint(f\\\"[Agent config preload] {config_path}\\\")\\n\\nfor filename in config.get(\\\"files\\\", []):\\n    print(f\\\"\\\\n[Preload file: {filename}]\\\")\\n    try:\\n        print(Path(filename).read_text())\\n    except Exception as exc:\\n        print(f\\\"Failed to read {filename}: {exc}\\\")\\n\\nfor command in config.get(\\\"commands\\\", []):\\n    print(f\\\"\\\\n[Preload command: {command}]\\\")\\n    try:\\n        result = subprocess.run(command, shell=True, text=True, capture_output=True)\\n        if result.stdout:\\n            print(result.stdout, end=\\\"\\\")\\n        if result.stderr:\\n            print(result.stderr, end=\\\"\\\")\\n        if result.returncode != 0:\\n            print(f\\\"Command exited with status {result.returncode}\\\")\\n    except Exception as exc:\\n        print(f\\\"Failed to run command {command!r}: {exc}\\\")\\nPY\")) + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_3a1ed3a9.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError:
+                                    assign:
+                                    - preloadCommand_blockResult_7d20e399: "${null}"
                       - preloadFile_block:
                           steps:
                           - preloadFile_block_initResult:
@@ -110,57 +200,62 @@ main:
                           steps:
                           - joinPreloads_initResult:
                               assign:
-                              - joinPreloadsResult_3e188060: []
+                              - joinPreloadsResult_6ba23d9d: []
                           - joinPreloads_steps:
                               for:
                                 value: "joinPreloadsIdx"
-                                range: "${[0, (1 - 1)]}"
+                                range: "${[0, (2 - 1)]}"
                                 steps:
                                 - joinPreloads_switch:
                                     steps:
                                     - joinPreloads_switch_initResult:
                                         assign:
-                                        - joinPreloads_switchResult_2651eb2b: {}
+                                        - joinPreloads_switchResult_79d743d6: {}
                                     - joinPreloads_switch_steps:
                                         switch:
                                         - condition: "${(joinPreloadsIdx == 0)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_0:
                                               assign:
-                                              - joinPreloads_switchResult_2651eb2b: "${preloadFile_blockResult_117815f7}"
+                                              - joinPreloads_switchResult_79d743d6: "${preloadCommand_blockResult_7d20e399}"
+                                        - condition: "${(joinPreloadsIdx == 1)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_1:
+                                              assign:
+                                              - joinPreloads_switchResult_79d743d6: "${preloadFile_blockResult_117815f7}"
                                 - joinPreloads_updateResult:
                                     assign:
-                                    - joinPreloadsResult_3e188060: "${list.concat(joinPreloadsResult_3e188060, joinPreloads_switchResult_2651eb2b)}"
+                                    - joinPreloadsResult_6ba23d9d: "${list.concat(joinPreloadsResult_6ba23d9d, joinPreloads_switchResult_79d743d6)}"
                   - preloads_joinSteps:
                       steps:
                       - preloads_joinSteps_initResult:
                           assign:
-                          - preloads_joinStepsResult_149b72bb: []
+                          - preloads_joinStepsResult_7aa8528a: []
                       - preloads_joinSteps_steps:
                           for:
                             value: "preloads_joinStepsIdx"
-                            range: "${[0, (((0 + len(buildPromptListResult_54ce1528)) + len(joinPreloadsResult_3e188060)) - 1)]}"
+                            range: "${[0, (((0 + len(buildPromptListResult_54ce1528)) + len(joinPreloadsResult_6ba23d9d)) - 1)]}"
                             steps:
                             - preloads_joinSteps_switch:
                                 steps:
                                 - preloads_joinSteps_switch_initResult:
                                     assign:
-                                    - preloads_joinSteps_switchResult_4e226672: {}
+                                    - preloads_joinSteps_switchResult_a4e45fe: {}
                                 - preloads_joinSteps_switch_steps:
                                     switch:
                                     - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_54ce1528)))}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_0:
                                           assign:
-                                          - preloads_joinSteps_switchResult_4e226672: "${joinPreloadsResult_3e188060[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_54ce1528)))]}"
+                                          - preloads_joinSteps_switchResult_a4e45fe: "${joinPreloadsResult_6ba23d9d[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_54ce1528)))]}"
                                     - condition: "${(preloads_joinStepsIdx >= 0)}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_1:
                                           assign:
-                                          - preloads_joinSteps_switchResult_4e226672: "${buildPromptListResult_54ce1528[(preloads_joinStepsIdx - 0)]}"
+                                          - preloads_joinSteps_switchResult_a4e45fe: "${buildPromptListResult_54ce1528[(preloads_joinStepsIdx - 0)]}"
                             - preloads_joinSteps_updateResult:
                                 assign:
-                                - preloads_joinStepsResult_149b72bb: "${list.concat(preloads_joinStepsResult_149b72bb, preloads_joinSteps_switchResult_4e226672)}"
+                                - preloads_joinStepsResult_7aa8528a: "${list.concat(preloads_joinStepsResult_7aa8528a, preloads_joinSteps_switchResult_a4e45fe)}"
               - buildPromptsWithTasks:
                   steps:
                   - buildPromptsWithTasks_initResult:
@@ -307,32 +402,32 @@ main:
                   steps:
                   - taskPrompts_joinSteps_initResult:
                       assign:
-                      - taskPrompts_joinStepsResult_63c76a48: []
+                      - taskPrompts_joinStepsResult_449b69f0: []
                   - taskPrompts_joinSteps_steps:
                       for:
                         value: "taskPrompts_joinStepsIdx"
-                        range: "${[0, (((0 + len(preloads_joinStepsResult_149b72bb)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
+                        range: "${[0, (((0 + len(preloads_joinStepsResult_7aa8528a)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
                         steps:
                         - taskPrompts_joinSteps_switch:
                             steps:
                             - taskPrompts_joinSteps_switch_initResult:
                                 assign:
-                                - taskPrompts_joinSteps_switchResult_6a8673e8: {}
+                                - taskPrompts_joinSteps_switchResult_589f63eb: {}
                             - taskPrompts_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_149b72bb)))}"
+                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_7aa8528a)))}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_6a8673e8: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_149b72bb)))]}"
+                                      - taskPrompts_joinSteps_switchResult_589f63eb: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_7aa8528a)))]}"
                                 - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_6a8673e8: "${preloads_joinStepsResult_149b72bb[(taskPrompts_joinStepsIdx - 0)]}"
+                                      - taskPrompts_joinSteps_switchResult_589f63eb: "${preloads_joinStepsResult_7aa8528a[(taskPrompts_joinStepsIdx - 0)]}"
                         - taskPrompts_joinSteps_updateResult:
                             assign:
-                            - taskPrompts_joinStepsResult_63c76a48: "${list.concat(taskPrompts_joinStepsResult_63c76a48, taskPrompts_joinSteps_switchResult_6a8673e8)}"
+                            - taskPrompts_joinStepsResult_449b69f0: "${list.concat(taskPrompts_joinStepsResult_449b69f0, taskPrompts_joinSteps_switchResult_589f63eb)}"
           - cliPrompt:
               steps:
               - cliPrompt_initResult:
@@ -368,32 +463,32 @@ main:
               steps:
               - cli_joinSteps_initResult:
                   assign:
-                  - cli_joinStepsResult_3e2d5e2a: []
+                  - cli_joinStepsResult_7a13bafd: []
               - cli_joinSteps_steps:
                   for:
                     value: "cli_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_63c76a48)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
+                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_449b69f0)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
                     steps:
                     - cli_joinSteps_switch:
                         steps:
                         - cli_joinSteps_switch_initResult:
                             assign:
-                            - cli_joinSteps_switchResult_bebc426: {}
+                            - cli_joinSteps_switchResult_3d25996f: {}
                         - cli_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_63c76a48)))}"
+                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_449b69f0)))}"
                               steps:
                               - cli_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cli_joinSteps_switchResult_bebc426: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_63c76a48)))]}"
+                                  - cli_joinSteps_switchResult_3d25996f: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_449b69f0)))]}"
                             - condition: "${(cli_joinStepsIdx >= 0)}"
                               steps:
                               - cli_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cli_joinSteps_switchResult_bebc426: "${taskPrompts_joinStepsResult_63c76a48[(cli_joinStepsIdx - 0)]}"
+                                  - cli_joinSteps_switchResult_3d25996f: "${taskPrompts_joinStepsResult_449b69f0[(cli_joinStepsIdx - 0)]}"
                     - cli_joinSteps_updateResult:
                         assign:
-                        - cli_joinStepsResult_3e2d5e2a: "${list.concat(cli_joinStepsResult_3e2d5e2a, cli_joinSteps_switchResult_bebc426)}"
+                        - cli_joinStepsResult_7a13bafd: "${list.concat(cli_joinStepsResult_7a13bafd, cli_joinSteps_switchResult_3d25996f)}"
       - fundPrompt:
           steps:
           - fundPrompt_initResult:
@@ -440,32 +535,32 @@ main:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_3865dde5: []
+              - fundsPrompts_joinStepsResult_3bfe463b: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_3e2d5e2a)) + len(fundPromptResult_4aef8109)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_7a13bafd)) + len(fundPromptResult_4aef8109)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_185b98dd: {}
+                        - fundsPrompts_joinSteps_switchResult_2c223782: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_3e2d5e2a)))}"
+                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_7a13bafd)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_185b98dd: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_3e2d5e2a)))]}"
+                              - fundsPrompts_joinSteps_switchResult_2c223782: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_7a13bafd)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_185b98dd: "${cli_joinStepsResult_3e2d5e2a[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_2c223782: "${cli_joinStepsResult_7a13bafd[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_3865dde5: "${list.concat(fundsPrompts_joinStepsResult_3865dde5, fundsPrompts_joinSteps_switchResult_185b98dd)}"
+                    - fundsPrompts_joinStepsResult_3bfe463b: "${list.concat(fundsPrompts_joinStepsResult_3bfe463b, fundsPrompts_joinSteps_switchResult_2c223782)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_3865dde5}"
+        prompts: "${fundsPrompts_joinStepsResult_3bfe463b}"
