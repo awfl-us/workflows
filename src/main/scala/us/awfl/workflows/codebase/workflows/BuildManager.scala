@@ -17,9 +17,11 @@ object BuildManager extends us.awfl.workflows.traits.Agent {
     PreloadFile("/Users/paul/github/TopAigents/workflows/build.sbt"),
     // val cornerstoneBuildSbt = Context.preloadFile("CornerstoneBuildSbt", "/Users/paul/github/TopAigents/cornerstone/build.sbt")
     PreloadCommand(
-      """bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo "# workflows/yaml_gens (sorted by mtime)"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo "No workflows/yaml_gens directory"; fi'"""
+      CelStr(
+        """bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo "# workflows/yaml_gens (sorted by mtime)"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo "No workflows/yaml_gens directory"; fi'"""
+      ).safe
     ),
-    PreloadCommand("""bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'""")
+    PreloadCommand(CelStr("""bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'""").safe)
   )
 
   // Base system prompt for this agent

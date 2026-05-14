@@ -713,7 +713,7 @@ main:
                           steps:
                           - preloadCommand_block_initResult_6:
                               assign:
-                              - preloadCommand_blockResult_65a34768: {}
+                              - preloadCommand_blockResult_265ecc87: {}
                           - preloadCommand_block_steps_6:
                               try:
                                 steps:
@@ -721,14 +721,14 @@ main:
                                     steps:
                                     - preloadCommand_paramJson_initResult_6:
                                         assign:
-                                        - preloadCommand_paramJsonResult_a11187c: {}
+                                        - preloadCommand_paramJsonResult_3f6e0d4d: {}
                                     - preloadCommand_paramJson_steps_6:
                                         try:
                                           steps:
                                           - preloadCommand_paramJson_updateResult_6:
                                               assign:
-                                              - preloadCommand_paramJsonResult_a11187c:
-                                                  command: "${\"bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \"# workflows/yaml_gens (sorted by mtime)\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \"No workflows/yaml_gens directory\"; fi'\"}"
+                                              - preloadCommand_paramJsonResult_3f6e0d4d:
+                                                  command: "${\"bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \\\"# workflows/yaml_gens (sorted by mtime)\\\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \\\"No workflows/yaml_gens directory\\\"; fi'\"}"
                                         except:
                                           as: "preloadCommand_paramJsonError"
                                           steps:
@@ -743,7 +743,7 @@ main:
                                               retry: "${http.default_retry}"
                                           - preloadCommand_paramJson_updateResultError_6:
                                               assign:
-                                              - preloadCommand_paramJsonResult_a11187c: "${null}"
+                                              - preloadCommand_paramJsonResult_3f6e0d4d: "${null}"
                                 - preloadCommand_preloadCommand_callback_block_6:
                                     steps:
                                     - preloadCommand_preloadCommand_run_tools_CliTools_6:
@@ -759,7 +759,7 @@ main:
                                                     type: "function"
                                                     function:
                                                       name: "${\"RUN_COMMAND\"}"
-                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_a11187c)}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_3f6e0d4d)}"
                                                   cost: 0.0
                                                   env:
                                                     userId: "${input.env.userId}"
@@ -773,13 +773,13 @@ main:
                                                 project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                 connector_params:
                                                   skip_polling: false
-                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_43a11a88"
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_4737ac94"
                                         retry: "${http.default_retry}"
                                 - preloadCommand_block_updateResult_6:
                                     assign:
-                                    - preloadCommand_blockResult_65a34768:
+                                    - preloadCommand_blockResult_265ecc87:
                                         role: "${\"system\"}"
-                                        content: "${(((\"[Preload \" + \"bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \\\"# workflows/yaml_gens (sorted by mtime)\\\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \\\"No workflows/yaml_gens directory\\\"; fi'\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_43a11a88.encoded)}"
+                                        content: "${(((\"[Preload \" + \"bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \\\\\\\"# workflows/yaml_gens (sorted by mtime)\\\\\\\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \\\\\\\"No workflows/yaml_gens directory\\\\\\\"; fi'\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_4737ac94.encoded)}"
                                         tool_calls: "${[]}"
                                         tool_call_id: "${null}"
                                         create_time: "${sys.now()}"
@@ -798,7 +798,7 @@ main:
                                     retry: "${http.default_retry}"
                                 - preloadCommand_block_updateResultError_6:
                                     assign:
-                                    - preloadCommand_blockResult_65a34768: "${null}"
+                                    - preloadCommand_blockResult_265ecc87: "${null}"
                       - preloadCommand_block_7:
                           steps:
                           - preloadCommand_block_initResult_7:
@@ -893,7 +893,7 @@ main:
                           steps:
                           - joinPreloads_initResult:
                               assign:
-                              - joinPreloadsResult_1b94b2b7: []
+                              - joinPreloadsResult_6cda85d7: []
                           - joinPreloads_steps:
                               for:
                                 value: "joinPreloadsIdx"
@@ -903,92 +903,92 @@ main:
                                     steps:
                                     - joinPreloads_switch_initResult:
                                         assign:
-                                        - joinPreloads_switchResult_1f6a38dd: {}
+                                        - joinPreloads_switchResult_6dfaf769: {}
                                     - joinPreloads_switch_steps:
                                         switch:
                                         - condition: "${(joinPreloadsIdx == 0)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_0:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_12f4b7de}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_12f4b7de}"
                                         - condition: "${(joinPreloadsIdx == 1)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_1:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_480b1cf4}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_480b1cf4}"
                                         - condition: "${(joinPreloadsIdx == 2)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_2:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_12314424}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_12314424}"
                                         - condition: "${(joinPreloadsIdx == 3)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_3:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_b98b96e}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_b98b96e}"
                                         - condition: "${(joinPreloadsIdx == 4)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_4:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_546f4bce}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_546f4bce}"
                                         - condition: "${(joinPreloadsIdx == 5)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_5:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_38ad1e8c}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_38ad1e8c}"
                                         - condition: "${(joinPreloadsIdx == 6)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_6:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadFile_blockResult_6d610dce}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadFile_blockResult_6d610dce}"
                                         - condition: "${(joinPreloadsIdx == 7)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_7:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadFile_blockResult_5278b5f5}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadFile_blockResult_5278b5f5}"
                                         - condition: "${(joinPreloadsIdx == 8)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_8:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_65a34768}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_265ecc87}"
                                         - condition: "${(joinPreloadsIdx == 9)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_9:
                                               assign:
-                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_8f5c5a}"
+                                              - joinPreloads_switchResult_6dfaf769: "${preloadCommand_blockResult_8f5c5a}"
                                 - joinPreloads_updateResult:
                                     assign:
-                                    - joinPreloadsResult_1b94b2b7: "${list.concat(joinPreloadsResult_1b94b2b7, joinPreloads_switchResult_1f6a38dd)}"
+                                    - joinPreloadsResult_6cda85d7: "${list.concat(joinPreloadsResult_6cda85d7, joinPreloads_switchResult_6dfaf769)}"
                   - preloads_joinSteps:
                       steps:
                       - preloads_joinSteps_initResult:
                           assign:
-                          - preloads_joinStepsResult_df4e2db: []
+                          - preloads_joinStepsResult_6152002b: []
                       - preloads_joinSteps_steps:
                           for:
                             value: "preloads_joinStepsIdx"
-                            range: "${[0, (((0 + len(buildPromptListResult_494eaa6c)) + len(joinPreloadsResult_1b94b2b7)) - 1)]}"
+                            range: "${[0, (((0 + len(buildPromptListResult_494eaa6c)) + len(joinPreloadsResult_6cda85d7)) - 1)]}"
                             steps:
                             - preloads_joinSteps_switch:
                                 steps:
                                 - preloads_joinSteps_switch_initResult:
                                     assign:
-                                    - preloads_joinSteps_switchResult_506a89ca: {}
+                                    - preloads_joinSteps_switchResult_27759d8d: {}
                                 - preloads_joinSteps_switch_steps:
                                     switch:
                                     - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_494eaa6c)))}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_0:
                                           assign:
-                                          - preloads_joinSteps_switchResult_506a89ca: "${joinPreloadsResult_1b94b2b7[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_494eaa6c)))]}"
+                                          - preloads_joinSteps_switchResult_27759d8d: "${joinPreloadsResult_6cda85d7[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_494eaa6c)))]}"
                                     - condition: "${(preloads_joinStepsIdx >= 0)}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_1:
                                           assign:
-                                          - preloads_joinSteps_switchResult_506a89ca: "${buildPromptListResult_494eaa6c[(preloads_joinStepsIdx - 0)]}"
+                                          - preloads_joinSteps_switchResult_27759d8d: "${buildPromptListResult_494eaa6c[(preloads_joinStepsIdx - 0)]}"
                             - preloads_joinSteps_updateResult:
                                 assign:
-                                - preloads_joinStepsResult_df4e2db: "${list.concat(preloads_joinStepsResult_df4e2db, preloads_joinSteps_switchResult_506a89ca)}"
+                                - preloads_joinStepsResult_6152002b: "${list.concat(preloads_joinStepsResult_6152002b, preloads_joinSteps_switchResult_27759d8d)}"
               - buildPromptsWithTasks:
                   steps:
                   - buildPromptsWithTasks_initResult:
@@ -1135,32 +1135,32 @@ main:
                   steps:
                   - taskPrompts_joinSteps_initResult:
                       assign:
-                      - taskPrompts_joinStepsResult_2aacbd25: []
+                      - taskPrompts_joinStepsResult_1c932fd6: []
                   - taskPrompts_joinSteps_steps:
                       for:
                         value: "taskPrompts_joinStepsIdx"
-                        range: "${[0, (((0 + len(preloads_joinStepsResult_df4e2db)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
+                        range: "${[0, (((0 + len(preloads_joinStepsResult_6152002b)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
                         steps:
                         - taskPrompts_joinSteps_switch:
                             steps:
                             - taskPrompts_joinSteps_switch_initResult:
                                 assign:
-                                - taskPrompts_joinSteps_switchResult_7696a348: {}
+                                - taskPrompts_joinSteps_switchResult_3153cdee: {}
                             - taskPrompts_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_df4e2db)))}"
+                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_6152002b)))}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_7696a348: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_df4e2db)))]}"
+                                      - taskPrompts_joinSteps_switchResult_3153cdee: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_6152002b)))]}"
                                 - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_7696a348: "${preloads_joinStepsResult_df4e2db[(taskPrompts_joinStepsIdx - 0)]}"
+                                      - taskPrompts_joinSteps_switchResult_3153cdee: "${preloads_joinStepsResult_6152002b[(taskPrompts_joinStepsIdx - 0)]}"
                         - taskPrompts_joinSteps_updateResult:
                             assign:
-                            - taskPrompts_joinStepsResult_2aacbd25: "${list.concat(taskPrompts_joinStepsResult_2aacbd25, taskPrompts_joinSteps_switchResult_7696a348)}"
+                            - taskPrompts_joinStepsResult_1c932fd6: "${list.concat(taskPrompts_joinStepsResult_1c932fd6, taskPrompts_joinSteps_switchResult_3153cdee)}"
           - cliPrompt:
               steps:
               - cliPrompt_initResult:
@@ -1196,32 +1196,32 @@ main:
               steps:
               - cli_joinSteps_initResult:
                   assign:
-                  - cli_joinStepsResult_2fb96d9a: []
+                  - cli_joinStepsResult_2f221428: []
               - cli_joinSteps_steps:
                   for:
                     value: "cli_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_2aacbd25)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
+                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_1c932fd6)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
                     steps:
                     - cli_joinSteps_switch:
                         steps:
                         - cli_joinSteps_switch_initResult:
                             assign:
-                            - cli_joinSteps_switchResult_3c45eb78: {}
+                            - cli_joinSteps_switchResult_58b5dba0: {}
                         - cli_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_2aacbd25)))}"
+                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_1c932fd6)))}"
                               steps:
                               - cli_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cli_joinSteps_switchResult_3c45eb78: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_2aacbd25)))]}"
+                                  - cli_joinSteps_switchResult_58b5dba0: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_1c932fd6)))]}"
                             - condition: "${(cli_joinStepsIdx >= 0)}"
                               steps:
                               - cli_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cli_joinSteps_switchResult_3c45eb78: "${taskPrompts_joinStepsResult_2aacbd25[(cli_joinStepsIdx - 0)]}"
+                                  - cli_joinSteps_switchResult_58b5dba0: "${taskPrompts_joinStepsResult_1c932fd6[(cli_joinStepsIdx - 0)]}"
                     - cli_joinSteps_updateResult:
                         assign:
-                        - cli_joinStepsResult_2fb96d9a: "${list.concat(cli_joinStepsResult_2fb96d9a, cli_joinSteps_switchResult_3c45eb78)}"
+                        - cli_joinStepsResult_2f221428: "${list.concat(cli_joinStepsResult_2f221428, cli_joinSteps_switchResult_58b5dba0)}"
       - fundPrompt:
           steps:
           - fundPrompt_initResult:
@@ -1268,32 +1268,32 @@ main:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_3a0410cb: []
+              - fundsPrompts_joinStepsResult_579b97a8: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_2fb96d9a)) + len(fundPromptResult_4aef8109)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_2f221428)) + len(fundPromptResult_4aef8109)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_3ba9bb55: {}
+                        - fundsPrompts_joinSteps_switchResult_1e9541f3: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_2fb96d9a)))}"
+                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_2f221428)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_3ba9bb55: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_2fb96d9a)))]}"
+                              - fundsPrompts_joinSteps_switchResult_1e9541f3: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_2f221428)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_3ba9bb55: "${cli_joinStepsResult_2fb96d9a[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_1e9541f3: "${cli_joinStepsResult_2f221428[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_3a0410cb: "${list.concat(fundsPrompts_joinStepsResult_3a0410cb, fundsPrompts_joinSteps_switchResult_3ba9bb55)}"
+                    - fundsPrompts_joinStepsResult_579b97a8: "${list.concat(fundsPrompts_joinStepsResult_579b97a8, fundsPrompts_joinSteps_switchResult_1e9541f3)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_3a0410cb}"
+        prompts: "${fundsPrompts_joinStepsResult_579b97a8}"
