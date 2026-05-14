@@ -47,7 +47,7 @@ main:
                           steps:
                           - preloadCommand_block_initResult:
                               assign:
-                              - preloadCommand_blockResult_7d20e399: {}
+                              - preloadCommand_blockResult_12f4b7de: {}
                           - preloadCommand_block_steps:
                               try:
                                 steps:
@@ -55,14 +55,14 @@ main:
                                     steps:
                                     - preloadCommand_paramJson_initResult:
                                         assign:
-                                        - preloadCommand_paramJsonResult_74eee2bc: {}
+                                        - preloadCommand_paramJsonResult_33466695: {}
                                     - preloadCommand_paramJson_steps:
                                         try:
                                           steps:
                                           - preloadCommand_paramJson_updateResult:
                                               assign:
-                                              - preloadCommand_paramJsonResult_74eee2bc:
-                                                  command: "${((\"python3 - <<'PY'\\nimport json\\nimport subprocess\\nfrom pathlib import Path\\n\\nconfig_path = Path(\\\".agent/config.json\\\")\\ndefault_config = {\\n    \\\"files\\\": [\\\"AGENT.md\\\"],\\n    \\\"commands\\\": [\\n        \\\"echo 'Files uploaded/specific to the current session:'\\\",\\n        \\\"ls -la sessions/\" + input.env.sessionId) + \"\\\"\\n    ]\\n}\\n\\nif not config_path.exists():\\n    config_path.parent.mkdir(parents=True, exist_ok=True)\\n    config_path.write_text(json.dumps(default_config, indent=2) + \\\"\\\\n\\\")\\n\\ntry:\\n    config = json.loads(config_path.read_text())\\nexcept Exception as exc:\\n    print(f\\\"[Agent config preload] Failed to read {config_path}: {exc}\\\")\\n    raise\\n\\nprint(f\\\"[Agent config preload] {config_path}\\\")\\n\\nfor filename in config.get(\\\"files\\\", []):\\n    print(f\\\"\\\\n[Preload file: {filename}]\\\")\\n    try:\\n        print(Path(filename).read_text())\\n    except Exception as exc:\\n        print(f\\\"Failed to read {filename}: {exc}\\\")\\n\\nfor command in config.get(\\\"commands\\\", []):\\n    print(f\\\"\\\\n[Preload command: {command}]\\\")\\n    try:\\n        result = subprocess.run(command, shell=True, text=True, capture_output=True)\\n        if result.stdout:\\n            print(result.stdout, end=\\\"\\\")\\n        if result.stderr:\\n            print(result.stderr, end=\\\"\\\")\\n        if result.returncode != 0:\\n            print(f\\\"Command exited with status {result.returncode}\\\")\\n    except Exception as exc:\\n        print(f\\\"Failed to run command {command!r}: {exc}\\\")\\nPY\")}"
+                                              - preloadCommand_paramJsonResult_33466695:
+                                                  command: "${((\"sh -lc \\\"[ -f .agent/config.json ] || { mkdir -p .agent; printf '%s\\\\n' '{\\\\\\\"files\\\\\\\":[\\\\\\\"AGENT.md\\\\\\\"],\\\\\\\"commands\\\\\\\":[\\\\\\\"echo Files uploaded/specific to the current session:\\\\\\\",\\\\\\\"ls -la sessions/\" + input.env.sessionId) + \"\\\\\\\"]}' > .agent/config.json; }\\\"\")}"
                                         except:
                                           as: "preloadCommand_paramJsonError"
                                           steps:
@@ -77,7 +77,7 @@ main:
                                               retry: "${http.default_retry}"
                                           - preloadCommand_paramJson_updateResultError:
                                               assign:
-                                              - preloadCommand_paramJsonResult_74eee2bc: "${null}"
+                                              - preloadCommand_paramJsonResult_33466695: "${null}"
                                 - preloadCommand_preloadCommand_callback_block:
                                     steps:
                                     - preloadCommand_preloadCommand_run_tools_CliTools:
@@ -93,7 +93,7 @@ main:
                                                     type: "function"
                                                     function:
                                                       name: "${\"RUN_COMMAND\"}"
-                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_74eee2bc)}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_33466695)}"
                                                   cost: 0.0
                                                   env:
                                                     userId: "${input.env.userId}"
@@ -107,13 +107,13 @@ main:
                                                 project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                 connector_params:
                                                   skip_polling: false
-                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_3a1ed3a9"
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_2cedf843"
                                         retry: "${http.default_retry}"
                                 - preloadCommand_block_updateResult:
                                     assign:
-                                    - preloadCommand_blockResult_7d20e399:
+                                    - preloadCommand_blockResult_12f4b7de:
                                         role: "${\"system\"}"
-                                        content: "${(((\"[Preload \" + ((\"python3 - <<'PY'\\nimport json\\nimport subprocess\\nfrom pathlib import Path\\n\\nconfig_path = Path(\\\".agent/config.json\\\")\\ndefault_config = {\\n    \\\"files\\\": [\\\"AGENT.md\\\"],\\n    \\\"commands\\\": [\\n        \\\"echo 'Files uploaded/specific to the current session:'\\\",\\n        \\\"ls -la sessions/\" + input.env.sessionId) + \"\\\"\\n    ]\\n}\\n\\nif not config_path.exists():\\n    config_path.parent.mkdir(parents=True, exist_ok=True)\\n    config_path.write_text(json.dumps(default_config, indent=2) + \\\"\\\\n\\\")\\n\\ntry:\\n    config = json.loads(config_path.read_text())\\nexcept Exception as exc:\\n    print(f\\\"[Agent config preload] Failed to read {config_path}: {exc}\\\")\\n    raise\\n\\nprint(f\\\"[Agent config preload] {config_path}\\\")\\n\\nfor filename in config.get(\\\"files\\\", []):\\n    print(f\\\"\\\\n[Preload file: {filename}]\\\")\\n    try:\\n        print(Path(filename).read_text())\\n    except Exception as exc:\\n        print(f\\\"Failed to read {filename}: {exc}\\\")\\n\\nfor command in config.get(\\\"commands\\\", []):\\n    print(f\\\"\\\\n[Preload command: {command}]\\\")\\n    try:\\n        result = subprocess.run(command, shell=True, text=True, capture_output=True)\\n        if result.stdout:\\n            print(result.stdout, end=\\\"\\\")\\n        if result.stderr:\\n            print(result.stderr, end=\\\"\\\")\\n        if result.returncode != 0:\\n            print(f\\\"Command exited with status {result.returncode}\\\")\\n    except Exception as exc:\\n        print(f\\\"Failed to run command {command!r}: {exc}\\\")\\nPY\")) + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_3a1ed3a9.encoded)}"
+                                        content: "${(((\"[Preload \" + ((\"sh -lc \\\"[ -f .agent/config.json ] || { mkdir -p .agent; printf '%s\\\\n' '{\\\\\\\"files\\\\\\\":[\\\\\\\"AGENT.md\\\\\\\"],\\\\\\\"commands\\\\\\\":[\\\\\\\"echo Files uploaded/specific to the current session:\\\\\\\",\\\\\\\"ls -la sessions/\" + input.env.sessionId) + \"\\\\\\\"]}' > .agent/config.json; }\\\"\")) + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_2cedf843.encoded)}"
                                         tool_calls: "${[]}"
                                         tool_call_id: "${null}"
                                         create_time: "${sys.now()}"
@@ -132,7 +132,457 @@ main:
                                     retry: "${http.default_retry}"
                                 - preloadCommand_block_updateResultError:
                                     assign:
-                                    - preloadCommand_blockResult_7d20e399: "${null}"
+                                    - preloadCommand_blockResult_12f4b7de: "${null}"
+                      - preloadCommand_block_1:
+                          steps:
+                          - preloadCommand_block_initResult_1:
+                              assign:
+                              - preloadCommand_blockResult_480b1cf4: {}
+                          - preloadCommand_block_steps_1:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_1:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult_1:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_5018d200: {}
+                                    - preloadCommand_paramJson_steps_1:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult_1:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_5018d200:
+                                                  command: "${\"sh -lc \\\"tr -d '\\\\n' < .agent/config.json > .agent/config.min\\\"\"}"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError_1:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call_1:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError_1:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_5018d200: "${null}"
+                                - preloadCommand_preloadCommand_callback_block_1:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_1:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_1:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_5018d200)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_6743d693"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult_1:
+                                    assign:
+                                    - preloadCommand_blockResult_480b1cf4:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + \"sh -lc \\\\\\\"tr -d '\\\\\\\\n' < .agent/config.json > .agent/config.min\\\\\\\"\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_6743d693.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError_1:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call_1:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError_1:
+                                    assign:
+                                    - preloadCommand_blockResult_480b1cf4: "${null}"
+                      - preloadCommand_block_2:
+                          steps:
+                          - preloadCommand_block_initResult_2:
+                              assign:
+                              - preloadCommand_blockResult_12314424: {}
+                          - preloadCommand_block_steps_2:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_2:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult_2:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_27ff67c3: {}
+                                    - preloadCommand_paramJson_steps_2:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult_2:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_27ff67c3:
+                                                  command: "${\"sh -lc \\\"sed -n 's/.*\\\\\\\"files\\\\\\\"[^[]*\\\\[\\\\(.*\\\\)\\\\].*/\\\\1/p' .agent/config.min | sed 's/\\\\\\\",\\\\\\\"/\\\\n/g' | tr -d '[]\\\\\\\"' > .agent/files.list\\\"\"}"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError_2:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call_2:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError_2:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_27ff67c3: "${null}"
+                                - preloadCommand_preloadCommand_callback_block_2:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_2:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_2:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_27ff67c3)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_20f1c0c3"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult_2:
+                                    assign:
+                                    - preloadCommand_blockResult_12314424:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + \"sh -lc \\\\\\\"sed -n 's/.*\\\\\\\\\\\\\\\"files\\\\\\\\\\\\\\\"[^[]*\\\\\\\\[\\\\\\\\(.*\\\\\\\\)\\\\\\\\].*/\\\\\\\\1/p' .agent/config.min | sed 's/\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"/\\\\\\\\n/g' | tr -d '[]\\\\\\\\\\\\\\\"' > .agent/files.list\\\\\\\"\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_20f1c0c3.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError_2:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call_2:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError_2:
+                                    assign:
+                                    - preloadCommand_blockResult_12314424: "${null}"
+                      - preloadCommand_block_3:
+                          steps:
+                          - preloadCommand_block_initResult_3:
+                              assign:
+                              - preloadCommand_blockResult_b98b96e: {}
+                          - preloadCommand_block_steps_3:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_3:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult_3:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_9b0bd0c: {}
+                                    - preloadCommand_paramJson_steps_3:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult_3:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_9b0bd0c:
+                                                  command: "${\"sh -lc \\\"while IFS= read -r f; do [ -n \\\\\\\"$f\\\\\\\" ] || continue; echo; echo \\\\\\\"[Preload file: $f]\\\\\\\"; [ -f \\\\\\\"$f\\\\\\\" ] && cat \\\\\\\"$f\\\\\\\" || echo \\\\\\\"Missing $f\\\\\\\"; done < .agent/files.list\\\"\"}"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError_3:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call_3:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError_3:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_9b0bd0c: "${null}"
+                                - preloadCommand_preloadCommand_callback_block_3:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_3:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_3:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_9b0bd0c)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_19d62244"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult_3:
+                                    assign:
+                                    - preloadCommand_blockResult_b98b96e:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + \"sh -lc \\\\\\\"while IFS= read -r f; do [ -n \\\\\\\\\\\\\\\"$f\\\\\\\\\\\\\\\" ] || continue; echo; echo \\\\\\\\\\\\\\\"[Preload file: $f]\\\\\\\\\\\\\\\"; [ -f \\\\\\\\\\\\\\\"$f\\\\\\\\\\\\\\\" ] && cat \\\\\\\\\\\\\\\"$f\\\\\\\\\\\\\\\" || echo \\\\\\\\\\\\\\\"Missing $f\\\\\\\\\\\\\\\"; done < .agent/files.list\\\\\\\"\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_19d62244.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError_3:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call_3:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError_3:
+                                    assign:
+                                    - preloadCommand_blockResult_b98b96e: "${null}"
+                      - preloadCommand_block_4:
+                          steps:
+                          - preloadCommand_block_initResult_4:
+                              assign:
+                              - preloadCommand_blockResult_546f4bce: {}
+                          - preloadCommand_block_steps_4:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_4:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult_4:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_6fbccbd8: {}
+                                    - preloadCommand_paramJson_steps_4:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult_4:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_6fbccbd8:
+                                                  command: "${\"sh -lc \\\"sed -n 's/.*\\\\\\\"commands\\\\\\\"[^[]*\\\\[\\\\(.*\\\\)\\\\].*/\\\\1/p' .agent/config.min | sed 's/\\\\\\\",\\\\\\\"/\\\\n/g' | tr -d '[]\\\\\\\"' > .agent/commands.list\\\"\"}"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError_4:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call_4:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError_4:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_6fbccbd8: "${null}"
+                                - preloadCommand_preloadCommand_callback_block_4:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_4:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_4:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_6fbccbd8)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_2aecb051"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult_4:
+                                    assign:
+                                    - preloadCommand_blockResult_546f4bce:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + \"sh -lc \\\\\\\"sed -n 's/.*\\\\\\\\\\\\\\\"commands\\\\\\\\\\\\\\\"[^[]*\\\\\\\\[\\\\\\\\(.*\\\\\\\\)\\\\\\\\].*/\\\\\\\\1/p' .agent/config.min | sed 's/\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"/\\\\\\\\n/g' | tr -d '[]\\\\\\\\\\\\\\\"' > .agent/commands.list\\\\\\\"\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_2aecb051.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError_4:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call_4:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError_4:
+                                    assign:
+                                    - preloadCommand_blockResult_546f4bce: "${null}"
+                      - preloadCommand_block_5:
+                          steps:
+                          - preloadCommand_block_initResult_5:
+                              assign:
+                              - preloadCommand_blockResult_38ad1e8c: {}
+                          - preloadCommand_block_steps_5:
+                              try:
+                                steps:
+                                - preloadCommand_paramJson_5:
+                                    steps:
+                                    - preloadCommand_paramJson_initResult_5:
+                                        assign:
+                                        - preloadCommand_paramJsonResult_413314d6: {}
+                                    - preloadCommand_paramJson_steps_5:
+                                        try:
+                                          steps:
+                                          - preloadCommand_paramJson_updateResult_5:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_413314d6:
+                                                  command: "${\"sh -lc \\\"while IFS= read -r c; do [ -n \\\\\\\"$c\\\\\\\" ] || continue; echo; echo \\\\\\\"[Preload command: $c]\\\\\\\"; bash -lc \\\\\\\"$c\\\\\\\"; done < .agent/commands.list\\\"\"}"
+                                        except:
+                                          as: "preloadCommand_paramJsonError"
+                                          steps:
+                                          - preloadCommand_paramJson_logError_5:
+                                              try:
+                                                steps:
+                                                - preloadCommand_paramJson_logError_call_5:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
+                                                    result: "preloadCommand_paramJson_logErrorResult_5f978326"
+                                              retry: "${http.default_retry}"
+                                          - preloadCommand_paramJson_updateResultError_5:
+                                              assign:
+                                              - preloadCommand_paramJsonResult_413314d6: "${null}"
+                                - preloadCommand_preloadCommand_callback_block_5:
+                                    steps:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_5:
+                                        try:
+                                          steps:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_5:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  tool_call:
+                                                    id: "${\"preload_command\"}"
+                                                    type: "function"
+                                                    function:
+                                                      name: "${\"RUN_COMMAND\"}"
+                                                      arguments: "${json.encode_to_string(preloadCommand_paramJsonResult_413314d6)}"
+                                                  cost: 0.0
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(true, null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_54b83ef5"
+                                        retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResult_5:
+                                    assign:
+                                    - preloadCommand_blockResult_38ad1e8c:
+                                        role: "${\"system\"}"
+                                        content: "${(((\"[Preload \" + \"sh -lc \\\\\\\"while IFS= read -r c; do [ -n \\\\\\\\\\\\\\\"$c\\\\\\\\\\\\\\\" ] || continue; echo; echo \\\\\\\\\\\\\\\"[Preload command: $c]\\\\\\\\\\\\\\\"; bash -lc \\\\\\\\\\\\\\\"$c\\\\\\\\\\\\\\\"; done < .agent/commands.list\\\\\\\"\") + \"]\r\") + preloadCommand_preloadCommand_run_tools_CliToolsResult_54b83ef5.encoded)}"
+                                        tool_calls: "${[]}"
+                                        tool_call_id: "${null}"
+                                        create_time: "${sys.now()}"
+                                        docId: "${null}"
+                              except:
+                                as: "preloadCommand_blockError"
+                                steps:
+                                - preloadCommand_block_logError_5:
+                                    try:
+                                      steps:
+                                      - preloadCommand_block_logError_call_5:
+                                          call: "sys.log"
+                                          args:
+                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
+                                          result: "preloadCommand_block_logErrorResult_38fafd4d"
+                                    retry: "${http.default_retry}"
+                                - preloadCommand_block_updateResultError_5:
+                                    assign:
+                                    - preloadCommand_blockResult_38ad1e8c: "${null}"
                       - preloadFile_block:
                           steps:
                           - preloadFile_block_initResult:
@@ -259,47 +709,47 @@ main:
                                 - preloadFile_block_updateResultError_1:
                                     assign:
                                     - preloadFile_blockResult_5278b5f5: "${null}"
-                      - preloadCommand_block_1:
+                      - preloadCommand_block_6:
                           steps:
-                          - preloadCommand_block_initResult_1:
+                          - preloadCommand_block_initResult_6:
                               assign:
                               - preloadCommand_blockResult_65a34768: {}
-                          - preloadCommand_block_steps_1:
+                          - preloadCommand_block_steps_6:
                               try:
                                 steps:
-                                - preloadCommand_paramJson_1:
+                                - preloadCommand_paramJson_6:
                                     steps:
-                                    - preloadCommand_paramJson_initResult_1:
+                                    - preloadCommand_paramJson_initResult_6:
                                         assign:
                                         - preloadCommand_paramJsonResult_a11187c: {}
-                                    - preloadCommand_paramJson_steps_1:
+                                    - preloadCommand_paramJson_steps_6:
                                         try:
                                           steps:
-                                          - preloadCommand_paramJson_updateResult_1:
+                                          - preloadCommand_paramJson_updateResult_6:
                                               assign:
                                               - preloadCommand_paramJsonResult_a11187c:
                                                   command: "${\"bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo \"# workflows/yaml_gens (sorted by mtime)\"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo \"No workflows/yaml_gens directory\"; fi'\"}"
                                         except:
                                           as: "preloadCommand_paramJsonError"
                                           steps:
-                                          - preloadCommand_paramJson_logError_1:
+                                          - preloadCommand_paramJson_logError_6:
                                               try:
                                                 steps:
-                                                - preloadCommand_paramJson_logError_call_1:
+                                                - preloadCommand_paramJson_logError_call_6:
                                                     call: "sys.log"
                                                     args:
                                                       text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
                                                     result: "preloadCommand_paramJson_logErrorResult_5f978326"
                                               retry: "${http.default_retry}"
-                                          - preloadCommand_paramJson_updateResultError_1:
+                                          - preloadCommand_paramJson_updateResultError_6:
                                               assign:
                                               - preloadCommand_paramJsonResult_a11187c: "${null}"
-                                - preloadCommand_preloadCommand_callback_block_1:
+                                - preloadCommand_preloadCommand_callback_block_6:
                                     steps:
-                                    - preloadCommand_preloadCommand_run_tools_CliTools_1:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_6:
                                         try:
                                           steps:
-                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_1:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_6:
                                               call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
                                               args:
                                                 workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
@@ -325,7 +775,7 @@ main:
                                                   skip_polling: false
                                               result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_43a11a88"
                                         retry: "${http.default_retry}"
-                                - preloadCommand_block_updateResult_1:
+                                - preloadCommand_block_updateResult_6:
                                     assign:
                                     - preloadCommand_blockResult_65a34768:
                                         role: "${\"system\"}"
@@ -337,59 +787,59 @@ main:
                               except:
                                 as: "preloadCommand_blockError"
                                 steps:
-                                - preloadCommand_block_logError_1:
+                                - preloadCommand_block_logError_6:
                                     try:
                                       steps:
-                                      - preloadCommand_block_logError_call_1:
+                                      - preloadCommand_block_logError_call_6:
                                           call: "sys.log"
                                           args:
                                             text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
                                           result: "preloadCommand_block_logErrorResult_38fafd4d"
                                     retry: "${http.default_retry}"
-                                - preloadCommand_block_updateResultError_1:
+                                - preloadCommand_block_updateResultError_6:
                                     assign:
                                     - preloadCommand_blockResult_65a34768: "${null}"
-                      - preloadCommand_block_2:
+                      - preloadCommand_block_7:
                           steps:
-                          - preloadCommand_block_initResult_2:
+                          - preloadCommand_block_initResult_7:
                               assign:
                               - preloadCommand_blockResult_8f5c5a: {}
-                          - preloadCommand_block_steps_2:
+                          - preloadCommand_block_steps_7:
                               try:
                                 steps:
-                                - preloadCommand_paramJson_2:
+                                - preloadCommand_paramJson_7:
                                     steps:
-                                    - preloadCommand_paramJson_initResult_2:
+                                    - preloadCommand_paramJson_initResult_7:
                                         assign:
                                         - preloadCommand_paramJsonResult_4b5745b8: {}
-                                    - preloadCommand_paramJson_steps_2:
+                                    - preloadCommand_paramJson_steps_7:
                                         try:
                                           steps:
-                                          - preloadCommand_paramJson_updateResult_2:
+                                          - preloadCommand_paramJson_updateResult_7:
                                               assign:
                                               - preloadCommand_paramJsonResult_4b5745b8:
                                                   command: "${\"bash -lc 'date -u +%Y-%m-%dT%H:%M:%SZ'\"}"
                                         except:
                                           as: "preloadCommand_paramJsonError"
                                           steps:
-                                          - preloadCommand_paramJson_logError_2:
+                                          - preloadCommand_paramJson_logError_7:
                                               try:
                                                 steps:
-                                                - preloadCommand_paramJson_logError_call_2:
+                                                - preloadCommand_paramJson_logError_call_7:
                                                     call: "sys.log"
                                                     args:
                                                       text: "${(\"[preloadCommand_paramJson_logError] \" + preloadCommand_paramJsonError.message)}"
                                                     result: "preloadCommand_paramJson_logErrorResult_5f978326"
                                               retry: "${http.default_retry}"
-                                          - preloadCommand_paramJson_updateResultError_2:
+                                          - preloadCommand_paramJson_updateResultError_7:
                                               assign:
                                               - preloadCommand_paramJsonResult_4b5745b8: "${null}"
-                                - preloadCommand_preloadCommand_callback_block_2:
+                                - preloadCommand_preloadCommand_callback_block_7:
                                     steps:
-                                    - preloadCommand_preloadCommand_run_tools_CliTools_2:
+                                    - preloadCommand_preloadCommand_run_tools_CliTools_7:
                                         try:
                                           steps:
-                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_2:
+                                          - preloadCommand_preloadCommand_run_tools_CliTools_call_7:
                                               call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
                                               args:
                                                 workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
@@ -415,7 +865,7 @@ main:
                                                   skip_polling: false
                                               result: "preloadCommand_preloadCommand_run_tools_CliToolsResult_52a7c481"
                                         retry: "${http.default_retry}"
-                                - preloadCommand_block_updateResult_2:
+                                - preloadCommand_block_updateResult_7:
                                     assign:
                                     - preloadCommand_blockResult_8f5c5a:
                                         role: "${\"system\"}"
@@ -427,93 +877,118 @@ main:
                               except:
                                 as: "preloadCommand_blockError"
                                 steps:
-                                - preloadCommand_block_logError_2:
+                                - preloadCommand_block_logError_7:
                                     try:
                                       steps:
-                                      - preloadCommand_block_logError_call_2:
+                                      - preloadCommand_block_logError_call_7:
                                           call: "sys.log"
                                           args:
                                             text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
                                           result: "preloadCommand_block_logErrorResult_38fafd4d"
                                     retry: "${http.default_retry}"
-                                - preloadCommand_block_updateResultError_2:
+                                - preloadCommand_block_updateResultError_7:
                                     assign:
                                     - preloadCommand_blockResult_8f5c5a: "${null}"
                       - joinPreloads:
                           steps:
                           - joinPreloads_initResult:
                               assign:
-                              - joinPreloadsResult_2356d2ac: []
+                              - joinPreloadsResult_1b94b2b7: []
                           - joinPreloads_steps:
                               for:
                                 value: "joinPreloadsIdx"
-                                range: "${[0, (5 - 1)]}"
+                                range: "${[0, (10 - 1)]}"
                                 steps:
                                 - joinPreloads_switch:
                                     steps:
                                     - joinPreloads_switch_initResult:
                                         assign:
-                                        - joinPreloads_switchResult_5163d9f2: {}
+                                        - joinPreloads_switchResult_1f6a38dd: {}
                                     - joinPreloads_switch_steps:
                                         switch:
                                         - condition: "${(joinPreloadsIdx == 0)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_0:
                                               assign:
-                                              - joinPreloads_switchResult_5163d9f2: "${preloadCommand_blockResult_7d20e399}"
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_12f4b7de}"
                                         - condition: "${(joinPreloadsIdx == 1)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_1:
                                               assign:
-                                              - joinPreloads_switchResult_5163d9f2: "${preloadFile_blockResult_6d610dce}"
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_480b1cf4}"
                                         - condition: "${(joinPreloadsIdx == 2)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_2:
                                               assign:
-                                              - joinPreloads_switchResult_5163d9f2: "${preloadFile_blockResult_5278b5f5}"
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_12314424}"
                                         - condition: "${(joinPreloadsIdx == 3)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_3:
                                               assign:
-                                              - joinPreloads_switchResult_5163d9f2: "${preloadCommand_blockResult_65a34768}"
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_b98b96e}"
                                         - condition: "${(joinPreloadsIdx == 4)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_4:
                                               assign:
-                                              - joinPreloads_switchResult_5163d9f2: "${preloadCommand_blockResult_8f5c5a}"
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_546f4bce}"
+                                        - condition: "${(joinPreloadsIdx == 5)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_5:
+                                              assign:
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_38ad1e8c}"
+                                        - condition: "${(joinPreloadsIdx == 6)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_6:
+                                              assign:
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadFile_blockResult_6d610dce}"
+                                        - condition: "${(joinPreloadsIdx == 7)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_7:
+                                              assign:
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadFile_blockResult_5278b5f5}"
+                                        - condition: "${(joinPreloadsIdx == 8)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_8:
+                                              assign:
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_65a34768}"
+                                        - condition: "${(joinPreloadsIdx == 9)}"
+                                          steps:
+                                          - joinPreloads_switch_updateResult_9:
+                                              assign:
+                                              - joinPreloads_switchResult_1f6a38dd: "${preloadCommand_blockResult_8f5c5a}"
                                 - joinPreloads_updateResult:
                                     assign:
-                                    - joinPreloadsResult_2356d2ac: "${list.concat(joinPreloadsResult_2356d2ac, joinPreloads_switchResult_5163d9f2)}"
+                                    - joinPreloadsResult_1b94b2b7: "${list.concat(joinPreloadsResult_1b94b2b7, joinPreloads_switchResult_1f6a38dd)}"
                   - preloads_joinSteps:
                       steps:
                       - preloads_joinSteps_initResult:
                           assign:
-                          - preloads_joinStepsResult_47201fa9: []
+                          - preloads_joinStepsResult_df4e2db: []
                       - preloads_joinSteps_steps:
                           for:
                             value: "preloads_joinStepsIdx"
-                            range: "${[0, (((0 + len(buildPromptListResult_494eaa6c)) + len(joinPreloadsResult_2356d2ac)) - 1)]}"
+                            range: "${[0, (((0 + len(buildPromptListResult_494eaa6c)) + len(joinPreloadsResult_1b94b2b7)) - 1)]}"
                             steps:
                             - preloads_joinSteps_switch:
                                 steps:
                                 - preloads_joinSteps_switch_initResult:
                                     assign:
-                                    - preloads_joinSteps_switchResult_2bb6ad4f: {}
+                                    - preloads_joinSteps_switchResult_506a89ca: {}
                                 - preloads_joinSteps_switch_steps:
                                     switch:
                                     - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_494eaa6c)))}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_0:
                                           assign:
-                                          - preloads_joinSteps_switchResult_2bb6ad4f: "${joinPreloadsResult_2356d2ac[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_494eaa6c)))]}"
+                                          - preloads_joinSteps_switchResult_506a89ca: "${joinPreloadsResult_1b94b2b7[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_494eaa6c)))]}"
                                     - condition: "${(preloads_joinStepsIdx >= 0)}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_1:
                                           assign:
-                                          - preloads_joinSteps_switchResult_2bb6ad4f: "${buildPromptListResult_494eaa6c[(preloads_joinStepsIdx - 0)]}"
+                                          - preloads_joinSteps_switchResult_506a89ca: "${buildPromptListResult_494eaa6c[(preloads_joinStepsIdx - 0)]}"
                             - preloads_joinSteps_updateResult:
                                 assign:
-                                - preloads_joinStepsResult_47201fa9: "${list.concat(preloads_joinStepsResult_47201fa9, preloads_joinSteps_switchResult_2bb6ad4f)}"
+                                - preloads_joinStepsResult_df4e2db: "${list.concat(preloads_joinStepsResult_df4e2db, preloads_joinSteps_switchResult_506a89ca)}"
               - buildPromptsWithTasks:
                   steps:
                   - buildPromptsWithTasks_initResult:
@@ -660,32 +1135,32 @@ main:
                   steps:
                   - taskPrompts_joinSteps_initResult:
                       assign:
-                      - taskPrompts_joinStepsResult_4701582f: []
+                      - taskPrompts_joinStepsResult_2aacbd25: []
                   - taskPrompts_joinSteps_steps:
                       for:
                         value: "taskPrompts_joinStepsIdx"
-                        range: "${[0, (((0 + len(preloads_joinStepsResult_47201fa9)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
+                        range: "${[0, (((0 + len(preloads_joinStepsResult_df4e2db)) + len(buildPromptsWithTasksResult_6fd9235)) - 1)]}"
                         steps:
                         - taskPrompts_joinSteps_switch:
                             steps:
                             - taskPrompts_joinSteps_switch_initResult:
                                 assign:
-                                - taskPrompts_joinSteps_switchResult_8ebc606: {}
+                                - taskPrompts_joinSteps_switchResult_7696a348: {}
                             - taskPrompts_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_47201fa9)))}"
+                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_df4e2db)))}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_8ebc606: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_47201fa9)))]}"
+                                      - taskPrompts_joinSteps_switchResult_7696a348: "${buildPromptsWithTasksResult_6fd9235[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_df4e2db)))]}"
                                 - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_8ebc606: "${preloads_joinStepsResult_47201fa9[(taskPrompts_joinStepsIdx - 0)]}"
+                                      - taskPrompts_joinSteps_switchResult_7696a348: "${preloads_joinStepsResult_df4e2db[(taskPrompts_joinStepsIdx - 0)]}"
                         - taskPrompts_joinSteps_updateResult:
                             assign:
-                            - taskPrompts_joinStepsResult_4701582f: "${list.concat(taskPrompts_joinStepsResult_4701582f, taskPrompts_joinSteps_switchResult_8ebc606)}"
+                            - taskPrompts_joinStepsResult_2aacbd25: "${list.concat(taskPrompts_joinStepsResult_2aacbd25, taskPrompts_joinSteps_switchResult_7696a348)}"
           - cliPrompt:
               steps:
               - cliPrompt_initResult:
@@ -721,32 +1196,32 @@ main:
               steps:
               - cli_joinSteps_initResult:
                   assign:
-                  - cli_joinStepsResult_3a14ace: []
+                  - cli_joinStepsResult_2fb96d9a: []
               - cli_joinSteps_steps:
                   for:
                     value: "cli_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_4701582f)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
+                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_2aacbd25)) + len(cliPromptResult_5f0a7bcb)) - 1)]}"
                     steps:
                     - cli_joinSteps_switch:
                         steps:
                         - cli_joinSteps_switch_initResult:
                             assign:
-                            - cli_joinSteps_switchResult_1a780c09: {}
+                            - cli_joinSteps_switchResult_3c45eb78: {}
                         - cli_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_4701582f)))}"
+                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_2aacbd25)))}"
                               steps:
                               - cli_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cli_joinSteps_switchResult_1a780c09: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_4701582f)))]}"
+                                  - cli_joinSteps_switchResult_3c45eb78: "${cliPromptResult_5f0a7bcb[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_2aacbd25)))]}"
                             - condition: "${(cli_joinStepsIdx >= 0)}"
                               steps:
                               - cli_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cli_joinSteps_switchResult_1a780c09: "${taskPrompts_joinStepsResult_4701582f[(cli_joinStepsIdx - 0)]}"
+                                  - cli_joinSteps_switchResult_3c45eb78: "${taskPrompts_joinStepsResult_2aacbd25[(cli_joinStepsIdx - 0)]}"
                     - cli_joinSteps_updateResult:
                         assign:
-                        - cli_joinStepsResult_3a14ace: "${list.concat(cli_joinStepsResult_3a14ace, cli_joinSteps_switchResult_1a780c09)}"
+                        - cli_joinStepsResult_2fb96d9a: "${list.concat(cli_joinStepsResult_2fb96d9a, cli_joinSteps_switchResult_3c45eb78)}"
       - fundPrompt:
           steps:
           - fundPrompt_initResult:
@@ -793,32 +1268,32 @@ main:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_6d4d98be: []
+              - fundsPrompts_joinStepsResult_3a0410cb: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_3a14ace)) + len(fundPromptResult_4aef8109)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_2fb96d9a)) + len(fundPromptResult_4aef8109)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_21a4166: {}
+                        - fundsPrompts_joinSteps_switchResult_3ba9bb55: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_3a14ace)))}"
+                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_2fb96d9a)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_21a4166: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_3a14ace)))]}"
+                              - fundsPrompts_joinSteps_switchResult_3ba9bb55: "${fundPromptResult_4aef8109[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_2fb96d9a)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_21a4166: "${cli_joinStepsResult_3a14ace[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_3ba9bb55: "${cli_joinStepsResult_2fb96d9a[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_6d4d98be: "${list.concat(fundsPrompts_joinStepsResult_6d4d98be, fundsPrompts_joinSteps_switchResult_21a4166)}"
+                    - fundsPrompts_joinStepsResult_3a0410cb: "${list.concat(fundsPrompts_joinStepsResult_3a0410cb, fundsPrompts_joinSteps_switchResult_3ba9bb55)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_6d4d98be}"
+        prompts: "${fundsPrompts_joinStepsResult_3a0410cb}"
