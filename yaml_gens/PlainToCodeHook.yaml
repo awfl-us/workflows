@@ -1,0 +1,266 @@
+main:
+  params:
+  - "input"
+  steps:
+  - read_plain_params:
+      steps:
+      - read_plain_params_initResult:
+          assign:
+          - read_plain_paramsResult_39ab9d2f: {}
+      - read_plain_params_steps:
+          try:
+            steps:
+            - read_plain_params_updateResult:
+                assign:
+                - read_plain_paramsResult_39ab9d2f:
+                    filepath: "${(\"plain/\" + input.filepath)}"
+          except:
+            as: "read_plain_paramsError"
+            steps:
+            - read_plain_params_logError:
+                try:
+                  steps:
+                  - read_plain_params_logError_call:
+                      call: "sys.log"
+                      args:
+                        text: "${(\"[read_plain_params_logError] \" + read_plain_paramsError.message)}"
+                      result: "read_plain_params_logErrorResult_23222293"
+                retry: "${http.default_retry}"
+            - read_plain_params_updateResultError:
+                assign:
+                - read_plain_paramsResult_39ab9d2f: "${null}"
+  - readPlain_callback_block:
+      steps:
+      - readPlain_run_tools_CliTools:
+          try:
+            steps:
+            - readPlain_run_tools_CliTools_call:
+                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                args:
+                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                  argument:
+                    tool_call:
+                      id: "${\"read_plain\"}"
+                      type: "function"
+                      function:
+                        name: "${\"READ_FILE\"}"
+                        arguments: "${json.encode_to_string(read_plain_paramsResult_39ab9d2f)}"
+                    cost: 0.0
+                    env:
+                      userId: "${input.env.userId}"
+                      model: "${input.env.model}"
+                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                      BASE_URL: "${input.env.BASE_URL}"
+                      background: "${default(true, null)}"
+                      projectId: "${input.env.projectId}"
+                      sessionId: "${uuid.generate()}"
+                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                  connector_params:
+                    skip_polling: false
+                result: "readPlain_run_tools_CliToolsResult_5dbcec80"
+          retry: "${http.default_retry}"
+  - plainToCodeMessages:
+      steps:
+      - plainToCodeMessages_initResult:
+          assign:
+          - plainToCodeMessagesResult_68b1a38: []
+      - plainToCodeMessages_steps:
+          for:
+            value: "plainToCodeMessagesIdx"
+            range: "${[0, (2 - 1)]}"
+            steps:
+            - plainToCodeMessages_switch:
+                steps:
+                - plainToCodeMessages_switch_initResult:
+                    assign:
+                    - plainToCodeMessages_switchResult_40513c5e: {}
+                - plainToCodeMessages_switch_steps:
+                    switch:
+                    - condition: "${(plainToCodeMessagesIdx == 0)}"
+                      steps:
+                      - plainToCodeMessages_switch_updateResult_0:
+                          assign:
+                          - plainToCodeMessages_switchResult_40513c5e:
+                              role: "${\"system\"}"
+                              content: "${\"\nYou are PlainToCodeHook. Convert a plain technical-English specification into a complete, compilable source file.\nOperating rules:\n - Infer the target language, package, and imports from the file path and context.\n - Preserve behavior, data flow, side effects, error handling, and formatting.\n - Include the correct package declaration when applicable.\n - Return only the full code of the file; no backticks, no commentary.\n      \"}"
+                              tool_calls: "${[]}"
+                              tool_call_id: "${null}"
+                              create_time: "${sys.now()}"
+                              docId: "${null}"
+                    - condition: "${(plainToCodeMessagesIdx == 1)}"
+                      steps:
+                      - plainToCodeMessages_switch_updateResult_1:
+                          assign:
+                          - plainToCodeMessages_switchResult_40513c5e:
+                              role: "${\"user\"}"
+                              content: "${(\"Plain specification follows:\n\n\" + map.get(json.decode(readPlain_run_tools_CliToolsResult_5dbcec80.encoded), \"content\"))}"
+                              tool_calls: "${[]}"
+                              tool_call_id: "${null}"
+                              create_time: "${sys.now()}"
+                              docId: "${null}"
+            - plainToCodeMessages_updateResult:
+                assign:
+                - plainToCodeMessagesResult_68b1a38: "${list.concat(plainToCodeMessagesResult_68b1a38, plainToCodeMessages_switchResult_40513c5e)}"
+  - chatBlock:
+      steps:
+      - toolChoice:
+          steps:
+          - toolChoice_initResult:
+              assign:
+              - toolChoiceResult_1d02d1fa: {}
+          - toolChoice_steps:
+              switch:
+              - condition: "${((null != null) and (len(null) > 0))}"
+                steps:
+                - toolChoice_updateResult_0:
+                    assign:
+                    - toolChoiceResult_1d02d1fa: "${null}"
+              - condition: "${true}"
+                steps:
+                - toolChoice_updateResult_1:
+                    assign:
+                    - toolChoiceResult_1d02d1fa: "${null}"
+      - plain_to_code:
+          try:
+            steps:
+            - plain_to_code_call:
+                call: "http.post"
+                args:
+                  url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
+                  body:
+                    messages: "${plainToCodeMessagesResult_68b1a38}"
+                    model: "${\"gpt-4o\"}"
+                    temperature: 0.2
+                    max_completion_tokens: "${null}"
+                    response_format:
+                      type: "text"
+                    tools: "${null}"
+                    tool_choice: "${toolChoiceResult_1d02d1fa}"
+                  auth:
+                    type: "OIDC"
+                    audience: "${input.env.BASE_URL}"
+                  headers:
+                    x-user-id: "${input.env.userId}"
+                    x-project-id: "${input.env.projectId}"
+                result: "plain_to_codeResult_213500a3"
+          retry: "${http.default_retry}"
+  - mkdir_code_params:
+      steps:
+      - mkdir_code_params_initResult:
+          assign:
+          - mkdir_code_paramsResult_5cf293fc: {}
+      - mkdir_code_params_steps:
+          try:
+            steps:
+            - mkdir_code_params_updateResult:
+                assign:
+                - mkdir_code_paramsResult_5cf293fc:
+                    command: "${((\"bash -lc 'mkdir -p $(dirname \" + input.filepath) + \")'\")}"
+          except:
+            as: "mkdir_code_paramsError"
+            steps:
+            - mkdir_code_params_logError:
+                try:
+                  steps:
+                  - mkdir_code_params_logError_call:
+                      call: "sys.log"
+                      args:
+                        text: "${(\"[mkdir_code_params_logError] \" + mkdir_code_paramsError.message)}"
+                      result: "mkdir_code_params_logErrorResult_3105ce0a"
+                retry: "${http.default_retry}"
+            - mkdir_code_params_updateResultError:
+                assign:
+                - mkdir_code_paramsResult_5cf293fc: "${null}"
+  - mkdirCode_callback_block:
+      steps:
+      - mkdirCode_run_tools_CliTools:
+          try:
+            steps:
+            - mkdirCode_run_tools_CliTools_call:
+                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                args:
+                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                  argument:
+                    tool_call:
+                      id: "${\"mkdir_code\"}"
+                      type: "function"
+                      function:
+                        name: "${\"RUN_COMMAND\"}"
+                        arguments: "${json.encode_to_string(mkdir_code_paramsResult_5cf293fc)}"
+                    cost: 0.0
+                    env:
+                      userId: "${input.env.userId}"
+                      model: "${input.env.model}"
+                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                      BASE_URL: "${input.env.BASE_URL}"
+                      background: "${default(true, null)}"
+                      projectId: "${input.env.projectId}"
+                      sessionId: "${uuid.generate()}"
+                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                  connector_params:
+                    skip_polling: false
+                result: "mkdirCode_run_tools_CliToolsResult_73bf4e97"
+          retry: "${http.default_retry}"
+  - write_code_params:
+      steps:
+      - write_code_params_initResult:
+          assign:
+          - write_code_paramsResult_7953d4de: {}
+      - write_code_params_steps:
+          try:
+            steps:
+            - write_code_params_updateResult:
+                assign:
+                - write_code_paramsResult_7953d4de:
+                    filepath: "${input.filepath}"
+                    content: "${plain_to_codeResult_213500a3.body.message.content}"
+          except:
+            as: "write_code_paramsError"
+            steps:
+            - write_code_params_logError:
+                try:
+                  steps:
+                  - write_code_params_logError_call:
+                      call: "sys.log"
+                      args:
+                        text: "${(\"[write_code_params_logError] \" + write_code_paramsError.message)}"
+                      result: "write_code_params_logErrorResult_50ea9fc6"
+                retry: "${http.default_retry}"
+            - write_code_params_updateResultError:
+                assign:
+                - write_code_paramsResult_7953d4de: "${null}"
+  - writeCode_callback_block:
+      steps:
+      - writeCode_run_tools_CliTools:
+          try:
+            steps:
+            - writeCode_run_tools_CliTools_call:
+                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                args:
+                  workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                  argument:
+                    tool_call:
+                      id: "${\"write_code\"}"
+                      type: "function"
+                      function:
+                        name: "${\"UPDATE_FILE\"}"
+                        arguments: "${json.encode_to_string(write_code_paramsResult_7953d4de)}"
+                    cost: 0.0
+                    env:
+                      userId: "${input.env.userId}"
+                      model: "${input.env.model}"
+                      callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                      BASE_URL: "${input.env.BASE_URL}"
+                      background: "${default(true, null)}"
+                      projectId: "${input.env.projectId}"
+                      sessionId: "${uuid.generate()}"
+                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                  connector_params:
+                    skip_polling: false
+                result: "writeCode_run_tools_CliToolsResult_4c17edf6"
+          retry: "${http.default_retry}"
+  - return:
+      return: "${input.filepath}"
