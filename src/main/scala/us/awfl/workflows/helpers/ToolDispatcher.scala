@@ -42,7 +42,7 @@ object ToolDispatcher extends us.awfl.core.Workflow {
 
       val toolFold = Fold("fold", Value.nil[ToolWorkflow.Result], input.toolDefs) { case (b, d) =>
         Switch("matchFunction", List(
-          (functionName === d.get.function.name) -> {
+          (functionName === d.flatMap(_.function).flatMap(_.name)) -> {
             val args = RunWorkflowArgs(str(d.get.workflowName + "${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, input.totalCost)))
             Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result]("callToolWorkflow", "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args)).fn
           },
@@ -58,7 +58,7 @@ object ToolDispatcher extends us.awfl.core.Workflow {
         )
       }
 
-      List[Step[_, _]](toolFold, saveResult) -> toolFold.resultValue
+      List[Step[?, ?]](toolFold, saveResult) -> toolFold.resultValue
     }
 
     Workflow(buildSteps[Result](List(dispatch) -> obj(Result(dispatch.resultValue)), _ => List() -> Value.nil))

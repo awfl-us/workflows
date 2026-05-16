@@ -1,6 +1,10 @@
 package us.awfl.workflows.codebase.workflows
 
 import us.awfl.dsl.*
+import us.awfl.dsl.auto.given
+import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
+import us.awfl.workflows.helpers.ToolDefs.ToolDefFunc
+import us.awfl.workflows.codebase.jobs.ContextAgent
 
 object Sutradhara extends us.awfl.workflows.traits.Agent {
   override def preloads = super.preloads ++ List(
@@ -21,8 +25,16 @@ object Sutradhara extends us.awfl.workflows.traits.Agent {
       |Choose among THINK, READ_FILE, UPDATE_FILE, RUN_COMMAND, or RESPOND with minimal, safe, idempotent actions.
       |Leverage specialized tools (e.g., Sutradhara, ContextAgent) when necessary.""".stripMargin
 
+  def tool = ToolWithWorkflow(
+    function = ToolDefFunc(
+      str("Sutradhara"),
+      "For all inquiries time based context: Yoj, Ista, Prakriya, Kala, etc.",
+      toolParams
+    ).toLlm,
+    workflowName = str(workflowName)
+  )
+
   override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(
-    "Sutradhara",
-    "ContextAgent"
+    ContextAgent.tool
   )))
 }

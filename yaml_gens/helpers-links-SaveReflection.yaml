@@ -6,7 +6,7 @@ main:
       steps:
       - maybeSaveReflection_initResult:
           assign:
-          - maybeSaveReflectionResult_24882ced: {}
+          - maybeSaveReflectionResult_6b6dfe8c: {}
       - maybeSaveReflection_steps:
           switch:
           - condition: "${((\"input\" in input) and input.input.shouldSaveReflection)}"
@@ -40,15 +40,15 @@ main:
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "callAgentResult_49a9a739"
+                      result: "callAgentResult_130bf79f"
                 retry: "${http.default_retry}"
             - maybeSaveReflection_updateResult_0:
                 assign:
-                - maybeSaveReflectionResult_24882ced: "${callAgentResult_49a9a739}"
+                - maybeSaveReflectionResult_6b6dfe8c: "${callAgentResult_130bf79f}"
           - condition: "${true}"
             steps:
             - maybeSaveReflection_updateResult_1:
                 assign:
-                - maybeSaveReflectionResult_24882ced: "${null}"
+                - maybeSaveReflectionResult_6b6dfe8c: "${null}"
   - return:
-      return: "${maybeSaveReflectionResult_24882ced}"
+      return: "${maybeSaveReflectionResult_6b6dfe8c}"

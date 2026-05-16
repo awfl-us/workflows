@@ -1,6 +1,8 @@
 package us.awfl.workflows.codebase.jobs
 
+import us.awfl.dsl._
 import us.awfl.workflows.traits.Agent
+import us.awfl.workflows.helpers.ToolDefs._
 
 // ContextAgent — SME for functions/jobs/context endpoints and filter pipeline.
 // Preloads the Context AGENT.md for authoritative guidance.
@@ -22,5 +24,12 @@ object ContextAgent extends Agent {
        |Default filter order: sizeLimiter then toolCallBackfill; keep docs and defaults in sync.
        |""".stripMargin
 
-  val runner = "codebase-jobs-ContextAgent"
+  def tool = ToolWithWorkflow(
+    function = ToolDefFunc(
+      str("ContextAgent"),
+      "Expert for the context service (functions/jobs/context)",
+      toolParams
+    ).toLlm,
+    workflowName = str(workflowName)
+  )
 }

@@ -1,0 +1,21 @@
+{
+  "name" : "us-awfl-workflows-traits-ToolWorkflow-Result",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.traits.ToolWorkflow.Result.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "encoded" : {
+        "type" : "string"
+      },
+      "cost" : {
+        "type" : "integer"
+      }
+    },
+    "required" : [
+      "encoded",
+      "cost"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-traits-ToolWorkflow-Result.json"
+  }
+}

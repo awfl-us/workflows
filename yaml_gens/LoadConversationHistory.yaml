@@ -13,12 +13,12 @@ main:
                 objectName: "${input.arg1}"
                 userId: "${input.arg2}"
               auth:
-                type: "OIDC"
+                type: "${\"OIDC\"}"
                 audience: "${input.env.BASE_URL}"
               headers:
                 x-user-id: "${input.env.userId}"
                 x-project-id: "${input.env.projectId}"
-            result: "postLoadConvoHistoryResult_737fede"
+            result: "postLoadConvoHistoryResult_38ef3965"
       retry: "${http.default_retry}"
   - return:
       return:

@@ -17,22 +17,22 @@ main:
                     overlapSeconds: "${default(input.overlapSeconds, 240)}"
                     userId: "${input.env.userId}"
                   auth:
-                    type: "OIDC"
+                    type: "${\"OIDC\"}"
                     audience: "${input.env.BASE_URL}"
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "segmentsForSession_fetchResult_307e92ce"
+                result: "segmentsForSession_fetchResult_13f5aabd"
           retry: "${http.default_retry}"
       - segmentsForSession_convert:
           steps:
           - segmentsForSession_convert_initResult:
               assign:
-              - segmentsForSession_convertResult_429e1f51: []
+              - segmentsForSession_convertResult_fdb29a4: []
           - segmentsForSession_convert_steps:
               for:
                 value: "segmentsForSession_convertValue"
-                in: "${segmentsForSession_fetchResult_307e92ce.body.segments}"
+                in: "${segmentsForSession_fetchResult_13f5aabd.body.segments}"
                 steps:
                 - segmentsForSession_convert_assignIterResult:
                     assign:
@@ -42,16 +42,16 @@ main:
                         windowSeconds: "${default(input.windowSeconds, 1200)}"
                 - segmentsForSession_convert_updateResult:
                     assign:
-                    - segmentsForSession_convertResult_429e1f51: "${list.concat(segmentsForSession_convertResult_429e1f51, segmentsForSession_convert_assignIterResultVar)}"
+                    - segmentsForSession_convertResult_fdb29a4: "${list.concat(segmentsForSession_convertResult_fdb29a4, segmentsForSession_convert_assignIterResultVar)}"
   - forEachSegment:
       steps:
       - forEachSegment_initResult:
           assign:
-          - forEachSegmentResult_77b617bb: []
+          - forEachSegmentResult_21d1b026: []
       - forEachSegment_steps:
           for:
             value: "forEachSegmentValue"
-            in: "${segmentsForSession_convertResult_429e1f51}"
+            in: "${segmentsForSession_convertResult_fdb29a4}"
             steps:
             - All_Backfill_run:
                 try:
@@ -76,12 +76,12 @@ main:
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "All_Backfill_runResult_32dd06c0"
+                      result: "All_Backfill_runResult_68d3eb72"
                 retry: "${http.default_retry}"
             - forEachSegment_updateResult:
                 assign:
-                - forEachSegmentResult_77b617bb: "${list.concat(forEachSegmentResult_77b617bb, All_Backfill_runResult_32dd06c0)}"
+                - forEachSegmentResult_21d1b026: "${list.concat(forEachSegmentResult_21d1b026, All_Backfill_runResult_68d3eb72)}"
   - returnBackfill:
-      return: "${forEachSegmentResult_77b617bb}"
+      return: "${forEachSegmentResult_21d1b026}"
   - return:
-      return: "${forEachSegmentResult_77b617bb}"
+      return: "${forEachSegmentResult_21d1b026}"

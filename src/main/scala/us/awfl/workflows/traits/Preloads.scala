@@ -15,7 +15,7 @@ trait Preloads extends EventHandler {
 
   case class PreloadCommand(command: Cel) extends PreloadItem
   object PreloadCommand:
-    def apply(command: String): PreloadCommand = PreloadCommand(CelStr(command))
+    def apply(command: String): PreloadCommand = PreloadCommand(CelStr(command).safe)
 
   def preloads: List[PreloadItem] = List()
 

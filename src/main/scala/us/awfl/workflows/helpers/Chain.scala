@@ -7,10 +7,10 @@ import us.awfl.utils.ChainableInput
 import us.awfl.utils.{Env, ENV}
 
 object Chain extends us.awfl.core.Workflow {
-  case class WorkflowArgs(workflowName: Value[String], params: BaseValue[_])
+  case class WorkflowArgs(workflowName: Value[String], params: BaseValue[?])
   // given Spec[WorkflowArgs] = Spec(r => WorkflowArgs(r.in("workflowName"), r.in("params")))
 
-  case class Input(input: BaseValue[_], headWorkflow: Value[String], tail: ListValue[WorkflowArgs], env: BaseValue[Env] = ENV)
+  case class Input(input: BaseValue[?], headWorkflow: Value[String], tail: ListValue[WorkflowArgs], env: BaseValue[Env] = ENV)
   // override type Input = ChainInput
   override type Result = AnyValueT
 
@@ -45,7 +45,7 @@ object Chain extends us.awfl.core.Workflow {
     Workflow((initCall :: runTail :: Nil) -> runTail.resultValue)
   })
 
-  def apply(chain: us.awfl.utils.Chain[_]): Step[_, _] = {
+  def apply(chain: us.awfl.utils.Chain[?]): Step[?, ?] = {
     val buildWorkflows = buildList("buildWorkflows", (chain.init.tail :+ (chain.lastParams -> chain.lastWorkflow)).map { (p, w) =>
       WorkflowArgs(str(w.workflowName), p)
     })
@@ -59,6 +59,6 @@ object Chain extends us.awfl.core.Workflow {
       "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
       obj(args)
     )
-    Block("chainBlock", List[Step[_, _]](buildWorkflows, call) -> call.resultValue)
+    Block("chainBlock", List[Step[?, ?]](buildWorkflows, call) -> call.resultValue)
   }
 }

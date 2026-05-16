@@ -7,7 +7,8 @@ import us.awfl.services.Llm.Tool
 import us.awfl.workflows.tools.Tools
 import us.awfl.utils._
 import us.awfl.workflows.EventHandler
-import us.awfl.services.Llm.ToolFunctionDef
+import us.awfl.services.Llm
+import scala.annotation.tailrec
 
 /**
  * ToolDefs
@@ -19,8 +20,41 @@ object ToolDefs extends us.awfl.core.Workflow {
   case class Input(toolNames: ListValue[String], env: BaseValue[Env] = ENV)
   override val inputVal = init[Input]("input")
 
+  sealed trait ToolDefValue {
+    def toLlm: Llm.ToolDefProperty = this match {
+      case ToolDefStr => Llm.ToolDefProperty("string")
+      case ToolDefEnum(e) => Llm.ToolDefProperty("string", `enum` = OptList(e))
+      case ToolDefObj(properties, required) =>
+          Llm.ToolDefProperty(
+            "object",
+            properties = properties.transform { case (_, v) => v.toLlm },
+            required = OptList(required)
+          )
+    }
+  }
+  object ToolDefStr extends ToolDefValue
+  case class ToolDefObj(
+    properties: Map[String, ToolDefValue],
+    required: ListValue[String]
+  ) extends ToolDefValue
+  case class ToolDefEnum(
+    `enum`: ListValue[String] = ListValue.empty,
+  ) extends ToolDefValue
+
+  case class ToolDefFunc(name: Value[String], description: String, parameters: ToolDefObj) {
+    def toLlm = obj(Llm.ToolFunctionDef(
+      name,
+      str(description),
+      obj(parameters.toLlm)
+    ))
+  }
+
   // Service-facing variant that carries workflowName metadata alongside the LLM tool def
-  case class ToolWithWorkflow(`type`: String = "function", function: ToolFunctionDef, workflowName: Value[String])
+  case class ToolWithWorkflow(
+    `type`: Value[String] = str("function"),
+    function: BaseValue[Llm.ToolFunctionDef],
+    workflowName: Value[String]
+  )
   
   case class Result(defs: ListValue[ToolWithWorkflow])
 
@@ -36,7 +70,7 @@ object ToolDefs extends us.awfl.core.Workflow {
     }
     val relativePath = str(("tools/list?names=": Cel) + names.resultValue)
     val getStep = get[ServiceResp](name, relativePath, Auth())
-    Block(s"${name}_block", List[Step[_, _]](names, getStep) -> getStep.resultValue)
+    Block(s"${name}_block", List[Step[?, ?]](names, getStep) -> getStep.resultValue)
   }
 
   // Expose as callable workflow (query-only: returns value list of Tool definitions)
@@ -53,6 +87,11 @@ object ToolDefs extends us.awfl.core.Workflow {
       .flatMap(_.body)
       .flatMapList(_.items)
 
-    List(Workflow(List(fetchItems) -> obj(Result(fetchItems.resultValue))))
+    val maybeFetch = Switch.list("maybeFetch", List(
+      (CelFunc("len", input.toolNames) > 0) -> fetchItems.fn,
+      (true: Cel) -> (List.empty[Step[?, ?]] -> ListValue.empty)
+    ))
+
+    List(Workflow(List(maybeFetch) -> obj(Result(maybeFetch.resultValue))))
   }
 }

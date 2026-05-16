@@ -1,6 +1,8 @@
 package us.awfl.workflows.codebase.workflows
 
 import us.awfl.dsl.*
+import us.awfl.dsl.auto.given
+import us.awfl.workflows.codebase.jobs.ContextAgent
 
 object Executor extends us.awfl.workflows.traits.Agent {
   override def preloads = super.preloads ++ List(
@@ -16,6 +18,6 @@ object Executor extends us.awfl.workflows.traits.Agent {
 
   // Keep tools aligned with original usage (ContextAgent only)
   override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(
-    "ContextAgent"
+    ContextAgent.tool
   )))
 }

@@ -132,7 +132,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
     reviews: ListValue[String]
   )
 
-  val cacheReport = us.awfl.utils.Cache("cacheReport", str("businesses.report"), input.placeId, cacheTtl, Try("cacheReportBlock", List[Step[_, _]](
+  val cacheReport = us.awfl.utils.Cache("cacheReport", str("businesses.report"), input.placeId, cacheTtl, Try("cacheReportBlock", List[Step[?, ?]](
     status("started", "Generating keywords..."),
     generateKeywords,
     // us.awfl.services.Firebase.create("createRecord", "businesses", input.placeId, generateKeywords.resultValue),
@@ -156,7 +156,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
     ))
   ))
 
-  override def workflows = List(Workflow(List[Step[_, _]](
+  override def workflows = List(Workflow(List[Step[?, ?]](
     cacheReport,
     status("done", "Done!")
   ) -> obj(Success(

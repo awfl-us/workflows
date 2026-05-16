@@ -7,6 +7,8 @@ import us.awfl.ista.ToolCall
 import us.awfl.workflows.EventHandler
 import us.awfl.workflows.helpers.tasks.TaskRunners
 import us.awfl.workflows.traits.ToolWorkflow
+import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
+import us.awfl.services.Llm.ToolFunctionDef
 
 /**
  * tools/Tasks
@@ -41,6 +43,25 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
 
     Workflow(List(sw) -> obj(ToolWorkflow.Result(sw.resultValue, Value(0))))
   })
+
+  val buildTools = buildList("buildTaskTools", List(
+    ToolWithWorkflow(
+      function = obj(ToolFunctionDef(
+        str("CREATE_TASK"),
+        str("Create a task in the current user's scope. Session is inferred by the current CLI workflow session."),
+        TaskRunners.createParams
+      )),
+      workflowName = str(workflowName)
+    ),
+    ToolWithWorkflow(
+      function = obj(ToolFunctionDef(
+        str("UPDATE_TASK"),
+        str("Update a task by id in the current user's scope (session inferred)."),
+        TaskRunners.updateParams
+      )),
+      workflowName = str(workflowName)
+    )
+  ))
 
   // Helper to invoke this workflow from elsewhere
   def apply(

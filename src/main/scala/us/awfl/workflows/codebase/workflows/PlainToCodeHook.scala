@@ -46,7 +46,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     )
     val readCall = obj(ToolCall(
       id = str("read_plain"),
-      `type` = "function",
+      `type` = str("function"),
       function = obj(ToolCallFunction(
         str("READ_FILE"),
         str(CelFunc("json.encode_to_string", readParams.resultValue))
@@ -106,7 +106,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     )
     val mkdirCall = obj(ToolCall(
       id = str("mkdir_code"),
-      `type` = "function",
+      `type` = str("function"),
       function = obj(ToolCallFunction(
         str("RUN_COMMAND"),
         str(CelFunc("json.encode_to_string", mkdirParams.resultValue))
@@ -130,7 +130,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     )
     val writeCall = obj(ToolCall(
       id = str("write_code"),
-      `type` = "function",
+      `type` = str("function"),
       function = obj(ToolCallFunction(
         str("UPDATE_FILE"),
         str(CelFunc("json.encode_to_string", writeParams.resultValue))
@@ -145,7 +145,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     )
 
     Workflow(
-      List[Step[_, _]](
+      List[Step[?, ?]](
         readParams,
         // readCall,
         readOutEncoded,

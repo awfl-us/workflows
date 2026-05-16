@@ -49,7 +49,7 @@ object Queue {
     // Return the number of messages published (len of built messages)
     val publishedCount = Value[Int](CelFunc("len", buildMessages.resultValue))
 
-    Workflow(List[Step[_, _]](
+    Workflow(List[Step[?, ?]](
       buildMessages,
       publish
     ) -> obj(Result(publishedCount)))
@@ -66,6 +66,6 @@ object Queue {
     val items = buildList("singleItem", List(item))
     val args = RunWorkflowArgs(str("helpers-Queue${WORKFLOW_ENV}"), obj(Input(sessionId, items.resultValue, topic)))
     val call = Call[RunWorkflowArgs[Input], Result](name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
-    Block(s"${name}_block", List[Step[_, _]](items, call) -> call.resultValue)
+    Block(s"${name}_block", List[Step[?, ?]](items, call) -> call.resultValue)
   }
 }

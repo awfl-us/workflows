@@ -70,6 +70,9 @@
                     ],
                     "additionalProperties" : true
                   },
+                  "enum" : {
+                    "type" : "string"
+                  },
                   "required" : {
                     "type" : "string"
                   }
@@ -77,6 +80,7 @@
                 "required" : [
                   "type",
                   "properties",
+                  "enum",
                   "required"
                 ],
                 "additionalProperties" : true

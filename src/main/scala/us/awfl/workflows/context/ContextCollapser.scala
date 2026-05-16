@@ -57,7 +57,7 @@ object CollapserMessages {
 
         Block(
           s"collapserYojBlock_${Yoj.kalaName}",
-          List[Step[_, _]](call, serialized, single) -> single.resultValue
+          List[Step[?, ?]](call, serialized, single) -> single.resultValue
         )
       },
       // Component spec identifies this Yoj semantically as the topicContext source

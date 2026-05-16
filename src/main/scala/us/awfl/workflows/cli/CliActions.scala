@@ -53,7 +53,7 @@ object CliActions {
   //   )
 
   //   Block(s"${name}_block",
-  //     List[Step[_, _]](
+  //     List[Step[?, ?]](
   //       Log(s"${name}_log", str(("Collection: ": Cel) + collection)),
   //       updateStep
   //     ) -> updateStep.resultValue

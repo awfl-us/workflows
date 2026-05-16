@@ -5,7 +5,7 @@ import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ToolCall
 import us.awfl.ista.ChatMessage
-import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefParams, ToolDefProperty}
+import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefProperty}
 import us.awfl.workflows.tools.Tools
 import us.awfl.workflows.helpers.Tasks
 import us.awfl.utils.get
@@ -16,33 +16,33 @@ import us.awfl.utils.get
  * - Keeps idempotent behavior and auto-promotion logic encapsulated here.
  */
 object TaskRunners {
-  // -------- Tool Params (kept for reference; not used directly by the workflow) --------
-  private val createParams = ToolDefParams(
+  // -------- Tool Params --------
+  val createParams = obj(ToolDefProperty(
     `type` = "object",
     properties = Map(
       // sessionId is implied by the current session context; agent should not provide it
       "title"       -> ToolDefProperty("string"),
       "description" -> ToolDefProperty("string"),
-      "status"      -> ToolDefProperty("string", ListValue("""["Queued", "In Progress", "Done", "Stuck"]"""))
+      "status"      -> ToolDefProperty("string", `enum` = OptList(List("Queued", "In Progress", "Done", "Stuck").cel))
     ),
     // No required fields; session is injected by the runner
-    required = str("[]")
-  )
+    required = OptList.nil
+  ))
 
-  private val updateParams = ToolDefParams(
+  val updateParams = obj(ToolDefProperty(
     `type` = "object",
     properties = Map(
       "id"          -> ToolDefProperty("string"),
       // sessionId is not required or exposed; runner will not change session
       "title"       -> ToolDefProperty("string"),
       "description" -> ToolDefProperty("string"),
-      "status"      -> ToolDefProperty("string", ListValue("""["Queued", "In Progress", "Done", "Stuck"]"""))
+      "status"      -> ToolDefProperty("string", `enum` = OptList(List("Queued", "In Progress", "Done", "Stuck").cel))
     ),
-    required = str("""["id"]""")
-  )
+    required = OptList(List("id").cel)
+  ))
 
   // -------- CREATE_TASK exec --------
-  private val createRun: Value[ToolCall] => (List[Step[_, _]], Value[String]) = { toolCall =>
+  private val createRun: Value[ToolCall] => (List[Step[?, ?]], Value[String]) = { toolCall =>
     val fn = toolCall.flatMap(_.function).get
     val title = fn.arg("title")
     val desc  = fn.arg("description")
@@ -64,7 +64,7 @@ object TaskRunners {
   }
 
   // -------- UPDATE_TASK exec --------
-  private val updateRun: Value[ToolCall] => (List[Step[_, _]], Value[String]) = { toolCall =>
+  private val updateRun: Value[ToolCall] => (List[Step[?, ?]], Value[String]) = { toolCall =>
     val fn = toolCall.flatMap(_.function).get
     val id    = fn.arg("id")
 
@@ -128,7 +128,7 @@ object TaskRunners {
             }
           ))
 
-          Block("promote_has_queued_block", List[Step[_, _]](getQueued, promoteIfHasQueued) -> promoteIfHasQueued.resultValue).fn
+          Block("promote_has_queued_block", List[Step[?, ?]](getQueued, promoteIfHasQueued) -> promoteIfHasQueued.resultValue).fn
         },
         (true: Cel) -> {
           val msg = str("Task marked Done, but another task is already In Progress; no promotion performed")
@@ -136,7 +136,7 @@ object TaskRunners {
         }
       ))
 
-      Block("promote_no_current_block", List[Step[_, _]](getInProgress, promoteIfNoCurrent) -> promoteIfNoCurrent.resultValue)
+      Block("promote_no_current_block", List[Step[?, ?]](getInProgress, promoteIfNoCurrent) -> promoteIfNoCurrent.resultValue)
     }
 
     val maybePromote = Switch[String, Value[String]]("maybe_promote_next", List(
@@ -152,13 +152,13 @@ object TaskRunners {
 
     val combinedMsg = str(tryUpdate.resultValue.cel + ("\r": Cel) + maybePromote.resultValue.cel)
 
-    (List[Step[_, _]](patch, tryUpdate, maybePromote), combinedMsg)
+    (List[Step[?, ?]](patch, tryUpdate, maybePromote), combinedMsg)
   }
 
   // -------- Public exec helpers used by tools/Tasks workflow --------
-  def runCreate(toolCall: Value[ToolCall]): (List[Step[_, _]], Value[String]) =
+  def runCreate(toolCall: Value[ToolCall]): (List[Step[?, ?]], Value[String]) =
     createRun(toolCall)
 
-  def runUpdate(toolCall: Value[ToolCall]): (List[Step[_, _]], Value[String]) =
+  def runUpdate(toolCall: Value[ToolCall]): (List[Step[?, ?]], Value[String]) =
     updateRun(toolCall)
 }

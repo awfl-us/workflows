@@ -21,7 +21,7 @@ trait Prompts extends us.awfl.core.Workflow {
 
   def prompt: String
 
-  override def workflows: List[Workflow[_]] = Workflow(
+  override def workflows: List[Workflow[?]] = Workflow(
     {
       val prompts = buildPrompts
       List(prompts) -> obj(PromptsResult(prompts.resultValue))

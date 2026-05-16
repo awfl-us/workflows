@@ -11,6 +11,7 @@ import us.awfl.utils.*
 import us.awfl.utils.Events
 import us.awfl.utils.Events.OperationEnvelope
 import us.awfl.utils.post
+import us.awfl.workflows.helpers.ToolDefs._
 
 object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
   // Workflows callback helpers
@@ -27,6 +28,49 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
   case class ProducerRequest(sessionId: Value[String] = Value.nil)
 
   val toolNames = List("READ_FILE", "UPDATE_FILE", "RUN_COMMAND")
+ 
+  val buildTools = buildList("buildCliTools", List(
+    ToolWithWorkflow(
+      function = ToolDefFunc(
+        str("READ_FILE"),
+        "Read a file from disk.",
+        ToolDefObj(
+          properties = Map(
+            "filepath" -> ToolDefStr
+          ),
+          required = ListValue(List("filepath").cel)
+        )
+      ).toLlm,
+      workflowName = str(workflowName)
+    ),
+    ToolWithWorkflow(
+      function = ToolDefFunc(
+        str("RUN_COMMAND"),
+        "Execute a shell command.",
+        ToolDefObj(
+          properties = Map(
+            "command" -> ToolDefStr
+          ),
+          required = ListValue(List("command").cel)
+        )
+      ).toLlm,
+      workflowName = str(workflowName)
+    ),
+    ToolWithWorkflow(
+      function = ToolDefFunc(
+        str("UPDATE_FILE"),
+        "Update a file on disk with provided content",
+        ToolDefObj(
+          properties = Map(
+            "filepath" -> ToolDefStr,
+            "content" -> ToolDefStr
+          ),
+          required = ListValue(List("filepath", "content").cel)
+        )
+      ).toLlm,
+      workflowName = str(workflowName)
+    )
+  ))
 
   // Standalone workflow to handle tool calls: create callback, persist it with an ID, enqueue via relay ingest, and await callback
   override def workflows = List({
@@ -78,7 +122,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     )
 
     Workflow(buildSteps(
-      List[Step[_, _]](
+      List[Step[?, ?]](
         createCallback,
         saveCallback,
         Log("logSavedCallback", str(("Saved callback: id=": Cel) + saveCallback.result.body.get.id)),
@@ -106,6 +150,6 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       obj(args)
     )
 
-    Block(s"${opName}_callback_block", List[Step[_, _]](run) -> run.resultValue.flatMap(_.encoded))
+    Block(s"${opName}_callback_block", List[Step[?, ?]](run) -> run.resultValue.flatMap(_.encoded))
   }
 }

@@ -3,8 +3,8 @@
   "$id" : "https://topaigents.dev/workflows/defs/us.awfl.workflows.tools.Agent.json",
   "name" : "us.awfl.workflows.tools.Agent",
   "description" : "Auto-generated workflow definition.",
-  "inputSchema" : "us-awfl-workflows-tools-Agent-Input",
-  "outputSchema" : "services-Llm-ChatToolResponse",
-  "inputType" : "us.awfl.workflows.tools.Agent.Input",
-  "outputType" : "services.Llm.ChatToolResponse"
+  "inputSchema" : "us-awfl-workflows-traits-ToolWorkflow-Input",
+  "outputSchema" : "us-awfl-workflows-traits-ToolWorkflow-Result",
+  "inputType" : "us.awfl.workflows.traits.ToolWorkflow.Input",
+  "outputType" : "us.awfl.workflows.traits.ToolWorkflow.Result"
 }

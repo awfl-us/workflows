@@ -4,7 +4,7 @@ import us.awfl.dsl.*
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ChatMessage
 import us.awfl.workflows.helpers
-import us.awfl.workflows.tools.Tasks as TasksTool
+import us.awfl.workflows.tools.Tasks as TaskTools
 
 trait Tasks extends Prompts with Tools {
   override def buildPrompts: Step[ChatMessage, ListValue[ChatMessage]] = joinSteps("taskPrompts", super.buildPrompts, {
@@ -21,9 +21,9 @@ trait Tasks extends Prompts with Tools {
 
     Try(
       "buildPromptsWithTasks",
-      List[Step[_, _]](taskPrompts, buildGuidancePrompt, buildPrompt) -> buildPrompt.resultValue
+      List[Step[?, ?]](taskPrompts, buildGuidancePrompt, buildPrompt) -> buildPrompt.resultValue
     )
   })
 
-  override def buildTools = joinSteps("taskTools", super.buildTools, buildList("buildTaskTools", TasksTool.supported))
+  override def buildTools = joinSteps("taskTools", super.buildTools, TaskTools.buildTools)
 }

@@ -12,5 +12,5 @@ trait Cli extends Prompts with Tools {
     ))))
   )
 
-  override def buildTools = joinSteps("cliTools", super.buildTools, buildList("buildCliTools", CliTools.toolNames))
+  override def buildTools = joinSteps("cliTools", super.buildTools, CliTools.buildTools)
 }

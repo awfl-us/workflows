@@ -1,6 +1,8 @@
 package us.awfl.workflows.codebase.workflows
 
 import us.awfl.dsl.*
+import us.awfl.dsl.auto.given
+import us.awfl.workflows.codebase.jobs.ContextAgent
 
 object ToolBuilder extends us.awfl.workflows.traits.Agent {
   override def preloads = super.preloads ++ List(
@@ -22,7 +24,7 @@ object ToolBuilder extends us.awfl.workflows.traits.Agent {
       |Leverage specialized tools (e.g., Sutradhara, ContextAgent) when necessary.""".stripMargin
 
   override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(
-    "Sutradhara",
-    "ContextAgent"
+    Sutradhara.tool,
+    ContextAgent.tool
   )))
 }

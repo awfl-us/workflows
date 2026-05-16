@@ -7,7 +7,7 @@ import us.awfl.ista.ChatMessage
 import us.awfl.utils.{get, PostResult}
 import us.awfl.workflows.EventHandler
 import us.awfl.workflows.tools.Tools
-import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefParams, ToolDefProperty}
+import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefProperty}
 import us.awfl.utils.Env
 
 object Tasks extends us.awfl.core.Workflow {
@@ -83,7 +83,7 @@ object Tasks extends us.awfl.core.Workflow {
     ))
 
     // Execute getStep before the Switch and expose the Block as `${name}_switch` so `${name}_switchResult` is resolvable downstream.
-    Block(s"${name}_switch", List[Step[_, _]](getStep, contentSwitch) -> contentSwitch.resultValue)
+    Block(s"${name}_switch", List[Step[?, ?]](getStep, contentSwitch) -> contentSwitch.resultValue)
   }
 
   case class Input(env: BaseValue[us.awfl.utils.Env] = us.awfl.utils.ENV)

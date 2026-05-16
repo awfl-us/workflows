@@ -11,7 +11,7 @@ object Context {
   def preloadFile(name: String, filename: Value[String]) = {
     val toolCall = obj(ToolCall(
       id = str("preload_file"),
-      `type` = "function",
+      `type` = str("function"),
       function = obj(ToolCallFunction(str("READ_FILE"), str(CelStr("{\"filepath\": \"").safe + filename.cel + CelStr("\"}").safe)))
     ))
 
@@ -35,7 +35,7 @@ object Context {
 
     val toolCall = obj(ToolCall(
       id = str("preload_command"),
-      `type` = "function",
+      `type` = str("function"),
       function = obj(ToolCallFunction(str("RUN_COMMAND"), str(CelFunc("json.encode_to_string", paramJson.resultValue))))
     ))
 
@@ -53,7 +53,7 @@ object Context {
 
     Try(
       s"${name}_block",
-      List[Step[_, _]](paramJson, contents) -> obj(ChatMessage("system", str(CelStr(s"[Preload ") + right + "]\r" + contents.resultValue.cel)))
+      List[Step[?, ?]](paramJson, contents) -> obj(ChatMessage("system", str(CelStr(s"[Preload ") + right + "]\r" + contents.resultValue.cel)))
     )
   }
 }
