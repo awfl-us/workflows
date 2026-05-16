@@ -43,7 +43,7 @@ trait ExtractLesson(using kala: SegKala) {
   )
 
   val buildPrompt = buildList("buildPrompt", List((ChatMessage("system", str("You're a homeschool teacher working in the background of the live lesson conversation to document and record the important elements of the lesson to track and guage the student's progression through the semester's lesson plan and towards their personal academic and life goals.")))))
-  given Convo.Prompt = Convo.Prompt(buildPrompt)
+  // given Convo.Prompt = Convo.Prompt(buildPrompt)
 
   def apply(name: String, sessionId: Value[String]): Call[RunWorkflowArgs[ExtractLessonInput], Lesson] = {
     val args = RunWorkflowArgs(str("homeschool-ExtractLesson${WORKFLOW_ENV}"), obj(ExtractLessonInput(sessionId)), connector_params = ConnectorParams(true))

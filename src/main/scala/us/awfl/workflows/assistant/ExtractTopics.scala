@@ -42,16 +42,18 @@ object TopicContext:
     )
 
 // Default prompt used by Strider workflows
-given Convo.Prompt = Convo.Prompt(
-  buildList(
-    "buildPrompt",
-    List(
-      ChatMessage(
-        "system",
-        str("You're a background assistant, scrutanizing live or recorded conversations. You're the 'unconsciouse' part of the conversation agent, adding depth and structured memory to the conversation.")
-      )
-    )
-  )
-)
+// given Convo.Prompt = Convo.Prompt(
+//   buildList(
+//     "buildPrompt",
+//     List(
+//       ChatMessage(
+//         "system",
+//         str("You're a background assistant, scrutanizing live or recorded conversations. You're the 'unconsciouse' part of the conversation agent, adding depth and structured memory to the conversation.")
+//       )
+//     )
+//   )
+// )
 
-object ExtractTopics extends us.awfl.utils.strider.Latest[TopicContext, TopicInfo]("assistant-ExtractTopics")
+object ExtractTopics extends us.awfl.utils.strider.Latest[TopicContext, TopicInfo]("assistant-ExtractTopics") {
+  override def prompt = "You're a background assistant, scrutanizing live or recorded conversations. You're the 'unconsciouse' part of the conversation agent, adding depth and structured memory to the conversation."
+}

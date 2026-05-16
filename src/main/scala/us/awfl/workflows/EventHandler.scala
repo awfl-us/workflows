@@ -123,7 +123,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           ))
           val completeStep = Convo.completeWithTools(
             "complete",
-            Convo.Prompt(promptsWorkflow.flatMapList(_.prompts)),
+            promptsWorkflow.result.prompts,
             buildYojStep.resultValue,
             tools = mapToolDefs.resultValue,
             toolChoice = input.toolChoice.getOrElse(ToolChoice.auto),
@@ -214,7 +214,10 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           // If lock acquired: build context, get response, save it, then release the lock.
           acquiredTry.resultValue.cel -> {
             List[Step[?, ?]](
-              toolsWorkflow,
+              Parallel("loadContext", List(
+                promptsWorkflow,
+                toolsWorkflow,
+              )),
               mapToolDefs,
               complete,
               sendContents,

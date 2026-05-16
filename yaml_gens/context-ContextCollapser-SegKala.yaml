@@ -74,7 +74,7 @@ main:
           steps:
           - lock_switch_initResult:
               assign:
-              - lock_switchResult_23b57979: {}
+              - lock_switchResult_6abb8dbf: {}
           - lock_switch_steps:
               switch:
               - condition: "${(lock_acquire_tryResult_fc86a29 == true)}"
@@ -270,11 +270,42 @@ main:
                         steps:
                         - ista_write_switch_initResult:
                             assign:
-                            - ista_write_switchResult_3264d0d7: {}
+                            - ista_write_switchResult_6d5a2a55: {}
                         - ista_write_switch_steps:
                             switch:
                             - condition: "${(((len(for_messages_items_SegKalaResult_5c33c5e0) > 0) and ((len(for_collapsedIstaResult_31628e10) == 0) or (for_collapsedIstaResult_31628e10[(len(for_collapsedIstaResult_31628e10) - 1)].create_time < input.segmentEnd))) == true)}"
                               steps:
+                              - buildPrompt:
+                                  steps:
+                                  - buildPrompt_initResult:
+                                      assign:
+                                      - buildPromptResult_5cb888ce: []
+                                  - buildPrompt_steps:
+                                      for:
+                                        value: "buildPromptIdx"
+                                        range: "${[0, (1 - 1)]}"
+                                        steps:
+                                        - buildPrompt_switch:
+                                            steps:
+                                            - buildPrompt_switch_initResult:
+                                                assign:
+                                                - buildPrompt_switchResult_91b92e3: {}
+                                            - buildPrompt_switch_steps:
+                                                switch:
+                                                - condition: "${(buildPromptIdx == 0)}"
+                                                  steps:
+                                                  - buildPrompt_switch_updateResult_0:
+                                                      assign:
+                                                      - buildPrompt_switchResult_91b92e3:
+                                                          role: "${\"system\"}"
+                                                          content: "${\"You're a background assistant that helps compress older conversation context into expandable, named groups.\"}"
+                                                          tool_calls: "${[]}"
+                                                          tool_call_id: "${null}"
+                                                          create_time: "${sys.now()}"
+                                                          docId: "${null}"
+                                        - buildPrompt_updateResult:
+                                            assign:
+                                            - buildPromptResult_5cb888ce: "${list.concat(buildPromptResult_5cb888ce, buildPrompt_switchResult_91b92e3)}"
                               - collapserYojBlock_SegKala:
                                   steps:
                                   - TopicContextYoj_run_with_docId_1:
@@ -394,7 +425,7 @@ main:
                                       steps:
                                       - complete_switch_initResult:
                                           assign:
-                                          - complete_switchResult_566e0ba: {}
+                                          - complete_switchResult_3079dacc: {}
                                       - complete_switch_steps:
                                           switch:
                                           - condition: "${(len(collapser_single_msg_SegKalaResult_39cd98f6) > 0)}"
@@ -430,37 +461,6 @@ main:
                                                       - buildCollapseIsta_updateResult:
                                                           assign:
                                                           - buildCollapseIstaResult_5e4df06c: "${list.concat(buildCollapseIstaResult_5e4df06c, buildCollapseIsta_switchResult_34b83d82)}"
-                                            - buildPrompt:
-                                                steps:
-                                                - buildPrompt_initResult:
-                                                    assign:
-                                                    - buildPromptResult_5cb888ce: []
-                                                - buildPrompt_steps:
-                                                    for:
-                                                      value: "buildPromptIdx"
-                                                      range: "${[0, (1 - 1)]}"
-                                                      steps:
-                                                      - buildPrompt_switch:
-                                                          steps:
-                                                          - buildPrompt_switch_initResult:
-                                                              assign:
-                                                              - buildPrompt_switchResult_91b92e3: {}
-                                                          - buildPrompt_switch_steps:
-                                                              switch:
-                                                              - condition: "${(buildPromptIdx == 0)}"
-                                                                steps:
-                                                                - buildPrompt_switch_updateResult_0:
-                                                                    assign:
-                                                                    - buildPrompt_switchResult_91b92e3:
-                                                                        role: "${\"system\"}"
-                                                                        content: "${\"You're a background assistant that helps compress older conversation context into expandable, named groups.\"}"
-                                                                        tool_calls: "${[]}"
-                                                                        tool_call_id: "${null}"
-                                                                        create_time: "${sys.now()}"
-                                                                        docId: "${null}"
-                                                      - buildPrompt_updateResult:
-                                                          assign:
-                                                          - buildPromptResult_5cb888ce: "${list.concat(buildPromptResult_5cb888ce, buildPrompt_switchResult_91b92e3)}"
                                             - complete_joinMessages:
                                                 steps:
                                                 - complete_joinMessages_initResult:
@@ -609,7 +609,7 @@ main:
                                                               - decodedResult_72b111fa: "${null}"
                                             - complete_switch_updateResult_0:
                                                 assign:
-                                                - complete_switchResult_566e0ba: "${decodedResult_72b111fa}"
+                                                - complete_switchResult_3079dacc: "${decodedResult_72b111fa}"
                                           - condition: "${true}"
                                             steps:
                                             - emptyYoj:
@@ -618,7 +618,7 @@ main:
                                                   code: "${400}"
                                             - complete_switch_updateResult_1:
                                                 assign:
-                                                - complete_switchResult_566e0ba: "${null}"
+                                                - complete_switchResult_3079dacc: "${null}"
                               - do_write_seg_block:
                                   steps:
                                   - ista_write_newId:
@@ -658,9 +658,9 @@ main:
                                                 collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"collapsed\")}"
                                                 id: "${ista_write_newIdResult_33102057}"
                                                 contents:
-                                                  value: "${complete_switchResult_566e0ba.result}"
+                                                  value: "${complete_switchResult_3079dacc.result}"
                                                   create_time: "${input.segmentEnd}"
-                                                  cost: "${complete_switchResult_566e0ba.total_cost}"
+                                                  cost: "${complete_switchResult_3079dacc.total_cost}"
                                                   execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                                 userId: "${input.env.userId}"
                                               auth:
@@ -669,7 +669,7 @@ main:
                                               headers:
                                                 x-user-id: "${input.env.userId}"
                                                 x-project-id: "${input.env.projectId}"
-                                            result: "ista_write_create_childResult_7b988d3b"
+                                            result: "ista_write_create_childResult_7ce5fb8d"
                                       retry: "${http.default_retry}"
                                   - ista_write_update_parent_update_time:
                                       try:
@@ -715,7 +715,7 @@ main:
                                           retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_0:
                                   assign:
-                                  - ista_write_switchResult_3264d0d7: "${complete_switchResult_566e0ba.result}"
+                                  - ista_write_switchResult_6d5a2a55: "${complete_switchResult_3079dacc.result}"
                             - condition: "${true}"
                               steps:
                               - write_skipped:
@@ -729,7 +729,7 @@ main:
                                   retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_1:
                                   assign:
-                                  - ista_write_switchResult_3264d0d7: "${null}"
+                                  - ista_write_switchResult_6d5a2a55: "${null}"
                 - lock_release:
                     try:
                       steps:
@@ -752,11 +752,11 @@ main:
                     retry: "${http.default_retry}"
                 - lock_switch_updateResult_0:
                     assign:
-                    - lock_switchResult_23b57979: "${ista_write_switchResult_3264d0d7}"
+                    - lock_switchResult_6abb8dbf: "${ista_write_switchResult_6d5a2a55}"
               - condition: "${true}"
                 steps:
                 - lock_switch_updateResult_1:
                     assign:
-                    - lock_switchResult_23b57979: "${null}"
+                    - lock_switchResult_6abb8dbf: "${null}"
   - return:
-      return: "${lock_switchResult_23b57979}"
+      return: "${lock_switchResult_6abb8dbf}"

@@ -16,19 +16,19 @@ import us.awfl.utils.post
 import us.awfl.utils.TopicContextYoj
 
 // Minimal prompt; core JSON schema/instructions live in Ista[CollapseResponse]
-private given Convo.Prompt = Convo.Prompt(
-  buildList(
-    "buildPrompt",
-    List(
-      ChatMessage(
-        "system",
-        str(
-          "You're a background assistant that helps compress older conversation context into expandable, named groups."
-        )
-      )
-    )
-  )
-)
+// private given Convo.Prompt = Convo.Prompt(
+//   buildList(
+//     "buildPrompt",
+//     List(
+//       ChatMessage(
+//         "system",
+//         str(
+//           "You're a background assistant that helps compress older conversation context into expandable, named groups."
+//         )
+//       )
+//     )
+//   )
+// )
 
 trait CollapserMessages
 object CollapserMessages {
@@ -72,6 +72,8 @@ object CollapserMessages {
 object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMessages, CollapseResponse] {
 
   override def name: String = "context-ContextCollapser"
+
+  override def prompt = "You're a background assistant that helps compress older conversation context into expandable, named groups."
 
   // Collapse indexer request/response payloads
   case class CollapseIndexerArgs(
