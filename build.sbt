@@ -33,18 +33,15 @@ publishMavenStyle := true
 // Dependencies
 libraryDependencies ++= Seq(
   "us.awfl" %% "dsl" % "0.3.0",
-  "us.awfl" %% "workflow-utils" % "0.2.0",
-  "us.awfl" %% "compiler" % "0.2.0"
+  "us.awfl" %% "workflow-utils" % "0.3.0",
+  "us.awfl" %% "compiler" % "0.3.0"
 )
 
 // Keep our org snapshot overrides
 // dependencyOverrides += "us.awfl" %% "dsl" % "0.1.0-SNAPSHOT"
-dependencyOverrides += "us.awfl" %% "compiler" % "0.1.0-SNAPSHOT"
-dependencyOverrides += "us.awfl" %% "compiler-yaml" % "0.1.0-SNAPSHOT"
-dependencyOverrides += "us.awfl" %% "workflow-utils" % "0.1.0-SNAPSHOT"
-
-// Pin scala3-library to match scalaVersion
-dependencyOverrides += ("org.scala-lang" %% "scala3-library" % scalaVersion.value)
+// dependencyOverrides += "us.awfl" %% "compiler" % "0.1.0-SNAPSHOT"
+// dependencyOverrides += "us.awfl" %% "compiler-yaml" % "0.1.0-SNAPSHOT"
+// dependencyOverrides += "us.awfl" %% "workflow-utils" % "0.1.0-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-language:implicitConversions")
 
