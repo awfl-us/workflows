@@ -170,7 +170,7 @@ EventHandler routing
 - Agent → tools resolution:
   - Resolve agent id for the session: Agents.agentIdBySession.
   - Fetch allowed tool names: Agents.toolsByAgent.
-  - Fallback to buildTools if no agent-specific list is found.
+  - Fallback to buildTools if no agent-specific tool list is found.
   - Tool definitions are fetched via helpers.ToolDefs(sessionId, names).
 - Locking: acquire a session-scoped lock Locks.sessionKey("Convo") with owner = Exec.currentExecId; release on completion or failure.
 - Exec status lifecycle:
@@ -262,6 +262,23 @@ Practical tips
 - Keep tool lists minimal and review risky tools carefully.
 - For generated workflow code, keep steps small; use Block, Try, joinSteps, and typed args via obj(...).
 - For IDs and collection names, prefer Value[String] built via str(("locks.": Cel) + ista.name.cel + "." + Yoj.kalaName).
+
+DSL compile-error fixes (most important)
+- Blocks/Steps vs Resolved Values
+  - Blocks are Steps and do not have .cel. To embed a Block’s output into CEL, reference step.resultValue.cel.
+- Building CEL strings correctly
+  - Build strings with CEL, not Scala concatenation: str((("prefix": Cel) + value.cel + ("/suffix": Cel))). Cast literals with ("text": Cel).
+- Tool arguments/results are JSON-encoded strings
+  - Build args with encodeJson(resolved) or CelFunc("json.encode_to_string", resolved.cel).
+  - Use callToolEncoded(...) for a one-shot call that returns Value[String] (encoded JSON). Avoid triggering the same tool twice.
+  - Extract fields via decodeField(encoded, "path.to.field") or json.decode(...).get("field").
+- Step chaining and joins
+  - For Step[..., Value[T]], use flatMap/flatMapList. To combine unrelated steps, use joinSteps and then outA.resultValue/outB.resultValue.
+- Values vs Obj/OptValue
+  - Wrap Scala literals for args with obj(...). For optionals, use OptValue(...).getOrElse(default) to stay in CEL space.
+- Path building without hardcoding
+  - Derive paths via CEL: str((("plain/": Cel) + filepath.cel)); avoid leading slashes unless required.
+- You cannot use Obj as Cel, only accept Value where Cel is needed, not BaseValue.
 
 References
 - EventHandler: src/main/scala/us/awfl/workflows/EventHandler.scala

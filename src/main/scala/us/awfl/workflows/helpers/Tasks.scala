@@ -6,7 +6,6 @@ import us.awfl.dsl.auto.given
 import us.awfl.ista.ChatMessage
 import us.awfl.utils.{get, PostResult}
 import us.awfl.workflows.EventHandler
-import us.awfl.workflows.tools.Tools
 import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefProperty}
 import us.awfl.utils.Env
 

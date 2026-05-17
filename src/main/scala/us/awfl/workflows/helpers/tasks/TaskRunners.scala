@@ -6,7 +6,6 @@ import us.awfl.dsl.auto.given
 import us.awfl.ista.ToolCall
 import us.awfl.ista.ChatMessage
 import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefProperty}
-import us.awfl.workflows.tools.Tools
 import us.awfl.workflows.helpers.Tasks
 import us.awfl.utils.get
 

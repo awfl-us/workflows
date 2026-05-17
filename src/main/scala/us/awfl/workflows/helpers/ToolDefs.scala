@@ -4,7 +4,6 @@ import us.awfl.dsl.*
 import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
 import us.awfl.services.Llm.Tool
-import us.awfl.workflows.tools.Tools
 import us.awfl.utils._
 import us.awfl.workflows.EventHandler
 import us.awfl.services.Llm
@@ -23,6 +22,7 @@ object ToolDefs extends us.awfl.core.Workflow {
   sealed trait ToolDefValue {
     def toLlm: Llm.ToolDefProperty = this match {
       case ToolDefStr => Llm.ToolDefProperty("string")
+      case ToolDefNum => Llm.ToolDefProperty("number")
       case ToolDefEnum(e) => Llm.ToolDefProperty("string", `enum` = OptList(e))
       case ToolDefObj(properties, required) =>
           Llm.ToolDefProperty(
@@ -33,6 +33,7 @@ object ToolDefs extends us.awfl.core.Workflow {
     }
   }
   object ToolDefStr extends ToolDefValue
+  object ToolDefNum extends ToolDefValue
   case class ToolDefObj(
     properties: Map[String, ToolDefValue],
     required: ListValue[String]

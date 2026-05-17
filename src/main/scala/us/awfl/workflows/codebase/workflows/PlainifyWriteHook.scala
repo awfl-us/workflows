@@ -3,7 +3,7 @@ package us.awfl.workflows.codebase.workflows
 import us.awfl.dsl.*
 import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
-import us.awfl.ista.{ChatMessage, ToolCall, ToolCallFunction}
+import us.awfl.ista.ChatMessage
 import us.awfl.workflows.tools.CliTools
 
 /**
@@ -37,32 +37,12 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
     val outPath: Value[String] = str((("plain/": Cel) + inPath.cel))
 
     // 1) READ_FILE the raw source code from <filepath>
-    val readParams = Try(
-      "read_raw_params",
-      List() -> obj(Map(
-        "filepath" -> inPath
-      ))
-    )
-    val readCall = obj(ToolCall(
-      id = str("read_raw"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(
-        str("READ_FILE"),
-        str(CelFunc("json.encode_to_string", readParams.resultValue))
-      ))
-    ))
-    val readOutEncoded = CliTools.enqueueAndAwaitCallback(
-      opName     = "readRaw",
-      toolCall   = readCall,
-      cost       = obj(0.0),
+    val rawCode = CliTools.readFile(
+      filepath = inPath,
+      opName = "readRaw",
+      sessionId = sessionId,
       background = Value(true)
     )
-    // Extract .content from the encoded JSON callback body
-    val rawCode: Value[String] = Value(CelFunc(
-      "map.get",
-      CelFunc("json.decode", readOutEncoded.resultValue.cel),
-      "content"
-    ))
 
     // 2) Ask LLM to generate a complete plain-technical-English explanation
     val sysMsg = ChatMessage(
@@ -73,7 +53,8 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
     )
     val userMsg = ChatMessage(
       "user",
-      str((("Code follows:\n\n" : Cel) + rawCode.cel))
+      // rawCode is a Block[..., Value[String]]. Use resultValue.cel to embed it in CEL
+      str((("Code follows:\n\n" : Cel) + rawCode.resultValue.cel))
     )
 
     val messages = buildList("plainifyMessages", sysMsg :: userMsg :: Nil)
@@ -90,62 +71,28 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
     val explanation = chat.result.message.get.content
 
     // 3) Ensure destination directory exists
-    val mkdirParams = Try(
-      "mkdir_plain_params",
-      List() -> obj(Map(
-        "command" -> str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel)))
-      ))
-    )
-    val mkdirCall = obj(ToolCall(
-      id = str("mkdir_plain"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(
-        str("RUN_COMMAND"),
-        str(CelFunc("json.encode_to_string", mkdirParams.resultValue))
-      ))
-    ))
-    val doMkdir = CliTools.enqueueAndAwaitCallback(
-      opName     = "mkdirPlain",
-      toolCall   = mkdirCall,
-      cost       = obj(0.0),
-      sessionId  = sessionId,
+    val doMkdir = CliTools.runCommand(
+      command = str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel))),
+      opName = "mkdirPlain",
+      sessionId = sessionId,
       background = Value(true)
     )
 
     // 4) Write explanation to /plain<filepath>
-    val writeParams = Try(
-      "write_plain_params",
-      List() -> obj(Map(
-        "filepath" -> outPath,
-        "content"  -> explanation
-      ))
-    )
-    val writeCall = obj(ToolCall(
-      id = str("write_plain"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(
-        str("UPDATE_FILE"),
-        str(CelFunc("json.encode_to_string", writeParams.resultValue))
-      ))
-    ))
-    val writeOut = CliTools.enqueueAndAwaitCallback(
-      opName     = "writePlain",
-      toolCall   = writeCall,
-      cost       = obj(0.0),
-      sessionId  = sessionId,
+    val writeOut = CliTools.writeFile(
+      filepath = outPath,
+      content  = explanation,
+      opName   = "writePlain",
+      sessionId = sessionId,
       background = Value(true)
     )
 
     Workflow(
       List[Step[?, ?]](
-        readParams,
-        // readCall,
-        readOutEncoded,
+        rawCode,
         messages,
         chat,
-        mkdirParams,
         doMkdir,
-        writeParams,
         writeOut
       ) -> outPath
     )

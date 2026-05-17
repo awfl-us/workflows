@@ -11,7 +11,7 @@ import us.awfl.utils.SegKala
 import us.awfl.utils.TopicContextYoj
 import us.awfl.services.Llm.ChatToolResponse
 import us.awfl.ista.ToolCall
-import us.awfl.workflows.tools.{CliTools, Tools}
+import us.awfl.workflows.tools.CliTools
 import us.awfl.utils.Convo.ConvoContext
 import us.awfl.utils.Yoj
 import us.awfl.utils.Exec
@@ -179,7 +179,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
               obj(EventHandler.Input(str("Tool calls completed"), input.fund, OptValue(newSpent))),
-              connector_params = ConnectorParams(true)
+              connector_params = ConnectorParams(skip_polling = false)
             )
             Call[RunWorkflowArgs[Input], ChatToolResponse](
               "toolCallsCompleted",

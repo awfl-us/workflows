@@ -3,7 +3,7 @@ package us.awfl.workflows.codebase.workflows
 import us.awfl.dsl.*
 import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
-import us.awfl.ista.{ChatMessage, ToolCall, ToolCallFunction}
+import us.awfl.ista.ChatMessage
 import us.awfl.workflows.tools.CliTools
 
 /**
@@ -38,33 +38,12 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     val plainPath: Value[String] = str((("plain/": Cel) + outPath.cel))
 
     // 1) READ_FILE the plain specification from /plain<filepath>
-    val readParams = Try(
-      "read_plain_params",
-      List() -> obj(Map(
-        "filepath" -> plainPath
-      ))
-    )
-    val readCall = obj(ToolCall(
-      id = str("read_plain"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(
-        str("READ_FILE"),
-        str(CelFunc("json.encode_to_string", readParams.resultValue))
-      ))
-    ))
-    val readOutEncoded = CliTools.enqueueAndAwaitCallback(
-      opName     = "readPlain",
-      toolCall   = readCall,
-      cost       = obj(0.0),
-      sessionId  = sessionId,
+    val plainSpec = CliTools.readFile(
+      filepath = plainPath,
+      opName = "readPlain",
+      sessionId = sessionId,
       background = Value(true)
     )
-    // Extract .content from the encoded JSON callback body
-    val plainSpec: Value[String] = Value(CelFunc(
-      "map.get",
-      CelFunc("json.decode", readOutEncoded.resultValue.cel),
-      "content"
-    ))
 
     // 2) Ask LLM to generate the complete, compilable code for <filepath>
     val sysMsg = ChatMessage(
@@ -80,7 +59,8 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     )
     val userMsg = ChatMessage(
       "user",
-      str((("Plain specification follows:\n\n" : Cel) + plainSpec.cel))
+      // plainSpec is a Block[..., Value[String]]. Use resultValue.cel to embed it in CEL
+      str((("Plain specification follows:\n\n" : Cel) + plainSpec.resultValue.cel))
     )
 
     val messages = buildList("plainToCodeMessages", sysMsg :: userMsg :: Nil)
@@ -98,62 +78,28 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     val generatedCode: BaseValue[String] = chat.result.message.get.content
 
     // 3) Ensure destination directory exists
-    val mkdirParams = Try(
-      "mkdir_code_params",
-      List() -> obj(Map(
-        "command" -> str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel)))
-      ))
-    )
-    val mkdirCall = obj(ToolCall(
-      id = str("mkdir_code"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(
-        str("RUN_COMMAND"),
-        str(CelFunc("json.encode_to_string", mkdirParams.resultValue))
-      ))
-    ))
-    val doMkdir = CliTools.enqueueAndAwaitCallback(
-      opName     = "mkdirCode",
-      toolCall   = mkdirCall,
-      cost       = obj(0.0),
-      sessionId  = sessionId,
+    val doMkdir = CliTools.runCommand(
+      command = str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel))),
+      opName = "mkdirCode",
+      sessionId = sessionId,
       background = Value(true)
     )
 
     // 4) Write generated code to <filepath>
-    val writeParams = Try(
-      "write_code_params",
-      List() -> obj(Map(
-        "filepath" -> outPath,
-        "content"  -> generatedCode
-      ))
-    )
-    val writeCall = obj(ToolCall(
-      id = str("write_code"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(
-        str("UPDATE_FILE"),
-        str(CelFunc("json.encode_to_string", writeParams.resultValue))
-      ))
-    ))
-    val writeOut = CliTools.enqueueAndAwaitCallback(
-      opName     = "writeCode",
-      toolCall   = writeCall,
-      cost       = obj(0.0),
-      sessionId  = sessionId,
+    val writeOut = CliTools.writeFile(
+      filepath = outPath,
+      content  = generatedCode,
+      opName   = "writeCode",
+      sessionId = sessionId,
       background = Value(true)
     )
 
     Workflow(
       List[Step[?, ?]](
-        readParams,
-        // readCall,
-        readOutEncoded,
+        plainSpec,
         messages,
         chat,
-        mkdirParams,
         doMkdir,
-        writeParams,
         writeOut
       ) -> outPath
     )

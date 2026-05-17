@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$id" : "https://topaigents.dev/workflows/defs/us.awfl.workflows.tools.SpawnCrawlers.json",
+  "name" : "us.awfl.workflows.tools.SpawnCrawlers",
+  "description" : "Auto-generated workflow definition.",
+  "inputSchema" : "us-awfl-workflows-traits-ToolWorkflow-Input",
+  "outputSchema" : "us-awfl-workflows-traits-ToolWorkflow-Result",
+  "inputType" : "us.awfl.workflows.traits.ToolWorkflow.Input",
+  "outputType" : "us.awfl.workflows.traits.ToolWorkflow.Result"
+}

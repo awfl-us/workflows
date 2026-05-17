@@ -125,9 +125,9 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       List[Step[?, ?]](
         createCallback,
         saveCallback,
-        Log("logSavedCallback", str(("Saved callback: id=": Cel) + saveCallback.result.body.get.id)),
+        Log("logSavedCallback", str(("[saveCallback] Saved callback: id=": Cel) + saveCallback.result.body.get.id)),
         ingest,
-        Log("logIngest", str(("Post event result: ": Cel) + CelFunc("json.encode_to_string", ingest.resultValue.cel))),
+        Log("logIngest", str(("[ingest] Post event result: ": Cel) + CelFunc("json.encode_to_string", ingest.resultValue.cel))),
         maybeStartProducer,
         awaitCallback
       ) -> obj(ToolWorkflow.Result(encodedCallback, Value(0))),
@@ -151,5 +151,69 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     )
 
     Block(s"${opName}_callback_block", List[Step[?, ?]](run) -> run.resultValue.flatMap(_.encoded))
+  }
+
+  // High-level helpers using ToolWorkflow generic methods
+  private val targetCliToolsWorkflow = str("tools-CliTools${WORKFLOW_ENV}")
+
+  def readFile(
+    filepath: BaseValue[String],
+    opName: String = "readFile",
+    cost: BaseValue[Double] = obj(0.0),
+    sessionId: Value[String] = Env.sessionId,
+    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+  ) = {
+    val encoded = callToolEncoded(
+      opName = opName,
+      targetWorkflowName = targetCliToolsWorkflow,
+      functionName = "READ_FILE",
+      params = List("filepath" -> filepath),
+      cost = cost,
+      sessionId = sessionId,
+      background = background
+    )
+    Block(s"${opName}_decode_content", List[Step[?, ?]](encoded) -> decodeField(encoded.resultValue, "content"))
+  }
+
+  def writeFile(
+    filepath: BaseValue[String],
+    content: BaseValue[String],
+    opName: String = "writeFile",
+    cost: BaseValue[Double] = obj(0.0),
+    sessionId: Value[String] = Env.sessionId,
+    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+  ) = {
+    val encoded = callToolEncoded(
+      opName = opName,
+      targetWorkflowName = targetCliToolsWorkflow,
+      functionName = "UPDATE_FILE",
+      params = List("filepath" -> filepath, "content" -> content),
+      cost = cost,
+      sessionId = sessionId,
+      background = background
+    )
+    // Return the encoded callback body (not used by callers typically)
+    Block(s"${opName}_encoded", List[Step[?, ?]](encoded) -> encoded.resultValue)
+  }
+
+  def runCommand(
+    command: BaseValue[String],
+    opName: String = "runCommand",
+    cost: BaseValue[Double] = obj(0.0),
+    sessionId: Value[String] = Env.sessionId,
+    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+  ) = {
+    val encoded = callToolEncoded(
+      opName = opName,
+      targetWorkflowName = targetCliToolsWorkflow,
+      functionName = "RUN_COMMAND",
+      params = List("command" -> command),
+      cost = cost,
+      sessionId = sessionId,
+      background = background
+    )
+    // Prefer decoding the common 'output' field if present; otherwise return raw encoded
+    val out = decodeField(encoded.resultValue, "output")
+    Block(s"${opName}_output", List[Step[?, ?]](encoded) -> out)
   }
 }
