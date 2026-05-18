@@ -5,7 +5,24 @@
     "type" : "object",
     "properties" : {
       "task" : {
-        "type" : "string"
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "title",
+          "description",
+          "status"
+        ],
+        "additionalProperties" : true
       },
       "query" : {
         "type" : "string"

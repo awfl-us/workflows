@@ -9,6 +9,7 @@ import us.awfl.utils.Env
 import us.awfl.ista.ChatMessage
 import us.awfl.workflows.helpers.ToolDefs._
 import us.awfl.services.Llm.ToolChoice
+import us.awfl.workflows.tools.Tasks.Task
 
 trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks with Cli with Funds {
   override type Result = ChatToolResponse
@@ -50,7 +51,7 @@ trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with T
     query: Value[String],
     fund: Value[Double],
     spent: Value[Double],
-    task: Value[String] = Value.nil,
+    task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
     env: BaseValue[Env] = obj(Env.get.copy(sessionId = str(workflowName)))
   ): Call[RunWorkflowArgs[Input], ChatToolResponse] = {

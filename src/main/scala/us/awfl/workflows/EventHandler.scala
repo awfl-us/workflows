@@ -40,6 +40,7 @@ import us.awfl.workflows.helpers.ToolDefs.ToolDefEnum
 import us.awfl.workflows.helpers.ToolDefs.ToolDefObj
 import scala.annotation.tailrec
 import us.awfl.services.Llm.ToolFunctionDef
+import us.awfl.workflows.tools.Tasks.Task
 
 trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools {
 
@@ -57,7 +58,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
     given KalaVibhaga = SegKala(sessionId, Value("sys.now()"), Value(20 * 60))
 
     // Best-effort: if an input.task object is provided, create it for this session before completion logic
-    val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", CelFunc("map.get", inputVal.cel, "task"))
+    val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", inputVal.flatMap(_.task.getOrElse(Value.nil)))
 
     val triggeredExecId: Value[String] = Exec.currentExecId
 
@@ -283,7 +284,7 @@ object EventHandler {
     fund: Value[Double],
     spent: OptValue[Double],
     // Optional task payload to seed a task for this session (title/description/status)
-    task: Value[String] = Value.nil,
+    task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
     sideCall: OptValue[Boolean] = OptValue(false),
     env: BaseValue[Env] = ENV

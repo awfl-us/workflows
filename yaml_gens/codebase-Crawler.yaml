@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_6d95283a: {}
+          - mainTryResult_112543b2: {}
       - mainTry_steps:
           try:
             steps:
@@ -279,10 +279,10 @@ main:
                     steps:
                     - maybeSaveInputTask_switch_initResult:
                         assign:
-                        - maybeSaveInputTask_switchResult_208f672f: {}
+                        - maybeSaveInputTask_switchResult_1fab8217: {}
                     - maybeSaveInputTask_switch_steps:
                         switch:
-                        - condition: "${(get_type(map.get(input, \"task\")) == \"map\")}"
+                        - condition: "${(get_type(default(map.get(input, \"task\"), null)) == \"map\")}"
                           steps:
                           - maybeSaveInputTask_post:
                               try:
@@ -293,22 +293,22 @@ main:
                                       url: "${((input.env.BASE_URL + \"/\") + \"tasks\")}"
                                       body:
                                         sessionId: "${input.env.sessionId}"
-                                        title: "${map.get(map.get(input, \"task\"), \"title\")}"
-                                        description: "${map.get(map.get(input, \"task\"), \"description\")}"
-                                        status: "${default(map.get(map.get(input, \"task\"), \"status\"), \"In Progress\")}"
+                                        title: "${default(map.get(input, \"task\"), null).title}"
+                                        description: "${default(map.get(input, \"task\"), null).description}"
+                                        status: "${default(map.get(input, \"task\"), null).status}"
                                       auth:
                                         type: "${\"OIDC\"}"
                                         audience: "${input.env.BASE_URL}"
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "maybeSaveInputTask_postResult_1b3f6342"
+                                    result: "maybeSaveInputTask_postResult_48eea1a1"
                               retry: "${http.default_retry}"
                           - maybeSaveInputTask_switch_updateResult_0:
                               assign:
-                              - maybeSaveInputTask_switchResult_208f672f:
+                              - maybeSaveInputTask_switchResult_1fab8217:
                                   role: "${\"system\"}"
-                                  content: "${(((((((((\"Task created\" + \": id=\") + string(maybeSaveInputTask_postResult_1b3f6342.body.task.id)) + \" | \") + string(maybeSaveInputTask_postResult_1b3f6342.body.task.title)) + \" — \") + string(maybeSaveInputTask_postResult_1b3f6342.body.task.description)) + \" [status=\") + string(maybeSaveInputTask_postResult_1b3f6342.body.task.status)) + \"]\")}"
+                                  content: "${(((((((((\"Task created\" + \": id=\") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.id)) + \" | \") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.title)) + \" — \") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.description)) + \" [status=\") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.status)) + \"]\")}"
                                   tool_calls: "${[]}"
                                   tool_call_id: "${null}"
                                   create_time: "${sys.now()}"
@@ -317,7 +317,7 @@ main:
                           steps:
                           - maybeSaveInputTask_switch_updateResult_1:
                               assign:
-                              - maybeSaveInputTask_switchResult_208f672f:
+                              - maybeSaveInputTask_switchResult_1fab8217:
                                   role: "${\"system\"}"
                                   content: "${\"No input.task provided\"}"
                                   tool_calls: "${[]}"
@@ -507,7 +507,7 @@ main:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_271301a8: {}
+                    - maybeRespondResult_32512efb: {}
                 - maybeRespond_steps:
                     switch:
                     - condition: "${maybeBypassAquireResult_37369eb2}"
@@ -1078,7 +1078,7 @@ main:
                           steps:
                           - maybeToolFeedback_initResult:
                               assign:
-                              - maybeToolFeedbackResult_137f245d: {}
+                              - maybeToolFeedbackResult_17151081: {}
                           - maybeToolFeedback_steps:
                               switch:
                               - condition: "${((len(processToolCallsResult_39a8da70.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
@@ -1094,7 +1094,7 @@ main:
                                               query: "${\"Tool calls completed\"}"
                                               fund: "${input.fund}"
                                               spent: "${default((default(map.get(input, \"spent\"), 0) + (complete_switchResult_4aa9374e.total_cost + toolsCostResult_33526882)), null)}"
-                                              task: "${null}"
+                                              task: "${default(null, null)}"
                                               toolChoice: "${default(null, null)}"
                                               sideCall: "${default(false, null)}"
                                               env:
@@ -1109,11 +1109,11 @@ main:
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
                                               skip_polling: false
-                                          result: "toolCallsCompletedResult_7fca46b0"
+                                          result: "toolCallsCompletedResult_1373fe01"
                                     retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_0:
                                     assign:
-                                    - maybeToolFeedbackResult_137f245d: "${toolCallsCompletedResult_7fca46b0}"
+                                    - maybeToolFeedbackResult_17151081: "${toolCallsCompletedResult_1373fe01}"
                               - condition: "${true}"
                                 steps:
                                 - statusDone:
@@ -1172,7 +1172,7 @@ main:
                                         retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_1:
                                     assign:
-                                    - maybeToolFeedbackResult_137f245d: "${complete_switchResult_4aa9374e}"
+                                    - maybeToolFeedbackResult_17151081: "${complete_switchResult_4aa9374e}"
                       - runSummaries:
                           try:
                             steps:
@@ -1358,15 +1358,15 @@ main:
                                     - collapseMessages_tryResult_9c6ed4d: "${null}"
                       - maybeRespond_updateResult_0:
                           assign:
-                          - maybeRespondResult_271301a8: "${maybeToolFeedbackResult_137f245d}"
+                          - maybeRespondResult_32512efb: "${maybeToolFeedbackResult_17151081}"
                     - condition: "${true}"
                       steps:
                       - maybeRespond_updateResult_1:
                           assign:
-                          - maybeRespondResult_271301a8: "${null}"
+                          - maybeRespondResult_32512efb: "${null}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_6d95283a: "${maybeRespondResult_271301a8}"
+                - mainTryResult_112543b2: "${maybeRespondResult_32512efb}"
           except:
             as: "mainTryError"
             steps:
@@ -1465,6 +1465,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_6d95283a: "${null}"
+                - mainTryResult_112543b2: "${null}"
   - return:
-      return: "${mainTryResult_6d95283a}"
+      return: "${mainTryResult_112543b2}"

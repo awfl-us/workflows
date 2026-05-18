@@ -24,6 +24,7 @@ object ToolDefs extends us.awfl.core.Workflow {
       case ToolDefStr => Llm.ToolDefProperty("string")
       case ToolDefNum => Llm.ToolDefProperty("number")
       case ToolDefEnum(e) => Llm.ToolDefProperty("string", `enum` = OptList(e))
+      case ToolDefArray(i) => Llm.ToolDefProperty("array", items = Some(i.toLlm.toMap))
       case ToolDefObj(properties, required) =>
           Llm.ToolDefProperty(
             "object",
@@ -33,14 +34,19 @@ object ToolDefs extends us.awfl.core.Workflow {
     }
   }
   object ToolDefStr extends ToolDefValue
+
   object ToolDefNum extends ToolDefValue
+
   case class ToolDefObj(
     properties: Map[String, ToolDefValue],
     required: ListValue[String]
   ) extends ToolDefValue
+
   case class ToolDefEnum(
     `enum`: ListValue[String] = ListValue.empty,
   ) extends ToolDefValue
+
+  case class ToolDefArray(items: ToolDefValue) extends ToolDefValue
 
   case class ToolDefFunc(name: Value[String], description: String, parameters: ToolDefObj) {
     def toLlm = obj(Llm.ToolFunctionDef(

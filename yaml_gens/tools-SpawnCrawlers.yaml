@@ -2,131 +2,88 @@ main:
   params:
   - "input"
   steps:
-  - runCommand_output:
-      steps:
-      - runCommand_call_block:
-          steps:
-          - buildParams:
-              steps:
-              - buildParams_initResult:
-                  assign:
-                  - buildParamsResult_3afd634d: {}
-              - buildParams_steps:
-                  try:
-                    steps:
-                    - buildParams_updateResult:
-                        assign:
-                        - buildParamsResult_3afd634d:
-                            command: "${json.decode(input.tool_call.function.arguments).producerCommand}"
-                  except:
-                    as: "buildParamsError"
-                    steps:
-                    - buildParams_logError:
-                        try:
-                          steps:
-                          - buildParams_logError_call:
-                              call: "sys.log"
-                              args:
-                                text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
-                              result: "buildParams_logErrorResult_240d3253"
-                        retry: "${http.default_retry}"
-                    - buildParams_updateResultError:
-                        assign:
-                        - buildParamsResult_3afd634d: "${null}"
-          - runCommand_await_block:
-              steps:
-              - runCommand_run:
-                  try:
-                    steps:
-                    - runCommand_run_call:
-                        call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                        args:
-                          workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                          argument:
-                            tool_call:
-                              id: "${\"runCommand\"}"
-                              type: "${\"function\"}"
-                              function:
-                                name: "${\"RUN_COMMAND\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_3afd634d)}"
-                            cost: 0.0
-                            env:
-                              userId: "${input.env.userId}"
-                              model: "${input.env.model}"
-                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                              BASE_URL: "${input.env.BASE_URL}"
-                              background: "${default(default(map.get(input.env, \"background\"), false), null)}"
-                              projectId: "${input.env.projectId}"
-                              sessionId: "${input.env.sessionId}"
-                          location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                          project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                          connector_params:
-                            skip_polling: false
-                        result: "runCommand_runResult_413e2bde"
-                  retry: "${http.default_retry}"
   - spawn:
       steps:
       - spawn_initResult:
           assign:
-          - spawnResult_5417efcb: []
+          - spawnResult_7f3a6752: []
       - spawn_steps:
           parallel:
             shared:
-            - "spawnResult_5417efcb"
+            - "spawnResult_7f3a6752"
             for:
               value: "spawnValue"
-              in: "${text.split(map.get(json.decode(runCommand_runResult_413e2bde.encoded), \"output\"), \"\\n\")}"
+              in: "${json.decode(input.tool_call.function.arguments).items}"
               steps:
-              - codebase_Crawler:
-                  try:
-                    steps:
-                    - codebase_Crawler_call:
-                        call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                        args:
-                          workflow_id: "${\"codebase-Crawler${WORKFLOW_ENV}\"}"
-                          argument:
-                            query: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + json.decode(input.tool_call.function.arguments).instructions)}"
-                            fund: "${json.decode(input.tool_call.function.arguments).perCrawlerBudget}"
-                            spent: "${default(0, null)}"
-                            task: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + json.decode(input.tool_call.function.arguments).task)}"
-                            toolChoice: "${default(null, null)}"
-                            sideCall: "${default(false, null)}"
-                            env:
-                              userId: "${input.env.userId}"
-                              model: "${input.env.model}"
-                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                              BASE_URL: "${input.env.BASE_URL}"
-                              background: "${default(map.get(input.env, \"background\"), null)}"
-                              projectId: "${input.env.projectId}"
-                              sessionId: "${(\"crawler_\" + base64.encode(text.encode(spawnValue, \"UTF-8\")))}"
-                          location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                          project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                          connector_params:
-                            skip_polling: false
-                        result: "codebase_CrawlerResult_956c518"
-                  retry: "${http.default_retry}"
-              - spawn_assignIterResult:
-                  assign:
-                  - spawn_assignIterResultVar:
-                      response: "${(((\"Response from the agent assigned to \" + spawnValue) + \":\\n\") + codebase_CrawlerResult_956c518.message.content)}"
-                      cost: "${codebase_CrawlerResult_956c518.total_cost}"
+              - tryRun:
+                  steps:
+                  - tryRun_initResult:
+                      assign:
+                      - tryRunResult_6520d547: {}
+                  - tryRun_steps:
+                      try:
+                        steps:
+                        - codebase_Crawler:
+                            try:
+                              steps:
+                              - codebase_Crawler_call:
+                                  call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                  args:
+                                    workflow_id: "${\"codebase-Crawler${WORKFLOW_ENV}\"}"
+                                    argument:
+                                      query: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + json.decode(input.tool_call.function.arguments).instructions)}"
+                                      fund: "${json.decode(input.tool_call.function.arguments).perCrawlerBudget}"
+                                      spent: "${default(0, null)}"
+                                      task:
+                                        title: "${json.decode(input.tool_call.function.arguments).task.title}"
+                                        description: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + json.decode(input.tool_call.function.arguments).task.description)}"
+                                        status: "${json.decode(input.tool_call.function.arguments).task.status}"
+                                      toolChoice: "${default(null, null)}"
+                                      sideCall: "${default(false, null)}"
+                                      env:
+                                        userId: "${input.env.userId}"
+                                        model: "${input.env.model}"
+                                        callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                        BASE_URL: "${input.env.BASE_URL}"
+                                        background: "${default(map.get(input.env, \"background\"), null)}"
+                                        projectId: "${input.env.projectId}"
+                                        sessionId: "${(\"crawler_\" + base64.encode(text.encode(spawnValue, \"UTF-8\")))}"
+                                    location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                    project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                    connector_params:
+                                      skip_polling: false
+                                  result: "codebase_CrawlerResult_622744e2"
+                            retry: "${http.default_retry}"
+                        - tryRun_updateResult:
+                            assign:
+                            - tryRunResult_6520d547:
+                                response: "${(((\"Response from the agent assigned to \" + spawnValue) + \":\\n\") + codebase_CrawlerResult_622744e2.message.content)}"
+                                cost: "${codebase_CrawlerResult_622744e2.total_cost}"
+                      except:
+                        as: "tryRunError"
+                        steps:
+                        - tryRun_updateResultError:
+                            assign:
+                            - tryRunResult_6520d547:
+                                response: "${(((\"The crawler assigned to \" + spawnValue) + \" failed: \") + tryRunError.message)}"
+                                cost: "${0}"
               - spawn_updateResult:
                   assign:
-                  - spawnResult_5417efcb: "${list.concat(spawnResult_5417efcb, spawn_assignIterResultVar)}"
+                  - spawnResult_7f3a6752: "${list.concat(spawnResult_7f3a6752, tryRunResult_6520d547)}"
   - sumSpent:
       steps:
       - sumSpent_initResult:
           assign:
-          - sumSpentResult_24016f52: "${0}"
+          - sumSpentResult_4e151569: "${0}"
       - sumSpent_steps:
           for:
             value: "sumSpentValue"
-            in: "${spawnResult_5417efcb}"
+            in: "${spawnResult_7f3a6752}"
             steps:
             - sumSpent_updateResult:
                 assign:
-                - sumSpentResult_24016f52: "${(sumSpentResult_24016f52 + sumSpentValue.cost)}"
+                - sumSpentResult_4e151569: "${(sumSpentResult_4e151569 + sumSpentValue.cost)}"
   - return:
       return:
-        encoded: "${json.encode_to_string(spawnResult_5417efcb)}"
-        cost: "${sumSpentResult_24016f52}"
+        encoded: "${json.encode_to_string(spawnResult_7f3a6752)}"
+        cost: "${sumSpentResult_4e151569}"

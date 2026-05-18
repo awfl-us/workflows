@@ -6,6 +6,7 @@ import us.awfl.dsl.auto.given
 import us.awfl.ista.ChatMessage
 import us.awfl.utils.{get, PostResult}
 import us.awfl.workflows.EventHandler
+import us.awfl.workflows.tools.Tasks.{Task => ToolTask}
 import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefProperty}
 import us.awfl.utils.Env
 
@@ -144,15 +145,15 @@ object Tasks extends us.awfl.core.Workflow {
 
   // Optional helper: create a task from EventHandler.input.task if provided
   // Expects `task` to be a map-like value with optional title/description/status
-  def maybeSaveInputTask(name: String, task: Cel): Step[ChatMessage, BaseValue[ChatMessage]] = {
+  def maybeSaveInputTask(name: String, task: Value[ToolTask]): Step[ChatMessage, BaseValue[ChatMessage]] = {
     val isMap: Cel = CelFunc("get_type", task) === ("map": Cel)
 
     val create = {
-      val title       = Value[String](CelFunc("map.get", task, "title"))
-      val description = Value[String](CelFunc("map.get", task, "description"))
-      val status      = str(CelFunc("default", CelFunc("map.get", task, "status"), "In Progress"))
+      // val title       = Value[String](CelFunc("map.get", task, "title"))
+      // val description = Value[String](CelFunc("map.get", task, "description"))
+      // val status      = str(CelFunc("default", CelFunc("map.get", task, "status"), "In Progress"))
 
-      val post = createTask(s"${name}_post", title, description, status)
+      val post = createTask(s"${name}_post", task.get.title, task.get.description, task.get.status)
       val body = post.resultValue.flatMap(_.body).flatMap(_.task)
       val line = taskToLine("Task created", body)
       List(post) -> obj(ChatMessage("system", line))

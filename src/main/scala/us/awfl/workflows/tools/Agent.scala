@@ -9,6 +9,7 @@ import us.awfl.workflows.EventHandler
 import us.awfl.workflows.traits.ToolWorkflow
 import us.awfl.utils.Exec
 import us.awfl.utils.Env
+import us.awfl.workflows.tools.Tasks.Task
 
 /**
  * tools/Agent
@@ -33,7 +34,7 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
 
     val fn = toolCall.flatMap(_.function).get
     val query: Value[String] = fn.arg("query")
-    val taskField: Value[String] = str(CelFunc("default", fn.arg("task").cel, CelConst("null")))
+    val task: Value[Task] = Value(CelFunc("default", fn.arg("task").cel, CelConst("null")))
     // Model is optional; provide a conservative default suitable for tooling if omitted
     val modelField: Value[String] = str(CelFunc("default", fn.arg("model").cel, "gpt-5"))
     val fund = Value[Double](CelFunc("default", fn.arg("fund").cel, 0))
@@ -46,7 +47,7 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
           query = query,
           fund = fund,
           spent = OptValue.nil[Double],
-          task = taskField,
+          task = OptValue(task),
           env = obj(Env.get.copy(sessionId = Value(nameStr)))
         )
       )

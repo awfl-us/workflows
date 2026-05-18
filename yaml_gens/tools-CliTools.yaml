@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_3d78fc99: {}
+          - mainTryResult_2d8af130: {}
       - mainTry_steps:
           try:
             steps:
@@ -225,8 +225,8 @@ main:
                   - logSavedCallback_call:
                       call: "sys.log"
                       args:
-                        text: "${(\"[logSavedCallback] \" + (\"Saved callback: id=\" + saveCallbackResult_2ea0586d.body.id))}"
-                      result: "logSavedCallbackResult_d0fb7a5"
+                        text: "${(\"[logSavedCallback] \" + (\"[saveCallback] Saved callback: id=\" + saveCallbackResult_2ea0586d.body.id))}"
+                      result: "logSavedCallbackResult_52e1e139"
                 retry: "${http.default_retry}"
             - relay_ingest_tool_call:
                 try:
@@ -264,8 +264,8 @@ main:
                   - logIngest_call:
                       call: "sys.log"
                       args:
-                        text: "${(\"[logIngest] \" + (\"Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_56f8ffef)))}"
-                      result: "logIngestResult_6243a08"
+                        text: "${(\"[logIngest] \" + (\"[ingest] Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_56f8ffef)))}"
+                      result: "logIngestResult_6251d34c"
                 retry: "${http.default_retry}"
             - maybeStartProducer:
                 try:
@@ -296,7 +296,7 @@ main:
                 retry: "${http.default_retry}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_3d78fc99:
+                - mainTryResult_2d8af130:
                     encoded: "${json.encode_to_string(awaitCallbackResult_1a1596d2.http_request.body)}"
                     cost: "${0}"
           except:
@@ -306,6 +306,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_3d78fc99: "${null}"
+                - mainTryResult_2d8af130: "${null}"
   - return:
-      return: "${mainTryResult_3d78fc99}"
+      return: "${mainTryResult_2d8af130}"

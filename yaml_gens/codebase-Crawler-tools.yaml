@@ -108,7 +108,7 @@ main:
                   steps:
                   - buildTaskTools_initResult:
                       assign:
-                      - buildTaskToolsResult_54b2995e: []
+                      - buildTaskToolsResult_21f843f3: []
                   - buildTaskTools_steps:
                       for:
                         value: "buildTaskToolsIdx"
@@ -118,14 +118,14 @@ main:
                             steps:
                             - buildTaskTools_switch_initResult:
                                 assign:
-                                - buildTaskTools_switchResult_6d73b683: {}
+                                - buildTaskTools_switchResult_68700c30: {}
                             - buildTaskTools_switch_steps:
                                 switch:
                                 - condition: "${(buildTaskToolsIdx == 0)}"
                                   steps:
                                   - buildTaskTools_switch_updateResult_0:
                                       assign:
-                                      - buildTaskTools_switchResult_6d73b683:
+                                      - buildTaskTools_switchResult_68700c30:
                                           type: "${\"function\"}"
                                           function:
                                             name: "${\"CREATE_TASK\"}"
@@ -138,24 +138,28 @@ main:
                                                   properties: {}
                                                   enum: "${default(null, null)}"
                                                   required: "${default(null, null)}"
+                                                  items: "${null}"
                                                 description:
                                                   type: "string"
                                                   properties: {}
                                                   enum: "${default(null, null)}"
                                                   required: "${default(null, null)}"
+                                                  items: "${null}"
                                                 status:
                                                   type: "string"
                                                   properties: {}
                                                   enum: "${default([\"Queued\", \"In Progress\", \"Done\", \"Stuck\"], null)}"
                                                   required: "${default(null, null)}"
+                                                  items: "${null}"
                                               enum: "${default(null, null)}"
                                               required: "${default(null, null)}"
+                                              items: "${null}"
                                           workflowName: "${\"tools-Tasks\"}"
                                 - condition: "${(buildTaskToolsIdx == 1)}"
                                   steps:
                                   - buildTaskTools_switch_updateResult_1:
                                       assign:
-                                      - buildTaskTools_switchResult_6d73b683:
+                                      - buildTaskTools_switchResult_68700c30:
                                           type: "${\"function\"}"
                                           function:
                                             name: "${\"UPDATE_TASK\"}"
@@ -168,62 +172,67 @@ main:
                                                   properties: {}
                                                   enum: "${default(null, null)}"
                                                   required: "${default(null, null)}"
+                                                  items: "${null}"
                                                 title:
                                                   type: "string"
                                                   properties: {}
                                                   enum: "${default(null, null)}"
                                                   required: "${default(null, null)}"
+                                                  items: "${null}"
                                                 description:
                                                   type: "string"
                                                   properties: {}
                                                   enum: "${default(null, null)}"
                                                   required: "${default(null, null)}"
+                                                  items: "${null}"
                                                 status:
                                                   type: "string"
                                                   properties: {}
                                                   enum: "${default([\"Queued\", \"In Progress\", \"Done\", \"Stuck\"], null)}"
                                                   required: "${default(null, null)}"
+                                                  items: "${null}"
                                               enum: "${default(null, null)}"
                                               required: "${default([\"id\"], null)}"
+                                              items: "${null}"
                                           workflowName: "${\"tools-Tasks\"}"
                         - buildTaskTools_updateResult:
                             assign:
-                            - buildTaskToolsResult_54b2995e: "${list.concat(buildTaskToolsResult_54b2995e, buildTaskTools_switchResult_6d73b683)}"
+                            - buildTaskToolsResult_21f843f3: "${list.concat(buildTaskToolsResult_21f843f3, buildTaskTools_switchResult_68700c30)}"
               - taskTools_joinSteps:
                   steps:
                   - taskTools_joinSteps_initResult:
                       assign:
-                      - taskTools_joinStepsResult_17f83461: []
+                      - taskTools_joinStepsResult_580f60a6: []
                   - taskTools_joinSteps_steps:
                       for:
                         value: "taskTools_joinStepsIdx"
-                        range: "${[0, (((0 + len(buildToolsResult_644a4211.defs)) + len(buildTaskToolsResult_54b2995e)) - 1)]}"
+                        range: "${[0, (((0 + len(buildToolsResult_644a4211.defs)) + len(buildTaskToolsResult_21f843f3)) - 1)]}"
                         steps:
                         - taskTools_joinSteps_switch:
                             steps:
                             - taskTools_joinSteps_switch_initResult:
                                 assign:
-                                - taskTools_joinSteps_switchResult_191b3092: {}
+                                - taskTools_joinSteps_switchResult_44b3129a: {}
                             - taskTools_joinSteps_switch_steps:
                                 switch:
                                 - condition: "${(taskTools_joinStepsIdx >= (0 + len(buildToolsResult_644a4211.defs)))}"
                                   steps:
                                   - taskTools_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskTools_joinSteps_switchResult_191b3092: "${buildTaskToolsResult_54b2995e[(taskTools_joinStepsIdx - (0 + len(buildToolsResult_644a4211.defs)))]}"
+                                      - taskTools_joinSteps_switchResult_44b3129a: "${buildTaskToolsResult_21f843f3[(taskTools_joinStepsIdx - (0 + len(buildToolsResult_644a4211.defs)))]}"
                                 - condition: "${(taskTools_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskTools_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskTools_joinSteps_switchResult_191b3092: "${buildToolsResult_644a4211.defs[(taskTools_joinStepsIdx - 0)]}"
+                                      - taskTools_joinSteps_switchResult_44b3129a: "${buildToolsResult_644a4211.defs[(taskTools_joinStepsIdx - 0)]}"
                         - taskTools_joinSteps_updateResult:
                             assign:
-                            - taskTools_joinStepsResult_17f83461: "${list.concat(taskTools_joinStepsResult_17f83461, taskTools_joinSteps_switchResult_191b3092)}"
+                            - taskTools_joinStepsResult_580f60a6: "${list.concat(taskTools_joinStepsResult_580f60a6, taskTools_joinSteps_switchResult_44b3129a)}"
           - buildCliTools:
               steps:
               - buildCliTools_initResult:
                   assign:
-                  - buildCliToolsResult_14b1157b: []
+                  - buildCliToolsResult_5b6a634a: []
               - buildCliTools_steps:
                   for:
                     value: "buildCliToolsIdx"
@@ -233,14 +242,14 @@ main:
                         steps:
                         - buildCliTools_switch_initResult:
                             assign:
-                            - buildCliTools_switchResult_6d76d17d: {}
+                            - buildCliTools_switchResult_2f25c872: {}
                         - buildCliTools_switch_steps:
                             switch:
                             - condition: "${(buildCliToolsIdx == 0)}"
                               steps:
                               - buildCliTools_switch_updateResult_0:
                                   assign:
-                                  - buildCliTools_switchResult_6d76d17d:
+                                  - buildCliTools_switchResult_2f25c872:
                                       type: "${\"function\"}"
                                       function:
                                         name: "${\"READ_FILE\"}"
@@ -253,14 +262,16 @@ main:
                                               properties: {}
                                               enum: "${default(null, null)}"
                                               required: "${default(null, null)}"
+                                              items: "${null}"
                                           enum: "${default(null, null)}"
                                           required: "${default([\"filepath\"], null)}"
+                                          items: "${null}"
                                       workflowName: "${\"tools-CliTools\"}"
                             - condition: "${(buildCliToolsIdx == 1)}"
                               steps:
                               - buildCliTools_switch_updateResult_1:
                                   assign:
-                                  - buildCliTools_switchResult_6d76d17d:
+                                  - buildCliTools_switchResult_2f25c872:
                                       type: "${\"function\"}"
                                       function:
                                         name: "${\"RUN_COMMAND\"}"
@@ -273,14 +284,16 @@ main:
                                               properties: {}
                                               enum: "${default(null, null)}"
                                               required: "${default(null, null)}"
+                                              items: "${null}"
                                           enum: "${default(null, null)}"
                                           required: "${default([\"command\"], null)}"
+                                          items: "${null}"
                                       workflowName: "${\"tools-CliTools\"}"
                             - condition: "${(buildCliToolsIdx == 2)}"
                               steps:
                               - buildCliTools_switch_updateResult_2:
                                   assign:
-                                  - buildCliTools_switchResult_6d76d17d:
+                                  - buildCliTools_switchResult_2f25c872:
                                       type: "${\"function\"}"
                                       function:
                                         name: "${\"UPDATE_FILE\"}"
@@ -293,52 +306,55 @@ main:
                                               properties: {}
                                               enum: "${default(null, null)}"
                                               required: "${default(null, null)}"
+                                              items: "${null}"
                                             content:
                                               type: "string"
                                               properties: {}
                                               enum: "${default(null, null)}"
                                               required: "${default(null, null)}"
+                                              items: "${null}"
                                           enum: "${default(null, null)}"
                                           required: "${default([\"filepath\", \"content\"], null)}"
+                                          items: "${null}"
                                       workflowName: "${\"tools-CliTools\"}"
                     - buildCliTools_updateResult:
                         assign:
-                        - buildCliToolsResult_14b1157b: "${list.concat(buildCliToolsResult_14b1157b, buildCliTools_switchResult_6d76d17d)}"
+                        - buildCliToolsResult_5b6a634a: "${list.concat(buildCliToolsResult_5b6a634a, buildCliTools_switchResult_2f25c872)}"
           - cliTools_joinSteps:
               steps:
               - cliTools_joinSteps_initResult:
                   assign:
-                  - cliTools_joinStepsResult_2b01c911: []
+                  - cliTools_joinStepsResult_274cf857: []
               - cliTools_joinSteps_steps:
                   for:
                     value: "cliTools_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskTools_joinStepsResult_17f83461)) + len(buildCliToolsResult_14b1157b)) - 1)]}"
+                    range: "${[0, (((0 + len(taskTools_joinStepsResult_580f60a6)) + len(buildCliToolsResult_5b6a634a)) - 1)]}"
                     steps:
                     - cliTools_joinSteps_switch:
                         steps:
                         - cliTools_joinSteps_switch_initResult:
                             assign:
-                            - cliTools_joinSteps_switchResult_3e39dfe9: {}
+                            - cliTools_joinSteps_switchResult_125d6297: {}
                         - cliTools_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cliTools_joinStepsIdx >= (0 + len(taskTools_joinStepsResult_17f83461)))}"
+                            - condition: "${(cliTools_joinStepsIdx >= (0 + len(taskTools_joinStepsResult_580f60a6)))}"
                               steps:
                               - cliTools_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cliTools_joinSteps_switchResult_3e39dfe9: "${buildCliToolsResult_14b1157b[(cliTools_joinStepsIdx - (0 + len(taskTools_joinStepsResult_17f83461)))]}"
+                                  - cliTools_joinSteps_switchResult_125d6297: "${buildCliToolsResult_5b6a634a[(cliTools_joinStepsIdx - (0 + len(taskTools_joinStepsResult_580f60a6)))]}"
                             - condition: "${(cliTools_joinStepsIdx >= 0)}"
                               steps:
                               - cliTools_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cliTools_joinSteps_switchResult_3e39dfe9: "${taskTools_joinStepsResult_17f83461[(cliTools_joinStepsIdx - 0)]}"
+                                  - cliTools_joinSteps_switchResult_125d6297: "${taskTools_joinStepsResult_580f60a6[(cliTools_joinStepsIdx - 0)]}"
                     - cliTools_joinSteps_updateResult:
                         assign:
-                        - cliTools_joinStepsResult_2b01c911: "${list.concat(cliTools_joinStepsResult_2b01c911, cliTools_joinSteps_switchResult_3e39dfe9)}"
+                        - cliTools_joinStepsResult_274cf857: "${list.concat(cliTools_joinStepsResult_274cf857, cliTools_joinSteps_switchResult_125d6297)}"
       - buildCrawlerTools:
           steps:
           - buildCrawlerTools_initResult:
               assign:
-              - buildCrawlerToolsResult_6cd089f0: []
+              - buildCrawlerToolsResult_4ed15c7: []
           - buildCrawlerTools_steps:
               for:
                 value: "buildCrawlerToolsIdx"
@@ -348,77 +364,105 @@ main:
                     steps:
                     - buildCrawlerTools_switch_initResult:
                         assign:
-                        - buildCrawlerTools_switchResult_4004771e: {}
+                        - buildCrawlerTools_switchResult_fbe1bf2: {}
                     - buildCrawlerTools_switch_steps:
                         switch:
                         - condition: "${(buildCrawlerToolsIdx == 0)}"
                           steps:
                           - buildCrawlerTools_switch_updateResult_0:
                               assign:
-                              - buildCrawlerTools_switchResult_4004771e:
+                              - buildCrawlerTools_switchResult_fbe1bf2:
                                   type: "${\"function\"}"
                                   function:
                                     name: "${\"SPAWN_CRAWLERS\"}"
-                                    description: "${\"Spawn crawlers from a producer command.\nSpawn crawlers when a task requires applying\na uniform approach to all nodes in a tree\n(files, webpages, knowledge graph, etc.)\n\n- producerCommand: Your command must result in a list\n  where each line is an item that will be assigned it's own agent.\n  (directories, files, webpages, sub topics, sub regions, etc.)\n\n- instructions: The instructions for the sub-agents.\n  The context of the overall task at hand and\n  what they need to accomplish in their own unique domain.\n\n- task: Initialize the task assigned to each crawler.\n  The task should include a description and\n  a TODO list for the agent to update incrementally.\n\nEach sub-agent will receive their assigned line and your general instructions.\n        \"}"
+                                    description: "${\"Spawn crawlers from an items list.\nSpawn crawlers when a task requires applying\na uniform approach to all nodes in a tree\n(files, webpages, knowledge graph, etc.)\n\n- items: A list of items that will each be assigned it's own agent.\n  (directories, files, webpages, sub topics, sub regions, etc.)\n\n- instructions: The instructions for the sub-agents.\n  The context of the overall task at hand and\n  what they need to accomplish in their own unique domain.\n\n- task: Optional, for assigning multi stepped tasks.\n  Initialize the task assigned to each crawler.\n  The task should include a description and\n  a TODO list for the agent to update incrementally.\n\n- perCrawlerBudget: You're paying for this so allocate funds wisely.\n\nEach sub-agent will receive their assigned line and your general instructions.\nSub-agents are ran in sessions ID'd after the item you assign.\nYou can follow up with sub-agents or assign new tasks by re-using the exact item values.\nFor example, to ask a single agent a question, spawn a single crawler with the same item.\n        \"}"
                                     parameters:
                                       type: "object"
                                       properties:
-                                        producerCommand:
-                                          type: "string"
+                                        items:
+                                          type: "array"
                                           properties: {}
                                           enum: "${default(null, null)}"
                                           required: "${default(null, null)}"
+                                          items:
+                                            items: "${null}"
+                                            properties: {}
+                                            enum: "${default(null, null)}"
+                                            type: "string"
+                                            required: "${default(null, null)}"
                                         instructions:
                                           type: "string"
                                           properties: {}
                                           enum: "${default(null, null)}"
                                           required: "${default(null, null)}"
+                                          items: "${null}"
                                         task:
-                                          type: "string"
-                                          properties: {}
+                                          type: "object"
+                                          properties:
+                                            title:
+                                              type: "string"
+                                              properties: {}
+                                              enum: "${default(null, null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
+                                            description:
+                                              type: "string"
+                                              properties: {}
+                                              enum: "${default(null, null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
+                                            status:
+                                              type: "string"
+                                              properties: {}
+                                              enum: "${default([\"Queued\", \"In Progress\", \"Done\", \"Stuck\"], null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
                                           enum: "${default(null, null)}"
                                           required: "${default(null, null)}"
+                                          items: "${null}"
                                         perCrawlerBudget:
                                           type: "number"
                                           properties: {}
                                           enum: "${default(null, null)}"
                                           required: "${default(null, null)}"
+                                          items: "${null}"
                                       enum: "${default(null, null)}"
-                                      required: "${default([\"producerCommand\", \"instructions\", \"task\", \"perCrawlerBudget\"], null)}"
+                                      required: "${default([\"items\", \"instructions\", \"perCrawlerBudget\"], null)}"
+                                      items: "${null}"
                                   workflowName: "${\"tools-SpawnCrawlers\"}"
                 - buildCrawlerTools_updateResult:
                     assign:
-                    - buildCrawlerToolsResult_6cd089f0: "${list.concat(buildCrawlerToolsResult_6cd089f0, buildCrawlerTools_switchResult_4004771e)}"
+                    - buildCrawlerToolsResult_4ed15c7: "${list.concat(buildCrawlerToolsResult_4ed15c7, buildCrawlerTools_switchResult_fbe1bf2)}"
       - buildCrawlerTools_joinSteps:
           steps:
           - buildCrawlerTools_joinSteps_initResult:
               assign:
-              - buildCrawlerTools_joinStepsResult_45b907d6: []
+              - buildCrawlerTools_joinStepsResult_8c8873a: []
           - buildCrawlerTools_joinSteps_steps:
               for:
                 value: "buildCrawlerTools_joinStepsIdx"
-                range: "${[0, (((0 + len(cliTools_joinStepsResult_2b01c911)) + len(buildCrawlerToolsResult_6cd089f0)) - 1)]}"
+                range: "${[0, (((0 + len(cliTools_joinStepsResult_274cf857)) + len(buildCrawlerToolsResult_4ed15c7)) - 1)]}"
                 steps:
                 - buildCrawlerTools_joinSteps_switch:
                     steps:
                     - buildCrawlerTools_joinSteps_switch_initResult:
                         assign:
-                        - buildCrawlerTools_joinSteps_switchResult_305bafe8: {}
+                        - buildCrawlerTools_joinSteps_switchResult_41bf1f20: {}
                     - buildCrawlerTools_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(buildCrawlerTools_joinStepsIdx >= (0 + len(cliTools_joinStepsResult_2b01c911)))}"
+                        - condition: "${(buildCrawlerTools_joinStepsIdx >= (0 + len(cliTools_joinStepsResult_274cf857)))}"
                           steps:
                           - buildCrawlerTools_joinSteps_switch_updateResult_0:
                               assign:
-                              - buildCrawlerTools_joinSteps_switchResult_305bafe8: "${buildCrawlerToolsResult_6cd089f0[(buildCrawlerTools_joinStepsIdx - (0 + len(cliTools_joinStepsResult_2b01c911)))]}"
+                              - buildCrawlerTools_joinSteps_switchResult_41bf1f20: "${buildCrawlerToolsResult_4ed15c7[(buildCrawlerTools_joinStepsIdx - (0 + len(cliTools_joinStepsResult_274cf857)))]}"
                         - condition: "${(buildCrawlerTools_joinStepsIdx >= 0)}"
                           steps:
                           - buildCrawlerTools_joinSteps_switch_updateResult_1:
                               assign:
-                              - buildCrawlerTools_joinSteps_switchResult_305bafe8: "${cliTools_joinStepsResult_2b01c911[(buildCrawlerTools_joinStepsIdx - 0)]}"
+                              - buildCrawlerTools_joinSteps_switchResult_41bf1f20: "${cliTools_joinStepsResult_274cf857[(buildCrawlerTools_joinStepsIdx - 0)]}"
                 - buildCrawlerTools_joinSteps_updateResult:
                     assign:
-                    - buildCrawlerTools_joinStepsResult_45b907d6: "${list.concat(buildCrawlerTools_joinStepsResult_45b907d6, buildCrawlerTools_joinSteps_switchResult_305bafe8)}"
+                    - buildCrawlerTools_joinStepsResult_8c8873a: "${list.concat(buildCrawlerTools_joinStepsResult_8c8873a, buildCrawlerTools_joinSteps_switchResult_41bf1f20)}"
   - return:
       return:
-        tools: "${buildCrawlerTools_joinStepsResult_45b907d6}"
+        tools: "${buildCrawlerTools_joinStepsResult_8c8873a}"

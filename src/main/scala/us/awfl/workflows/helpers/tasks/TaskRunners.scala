@@ -5,7 +5,6 @@ import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ToolCall
 import us.awfl.ista.ChatMessage
-import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefProperty}
 import us.awfl.workflows.helpers.Tasks
 import us.awfl.utils.get
 
@@ -15,31 +14,6 @@ import us.awfl.utils.get
  * - Keeps idempotent behavior and auto-promotion logic encapsulated here.
  */
 object TaskRunners {
-  // -------- Tool Params --------
-  val createParams = obj(ToolDefProperty(
-    `type` = "object",
-    properties = Map(
-      // sessionId is implied by the current session context; agent should not provide it
-      "title"       -> ToolDefProperty("string"),
-      "description" -> ToolDefProperty("string"),
-      "status"      -> ToolDefProperty("string", `enum` = OptList(List("Queued", "In Progress", "Done", "Stuck").cel))
-    ),
-    // No required fields; session is injected by the runner
-    required = OptList.nil
-  ))
-
-  val updateParams = obj(ToolDefProperty(
-    `type` = "object",
-    properties = Map(
-      "id"          -> ToolDefProperty("string"),
-      // sessionId is not required or exposed; runner will not change session
-      "title"       -> ToolDefProperty("string"),
-      "description" -> ToolDefProperty("string"),
-      "status"      -> ToolDefProperty("string", `enum` = OptList(List("Queued", "In Progress", "Done", "Stuck").cel))
-    ),
-    required = OptList(List("id").cel)
-  ))
-
   // -------- CREATE_TASK exec --------
   private val createRun: Value[ToolCall] => (List[Step[?, ?]], Value[String]) = { toolCall =>
     val fn = toolCall.flatMap(_.function).get

@@ -4,11 +4,11 @@ import us.awfl.dsl.*
 import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ToolCall
+import us.awfl.services.Llm.{Tool, ToolFunctionDef, ToolDefProperty}
 import us.awfl.workflows.EventHandler
 import us.awfl.workflows.helpers.tasks.TaskRunners
 import us.awfl.workflows.traits.ToolWorkflow
-import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
-import us.awfl.services.Llm.ToolFunctionDef
+import us.awfl.workflows.helpers.ToolDefs._
 
 /**
  * tools/Tasks
@@ -18,6 +18,32 @@ import us.awfl.services.Llm.ToolFunctionDef
  */
 object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
   val supported = List("CREATE_TASK", "UPDATE_TASK")
+
+  case class Task(title: Value[String], description: Value[String], status: Value[String])
+
+  // -------- Tool Params --------
+  val createParams = ToolDefObj(
+    properties = Map(
+      // sessionId is implied by the current session context; agent should not provide it
+      "title"       -> ToolDefStr,
+      "description" -> ToolDefStr,
+      "status"      -> ToolDefEnum(`enum` = ListValue(List("Queued", "In Progress", "Done", "Stuck").cel))
+    ),
+    // No required fields; session is injected by the runner
+    required = ListValue.nil
+  )
+
+  val updateParams = obj(ToolDefProperty(
+    `type` = "object",
+    properties = Map(
+      "id"          -> ToolDefProperty("string"),
+      // sessionId is not required or exposed; runner will not change session
+      "title"       -> ToolDefProperty("string"),
+      "description" -> ToolDefProperty("string"),
+      "status"      -> ToolDefProperty("string", `enum` = OptList(List("Queued", "In Progress", "Done", "Stuck").cel))
+    ),
+    required = OptList(List("id").cel)
+  ))
 
   override def workflows = List({
     val toolCall = inputVal.flatMap(_.tool_call)
@@ -49,7 +75,7 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
       function = obj(ToolFunctionDef(
         str("CREATE_TASK"),
         str("Create a task in the current user's scope. Session is inferred by the current CLI workflow session."),
-        TaskRunners.createParams
+        obj(createParams.toLlm)
       )),
       workflowName = str(workflowName)
     ),
@@ -57,7 +83,7 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
       function = obj(ToolFunctionDef(
         str("UPDATE_TASK"),
         str("Update a task by id in the current user's scope (session inferred)."),
-        TaskRunners.updateParams
+        updateParams
       )),
       workflowName = str(workflowName)
     )

@@ -58,8 +58,14 @@
               "parameters" : {
                 "type" : "object",
                 "properties" : {
-                  "type" : {
-                    "type" : "string"
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      
+                    },
+                    "required" : [
+                    ],
+                    "additionalProperties" : true
                   },
                   "properties" : {
                     "type" : "object",
@@ -73,6 +79,9 @@
                   "enum" : {
                     "type" : "string"
                   },
+                  "type" : {
+                    "type" : "string"
+                  },
                   "required" : {
                     "type" : "string"
                   }
@@ -81,7 +90,8 @@
                   "type",
                   "properties",
                   "enum",
-                  "required"
+                  "required",
+                  "items"
                 ],
                 "additionalProperties" : true
               }
