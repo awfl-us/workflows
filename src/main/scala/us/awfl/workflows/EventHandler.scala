@@ -229,7 +229,9 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               summaries,
               extract,
               collapse
-            ) -> maybeToolFeedback.resultValue
+            ) -> obj(maybeToolFeedback.result.copy(
+              total_cost = Value[Double](maybeToolFeedback.result.total_cost + totalCost)
+            ))
           },
           // If busy: exit without fetching a response (query message is already saved).
           (true: Cel) -> (List() -> Value.nil[ChatToolResponse])

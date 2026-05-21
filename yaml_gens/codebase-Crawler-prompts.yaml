@@ -710,7 +710,7 @@ main:
           steps:
           - fundPrompt_initResult:
               assign:
-              - fundPromptResult_743bb3cb: []
+              - fundPromptResult_79374364: []
           - fundPrompt_steps:
               for:
                 value: "fundPromptIdx"
@@ -720,14 +720,14 @@ main:
                     steps:
                     - fundPrompt_switch_initResult:
                         assign:
-                        - fundPrompt_switchResult_7e2235ef: {}
+                        - fundPrompt_switchResult_3f363a67: {}
                     - fundPrompt_switch_steps:
                         switch:
                         - condition: "${(fundPromptIdx == 0)}"
                           steps:
                           - fundPrompt_switch_updateResult_0:
                               assign:
-                              - fundPrompt_switchResult_7e2235ef:
+                              - fundPrompt_switchResult_3f363a67:
                                   role: "${\"system\"}"
                                   content: "${(((\"Original funds allocated for the current task: $\" + input.fund) + \"\rSpent so far: $\") + default(map.get(input, \"spent\"), 0))}"
                                   tool_calls: "${[]}"
@@ -738,46 +738,46 @@ main:
                           steps:
                           - fundPrompt_switch_updateResult_1:
                               assign:
-                              - fundPrompt_switchResult_7e2235ef:
+                              - fundPrompt_switchResult_3f363a67:
                                   role: "${\"system\"}"
-                                  content: "${\"Plan accordingly. If a third of the available funds have been spent: Make sure you're wrapping up investigation and have updated the task.\nIf two thirds of the funds have been spent: Make sure you're wrapping up implentation/main work and the task is up to date.\nIf all the funds have been spent: No more work allowed! Immediatly update the task and then report the latest status.\n        \"}"
+                                  content: "${\"Plan accordingly. If a third of the available funds have been spent: Make sure you're wrapping up investigation and have updated the task.\nIf two thirds of the funds have been spent: Make sure you're wrapping up implentation/main work and the task is up to date.\nIf all the funds have been spent: No more work allowed! Immediatly update the task and then report the latest status.\n(You can update a file if that is the last step remaining, then return)\n        \"}"
                                   tool_calls: "${[]}"
                                   tool_call_id: "${null}"
                                   create_time: "${sys.now()}"
                                   docId: "${null}"
                 - fundPrompt_updateResult:
                     assign:
-                    - fundPromptResult_743bb3cb: "${list.concat(fundPromptResult_743bb3cb, fundPrompt_switchResult_7e2235ef)}"
+                    - fundPromptResult_79374364: "${list.concat(fundPromptResult_79374364, fundPrompt_switchResult_3f363a67)}"
       - fundsPrompts_joinSteps:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_22553b0: []
+              - fundsPrompts_joinStepsResult_3ea48d5a: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_2fc19ad6)) + len(fundPromptResult_743bb3cb)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_2fc19ad6)) + len(fundPromptResult_79374364)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_54b14944: {}
+                        - fundsPrompts_joinSteps_switchResult_380d610a: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
                         - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_2fc19ad6)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_54b14944: "${fundPromptResult_743bb3cb[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_2fc19ad6)))]}"
+                              - fundsPrompts_joinSteps_switchResult_380d610a: "${fundPromptResult_79374364[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_2fc19ad6)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_54b14944: "${cli_joinStepsResult_2fc19ad6[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_380d610a: "${cli_joinStepsResult_2fc19ad6[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_22553b0: "${list.concat(fundsPrompts_joinStepsResult_22553b0, fundsPrompts_joinSteps_switchResult_54b14944)}"
+                    - fundsPrompts_joinStepsResult_3ea48d5a: "${list.concat(fundsPrompts_joinStepsResult_3ea48d5a, fundsPrompts_joinSteps_switchResult_380d610a)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_22553b0}"
+        prompts: "${fundsPrompts_joinStepsResult_3ea48d5a}"

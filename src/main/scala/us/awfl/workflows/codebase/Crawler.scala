@@ -7,7 +7,7 @@ import us.awfl.workflows.traits.Agent
 import us.awfl.workflows.tools.SpawnCrawlers
 
 object Crawler extends Agent {
-  override def prompt = 
+  override def prompt =
     """You are a crawler agent,
       |your job is to address the task at hand
       |and optionally spawn crawlers to handle subtasks within your domain.

@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_112543b2: {}
+          - mainTryResult_312e0615: {}
       - mainTry_steps:
           try:
             steps:
@@ -507,7 +507,7 @@ main:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_32512efb: {}
+                    - maybeRespondResult_656e3ef1: {}
                 - maybeRespond_steps:
                     switch:
                     - condition: "${maybeBypassAquireResult_37369eb2}"
@@ -1358,15 +1358,17 @@ main:
                                     - collapseMessages_tryResult_9c6ed4d: "${null}"
                       - maybeRespond_updateResult_0:
                           assign:
-                          - maybeRespondResult_32512efb: "${maybeToolFeedbackResult_17151081}"
+                          - maybeRespondResult_656e3ef1:
+                              message: "${maybeToolFeedbackResult_17151081.message}"
+                              total_cost: "${(maybeToolFeedbackResult_17151081.total_cost + (complete_switchResult_4aa9374e.total_cost + toolsCostResult_33526882))}"
                     - condition: "${true}"
                       steps:
                       - maybeRespond_updateResult_1:
                           assign:
-                          - maybeRespondResult_32512efb: "${null}"
+                          - maybeRespondResult_656e3ef1: "${null}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_112543b2: "${maybeRespondResult_32512efb}"
+                - mainTryResult_312e0615: "${maybeRespondResult_656e3ef1}"
           except:
             as: "mainTryError"
             steps:
@@ -1465,6 +1467,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_112543b2: "${null}"
+                - mainTryResult_312e0615: "${null}"
   - return:
-      return: "${mainTryResult_112543b2}"
+      return: "${mainTryResult_312e0615}"

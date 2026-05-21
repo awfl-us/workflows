@@ -15,7 +15,7 @@ object SpawnCrawlers extends ToolWorkflow {
   case class Args(
     items: ListValue[String],
     instructions: Value[String],
-    task: Value[Task],
+    task: OptValue[Task],
     perCrawlerBudget: Value[Double]
   )
 
@@ -62,27 +62,35 @@ object SpawnCrawlers extends ToolWorkflow {
   ))
 
   override def workflows = List({
-    val args = Value[Args](CelFunc(
+    val argsVal = Value[Args](CelFunc(
       "json.decode",
       inputVal.flatMap(_.tool_call).flatMap(_.function).flatMap(_.arguments)
-    )).get
+    ))
+    val args = argsVal.get
 
     case class CrawlerResponse(response: Value[String], cost: Value[Double])
 
     val spawn = ParallelFor("spawn", args.items) { item =>
       val itemPrompt = ("Your sole responsibility/area of focus is: ": Cel) + item + CelStr("\n").safe
       val crawlerSession = str(("crawler_": Cel) + CelFunc("base64.encode", CelFunc("text.encode", item, "UTF-8")))
+      val updatedTask = Switch("updatedTask", List(
+        (("task": Cel) in argsVal) -> (List() -> {
+          val safeTask = args.task.getOrElse(Value.nil).get
+          obj(safeTask.copy(description = str(itemPrompt + safeTask.description)))
+        }),
+        (true: Cel) -> (List() -> Value.nil)
+      ))
       val runCrawler = Crawler(
         name = "crawler",
         query = str(itemPrompt + args.instructions),
         fund = args.perCrawlerBudget,
         spent = Value(0),
-        task = OptObj(obj(args.task.get.copy(description = str(itemPrompt + args.task.get.description)))),
+        task = OptValue(updatedTask.resultValue),
         env = obj(Env.get.copy(sessionId = crawlerSession))
       )
       Try(
         "tryRun",
-        List(runCrawler) -> obj(CrawlerResponse(
+        List[Step[?, ?]](updatedTask, runCrawler) -> obj(CrawlerResponse(
           response = str(
             ("Response from the agent assigned to ": Cel) + item + CelStr(":\n").safe +
             runCrawler.result.message.flatMap(_.content)

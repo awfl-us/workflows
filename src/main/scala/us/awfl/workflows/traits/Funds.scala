@@ -19,6 +19,7 @@ trait Funds extends EventHandler {
         """Plan accordingly. If a third of the available funds have been spent: Make sure you're wrapping up investigation and have updated the task.
           |If two thirds of the funds have been spent: Make sure you're wrapping up implentation/main work and the task is up to date.
           |If all the funds have been spent: No more work allowed! Immediatly update the task and then report the latest status.
+          |(You can update a file if that is the last step remaining, then return)
         """.stripMargin
       ))
     ))
