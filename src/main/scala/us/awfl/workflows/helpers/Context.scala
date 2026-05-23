@@ -9,18 +9,20 @@ import us.awfl.workflows.EventHandler
 
 object Context {
   def preloadFile(name: String, filename: Value[String]) = {
-    val toolCall = obj(ToolCall(
-      id = str("preload_file"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(str("READ_FILE"), str(CelStr("{\"filepath\": \"").safe + filename.cel + CelStr("\"}").safe)))
-    ))
+    // val toolCall = obj(ToolCall(
+    //   id = str("preload_file"),
+    //   `type` = str("function"),
+    //   function = obj(ToolCallFunction(str("READ_FILE"), str(CelStr("{\"filepath\": \"").safe + filename.cel + CelStr("\"}").safe)))
+    // ))
 
-    val contents = CliTools.enqueueAndAwaitCallback(
-      opName   = s"${name}_preloadFile",
-      toolCall = toolCall,
-      cost     = obj(0.0),
-      background = Value(true)
-    )
+    // val contents = CliTools.enqueueAndAwaitCallback(
+    //   opName   = s"${name}_preloadFile",
+    //   toolCall = toolCall,
+    //   cost     = obj(0.0),
+    //   background = Value(true)
+    // )
+
+    val contents = CliTools.readFile(filename, background = Value(true))
 
     // Keep the expression short to satisfy Cloud Workflows' 400-char expression limit.
     Try(
@@ -31,20 +33,21 @@ object Context {
 
   // Preload helper that runs a shell command and captures stdout for the system prompt
   def preloadCommand(name: String, command: Cel) = {
-    val paramJson = Try(s"${name}_paramJson", List() -> obj(Map("command" -> str(command))))
+    // val paramJson = Try(s"${name}_paramJson", List() -> obj(Map("command" -> str(command))))
 
-    val toolCall = obj(ToolCall(
-      id = str("preload_command"),
-      `type` = str("function"),
-      function = obj(ToolCallFunction(str("RUN_COMMAND"), str(CelFunc("json.encode_to_string", paramJson.resultValue))))
-    ))
+    // val toolCall = obj(ToolCall(
+    //   id = str("preload_command"),
+    //   `type` = str("function"),
+    //   function = obj(ToolCallFunction(str("RUN_COMMAND"), str(CelFunc("json.encode_to_string", paramJson.resultValue))))
+    // ))
 
-    val contents = CliTools.enqueueAndAwaitCallback(
-      opName   = s"${name}_preloadCommand",
-      toolCall = toolCall,
-      cost     = obj(0.0),
-      background = Value(true)
-    )
+    // val contents = CliTools.enqueueAndAwaitCallback(
+    //   opName   = s"${name}_preloadCommand",
+    //   toolCall = toolCall,
+    //   cost     = obj(0.0),
+    //   background = Value(true)
+    // )
+    val contents = CliTools.runCommand(str(command), background = Value(true))
 
     val right = command match {
       case CelStr(str) => CelStr(str.takeRight(350)).safe
@@ -53,7 +56,7 @@ object Context {
 
     Try(
       s"${name}_block",
-      List[Step[?, ?]](paramJson, contents) -> obj(ChatMessage("system", str(CelStr(s"[Preload ") + right + "]\r" + contents.resultValue.cel)))
+      List[Step[?, ?]](contents) -> obj(ChatMessage("system", str(CelStr(s"[Preload ") + right + "]\r" + contents.resultValue.cel)))
     )
   }
 }

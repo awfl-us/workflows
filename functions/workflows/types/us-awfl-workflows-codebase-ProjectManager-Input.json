@@ -70,6 +70,9 @@
           "background" : {
             "type" : "boolean"
           },
+          "workbranch" : {
+            "type" : "boolean"
+          },
           "projectId" : {
             "type" : "string"
           },
@@ -90,7 +93,8 @@
           "BASE_URL",
           "background",
           "projectId",
-          "sessionId"
+          "sessionId",
+          "workbranch"
         ],
         "additionalProperties" : true
       },

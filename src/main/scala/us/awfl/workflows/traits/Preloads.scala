@@ -6,6 +6,7 @@ import us.awfl.dsl.*
 import us.awfl.dsl.auto.given
 import us.awfl.workflows.helpers.Context
 import us.awfl.workflows.EventHandler
+import us.awfl.workflows.helpers.Files
 
 trait Preloads extends EventHandler {
   trait PreloadItem
@@ -16,6 +17,8 @@ trait Preloads extends EventHandler {
   case class PreloadCommand(command: Cel) extends PreloadItem
   object PreloadCommand:
     def apply(command: String): PreloadCommand = PreloadCommand(CelStr(command).safe)
+
+  case class PreloadScript(name: String) extends PreloadItem
 
   def preloads: List[PreloadItem] = List()
 
@@ -29,6 +32,13 @@ trait Preloads extends EventHandler {
         "preloadCommand",
         command
       )
+      case PreloadScript(name) =>
+        val readFile = Files.scripts(name)
+        val runScript = Context.preloadCommand(
+          "runScript",
+          readFile.resultValue
+        )
+        Try("preloadScript", List[Step[?, ?]](readFile, runScript) -> runScript.resultValue)
     }
     val joinPreloads = buildValueList("joinPreloads", runPreloads.map(_.resultValue))
     Block("preloadsBlock", (runPreloads :+ joinPreloads) -> joinPreloads.resultValue)
