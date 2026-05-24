@@ -6,7 +6,7 @@ main:
       steps:
       - maybeSaveReflection_initResult:
           assign:
-          - maybeSaveReflectionResult_51f5971: {}
+          - maybeSaveReflectionResult_438db7c: {}
       - maybeSaveReflection_steps:
           switch:
           - condition: "${((\"input\" in input) and input.input.shouldSaveReflection)}"
@@ -36,19 +36,20 @@ main:
                             background: "${default(map.get(input.env, \"background\"), null)}"
                             projectId: "${input.env.projectId}"
                             sessionId: "${input.env.sessionId}"
+                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                         location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "callAgentResult_69987fbe"
+                      result: "callAgentResult_2ce8270e"
                 retry: "${http.default_retry}"
             - maybeSaveReflection_updateResult_0:
                 assign:
-                - maybeSaveReflectionResult_51f5971: "${callAgentResult_69987fbe}"
+                - maybeSaveReflectionResult_438db7c: "${callAgentResult_2ce8270e}"
           - condition: "${true}"
             steps:
             - maybeSaveReflection_updateResult_1:
                 assign:
-                - maybeSaveReflectionResult_51f5971: "${null}"
+                - maybeSaveReflectionResult_438db7c: "${null}"
   - return:
-      return: "${maybeSaveReflectionResult_51f5971}"
+      return: "${maybeSaveReflectionResult_438db7c}"

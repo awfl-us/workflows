@@ -6,7 +6,7 @@ import us.awfl.workflows.tools.CliTools
 
 trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
   def directory: Value[String]
-  def variables: Map[String, ListValue[Cel]]
+  def variables: Map[String, ListValue[String]]
   def experiment: Experiment[P, R]
   def csvCols: ListValue[String]
 
@@ -16,12 +16,18 @@ trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
     val runExperiments = ParallelFor("runExperiments", buildParams.resultValue) { rawParams =>
       val params = Value[P](rawParams.cel)
       val subDir = variables.keys.map[Cel] { k => CelFunc("map.get", params, k) }.reduce(_ + "_" + _)
-      experiment("experiment", str(directory.cel + "/" + subDir), params).fn
+      val run = experiment("experiment", str(directory.cel + "/" + subDir), params)
+      List[Step[?,?]](
+        Log("logParams", str(("Running with params: ": Cel) + CelFunc("json.encode_to_string", params))),
+        run
+      ) -> run.resultValue
     }
 
     def toRow(row: ListValue[String]) =
-      Fold("buildHeader", str(""), row) { (b, c) => List() -> str(b.cel + "," + c) }
-        .flatMap { s => str(CelFunc("text.substring", s, 1, CelFunc("len", s))) }
+      Fold("buildCsvRow", str(""), row) { (b, c) =>
+        val joined = str(b.cel + "," + c)
+        List() -> str(CelFunc("text.substring", joined, 1, CelFunc("len", joined)))
+      }
 
     val buildHeader = toRow(csvCols)
 

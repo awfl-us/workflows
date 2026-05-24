@@ -47,7 +47,7 @@ main:
                           steps:
                           - preloadScript_initResult:
                               assign:
-                              - preloadScriptResult_4fafdc7a: {}
+                              - preloadScriptResult_243c5d15: {}
                           - preloadScript_steps:
                               try:
                                 steps:
@@ -68,39 +68,41 @@ main:
                                             steps:
                                             - readFile_buildArgs_initResult:
                                                 assign:
-                                                - readFile_buildArgsResult_4e69b595: {}
+                                                - readFile_buildArgsResult_197040f8: {}
                                             - readFile_buildArgs_steps:
                                                 try:
                                                   steps:
                                                   - readFile_buildArgs_updateResult:
                                                       assign:
-                                                      - readFile_buildArgsResult_4e69b595:
+                                                      - readFile_buildArgsResult_197040f8:
                                                           bucket: "${(sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\") + text.to_lower(\"-workflow-files${WORKFLOW_ENV}\"))}"
                                                           object: "${text.url_encode(\"scripts/agent.sh\")}"
                                                           alt: "${\"media\"}"
                                                 except:
                                                   as: "readFile_buildArgsError"
                                                   steps:
-                                                  - readFile_buildArgs_logError:
+                                                  - logError:
                                                       try:
                                                         steps:
-                                                        - readFile_buildArgs_logError_call:
+                                                        - logError_call:
                                                             call: "sys.log"
                                                             args:
-                                                              text: "${(\"[readFile_buildArgs_logError] \" + readFile_buildArgsError.message)}"
-                                                            result: "readFile_buildArgs_logErrorResult_41a085cd"
+                                                              text: "${(\"[logError] \" + readFile_buildArgsError.message)}"
+                                                            result: "logErrorResult_79bcd3fb"
                                                       retry: "${http.default_retry}"
+                                                  - reRaise:
+                                                      raise: "${readFile_buildArgsError}"
                                                   - readFile_buildArgs_updateResultError:
                                                       assign:
-                                                      - readFile_buildArgsResult_4e69b595: "${null}"
+                                                      - readFile_buildArgsResult_197040f8: "${null}"
                                         - readFile_logFileReadCall:
                                             try:
                                               steps:
                                               - readFile_logFileReadCall_call:
                                                   call: "sys.log"
                                                   args:
-                                                    text: "${(\"[readFile_logFileReadCall] \" + (\"Storage readFile call: \" + json.encode_to_string(readFile_buildArgsResult_4e69b595)))}"
-                                                  result: "readFile_logFileReadCallResult_1b8c2e8f"
+                                                    text: "${(\"[readFile_logFileReadCall] \" + (\"Storage readFile call: \" + json.encode_to_string(readFile_buildArgsResult_197040f8)))}"
+                                                  result: "readFile_logFileReadCallResult_36884462"
                                             retry: "${http.default_retry}"
                                         - readFile:
                                             try:
@@ -117,7 +119,7 @@ main:
                                     steps:
                                     - runScript_block_initResult:
                                         assign:
-                                        - runScript_blockResult_30d3717: {}
+                                        - runScript_blockResult_28946693: {}
                                     - runScript_block_steps:
                                         try:
                                           steps:
@@ -129,29 +131,31 @@ main:
                                                       steps:
                                                       - buildParams_initResult:
                                                           assign:
-                                                          - buildParamsResult_5e8ad585: {}
+                                                          - buildParamsResult_a353fd6: {}
                                                       - buildParams_steps:
                                                           try:
                                                             steps:
                                                             - buildParams_updateResult:
                                                                 assign:
-                                                                - buildParamsResult_5e8ad585:
+                                                                - buildParamsResult_a353fd6:
                                                                     command: "${text.decode(readFileResult_47a72c9a)}"
                                                           except:
                                                             as: "buildParamsError"
                                                             steps:
-                                                            - buildParams_logError:
+                                                            - logError_1:
                                                                 try:
                                                                   steps:
-                                                                  - buildParams_logError_call:
+                                                                  - logError_call_1:
                                                                       call: "sys.log"
                                                                       args:
-                                                                        text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
-                                                                      result: "buildParams_logErrorResult_240d3253"
+                                                                        text: "${(\"[logError] \" + buildParamsError.message)}"
+                                                                      result: "logErrorResult_1671996f"
                                                                 retry: "${http.default_retry}"
+                                                            - reRaise_1:
+                                                                raise: "${buildParamsError}"
                                                             - buildParams_updateResultError:
                                                                 assign:
-                                                                - buildParamsResult_5e8ad585: "${null}"
+                                                                - buildParamsResult_a353fd6: "${null}"
                                                   - runCommand_await_block:
                                                       steps:
                                                       - runCommand_run:
@@ -167,8 +171,9 @@ main:
                                                                       type: "${\"function\"}"
                                                                       function:
                                                                         name: "${\"RUN_COMMAND\"}"
-                                                                        arguments: "${json.encode_to_string(buildParamsResult_5e8ad585)}"
+                                                                        arguments: "${json.encode_to_string(buildParamsResult_a353fd6)}"
                                                                     cost: 0.0
+                                                                    timeoutSeconds: "${default(60, null)}"
                                                                     env:
                                                                       userId: "${input.env.userId}"
                                                                       model: "${input.env.model}"
@@ -177,18 +182,35 @@ main:
                                                                       background: "${default(true, null)}"
                                                                       projectId: "${input.env.projectId}"
                                                                       sessionId: "${input.env.sessionId}"
-                                                                      workbranch: "${default(map.get(input.env, \"workbranch\"), null)}"
+                                                                      workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
                                                                   location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                                   connector_params:
                                                                     skip_polling: false
-                                                                result: "runCommand_runResult_166d3408"
+                                                                result: "runCommand_runResult_2a0753e1"
                                                           retry: "${http.default_retry}"
+                                              - checkError:
+                                                  steps:
+                                                  - checkError_initResult:
+                                                      assign:
+                                                      - checkErrorResult_5b025299: {}
+                                                  - checkError_steps:
+                                                      switch:
+                                                      - condition: "${(len(map.get(json.decode(runCommand_runResult_2a0753e1.encoded), \"error\")) == 0)}"
+                                                        steps:
+                                                        - checkError_updateResult_0:
+                                                            assign:
+                                                            - checkErrorResult_5b025299: "${map.get(json.decode(runCommand_runResult_2a0753e1.encoded), \"output\")}"
+                                                      - condition: "${true}"
+                                                        steps:
+                                                        - checkError_updateResult_1:
+                                                            assign:
+                                                            - checkErrorResult_5b025299: "${map.get(json.decode(runCommand_runResult_2a0753e1.encoded), \"output\")}"
                                           - runScript_block_updateResult:
                                               assign:
-                                              - runScript_blockResult_30d3717:
+                                              - runScript_blockResult_28946693:
                                                   role: "${\"system\"}"
-                                                  content: "${(((\"[Preload \" + text.decode(readFileResult_47a72c9a)) + \"]\r\") + map.get(json.decode(runCommand_runResult_166d3408.encoded), \"output\"))}"
+                                                  content: "${(((\"[Preload \" + text.decode(readFileResult_47a72c9a)) + \"]\r\") + checkErrorResult_5b025299)}"
                                                   tool_calls: "${[]}"
                                                   tool_call_id: "${null}"
                                                   create_time: "${sys.now()}"
@@ -196,41 +218,45 @@ main:
                                         except:
                                           as: "runScript_blockError"
                                           steps:
-                                          - runScript_block_logError:
+                                          - logError_2:
                                               try:
                                                 steps:
-                                                - runScript_block_logError_call:
+                                                - logError_call_2:
                                                     call: "sys.log"
                                                     args:
-                                                      text: "${(\"[runScript_block_logError] \" + runScript_blockError.message)}"
-                                                    result: "runScript_block_logErrorResult_781bb0b4"
+                                                      text: "${(\"[logError] \" + runScript_blockError.message)}"
+                                                    result: "logErrorResult_4f47cfa2"
                                               retry: "${http.default_retry}"
+                                          - reRaise_2:
+                                              raise: "${runScript_blockError}"
                                           - runScript_block_updateResultError:
                                               assign:
-                                              - runScript_blockResult_30d3717: "${null}"
+                                              - runScript_blockResult_28946693: "${null}"
                                 - preloadScript_updateResult:
                                     assign:
-                                    - preloadScriptResult_4fafdc7a: "${runScript_blockResult_30d3717}"
+                                    - preloadScriptResult_243c5d15: "${runScript_blockResult_28946693}"
                               except:
                                 as: "preloadScriptError"
                                 steps:
-                                - preloadScript_logError:
+                                - logError_3:
                                     try:
                                       steps:
-                                      - preloadScript_logError_call:
+                                      - logError_call_3:
                                           call: "sys.log"
                                           args:
-                                            text: "${(\"[preloadScript_logError] \" + preloadScriptError.message)}"
-                                          result: "preloadScript_logErrorResult_716fe7ad"
+                                            text: "${(\"[logError] \" + preloadScriptError.message)}"
+                                          result: "logErrorResult_547ac111"
                                     retry: "${http.default_retry}"
+                                - reRaise_3:
+                                    raise: "${preloadScriptError}"
                                 - preloadScript_updateResultError:
                                     assign:
-                                    - preloadScriptResult_4fafdc7a: "${null}"
+                                    - preloadScriptResult_243c5d15: "${null}"
                       - preloadCommand_block:
                           steps:
                           - preloadCommand_block_initResult:
                               assign:
-                              - preloadCommand_blockResult_31d0ecc3: {}
+                              - preloadCommand_blockResult_73a2b0a: {}
                           - preloadCommand_block_steps:
                               try:
                                 steps:
@@ -242,29 +268,31 @@ main:
                                             steps:
                                             - buildParams_initResult_1:
                                                 assign:
-                                                - buildParamsResult_555df4d5: {}
+                                                - buildParamsResult_54dd12fe: {}
                                             - buildParams_steps_1:
                                                 try:
                                                   steps:
                                                   - buildParams_updateResult_1:
                                                       assign:
-                                                      - buildParamsResult_555df4d5:
+                                                      - buildParamsResult_54dd12fe:
                                                           command: "${((\"sh -lc \\\"echo; echo 'Files uploaded/specific to the current session:'; ls -la sessions/\" + input.env.sessionId) + \" 2>/dev/null || echo 'No session directory for this sessionId'\\\"\")}"
                                                 except:
                                                   as: "buildParamsError"
                                                   steps:
-                                                  - buildParams_logError_1:
+                                                  - logError_4:
                                                       try:
                                                         steps:
-                                                        - buildParams_logError_call_1:
+                                                        - logError_call_4:
                                                             call: "sys.log"
                                                             args:
-                                                              text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
-                                                            result: "buildParams_logErrorResult_240d3253"
+                                                              text: "${(\"[logError] \" + buildParamsError.message)}"
+                                                            result: "logErrorResult_1671996f"
                                                       retry: "${http.default_retry}"
+                                                  - reRaise_4:
+                                                      raise: "${buildParamsError}"
                                                   - buildParams_updateResultError_1:
                                                       assign:
-                                                      - buildParamsResult_555df4d5: "${null}"
+                                                      - buildParamsResult_54dd12fe: "${null}"
                                         - runCommand_await_block_1:
                                             steps:
                                             - runCommand_run_1:
@@ -280,8 +308,9 @@ main:
                                                             type: "${\"function\"}"
                                                             function:
                                                               name: "${\"RUN_COMMAND\"}"
-                                                              arguments: "${json.encode_to_string(buildParamsResult_555df4d5)}"
+                                                              arguments: "${json.encode_to_string(buildParamsResult_54dd12fe)}"
                                                           cost: 0.0
+                                                          timeoutSeconds: "${default(60, null)}"
                                                           env:
                                                             userId: "${input.env.userId}"
                                                             model: "${input.env.model}"
@@ -290,18 +319,35 @@ main:
                                                             background: "${default(true, null)}"
                                                             projectId: "${input.env.projectId}"
                                                             sessionId: "${input.env.sessionId}"
-                                                            workbranch: "${default(map.get(input.env, \"workbranch\"), null)}"
+                                                            workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
                                                         location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                         connector_params:
                                                           skip_polling: false
-                                                      result: "runCommand_runResult_25c9f431"
+                                                      result: "runCommand_runResult_42a2a213"
                                                 retry: "${http.default_retry}"
+                                    - checkError_1:
+                                        steps:
+                                        - checkError_initResult_1:
+                                            assign:
+                                            - checkErrorResult_ef9821b: {}
+                                        - checkError_steps_1:
+                                            switch:
+                                            - condition: "${(len(map.get(json.decode(runCommand_runResult_42a2a213.encoded), \"error\")) == 0)}"
+                                              steps:
+                                              - checkError_updateResult_0_1:
+                                                  assign:
+                                                  - checkErrorResult_ef9821b: "${map.get(json.decode(runCommand_runResult_42a2a213.encoded), \"output\")}"
+                                            - condition: "${true}"
+                                              steps:
+                                              - checkError_updateResult_1_1:
+                                                  assign:
+                                                  - checkErrorResult_ef9821b: "${map.get(json.decode(runCommand_runResult_42a2a213.encoded), \"output\")}"
                                 - preloadCommand_block_updateResult:
                                     assign:
-                                    - preloadCommand_blockResult_31d0ecc3:
+                                    - preloadCommand_blockResult_73a2b0a:
                                         role: "${\"system\"}"
-                                        content: "${(((\"[Preload \" + ((\"sh -lc \\\"echo; echo 'Files uploaded/specific to the current session:'; ls -la sessions/\" + input.env.sessionId) + \" 2>/dev/null || echo 'No session directory for this sessionId'\\\"\")) + \"]\r\") + map.get(json.decode(runCommand_runResult_25c9f431.encoded), \"output\"))}"
+                                        content: "${(((\"[Preload \" + ((\"sh -lc \\\"echo; echo 'Files uploaded/specific to the current session:'; ls -la sessions/\" + input.env.sessionId) + \" 2>/dev/null || echo 'No session directory for this sessionId'\\\"\")) + \"]\r\") + checkErrorResult_ef9821b)}"
                                         tool_calls: "${[]}"
                                         tool_call_id: "${null}"
                                         create_time: "${sys.now()}"
@@ -309,23 +355,25 @@ main:
                               except:
                                 as: "preloadCommand_blockError"
                                 steps:
-                                - preloadCommand_block_logError:
+                                - logError_5:
                                     try:
                                       steps:
-                                      - preloadCommand_block_logError_call:
+                                      - logError_call_5:
                                           call: "sys.log"
                                           args:
-                                            text: "${(\"[preloadCommand_block_logError] \" + preloadCommand_blockError.message)}"
-                                          result: "preloadCommand_block_logErrorResult_115b93cf"
+                                            text: "${(\"[logError] \" + preloadCommand_blockError.message)}"
+                                          result: "logErrorResult_486e1bf5"
                                     retry: "${http.default_retry}"
+                                - reRaise_5:
+                                    raise: "${preloadCommand_blockError}"
                                 - preloadCommand_block_updateResultError:
                                     assign:
-                                    - preloadCommand_blockResult_31d0ecc3: "${null}"
+                                    - preloadCommand_blockResult_73a2b0a: "${null}"
                       - joinPreloads:
                           steps:
                           - joinPreloads_initResult:
                               assign:
-                              - joinPreloadsResult_3bbc6f3d: []
+                              - joinPreloadsResult_656496c1: []
                           - joinPreloads_steps:
                               for:
                                 value: "joinPreloadsIdx"
@@ -335,57 +383,57 @@ main:
                                     steps:
                                     - joinPreloads_switch_initResult:
                                         assign:
-                                        - joinPreloads_switchResult_11645a74: {}
+                                        - joinPreloads_switchResult_37e81699: {}
                                     - joinPreloads_switch_steps:
                                         switch:
                                         - condition: "${(joinPreloadsIdx == 0)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_0:
                                               assign:
-                                              - joinPreloads_switchResult_11645a74: "${preloadScriptResult_4fafdc7a}"
+                                              - joinPreloads_switchResult_37e81699: "${preloadScriptResult_243c5d15}"
                                         - condition: "${(joinPreloadsIdx == 1)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_1:
                                               assign:
-                                              - joinPreloads_switchResult_11645a74: "${preloadCommand_blockResult_31d0ecc3}"
+                                              - joinPreloads_switchResult_37e81699: "${preloadCommand_blockResult_73a2b0a}"
                                 - joinPreloads_updateResult:
                                     assign:
-                                    - joinPreloadsResult_3bbc6f3d: "${list.concat(joinPreloadsResult_3bbc6f3d, joinPreloads_switchResult_11645a74)}"
+                                    - joinPreloadsResult_656496c1: "${list.concat(joinPreloadsResult_656496c1, joinPreloads_switchResult_37e81699)}"
                   - preloads_joinSteps:
                       steps:
                       - preloads_joinSteps_initResult:
                           assign:
-                          - preloads_joinStepsResult_6505e54c: []
+                          - preloads_joinStepsResult_319e945f: []
                       - preloads_joinSteps_steps:
                           for:
                             value: "preloads_joinStepsIdx"
-                            range: "${[0, (((0 + len(buildPromptListResult_25165fe8)) + len(joinPreloadsResult_3bbc6f3d)) - 1)]}"
+                            range: "${[0, (((0 + len(buildPromptListResult_25165fe8)) + len(joinPreloadsResult_656496c1)) - 1)]}"
                             steps:
                             - preloads_joinSteps_switch:
                                 steps:
                                 - preloads_joinSteps_switch_initResult:
                                     assign:
-                                    - preloads_joinSteps_switchResult_135dddf2: {}
+                                    - preloads_joinSteps_switchResult_34a2e875: {}
                                 - preloads_joinSteps_switch_steps:
                                     switch:
                                     - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_25165fe8)))}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_0:
                                           assign:
-                                          - preloads_joinSteps_switchResult_135dddf2: "${joinPreloadsResult_3bbc6f3d[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_25165fe8)))]}"
+                                          - preloads_joinSteps_switchResult_34a2e875: "${joinPreloadsResult_656496c1[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_25165fe8)))]}"
                                     - condition: "${(preloads_joinStepsIdx >= 0)}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_1:
                                           assign:
-                                          - preloads_joinSteps_switchResult_135dddf2: "${buildPromptListResult_25165fe8[(preloads_joinStepsIdx - 0)]}"
+                                          - preloads_joinSteps_switchResult_34a2e875: "${buildPromptListResult_25165fe8[(preloads_joinStepsIdx - 0)]}"
                             - preloads_joinSteps_updateResult:
                                 assign:
-                                - preloads_joinStepsResult_6505e54c: "${list.concat(preloads_joinStepsResult_6505e54c, preloads_joinSteps_switchResult_135dddf2)}"
+                                - preloads_joinStepsResult_319e945f: "${list.concat(preloads_joinStepsResult_319e945f, preloads_joinSteps_switchResult_34a2e875)}"
               - buildPromptsWithTasks:
                   steps:
                   - buildPromptsWithTasks_initResult:
                       assign:
-                      - buildPromptsWithTasksResult_75ab2752: {}
+                      - buildPromptsWithTasksResult_11e720ab: {}
                   - buildPromptsWithTasks_steps:
                       try:
                         steps:
@@ -405,12 +453,12 @@ main:
                                         background: "${default(map.get(input.env, \"background\"), null)}"
                                         projectId: "${input.env.projectId}"
                                         sessionId: "${input.env.sessionId}"
-                                        workbranch: "${default(map.get(input.env, \"workbranch\"), null)}"
+                                        workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                                     location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                     project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                     connector_params:
                                       skip_polling: false
-                                  result: "tasksResult_6b272be6"
+                                  result: "tasksResult_31b2540a"
                             retry: "${http.default_retry}"
                         - buildGuidancePrompt:
                             steps:
@@ -480,80 +528,82 @@ main:
                             steps:
                             - buildPrompt_initResult:
                                 assign:
-                                - buildPromptResult_9a5dc89: []
+                                - buildPromptResult_7eb8bd60: []
                             - buildPrompt_steps:
                                 for:
                                   value: "buildPromptIdx"
-                                  range: "${[0, (((0 + len(buildGuidancePromptResult_5d3adf93)) + len(tasksResult_6b272be6.tasks)) - 1)]}"
+                                  range: "${[0, (((0 + len(buildGuidancePromptResult_5d3adf93)) + len(tasksResult_31b2540a.tasks)) - 1)]}"
                                   steps:
                                   - buildPrompt_switch:
                                       steps:
                                       - buildPrompt_switch_initResult:
                                           assign:
-                                          - buildPrompt_switchResult_443fca2: {}
+                                          - buildPrompt_switchResult_34af3a3e: {}
                                       - buildPrompt_switch_steps:
                                           switch:
                                           - condition: "${(buildPromptIdx >= (0 + len(buildGuidancePromptResult_5d3adf93)))}"
                                             steps:
                                             - buildPrompt_switch_updateResult_0:
                                                 assign:
-                                                - buildPrompt_switchResult_443fca2: "${tasksResult_6b272be6.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_5d3adf93)))]}"
+                                                - buildPrompt_switchResult_34af3a3e: "${tasksResult_31b2540a.tasks[(buildPromptIdx - (0 + len(buildGuidancePromptResult_5d3adf93)))]}"
                                           - condition: "${(buildPromptIdx >= 0)}"
                                             steps:
                                             - buildPrompt_switch_updateResult_1:
                                                 assign:
-                                                - buildPrompt_switchResult_443fca2: "${buildGuidancePromptResult_5d3adf93[(buildPromptIdx - 0)]}"
+                                                - buildPrompt_switchResult_34af3a3e: "${buildGuidancePromptResult_5d3adf93[(buildPromptIdx - 0)]}"
                                   - buildPrompt_updateResult:
                                       assign:
-                                      - buildPromptResult_9a5dc89: "${list.concat(buildPromptResult_9a5dc89, buildPrompt_switchResult_443fca2)}"
+                                      - buildPromptResult_7eb8bd60: "${list.concat(buildPromptResult_7eb8bd60, buildPrompt_switchResult_34af3a3e)}"
                         - buildPromptsWithTasks_updateResult:
                             assign:
-                            - buildPromptsWithTasksResult_75ab2752: "${buildPromptResult_9a5dc89}"
+                            - buildPromptsWithTasksResult_11e720ab: "${buildPromptResult_7eb8bd60}"
                       except:
                         as: "buildPromptsWithTasksError"
                         steps:
-                        - buildPromptsWithTasks_logError:
+                        - logError_6:
                             try:
                               steps:
-                              - buildPromptsWithTasks_logError_call:
+                              - logError_call_6:
                                   call: "sys.log"
                                   args:
-                                    text: "${(\"[buildPromptsWithTasks_logError] \" + buildPromptsWithTasksError.message)}"
-                                  result: "buildPromptsWithTasks_logErrorResult_10f26276"
+                                    text: "${(\"[logError] \" + buildPromptsWithTasksError.message)}"
+                                  result: "logErrorResult_21320a25"
                             retry: "${http.default_retry}"
+                        - reRaise_6:
+                            raise: "${buildPromptsWithTasksError}"
                         - buildPromptsWithTasks_updateResultError:
                             assign:
-                            - buildPromptsWithTasksResult_75ab2752: "${\"null\"}"
+                            - buildPromptsWithTasksResult_11e720ab: "${\"null\"}"
               - taskPrompts_joinSteps:
                   steps:
                   - taskPrompts_joinSteps_initResult:
                       assign:
-                      - taskPrompts_joinStepsResult_7e53ea92: []
+                      - taskPrompts_joinStepsResult_6adcd525: []
                   - taskPrompts_joinSteps_steps:
                       for:
                         value: "taskPrompts_joinStepsIdx"
-                        range: "${[0, (((0 + len(preloads_joinStepsResult_6505e54c)) + len(buildPromptsWithTasksResult_75ab2752)) - 1)]}"
+                        range: "${[0, (((0 + len(preloads_joinStepsResult_319e945f)) + len(buildPromptsWithTasksResult_11e720ab)) - 1)]}"
                         steps:
                         - taskPrompts_joinSteps_switch:
                             steps:
                             - taskPrompts_joinSteps_switch_initResult:
                                 assign:
-                                - taskPrompts_joinSteps_switchResult_23be73f2: {}
+                                - taskPrompts_joinSteps_switchResult_6f050efd: {}
                             - taskPrompts_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_6505e54c)))}"
+                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_319e945f)))}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_23be73f2: "${buildPromptsWithTasksResult_75ab2752[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_6505e54c)))]}"
+                                      - taskPrompts_joinSteps_switchResult_6f050efd: "${buildPromptsWithTasksResult_11e720ab[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_319e945f)))]}"
                                 - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_23be73f2: "${preloads_joinStepsResult_6505e54c[(taskPrompts_joinStepsIdx - 0)]}"
+                                      - taskPrompts_joinSteps_switchResult_6f050efd: "${preloads_joinStepsResult_319e945f[(taskPrompts_joinStepsIdx - 0)]}"
                         - taskPrompts_joinSteps_updateResult:
                             assign:
-                            - taskPrompts_joinStepsResult_7e53ea92: "${list.concat(taskPrompts_joinStepsResult_7e53ea92, taskPrompts_joinSteps_switchResult_23be73f2)}"
+                            - taskPrompts_joinStepsResult_6adcd525: "${list.concat(taskPrompts_joinStepsResult_6adcd525, taskPrompts_joinSteps_switchResult_6f050efd)}"
           - cliPrompt:
               steps:
               - cliPrompt_initResult:
@@ -589,32 +639,32 @@ main:
               steps:
               - cli_joinSteps_initResult:
                   assign:
-                  - cli_joinStepsResult_633da215: []
+                  - cli_joinStepsResult_6f42bb99: []
               - cli_joinSteps_steps:
                   for:
                     value: "cli_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_7e53ea92)) + len(cliPromptResult_636741be)) - 1)]}"
+                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_6adcd525)) + len(cliPromptResult_636741be)) - 1)]}"
                     steps:
                     - cli_joinSteps_switch:
                         steps:
                         - cli_joinSteps_switch_initResult:
                             assign:
-                            - cli_joinSteps_switchResult_385e671e: {}
+                            - cli_joinSteps_switchResult_6693090d: {}
                         - cli_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_7e53ea92)))}"
+                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_6adcd525)))}"
                               steps:
                               - cli_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cli_joinSteps_switchResult_385e671e: "${cliPromptResult_636741be[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_7e53ea92)))]}"
+                                  - cli_joinSteps_switchResult_6693090d: "${cliPromptResult_636741be[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_6adcd525)))]}"
                             - condition: "${(cli_joinStepsIdx >= 0)}"
                               steps:
                               - cli_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cli_joinSteps_switchResult_385e671e: "${taskPrompts_joinStepsResult_7e53ea92[(cli_joinStepsIdx - 0)]}"
+                                  - cli_joinSteps_switchResult_6693090d: "${taskPrompts_joinStepsResult_6adcd525[(cli_joinStepsIdx - 0)]}"
                     - cli_joinSteps_updateResult:
                         assign:
-                        - cli_joinStepsResult_633da215: "${list.concat(cli_joinStepsResult_633da215, cli_joinSteps_switchResult_385e671e)}"
+                        - cli_joinStepsResult_6f42bb99: "${list.concat(cli_joinStepsResult_6f42bb99, cli_joinSteps_switchResult_6693090d)}"
       - fundPrompt:
           steps:
           - fundPrompt_initResult:
@@ -661,32 +711,32 @@ main:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_15bec946: []
+              - fundsPrompts_joinStepsResult_541d7e21: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_633da215)) + len(fundPromptResult_79374364)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_6f42bb99)) + len(fundPromptResult_79374364)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_4eda68cc: {}
+                        - fundsPrompts_joinSteps_switchResult_28db3649: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_633da215)))}"
+                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_6f42bb99)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_4eda68cc: "${fundPromptResult_79374364[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_633da215)))]}"
+                              - fundsPrompts_joinSteps_switchResult_28db3649: "${fundPromptResult_79374364[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_6f42bb99)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_4eda68cc: "${cli_joinStepsResult_633da215[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_28db3649: "${cli_joinStepsResult_6f42bb99[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_15bec946: "${list.concat(fundsPrompts_joinStepsResult_15bec946, fundsPrompts_joinSteps_switchResult_4eda68cc)}"
+                    - fundsPrompts_joinStepsResult_541d7e21: "${list.concat(fundsPrompts_joinStepsResult_541d7e21, fundsPrompts_joinSteps_switchResult_28db3649)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_15bec946}"
+        prompts: "${fundsPrompts_joinStepsResult_541d7e21}"

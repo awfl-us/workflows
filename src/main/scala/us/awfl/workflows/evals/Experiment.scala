@@ -7,20 +7,22 @@ import us.awfl.dsl.Workflow
 import us.awfl.workflows.tools.CliTools
 import us.awfl.utils.{Env, ENV}
 
-trait Experiment[P, R: Spec] extends us.awfl.core.Workflow {
+trait Experiment[P: Spec, R: Spec] extends us.awfl.core.Workflow {
   override type Input = Experiment.Input[P]
   override type Result = R
+
+  override val inputVal = init("input")
 
   type Answer
 
   def task: Step[Answer, Value[Answer]]
   def eval: Value[Answer] => Step[Result, Value[Result]]
 
-  val directory = inputVal.get.directory.cel
+  lazy val directory = inputVal.get.directory.cel
 
-  val inputFile = str(directory + "/input.json")
-  val answerFile = str(directory + "/answer.json")
-  val resultsFile = str(directory + "/results.json")
+  lazy val inputFile = str(directory + "/input.json")
+  lazy val answerFile = str(directory + "/answer.json")
+  lazy val resultsFile = str(directory + "/results.json")
 
   def apply(
     name: String,

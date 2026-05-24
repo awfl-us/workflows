@@ -40,6 +40,9 @@
       "cost" : {
         "type" : "integer"
       },
+      "timeoutSeconds" : {
+        "type" : "integer"
+      },
       "env" : {
         "type" : "object",
         "properties" : {
@@ -51,6 +54,9 @@
           },
           "background" : {
             "type" : "boolean"
+          },
+          "workdir" : {
+            "type" : "string"
           },
           "projectId" : {
             "type" : "string"
@@ -72,7 +78,8 @@
           "BASE_URL",
           "background",
           "projectId",
-          "sessionId"
+          "sessionId",
+          "workdir"
         ],
         "additionalProperties" : true
       }
@@ -80,6 +87,7 @@
     "required" : [
       "tool_call",
       "cost",
+      "timeoutSeconds",
       "env"
     ],
     "additionalProperties" : true,

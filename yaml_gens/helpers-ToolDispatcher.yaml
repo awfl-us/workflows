@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_527e9981: {}
+          - mainTryResult_fb141fc: {}
       - mainTry_steps:
           try:
             steps:
@@ -197,7 +197,7 @@ main:
                 steps:
                 - forToolCall_initResult:
                     assign:
-                    - forToolCallResult_18e111d3: []
+                    - forToolCallResult_37096fda: []
                 - forToolCall_steps:
                     for:
                       value: "forToolCallValue"
@@ -207,7 +207,7 @@ main:
                           steps:
                           - fold_initResult:
                               assign:
-                              - foldResult_3ca53594: "${null}"
+                              - foldResult_57ea3ab9: "${null}"
                           - fold_steps:
                               for:
                                 value: "foldValue"
@@ -217,7 +217,7 @@ main:
                                     steps:
                                     - matchFunction_initResult:
                                         assign:
-                                        - matchFunctionResult_59a10d69: {}
+                                        - matchFunctionResult_46540fe6: {}
                                     - matchFunction_steps:
                                         switch:
                                         - condition: "${(forToolCallValue.function.name == foldValue.function.name)}"
@@ -232,6 +232,7 @@ main:
                                                       argument:
                                                         tool_call: "${forToolCallValue}"
                                                         cost: "${input.totalCost}"
+                                                        timeoutSeconds: "${default(60, null)}"
                                                         env:
                                                           userId: "${input.env.userId}"
                                                           model: "${input.env.model}"
@@ -240,51 +241,54 @@ main:
                                                           background: "${default(map.get(input.env, \"background\"), null)}"
                                                           projectId: "${input.env.projectId}"
                                                           sessionId: "${input.env.sessionId}"
+                                                          workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                                                       location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                                       project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                       connector_params:
                                                         skip_polling: false
-                                                    result: "callToolWorkflowResult_4d12751e"
+                                                    result: "callToolWorkflowResult_5f00325"
                                               retry: "${http.default_retry}"
                                           - matchFunction_updateResult_0:
                                               assign:
-                                              - matchFunctionResult_59a10d69: "${callToolWorkflowResult_4d12751e}"
+                                              - matchFunctionResult_46540fe6: "${callToolWorkflowResult_5f00325}"
                                         - condition: "${true}"
                                           steps:
                                           - matchFunction_updateResult_1:
                                               assign:
-                                              - matchFunctionResult_59a10d69: "${foldResult_3ca53594}"
+                                              - matchFunctionResult_46540fe6: "${foldResult_57ea3ab9}"
                                 - fold_updateResult:
                                     assign:
-                                    - foldResult_3ca53594: "${matchFunctionResult_59a10d69}"
+                                    - foldResult_57ea3ab9: "${matchFunctionResult_46540fe6}"
                       - saveResult_seg_write_with_session_update:
                           steps:
                           - saveResult_newId:
                               steps:
                               - saveResult_newId_initResult:
                                   assign:
-                                  - saveResult_newIdResult_17881648: {}
+                                  - saveResult_newIdResult_1d4d49cc: {}
                               - saveResult_newId_steps:
                                   try:
                                     steps:
                                     - saveResult_newId_updateResult:
                                         assign:
-                                        - saveResult_newIdResult_17881648: "${uuid.generate()}"
+                                        - saveResult_newIdResult_1d4d49cc: "${uuid.generate()}"
                                   except:
                                     as: "saveResult_newIdError"
                                     steps:
-                                    - saveResult_newId_logError:
+                                    - logError:
                                         try:
                                           steps:
-                                          - saveResult_newId_logError_call:
+                                          - logError_call:
                                               call: "sys.log"
                                               args:
-                                                text: "${(\"[saveResult_newId_logError] \" + saveResult_newIdError.message)}"
-                                              result: "saveResult_newId_logErrorResult_3664e089"
+                                                text: "${(\"[logError] \" + saveResult_newIdError.message)}"
+                                              result: "logErrorResult_5106881c"
                                         retry: "${http.default_retry}"
+                                    - reRaise:
+                                        raise: "${saveResult_newIdError}"
                                     - saveResult_newId_updateResultError:
                                         assign:
-                                        - saveResult_newIdResult_17881648: "${null}"
+                                        - saveResult_newIdResult_1d4d49cc: "${null}"
                           - saveResult_write_messagesIsta_SegKala:
                               try:
                                 steps:
@@ -294,11 +298,11 @@ main:
                                       url: "${((input.env.BASE_URL + \"/\") + \"firebase/create\")}"
                                       body:
                                         collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
-                                        id: "${saveResult_newIdResult_17881648}"
+                                        id: "${saveResult_newIdResult_1d4d49cc}"
                                         contents:
                                           value:
                                             role: "${\"tool\"}"
-                                            content: "${foldResult_3ca53594.encoded}"
+                                            content: "${foldResult_57ea3ab9.encoded}"
                                             tool_calls: "${[]}"
                                             tool_call_id: "${forToolCallValue.id}"
                                             create_time: "${sys.now()}"
@@ -313,7 +317,7 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "saveResult_write_messagesIsta_SegKalaResult_575ea4ce"
+                                    result: "saveResult_write_messagesIsta_SegKalaResult_48fa30cb"
                               retry: "${http.default_retry}"
                           - saveResult_update_session_update_time:
                               try:
@@ -338,11 +342,11 @@ main:
                               retry: "${http.default_retry}"
                       - forToolCall_updateResult:
                           assign:
-                          - forToolCallResult_18e111d3: "${list.concat(forToolCallResult_18e111d3, foldResult_3ca53594)}"
+                          - forToolCallResult_37096fda: "${list.concat(forToolCallResult_37096fda, foldResult_57ea3ab9)}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_527e9981:
-                    results: "${forToolCallResult_18e111d3}"
+                - mainTryResult_fb141fc:
+                    results: "${forToolCallResult_37096fda}"
           except:
             as: "mainTryError"
             steps:
@@ -350,6 +354,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_527e9981: "${null}"
+                - mainTryResult_fb141fc: "${null}"
   - return:
-      return: "${mainTryResult_527e9981}"
+      return: "${mainTryResult_fb141fc}"

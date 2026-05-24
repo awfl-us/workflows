@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_2d8af130: {}
+          - mainTryResult_36c31a9e: {}
       - mainTry_steps:
           try:
             steps:
@@ -245,6 +245,8 @@ main:
                             tool_call: "${input.tool_call}"
                             cost: "${input.cost}"
                             background: "${default(map.get(input.env, \"background\"), false)}"
+                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                            timeout_seconds: "${default(map.get(input, \"timeoutSeconds\"), null)}"
                             status: "${\"\"}"
                             error: "${null}"
                           background: "${default(map.get(input.env, \"background\"), false)}"
@@ -256,7 +258,7 @@ main:
                         headers:
                           x-user-id: "${input.env.userId}"
                           x-project-id: "${input.env.projectId}"
-                      result: "relay_ingest_tool_callResult_56f8ffef"
+                      result: "relay_ingest_tool_callResult_43c1222b"
                 retry: "${http.default_retry}"
             - logIngest:
                 try:
@@ -264,8 +266,8 @@ main:
                   - logIngest_call:
                       call: "sys.log"
                       args:
-                        text: "${(\"[logIngest] \" + (\"[ingest] Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_56f8ffef)))}"
-                      result: "logIngestResult_6251d34c"
+                        text: "${(\"[logIngest] \" + (\"[ingest] Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_43c1222b)))}"
+                      result: "logIngestResult_1d09e5b3"
                 retry: "${http.default_retry}"
             - maybeStartProducer:
                 try:
@@ -296,7 +298,7 @@ main:
                 retry: "${http.default_retry}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_2d8af130:
+                - mainTryResult_36c31a9e:
                     encoded: "${json.encode_to_string(awaitCallbackResult_1a1596d2.http_request.body)}"
                     cost: "${0}"
           except:
@@ -306,6 +308,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_2d8af130: "${null}"
+                - mainTryResult_36c31a9e: "${null}"
   - return:
-      return: "${mainTryResult_2d8af130}"
+      return: "${mainTryResult_36c31a9e}"

@@ -94,7 +94,9 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       content = Value("null"),
       tool_call = input.tool_call,
       cost = input.cost,
-      background = Env.background.getOrElse(Value(false))
+      background = Env.background.getOrElse(Value(false)),
+      workdir = Env.workdir.getOrElse(Value.nil),
+      timeout_seconds = input.timeoutSeconds.getOrElse(Value.nil)
     )
 
     // POST to /workflows/events instead of Pub/Sub
@@ -201,7 +203,10 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     opName: String = "runCommand",
     cost: BaseValue[Double] = obj(0.0),
     sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+    background: Value[Boolean] = Env.background.getOrElse(Value(false)),
+    raiseError: Boolean = false,
+    timeoutSeconds: Value[Int] = Value(60),
+    workdir: Value[String] = Env.get.workdir.getOrElse(Value.nil)
   ) = {
     val encoded = callToolEncoded(
       opName = opName,
@@ -210,10 +215,20 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       params = List("command" -> command),
       cost = cost,
       sessionId = sessionId,
-      background = background
+      background = background,
+      timeoutSeconds = timeoutSeconds,
+      workdir = workdir,
     )
-    // Prefer decoding the common 'output' field if present; otherwise return raw encoded
-    val out = decodeField(encoded.resultValue, "output")
-    Block(s"${opName}_output", List[Step[?, ?]](encoded) -> out)
+    val error = decodeField(encoded.resultValue, "error")
+    val output = decodeField(encoded.resultValue, "output")
+    val handleError = Switch("checkError", List(
+      (CelFunc("len", error) === 0) ->
+        (List() -> output),
+      (true: Cel) -> (
+        if (raiseError) List(Raise("raiseError", obj(Error(error, Value(500))))) -> Value.nil[String]
+        else List() -> output
+      )
+    ))
+    Block(s"${opName}_output", List[Step[?, ?]](encoded, handleError) -> handleError.resultValue)
   }
 }

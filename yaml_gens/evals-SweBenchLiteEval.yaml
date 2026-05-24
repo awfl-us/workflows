@@ -1,0 +1,284 @@
+main:
+  params:
+  - "input"
+  steps:
+  - foldVars:
+      steps:
+      - init:
+          steps:
+          - init_initResult:
+              assign:
+              - initResult_3660b88d: []
+          - init_steps:
+              for:
+                value: "initIdx"
+                range: "${[0, (1 - 1)]}"
+                steps:
+                - init_switch:
+                    steps:
+                    - init_switch_initResult:
+                        assign:
+                        - init_switchResult_51b6f3fa: {}
+                    - init_switch_steps:
+                        switch:
+                        - condition: "${(initIdx == 0)}"
+                          steps:
+                          - init_switch_updateResult_0:
+                              assign:
+                              - init_switchResult_51b6f3fa: {}
+                - init_updateResult:
+                    assign:
+                    - initResult_3660b88d: "${list.concat(initResult_3660b88d, init_switchResult_51b6f3fa)}"
+      - forValues_agent:
+          steps:
+          - forValues_agent_initResult:
+              assign:
+              - forValues_agentResult_10c88c78:
+                  list: "${[]}"
+          - forValues_agent_steps:
+              for:
+                value: "forValues_agentValue"
+                in: "${[\"AWFL\"]}"
+                steps:
+                - buildV:
+                    steps:
+                    - buildV_initResult:
+                        assign:
+                        - buildVResult_2668c9d1: {}
+                    - buildV_steps:
+                        try:
+                          steps:
+                          - buildV_updateResult:
+                              assign:
+                              - buildVResult_2668c9d1:
+                                  agent: "${forValues_agentValue}"
+                        except:
+                          as: "buildVError"
+                          steps:
+                          - buildV_logError:
+                              try:
+                                steps:
+                                - buildV_logError_call:
+                                    call: "sys.log"
+                                    args:
+                                      text: "${(\"[buildV_logError] \" + buildVError.message)}"
+                                    result: "buildV_logErrorResult_5f5608d9"
+                              retry: "${http.default_retry}"
+                          - buildV_updateResultError:
+                              assign:
+                              - buildVResult_2668c9d1: "${null}"
+                - forB:
+                    steps:
+                    - forB_initResult:
+                        assign:
+                        - forBResult_e59dc65: []
+                    - forB_steps:
+                        for:
+                          value: "forBValue"
+                          in: "${initResult_3660b88d}"
+                          steps:
+                          - forB_updateResult:
+                              assign:
+                              - forBResult_e59dc65: "${list.concat(forBResult_e59dc65, map.merge(forBValue, buildVResult_2668c9d1))}"
+                - joinParams:
+                    steps:
+                    - joinParams_initResult:
+                        assign:
+                        - joinParamsResult_4e3b455f: []
+                    - joinParams_steps:
+                        for:
+                          value: "joinParamsIdx"
+                          range: "${[0, (((0 + len(forValues_agentResult_10c88c78.list)) + len(forBResult_e59dc65)) - 1)]}"
+                          steps:
+                          - joinParams_switch:
+                              steps:
+                              - joinParams_switch_initResult:
+                                  assign:
+                                  - joinParams_switchResult_3b2db44f: {}
+                              - joinParams_switch_steps:
+                                  switch:
+                                  - condition: "${(joinParamsIdx >= (0 + len(forValues_agentResult_10c88c78.list)))}"
+                                    steps:
+                                    - joinParams_switch_updateResult_0:
+                                        assign:
+                                        - joinParams_switchResult_3b2db44f: "${forBResult_e59dc65[(joinParamsIdx - (0 + len(forValues_agentResult_10c88c78.list)))]}"
+                                  - condition: "${(joinParamsIdx >= 0)}"
+                                    steps:
+                                    - joinParams_switch_updateResult_1:
+                                        assign:
+                                        - joinParams_switchResult_3b2db44f: "${forValues_agentResult_10c88c78.list[(joinParamsIdx - 0)]}"
+                          - joinParams_updateResult:
+                              assign:
+                              - joinParamsResult_4e3b455f: "${list.concat(joinParamsResult_4e3b455f, joinParams_switchResult_3b2db44f)}"
+                - forValues_agent_updateResult:
+                    assign:
+                    - forValues_agentResult_10c88c78:
+                        list: "${joinParamsResult_4e3b455f}"
+  - runExperiments:
+      steps:
+      - runExperiments_initResult:
+          assign:
+          - runExperimentsResult_1cdc1e30: []
+      - runExperiments_steps:
+          parallel:
+            shared:
+            - "runExperimentsResult_1cdc1e30"
+            for:
+              value: "runExperimentsValue"
+              in: "${forValues_agentResult_10c88c78.list}"
+              steps:
+              - logParams:
+                  try:
+                    steps:
+                    - logParams_call:
+                        call: "sys.log"
+                        args:
+                          text: "${(\"[logParams] \" + (\"Running with params: \" + json.encode_to_string(runExperimentsValue)))}"
+                        result: "logParamsResult_24245"
+                  retry: "${http.default_retry}"
+              - evals_experiments_SweBenchLite:
+                  try:
+                    steps:
+                    - evals_experiments_SweBenchLite_call:
+                        call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                        args:
+                          workflow_id: "${\"evals-experiments-SweBenchLite${WORKFLOW_ENV}\"}"
+                          argument:
+                            directory: "${((\"swe-bench-lite-eval\" + \"/\") + map.get(runExperimentsValue, \"agent\"))}"
+                            params: "${runExperimentsValue}"
+                            env:
+                              userId: "${input.env.userId}"
+                              model: "${input.env.model}"
+                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                              BASE_URL: "${input.env.BASE_URL}"
+                              background: "${default(map.get(input.env, \"background\"), null)}"
+                              projectId: "${input.env.projectId}"
+                              sessionId: "${\"evals-experiments-SweBenchLite\"}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                          location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                          project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                          connector_params:
+                            skip_polling: false
+                        result: "evals_experiments_SweBenchLiteResult_2f83b251"
+                  retry: "${http.default_retry}"
+              - runExperiments_updateResult:
+                  assign:
+                  - runExperimentsResult_1cdc1e30: "${list.concat(runExperimentsResult_1cdc1e30, evals_experiments_SweBenchLiteResult_2f83b251)}"
+  - buildHeader_1:
+      steps:
+      - buildHeader_initResult:
+          assign:
+          - buildHeaderResult_133d9900: "${\"\"}"
+      - buildHeader_steps:
+          for:
+            value: "buildHeaderValue"
+            in: "${[\"total_instances\", \"completed_instances\", \"resolved_instances\", \"unresolved_instances\", \"error_instances\"]}"
+            steps:
+            - buildHeader_updateResult:
+                assign:
+                - buildHeaderResult_133d9900: "${text.substring(((buildHeaderResult_133d9900 + \",\") + buildHeaderValue), 1, len(((buildHeaderResult_133d9900 + \",\") + buildHeaderValue)))}"
+  - buildCsv:
+      steps:
+      - buildCsv_initResult:
+          assign:
+          - buildCsvResult_65a22162: "${buildHeaderResult_133d9900}"
+      - buildCsv_steps:
+          for:
+            value: "buildCsvValue"
+            in: "${runExperimentsResult_1cdc1e30}"
+            steps:
+            - csvRow:
+                steps:
+                - csvRow_initResult:
+                    assign:
+                    - csvRowResult_1508315a: []
+                - csvRow_steps:
+                    for:
+                      value: "csvRowValue"
+                      in: "${[\"total_instances\", \"completed_instances\", \"resolved_instances\", \"unresolved_instances\", \"error_instances\"]}"
+                      steps:
+                      - csvRow_updateResult:
+                          assign:
+                          - csvRowResult_1508315a: "${list.concat(csvRowResult_1508315a, map.get(buildCsvValue, csvRowValue))}"
+            - buildHeader:
+                steps:
+                - buildHeader_initResult_1:
+                    assign:
+                    - buildHeaderResult_b0e1ff9: "${\"\"}"
+                - buildHeader_steps_1:
+                    for:
+                      value: "buildHeaderValue"
+                      in: "${csvRowResult_1508315a}"
+                      steps:
+                      - buildHeader_updateResult_1:
+                          assign:
+                          - buildHeaderResult_b0e1ff9: "${text.substring(((buildHeaderResult_b0e1ff9 + \",\") + buildHeaderValue), 1, len(((buildHeaderResult_b0e1ff9 + \",\") + buildHeaderValue)))}"
+            - buildCsv_updateResult:
+                assign:
+                - buildCsvResult_65a22162: "${((buildCsvResult_65a22162 + \"\\n\") + buildHeaderResult_b0e1ff9)}"
+  - writeFile_encoded:
+      steps:
+      - writeFile_call_block:
+          steps:
+          - buildParams:
+              steps:
+              - buildParams_initResult:
+                  assign:
+                  - buildParamsResult_5cc7a35: {}
+              - buildParams_steps:
+                  try:
+                    steps:
+                    - buildParams_updateResult:
+                        assign:
+                        - buildParamsResult_5cc7a35:
+                            filepath: "${(\"swe-bench-lite-eval\" + \"/results.csv\")}"
+                            content: "${buildCsvResult_65a22162}"
+                  except:
+                    as: "buildParamsError"
+                    steps:
+                    - buildParams_logError:
+                        try:
+                          steps:
+                          - buildParams_logError_call:
+                              call: "sys.log"
+                              args:
+                                text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
+                              result: "buildParams_logErrorResult_240d3253"
+                        retry: "${http.default_retry}"
+                    - buildParams_updateResultError:
+                        assign:
+                        - buildParamsResult_5cc7a35: "${null}"
+          - writeFile_await_block:
+              steps:
+              - writeFile_run:
+                  try:
+                    steps:
+                    - writeFile_run_call:
+                        call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                        args:
+                          workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                          argument:
+                            tool_call:
+                              id: "${\"writeFile\"}"
+                              type: "${\"function\"}"
+                              function:
+                                name: "${\"UPDATE_FILE\"}"
+                                arguments: "${json.encode_to_string(buildParamsResult_5cc7a35)}"
+                            cost: 0.0
+                            env:
+                              userId: "${input.env.userId}"
+                              model: "${input.env.model}"
+                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                              BASE_URL: "${input.env.BASE_URL}"
+                              background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                              projectId: "${input.env.projectId}"
+                              sessionId: "${input.env.sessionId}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                          location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                          project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                          connector_params:
+                            skip_polling: false
+                        result: "writeFile_runResult_2bafa6a4"
+                  retry: "${http.default_retry}"
+  - return:
+      return: "${runExperimentsResult_1cdc1e30}"

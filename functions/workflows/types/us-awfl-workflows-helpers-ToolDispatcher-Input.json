@@ -126,6 +126,9 @@
           "background" : {
             "type" : "boolean"
           },
+          "workdir" : {
+            "type" : "string"
+          },
           "projectId" : {
             "type" : "string"
           },
@@ -146,7 +149,8 @@
           "BASE_URL",
           "background",
           "projectId",
-          "sessionId"
+          "sessionId",
+          "workdir"
         ],
         "additionalProperties" : true
       }

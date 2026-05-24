@@ -1,11 +1,23 @@
 {
-  "name" : "us-awfl-workflows-helpers-ToolDefs-Input",
-  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.helpers.ToolDefs.Input.",
+  "name" : "us-awfl-workflows-evals-experiments-SweBenchLite-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.evals.experiments.SweBenchLite.Input.",
   "schema" : {
     "type" : "object",
     "properties" : {
-      "toolNames" : {
+      "directory" : {
         "type" : "string"
+      },
+      "params" : {
+        "type" : "object",
+        "properties" : {
+          "agent" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "agent"
+        ],
+        "additionalProperties" : true
       },
       "env" : {
         "type" : "object",
@@ -49,10 +61,11 @@
       }
     },
     "required" : [
-      "toolNames",
+      "directory",
+      "params",
       "env"
     ],
     "additionalProperties" : true,
-    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-helpers-ToolDefs-Input.json"
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-evals-experiments-SweBenchLite-Input.json"
   }
 }

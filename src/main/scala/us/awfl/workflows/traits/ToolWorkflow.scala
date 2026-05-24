@@ -32,11 +32,22 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
     toolCall: BaseValue[ToolCall],
     cost: BaseValue[Double],
     sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+    background: Value[Boolean] = Env.background.getOrElse(Value(false)),
+    timeoutSeconds: Value[Int] = Value(60),
+    workdir: Value[String] = Env.get.workdir.getOrElse(Value.nil)
   ) = {
     val args = RunWorkflowArgs(
       targetWorkflowName,
-      obj(ToolWorkflow.Input(toolCall, cost, env = obj(Env.get.copy(sessionId = sessionId, background = OptValue(background)))))
+      obj(ToolWorkflow.Input(
+        toolCall,
+        cost,
+        OptValue(timeoutSeconds),
+        env = obj(Env.get.copy(
+          sessionId = sessionId,
+          background = OptValue(background),
+          workdir = OptValue(workdir)
+        ))
+      ))
     )
     val run = Call[RunWorkflowArgs[Input], Result](
       s"${opName}_run",
@@ -54,11 +65,13 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
     params: Seq[(String, BaseValue[?])],
     cost: BaseValue[Double] = obj(0.0),
     sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+    background: Value[Boolean] = Env.background.getOrElse(Value(false)),
+    timeoutSeconds: Value[Int] = Value(60),
+    workdir: Value[String] = Env.get.workdir.getOrElse(Value.nil)
   ) = {
     val buildParams = Try("buildParams", List() -> obj(Map(params*)))
     val tcall     = makeToolCall(s"${opName}", functionName, buildParams.resultValue)
-    val await     = enqueueAndAwait(opName, targetWorkflowName, tcall, cost, sessionId, background)
+    val await     = enqueueAndAwait(opName, targetWorkflowName, tcall, cost, sessionId, background, timeoutSeconds, workdir)
     Block(
       s"${opName}_call_block",
       List[Step[?, ?]](
@@ -81,6 +94,7 @@ object ToolWorkflow {
   case class Input(
     tool_call: BaseValue[ToolCall],
     cost: BaseValue[Double],
+    timeoutSeconds: OptValue[Int] = OptValue(60),
     env: BaseValue[Env] = ENV
   )
   case class Result(encoded: Value[String], cost: Value[Double])

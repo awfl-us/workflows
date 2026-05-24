@@ -70,8 +70,8 @@
           "background" : {
             "type" : "boolean"
           },
-          "workbranch" : {
-            "type" : "boolean"
+          "workdir" : {
+            "type" : "string"
           },
           "projectId" : {
             "type" : "string"
@@ -94,7 +94,7 @@
           "background",
           "projectId",
           "sessionId",
-          "workbranch"
+          "workdir"
         ],
         "additionalProperties" : true
       },

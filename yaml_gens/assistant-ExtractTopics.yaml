@@ -62,13 +62,14 @@ main:
                   background: "${default(map.get(input.env, \"background\"), null)}"
                   projectId: "${input.env.projectId}"
                   sessionId: "${input.env.sessionId}"
+                  workdir: "${default(map.get(input.env, \"workdir\"), null)}"
               location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "All_Latest_runResult_dfae277"
+            result: "All_Latest_runResult_2809ffaa"
       retry: "${http.default_retry}"
   - returnLatest:
-      return: "${All_Latest_runResult_dfae277}"
+      return: "${All_Latest_runResult_2809ffaa}"
   - return:
-      return: "${All_Latest_runResult_dfae277}"
+      return: "${All_Latest_runResult_2809ffaa}"

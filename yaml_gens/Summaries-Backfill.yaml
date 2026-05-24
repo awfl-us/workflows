@@ -47,7 +47,7 @@ main:
       steps:
       - forEachSegment_initResult:
           assign:
-          - forEachSegmentResult_47eb0309: []
+          - forEachSegmentResult_2b69b302: []
       - forEachSegment_steps:
           for:
             value: "forEachSegmentValue"
@@ -72,16 +72,17 @@ main:
                             background: "${default(map.get(input.env, \"background\"), null)}"
                             projectId: "${input.env.projectId}"
                             sessionId: "${input.env.sessionId}"
+                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                         location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "All_Backfill_runResult_4fa8ca42"
+                      result: "All_Backfill_runResult_2c76e3e2"
                 retry: "${http.default_retry}"
             - forEachSegment_updateResult:
                 assign:
-                - forEachSegmentResult_47eb0309: "${list.concat(forEachSegmentResult_47eb0309, All_Backfill_runResult_4fa8ca42)}"
+                - forEachSegmentResult_2b69b302: "${list.concat(forEachSegmentResult_2b69b302, All_Backfill_runResult_2c76e3e2)}"
   - returnBackfill:
-      return: "${forEachSegmentResult_47eb0309}"
+      return: "${forEachSegmentResult_2b69b302}"
   - return:
-      return: "${forEachSegmentResult_47eb0309}"
+      return: "${forEachSegmentResult_2b69b302}"

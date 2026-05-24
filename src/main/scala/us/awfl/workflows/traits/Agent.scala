@@ -31,7 +31,7 @@ trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with T
     name: String,
     query: Value[String],
     fund: Value[Double],
-    spent: Value[Double],
+    spent: Value[Double] = Value(0),
     task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
     env: BaseValue[Env] = obj(Env.get.copy(sessionId = str(workflowName)))
