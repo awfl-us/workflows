@@ -8,6 +8,10 @@ import us.awfl.dsl.Value
 import us.awfl.dsl.Cel
 import us.awfl.dsl.ListValue
 
+/**
+ * Run this workflow from inside a SWE-bench venv,
+ * this way it can use the python utils to load datasets and run the eval
+**/
 object SweBenchLiteEval extends Eval[BenchmarkParams, BenchmarkRunSummary] {
   override type Input = String
   override type Result = String

@@ -12,6 +12,7 @@ object Datasets {
     repo: Value[String],
     base_commit: Value[String],
     problem_statement: Value[String],
+    FAIL_TO_PASS: Value[String],
     hints_text: Value[String]
   )
   def sweBenchLite = Dataset[SweBenchInstance](str("SWE-bench/SWE-bench_Lite"))

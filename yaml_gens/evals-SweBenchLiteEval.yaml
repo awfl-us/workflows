@@ -33,7 +33,7 @@ main:
           steps:
           - forValues_agent_initResult:
               assign:
-              - forValues_agentResult_10c88c78:
+              - forValues_agentResult_5307efbc:
                   list: "${[]}"
           - forValues_agent_steps:
               for:
@@ -44,34 +44,36 @@ main:
                     steps:
                     - buildV_initResult:
                         assign:
-                        - buildVResult_2668c9d1: {}
+                        - buildVResult_7f87572d: {}
                     - buildV_steps:
                         try:
                           steps:
                           - buildV_updateResult:
                               assign:
-                              - buildVResult_2668c9d1:
+                              - buildVResult_7f87572d:
                                   agent: "${forValues_agentValue}"
                         except:
                           as: "buildVError"
                           steps:
-                          - buildV_logError:
+                          - logError:
                               try:
                                 steps:
-                                - buildV_logError_call:
+                                - logError_call:
                                     call: "sys.log"
                                     args:
-                                      text: "${(\"[buildV_logError] \" + buildVError.message)}"
-                                    result: "buildV_logErrorResult_5f5608d9"
+                                      text: "${(\"[logError] \" + buildVError.message)}"
+                                    result: "logErrorResult_711f59de"
                               retry: "${http.default_retry}"
+                          - reRaise:
+                              raise: "${buildVError}"
                           - buildV_updateResultError:
                               assign:
-                              - buildVResult_2668c9d1: "${null}"
+                              - buildVResult_7f87572d: "${null}"
                 - forB:
                     steps:
                     - forB_initResult:
                         assign:
-                        - forBResult_e59dc65: []
+                        - forBResult_69c9410b: []
                     - forB_steps:
                         for:
                           value: "forBValue"
@@ -79,53 +81,53 @@ main:
                           steps:
                           - forB_updateResult:
                               assign:
-                              - forBResult_e59dc65: "${list.concat(forBResult_e59dc65, map.merge(forBValue, buildVResult_2668c9d1))}"
+                              - forBResult_69c9410b: "${list.concat(forBResult_69c9410b, map.merge(forBValue, buildVResult_7f87572d))}"
                 - joinParams:
                     steps:
                     - joinParams_initResult:
                         assign:
-                        - joinParamsResult_4e3b455f: []
+                        - joinParamsResult_60ce7c03: []
                     - joinParams_steps:
                         for:
                           value: "joinParamsIdx"
-                          range: "${[0, (((0 + len(forValues_agentResult_10c88c78.list)) + len(forBResult_e59dc65)) - 1)]}"
+                          range: "${[0, (((0 + len(forValues_agentResult_5307efbc.list)) + len(forBResult_69c9410b)) - 1)]}"
                           steps:
                           - joinParams_switch:
                               steps:
                               - joinParams_switch_initResult:
                                   assign:
-                                  - joinParams_switchResult_3b2db44f: {}
+                                  - joinParams_switchResult_734798eb: {}
                               - joinParams_switch_steps:
                                   switch:
-                                  - condition: "${(joinParamsIdx >= (0 + len(forValues_agentResult_10c88c78.list)))}"
+                                  - condition: "${(joinParamsIdx >= (0 + len(forValues_agentResult_5307efbc.list)))}"
                                     steps:
                                     - joinParams_switch_updateResult_0:
                                         assign:
-                                        - joinParams_switchResult_3b2db44f: "${forBResult_e59dc65[(joinParamsIdx - (0 + len(forValues_agentResult_10c88c78.list)))]}"
+                                        - joinParams_switchResult_734798eb: "${forBResult_69c9410b[(joinParamsIdx - (0 + len(forValues_agentResult_5307efbc.list)))]}"
                                   - condition: "${(joinParamsIdx >= 0)}"
                                     steps:
                                     - joinParams_switch_updateResult_1:
                                         assign:
-                                        - joinParams_switchResult_3b2db44f: "${forValues_agentResult_10c88c78.list[(joinParamsIdx - 0)]}"
+                                        - joinParams_switchResult_734798eb: "${forValues_agentResult_5307efbc.list[(joinParamsIdx - 0)]}"
                           - joinParams_updateResult:
                               assign:
-                              - joinParamsResult_4e3b455f: "${list.concat(joinParamsResult_4e3b455f, joinParams_switchResult_3b2db44f)}"
+                              - joinParamsResult_60ce7c03: "${list.concat(joinParamsResult_60ce7c03, joinParams_switchResult_734798eb)}"
                 - forValues_agent_updateResult:
                     assign:
-                    - forValues_agentResult_10c88c78:
-                        list: "${joinParamsResult_4e3b455f}"
+                    - forValues_agentResult_5307efbc:
+                        list: "${joinParamsResult_60ce7c03}"
   - runExperiments:
       steps:
       - runExperiments_initResult:
           assign:
-          - runExperimentsResult_1cdc1e30: []
+          - runExperimentsResult_147a2ab2: []
       - runExperiments_steps:
           parallel:
             shared:
-            - "runExperimentsResult_1cdc1e30"
+            - "runExperimentsResult_147a2ab2"
             for:
               value: "runExperimentsValue"
-              in: "${forValues_agentResult_10c88c78.list}"
+              in: "${forValues_agentResult_5307efbc.list}"
               steps:
               - logParams:
                   try:
@@ -163,29 +165,29 @@ main:
                   retry: "${http.default_retry}"
               - runExperiments_updateResult:
                   assign:
-                  - runExperimentsResult_1cdc1e30: "${list.concat(runExperimentsResult_1cdc1e30, evals_experiments_SweBenchLiteResult_2f83b251)}"
-  - buildHeader_1:
+                  - runExperimentsResult_147a2ab2: "${list.concat(runExperimentsResult_147a2ab2, evals_experiments_SweBenchLiteResult_2f83b251)}"
+  - buildCsvRow_1:
       steps:
-      - buildHeader_initResult:
+      - buildCsvRow_initResult:
           assign:
-          - buildHeaderResult_133d9900: "${\"\"}"
-      - buildHeader_steps:
+          - buildCsvRowResult_97b98c: "${\"\"}"
+      - buildCsvRow_steps:
           for:
-            value: "buildHeaderValue"
+            value: "buildCsvRowValue"
             in: "${[\"total_instances\", \"completed_instances\", \"resolved_instances\", \"unresolved_instances\", \"error_instances\"]}"
             steps:
-            - buildHeader_updateResult:
+            - buildCsvRow_updateResult:
                 assign:
-                - buildHeaderResult_133d9900: "${text.substring(((buildHeaderResult_133d9900 + \",\") + buildHeaderValue), 1, len(((buildHeaderResult_133d9900 + \",\") + buildHeaderValue)))}"
+                - buildCsvRowResult_97b98c: "${text.substring(((buildCsvRowResult_97b98c + \",\") + buildCsvRowValue), 1, len(((buildCsvRowResult_97b98c + \",\") + buildCsvRowValue)))}"
   - buildCsv:
       steps:
       - buildCsv_initResult:
           assign:
-          - buildCsvResult_65a22162: "${buildHeaderResult_133d9900}"
+          - buildCsvResult_7c79710f: "${buildCsvRowResult_97b98c}"
       - buildCsv_steps:
           for:
             value: "buildCsvValue"
-            in: "${runExperimentsResult_1cdc1e30}"
+            in: "${runExperimentsResult_147a2ab2}"
             steps:
             - csvRow:
                 steps:
@@ -200,22 +202,22 @@ main:
                       - csvRow_updateResult:
                           assign:
                           - csvRowResult_1508315a: "${list.concat(csvRowResult_1508315a, map.get(buildCsvValue, csvRowValue))}"
-            - buildHeader:
+            - buildCsvRow:
                 steps:
-                - buildHeader_initResult_1:
+                - buildCsvRow_initResult_1:
                     assign:
-                    - buildHeaderResult_b0e1ff9: "${\"\"}"
-                - buildHeader_steps_1:
+                    - buildCsvRowResult_5f6a6128: "${\"\"}"
+                - buildCsvRow_steps_1:
                     for:
-                      value: "buildHeaderValue"
+                      value: "buildCsvRowValue"
                       in: "${csvRowResult_1508315a}"
                       steps:
-                      - buildHeader_updateResult_1:
+                      - buildCsvRow_updateResult_1:
                           assign:
-                          - buildHeaderResult_b0e1ff9: "${text.substring(((buildHeaderResult_b0e1ff9 + \",\") + buildHeaderValue), 1, len(((buildHeaderResult_b0e1ff9 + \",\") + buildHeaderValue)))}"
+                          - buildCsvRowResult_5f6a6128: "${text.substring(((buildCsvRowResult_5f6a6128 + \",\") + buildCsvRowValue), 1, len(((buildCsvRowResult_5f6a6128 + \",\") + buildCsvRowValue)))}"
             - buildCsv_updateResult:
                 assign:
-                - buildCsvResult_65a22162: "${((buildCsvResult_65a22162 + \"\\n\") + buildHeaderResult_b0e1ff9)}"
+                - buildCsvResult_7c79710f: "${((buildCsvResult_7c79710f + \"\\n\") + buildCsvRowResult_5f6a6128)}"
   - writeFile_encoded:
       steps:
       - writeFile_call_block:
@@ -224,30 +226,32 @@ main:
               steps:
               - buildParams_initResult:
                   assign:
-                  - buildParamsResult_5cc7a35: {}
+                  - buildParamsResult_75b25eb6: {}
               - buildParams_steps:
                   try:
                     steps:
                     - buildParams_updateResult:
                         assign:
-                        - buildParamsResult_5cc7a35:
+                        - buildParamsResult_75b25eb6:
                             filepath: "${(\"swe-bench-lite-eval\" + \"/results.csv\")}"
-                            content: "${buildCsvResult_65a22162}"
+                            content: "${buildCsvResult_7c79710f}"
                   except:
                     as: "buildParamsError"
                     steps:
-                    - buildParams_logError:
+                    - logError_1:
                         try:
                           steps:
-                          - buildParams_logError_call:
+                          - logError_call_1:
                               call: "sys.log"
                               args:
-                                text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
-                              result: "buildParams_logErrorResult_240d3253"
+                                text: "${(\"[logError] \" + buildParamsError.message)}"
+                              result: "logErrorResult_1671996f"
                         retry: "${http.default_retry}"
+                    - reRaise_1:
+                        raise: "${buildParamsError}"
                     - buildParams_updateResultError:
                         assign:
-                        - buildParamsResult_5cc7a35: "${null}"
+                        - buildParamsResult_75b25eb6: "${null}"
           - writeFile_await_block:
               steps:
               - writeFile_run:
@@ -263,8 +267,9 @@ main:
                               type: "${\"function\"}"
                               function:
                                 name: "${\"UPDATE_FILE\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_5cc7a35)}"
+                                arguments: "${json.encode_to_string(buildParamsResult_75b25eb6)}"
                             cost: 0.0
+                            timeoutSeconds: "${default(60, null)}"
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
@@ -273,12 +278,12 @@ main:
                               background: "${default(default(map.get(input.env, \"background\"), false), null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${input.env.sessionId}"
-                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                              workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "writeFile_runResult_2bafa6a4"
+                        result: "writeFile_runResult_55f7dc39"
                   retry: "${http.default_retry}"
   - return:
-      return: "${runExperimentsResult_1cdc1e30}"
+      return: "${runExperimentsResult_147a2ab2}"

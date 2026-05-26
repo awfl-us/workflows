@@ -4,9 +4,28 @@
   "schema" : {
     "type" : "object",
     "properties" : {
-      
+      "completed_instances" : {
+        "type" : "integer"
+      },
+      "resolved_instances" : {
+        "type" : "integer"
+      },
+      "total_instances" : {
+        "type" : "integer"
+      },
+      "unresolved_instances" : {
+        "type" : "integer"
+      },
+      "error_instances" : {
+        "type" : "integer"
+      }
     },
     "required" : [
+      "total_instances",
+      "completed_instances",
+      "resolved_instances",
+      "unresolved_instances",
+      "error_instances"
     ],
     "additionalProperties" : true,
     "$id" : "https://topaigents.dev/workflows/types/services-Llm-ChatToolResponse.json"

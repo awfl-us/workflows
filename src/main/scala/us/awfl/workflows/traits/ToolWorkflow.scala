@@ -31,10 +31,8 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
     targetWorkflowName: Value[String],
     toolCall: BaseValue[ToolCall],
     cost: BaseValue[Double],
-    sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false)),
     timeoutSeconds: Value[Int] = Value(60),
-    workdir: Value[String] = Env.get.workdir.getOrElse(Value.nil)
+    env: BaseValue[Env] = ENV
   ) = {
     val args = RunWorkflowArgs(
       targetWorkflowName,
@@ -42,11 +40,7 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
         toolCall,
         cost,
         OptValue(timeoutSeconds),
-        env = obj(Env.get.copy(
-          sessionId = sessionId,
-          background = OptValue(background),
-          workdir = OptValue(workdir)
-        ))
+        env = env
       ))
     )
     val run = Call[RunWorkflowArgs[Input], Result](
@@ -64,14 +58,12 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
     functionName: String,
     params: Seq[(String, BaseValue[?])],
     cost: BaseValue[Double] = obj(0.0),
-    sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false)),
     timeoutSeconds: Value[Int] = Value(60),
-    workdir: Value[String] = Env.get.workdir.getOrElse(Value.nil)
+    env: BaseValue[Env] = ENV
   ) = {
     val buildParams = Try("buildParams", List() -> obj(Map(params*)))
     val tcall     = makeToolCall(s"${opName}", functionName, buildParams.resultValue)
-    val await     = enqueueAndAwait(opName, targetWorkflowName, tcall, cost, sessionId, background, timeoutSeconds, workdir)
+    val await     = enqueueAndAwait(opName, targetWorkflowName, tcall, cost, timeoutSeconds, env)
     Block(
       s"${opName}_call_block",
       List[Step[?, ?]](

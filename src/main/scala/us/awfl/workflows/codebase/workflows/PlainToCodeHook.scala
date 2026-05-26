@@ -5,6 +5,7 @@ import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ChatMessage
 import us.awfl.workflows.tools.CliTools
+import us.awfl.utils.Env
 
 /**
  * PlainToCodeHook
@@ -41,8 +42,10 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     val plainSpec = CliTools.readFile(
       filepath = plainPath,
       opName = "readPlain",
-      sessionId = sessionId,
-      background = Value(true)
+      env = obj(Env.get.copy(
+        sessionId = sessionId,
+        background = OptValue(true)
+      ))
     )
 
     // 2) Ask LLM to generate the complete, compilable code for <filepath>
@@ -81,8 +84,10 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
     val doMkdir = CliTools.runCommand(
       command = str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel))),
       opName = "mkdirCode",
-      sessionId = sessionId,
-      background = Value(true)
+      env = obj(Env.get.copy(
+        sessionId = sessionId,
+        background = OptValue(true)
+      ))
     )
 
     // 4) Write generated code to <filepath>
@@ -90,8 +95,10 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
       filepath = outPath,
       content  = generatedCode,
       opName   = "writeCode",
-      sessionId = sessionId,
-      background = Value(true)
+      env = obj(Env.get.copy(
+        sessionId = sessionId,
+        background = OptValue(true)
+      ))
     )
 
     Workflow(

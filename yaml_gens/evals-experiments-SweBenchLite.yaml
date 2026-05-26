@@ -57,23 +57,23 @@ main:
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
-                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                              callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                               BASE_URL: "${input.env.BASE_URL}"
-                              background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                              background: "${default(map.get(input.env, \"background\"), null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${input.env.sessionId}"
-                              workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "writeFile_runResult_5716afd"
+                        result: "writeFile_runResult_4cb0ec09"
                   retry: "${http.default_retry}"
   - task:
       steps:
       - task_initResult:
           assign:
-          - taskResult_5426af26: {}
+          - taskResult_a6a3eb4: {}
       - task_steps:
           try:
             steps:
@@ -81,7 +81,7 @@ main:
                 steps:
                 - loadDataset_initResult:
                     assign:
-                    - loadDatasetResult_384d65d6: {}
+                    - loadDatasetResult_f17e8d3: {}
                 - loadDataset_steps:
                     try:
                       steps:
@@ -203,51 +203,51 @@ main:
                                                 env:
                                                   userId: "${input.env.userId}"
                                                   model: "${input.env.model}"
-                                                  callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                  callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                                                   BASE_URL: "${input.env.BASE_URL}"
-                                                  background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                                                  background: "${default(map.get(input.env, \"background\"), null)}"
                                                   projectId: "${input.env.projectId}"
                                                   sessionId: "${input.env.sessionId}"
-                                                  workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                                                  workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                                               location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                               connector_params:
                                                 skip_polling: false
-                                            result: "runCommand_runResult_24ef0201"
+                                            result: "runCommand_runResult_21cd4f9b"
                                       retry: "${http.default_retry}"
                           - checkError:
                               steps:
                               - checkError_initResult:
                                   assign:
-                                  - checkErrorResult_7f40594b: {}
+                                  - checkErrorResult_5d9fb1b5: {}
                               - checkError_steps:
                                   switch:
-                                  - condition: "${(len(map.get(json.decode(runCommand_runResult_24ef0201.encoded), \"error\")) == 0)}"
+                                  - condition: "${(map.get(json.decode(runCommand_runResult_21cd4f9b.encoded), \"exitCode\") == 0)}"
                                     steps:
                                     - checkError_updateResult_0:
                                         assign:
-                                        - checkErrorResult_7f40594b: "${map.get(json.decode(runCommand_runResult_24ef0201.encoded), \"output\")}"
+                                        - checkErrorResult_5d9fb1b5: "${map.get(json.decode(runCommand_runResult_21cd4f9b.encoded), \"output\")}"
                                   - condition: "${true}"
                                     steps:
                                     - checkError_updateResult_1:
                                         assign:
-                                        - checkErrorResult_7f40594b: "${map.get(json.decode(runCommand_runResult_24ef0201.encoded), \"output\")}"
+                                        - checkErrorResult_5d9fb1b5: "${map.get(json.decode(runCommand_runResult_21cd4f9b.encoded), \"output\")}"
                       - decode:
                           steps:
                           - decode_initResult:
                               assign:
-                              - decodeResult_447fb6fd: []
+                              - decodeResult_2aaf42e0: []
                           - decode_steps:
                               for:
                                 value: "decodeValue"
-                                in: "${text.split(checkErrorResult_7f40594b, \"\\n\")}"
+                                in: "${text.split(checkErrorResult_5d9fb1b5, \"\\n\")}"
                                 steps:
                                 - decode_updateResult:
                                     assign:
-                                    - decodeResult_447fb6fd: "${list.concat(decodeResult_447fb6fd, json.decode(decodeValue))}"
+                                    - decodeResult_2aaf42e0: "${list.concat(decodeResult_2aaf42e0, json.decode(decodeValue))}"
                       - loadDataset_updateResult:
                           assign:
-                          - loadDatasetResult_384d65d6: "${decodeResult_447fb6fd}"
+                          - loadDatasetResult_f17e8d3: "${decodeResult_2aaf42e0}"
                     except:
                       as: "loadDatasetError"
                       steps:
@@ -264,92 +264,100 @@ main:
                           raise: "${loadDatasetError}"
                       - loadDataset_updateResultError:
                           assign:
-                          - loadDatasetResult_384d65d6: "${\"null\"}"
+                          - loadDatasetResult_f17e8d3: "${\"null\"}"
             - runInstances:
                 steps:
                 - runInstances_initResult:
                     assign:
-                    - runInstancesResult_44473bce: []
+                    - runInstancesResult_3f8315ec: []
                 - runInstances_steps:
                     parallel:
                       shared:
-                      - "runInstancesResult_44473bce"
+                      - "runInstancesResult_3f8315ec"
                       for:
                         value: "runInstancesValue"
-                        in: "${loadDatasetResult_384d65d6}"
+                        in: "${loadDatasetResult_f17e8d3}"
                         steps:
-                        - initWorktree:
+                        - safeRun:
                             steps:
-                            - initWorktree_initResult:
+                            - safeRun_initResult:
                                 assign:
-                                - initWorktreeResult_73081e62: {}
-                            - initWorktree_steps:
+                                - safeRunResult_8533ea6: {}
+                            - safeRun_steps:
                                 try:
                                   steps:
-                                  - readFileBlock_1:
+                                  - initEnv:
                                       steps:
-                                      - logParams_1:
+                                      - initEnv_initResult:
+                                          assign:
+                                          - initEnvResult_71e5323f: {}
+                                      - initEnv_steps:
                                           try:
                                             steps:
-                                            - logParams_call_1:
-                                                call: "sys.log"
-                                                args:
-                                                  text: "${(\"[logParams] \" + ((((\"Reading file from storage (\" + (sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\") + text.to_lower(\"-workflow-files${WORKFLOW_ENV}\"))) + \"/\") + \"scripts/init_worktree.sh\") + \")\"))}"
-                                                result: "logParamsResult_339a88e1"
-                                          retry: "${http.default_retry}"
-                                      - readFile_block_1:
-                                          steps:
-                                          - readFile_buildArgs_1:
-                                              steps:
-                                              - readFile_buildArgs_initResult_1:
-                                                  assign:
-                                                  - readFile_buildArgsResult_1c729441: {}
-                                              - readFile_buildArgs_steps_1:
-                                                  try:
-                                                    steps:
-                                                    - readFile_buildArgs_updateResult_1:
-                                                        assign:
-                                                        - readFile_buildArgsResult_1c729441:
-                                                            bucket: "${(sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\") + text.to_lower(\"-workflow-files${WORKFLOW_ENV}\"))}"
-                                                            object: "${text.url_encode(\"scripts/init_worktree.sh\")}"
-                                                            alt: "${\"media\"}"
-                                                  except:
-                                                    as: "readFile_buildArgsError"
-                                                    steps:
-                                                    - logError_4:
-                                                        try:
-                                                          steps:
-                                                          - logError_call_4:
-                                                              call: "sys.log"
-                                                              args:
-                                                                text: "${(\"[logError] \" + readFile_buildArgsError.message)}"
-                                                              result: "logErrorResult_79bcd3fb"
-                                                        retry: "${http.default_retry}"
-                                                    - reRaise_4:
-                                                        raise: "${readFile_buildArgsError}"
-                                                    - readFile_buildArgs_updateResultError_1:
-                                                        assign:
-                                                        - readFile_buildArgsResult_1c729441: "${null}"
-                                          - readFile_logFileReadCall_1:
-                                              try:
-                                                steps:
-                                                - readFile_logFileReadCall_call_1:
-                                                    call: "sys.log"
-                                                    args:
-                                                      text: "${(\"[readFile_logFileReadCall] \" + (\"Storage readFile call: \" + json.encode_to_string(readFile_buildArgsResult_1c729441)))}"
-                                                    result: "readFile_logFileReadCallResult_4f492c28"
-                                              retry: "${http.default_retry}"
-                                          - readFile_1:
-                                              try:
-                                                steps:
-                                                - readFile_call_1:
-                                                    call: "googleapis.storage.v1.objects.get"
-                                                    args:
-                                                      bucket: "${(sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\") + text.to_lower(\"-workflow-files${WORKFLOW_ENV}\"))}"
-                                                      object: "${text.url_encode(\"scripts/init_worktree.sh\")}"
-                                                      alt: "${\"media\"}"
-                                                    result: "readFileResult_5d0266e4"
-                                              retry: "${http.default_retry}"
+                                            - createProject:
+                                                try:
+                                                  steps:
+                                                  - createProject_call:
+                                                      call: "http.post"
+                                                      args:
+                                                        url: "${((input.env.BASE_URL + \"/\") + \"projects/\")}"
+                                                        body:
+                                                          name: "${(\"tmp/\" + uuid.generate())}"
+                                                          remote: "${null}"
+                                                        auth:
+                                                          type: "${\"OIDC\"}"
+                                                          audience: "${input.env.BASE_URL}"
+                                                        headers:
+                                                          x-user-id: "${input.env.userId}"
+                                                          x-project-id: "${input.env.projectId}"
+                                                      result: "createProjectResult_21d79f7b"
+                                                retry: "${http.default_retry}"
+                                            - startProducer:
+                                                try:
+                                                  steps:
+                                                  - startProducer_call:
+                                                      call: "http.post"
+                                                      args:
+                                                        url: "${((input.env.BASE_URL + \"/\") + \"producer/start\")}"
+                                                        body:
+                                                          sessionId: "${uuid.generate()}"
+                                                          image: "${(\"ghcr.io/epoch-research/swe-bench.eval.x86_64.\" + runInstancesValue.instance_id)}"
+                                                        auth:
+                                                          type: "${\"OIDC\"}"
+                                                          audience: "${input.env.BASE_URL}"
+                                                        headers:
+                                                          x-user-id: "${input.env.userId}"
+                                                          x-project-id: "${createProjectResult_21d79f7b.body.project.id}"
+                                                      result: "startProducerResult_f61dc05"
+                                                retry: "${http.default_retry}"
+                                            - initEnv_updateResult:
+                                                assign:
+                                                - initEnvResult_71e5323f:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(map.get(input.env, \"background\"), null)}"
+                                                    projectId: "${createProjectResult_21d79f7b.body.project.id}"
+                                                    sessionId: "${uuid.generate()}"
+                                                    workdir: "${default(\"/testbed\", null)}"
+                                          except:
+                                            as: "initEnvError"
+                                            steps:
+                                            - logError_4:
+                                                try:
+                                                  steps:
+                                                  - logError_call_4:
+                                                      call: "sys.log"
+                                                      args:
+                                                        text: "${(\"[logError] \" + initEnvError.message)}"
+                                                      result: "logErrorResult_72028805"
+                                                retry: "${http.default_retry}"
+                                            - reRaise_4:
+                                                raise: "${initEnvError}"
+                                            - initEnv_updateResultError:
+                                                assign:
+                                                - initEnvResult_71e5323f: "${null}"
                                   - runCommand_output_1:
                                       steps:
                                       - runCommand_call_block_1:
@@ -358,14 +366,14 @@ main:
                                               steps:
                                               - buildParams_initResult_2:
                                                   assign:
-                                                  - buildParamsResult_79f55d5f: {}
+                                                  - buildParamsResult_2a24226a: {}
                                               - buildParams_steps_2:
                                                   try:
                                                     steps:
                                                     - buildParams_updateResult_2:
                                                         assign:
-                                                        - buildParamsResult_79f55d5f:
-                                                            command: "${(((((((\"SESSION_ID='\" + uuid.generate()) + \"'\\nREPO_URL='\") + runInstancesValue.repo) + \"'\\nBRANCH='\") + runInstancesValue.base_commit) + \"'\\n\\n\") + text.decode(readFileResult_5d0266e4))}"
+                                                        - buildParamsResult_2a24226a:
+                                                            command: "${\"echo \\\"$PATH\\\"\\nwhich python || true\\nwhich pytest || true\\nfind / -path '*bin/pytest' 2>/dev/null | head -20\\nfind / -path '*bin/python' 2>/dev/null | head -20\\n\"}"
                                                   except:
                                                     as: "buildParamsError"
                                                     steps:
@@ -382,7 +390,7 @@ main:
                                                         raise: "${buildParamsError}"
                                                     - buildParams_updateResultError_2:
                                                         assign:
-                                                        - buildParamsResult_79f55d5f: "${null}"
+                                                        - buildParamsResult_2a24226a: "${null}"
                                           - runCommand_await_block_1:
                                               steps:
                                               - runCommand_run_1:
@@ -398,214 +406,320 @@ main:
                                                               type: "${\"function\"}"
                                                               function:
                                                                 name: "${\"RUN_COMMAND\"}"
-                                                                arguments: "${json.encode_to_string(buildParamsResult_79f55d5f)}"
+                                                                arguments: "${json.encode_to_string(buildParamsResult_2a24226a)}"
                                                             cost: 0.0
-                                                            timeoutSeconds: "${default(300, null)}"
-                                                            env:
-                                                              userId: "${input.env.userId}"
-                                                              model: "${input.env.model}"
-                                                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                                              BASE_URL: "${input.env.BASE_URL}"
-                                                              background: "${default(default(map.get(input.env, \"background\"), false), null)}"
-                                                              projectId: "${input.env.projectId}"
-                                                              sessionId: "${input.env.sessionId}"
-                                                              workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                                                            timeoutSeconds: "${default(60, null)}"
+                                                            env: "${initEnvResult_71e5323f}"
                                                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                           connector_params:
                                                             skip_polling: false
-                                                        result: "runCommand_runResult_4e6c4016"
+                                                        result: "runCommand_runResult_765672f6"
                                                   retry: "${http.default_retry}"
                                       - checkError_1:
                                           steps:
                                           - checkError_initResult_1:
                                               assign:
-                                              - checkErrorResult_46acbe8c: {}
+                                              - checkErrorResult_49797069: {}
                                           - checkError_steps_1:
                                               switch:
-                                              - condition: "${(len(map.get(json.decode(runCommand_runResult_4e6c4016.encoded), \"error\")) == 0)}"
+                                              - condition: "${(map.get(json.decode(runCommand_runResult_765672f6.encoded), \"exitCode\") == 0)}"
                                                 steps:
                                                 - checkError_updateResult_0_1:
                                                     assign:
-                                                    - checkErrorResult_46acbe8c: "${map.get(json.decode(runCommand_runResult_4e6c4016.encoded), \"output\")}"
+                                                    - checkErrorResult_49797069: "${map.get(json.decode(runCommand_runResult_765672f6.encoded), \"output\")}"
                                               - condition: "${true}"
                                                 steps:
-                                                - raiseError:
-                                                    raise:
-                                                      message: "${map.get(json.decode(runCommand_runResult_4e6c4016.encoded), \"error\")}"
-                                                      code: "${500}"
                                                 - checkError_updateResult_1_1:
                                                     assign:
-                                                    - checkErrorResult_46acbe8c: "${null}"
-                                  - initWorktree_updateResult:
-                                      assign:
-                                      - initWorktreeResult_73081e62: "${checkErrorResult_46acbe8c}"
-                                except:
-                                  as: "initWorktreeError"
-                                  steps:
-                                  - logError_6:
-                                      try:
-                                        steps:
-                                        - logError_call_6:
-                                            call: "sys.log"
-                                            args:
-                                              text: "${(\"[logError] \" + initWorktreeError.message)}"
-                                            result: "logErrorResult_4dcbb463"
-                                      retry: "${http.default_retry}"
-                                  - reRaise_6:
-                                      raise: "${initWorktreeError}"
-                                  - initWorktree_updateResultError:
-                                      assign:
-                                      - initWorktreeResult_73081e62: "${null}"
-                        - selectAgent:
-                            steps:
-                            - selectAgent_initResult:
-                                assign:
-                                - selectAgentResult_7cc346a7: {}
-                            - selectAgent_steps:
-                                switch:
-                                - condition: "${(input.params.agent == \"AWFL\")}"
-                                  steps:
-                                  - codebase_ProjectManager:
-                                      try:
-                                        steps:
-                                        - codebase_ProjectManager_call:
-                                            call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                            args:
-                                              workflow_id: "${\"codebase-ProjectManager${WORKFLOW_ENV}\"}"
-                                              argument:
-                                                query: "${((\"Your job is to fix the following issue and ensure that all tests pass: \" + runInstancesValue.problem_statement) + \" * DON'T RESPOND UNTIL THE TESTS PASS OR YOU ARE COMPLETELY STUCK.\")}"
-                                                fund: "${1}"
-                                                spent: "${default(0, null)}"
-                                                task:
-                                                  title: "${\"[URGENT] Important Issue\"}"
-                                                  description: "${(runInstancesValue.problem_statement + \"\\nTODO:\\n[ ] Investigate project architecture relevant to problem. Update this task.\\n[ ] Plan out implementation, changes needed, dependencies, etc. Update this task.\\n[ ] Implement changes. Update this task.\\n[ ] Run tests, check output.\\n[ ] Either: iterate back through this TODO list to fix tests, Or: mark task complete and respond.\\n            \")}"
-                                                  status: "${\"In Progress\"}"
-                                                toolChoice: "${default(null, null)}"
-                                                sideCall: "${default(false, null)}"
-                                                env:
-                                                  userId: "${input.env.userId}"
-                                                  model: "${input.env.model}"
-                                                  callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                                  BASE_URL: "${input.env.BASE_URL}"
-                                                  background: "${default(map.get(input.env, \"background\"), null)}"
-                                                  projectId: "${input.env.projectId}"
-                                                  sessionId: "${uuid.generate()}"
-                                                  workdir: "${default(initWorktreeResult_73081e62, null)}"
-                                              location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                              project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                              connector_params:
-                                                skip_polling: false
-                                            result: "codebase_ProjectManagerResult_6210d829"
-                                      retry: "${http.default_retry}"
-                                  - selectAgent_updateResult_0:
-                                      assign:
-                                      - selectAgentResult_7cc346a7: "${codebase_ProjectManagerResult_6210d829}"
-                        - runCommand_output_2:
-                            steps:
-                            - runCommand_call_block_2:
-                                steps:
-                                - buildParams_3:
-                                    steps:
-                                    - buildParams_initResult_3:
-                                        assign:
-                                        - buildParamsResult_75804e5d: {}
-                                    - buildParams_steps_3:
-                                        try:
+                                                    - checkErrorResult_49797069: "${map.get(json.decode(runCommand_runResult_765672f6.encoded), \"output\")}"
+                                  - buildTodo:
+                                      steps:
+                                      - buildTodo_initResult:
+                                          assign:
+                                          - buildTodoResult_59ad5e23: {}
+                                      - buildTodo_steps:
+                                          try:
+                                            steps:
+                                            - buildTodo_updateResult:
+                                                assign:
+                                                - buildTodoResult_59ad5e23: "${\"\\nTODO:\\n[ ] Investigate project architecture relevant to problem. Update this task.\\n[ ] Plan out implementation, changes needed, dependencies, etc. Update this task.\\n[ ] Implement changes. Update this task.\\n[ ] Run tests, check output.\\n[ ] Either: iterate back through this TODO list to fix tests, Or: mark task complete and respond.\\n            \"}"
+                                          except:
+                                            as: "buildTodoError"
+                                            steps:
+                                            - logError_6:
+                                                try:
+                                                  steps:
+                                                  - logError_call_6:
+                                                      call: "sys.log"
+                                                      args:
+                                                        text: "${(\"[logError] \" + buildTodoError.message)}"
+                                                      result: "logErrorResult_3c6f3f01"
+                                                retry: "${http.default_retry}"
+                                            - reRaise_6:
+                                                raise: "${buildTodoError}"
+                                            - buildTodo_updateResultError:
+                                                assign:
+                                                - buildTodoResult_59ad5e23: "${null}"
+                                  - selectAgent:
+                                      steps:
+                                      - selectAgent_initResult:
+                                          assign:
+                                          - selectAgentResult_2afab769: {}
+                                      - selectAgent_steps:
+                                          switch:
+                                          - condition: "${(input.params.agent == \"AWFL\")}"
+                                            steps:
+                                            - codebase_ProjectManager:
+                                                try:
+                                                  steps:
+                                                  - codebase_ProjectManager_call:
+                                                      call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                                      args:
+                                                        workflow_id: "${\"codebase-ProjectManager${WORKFLOW_ENV}\"}"
+                                                        argument:
+                                                          query: "${((((((\"Your job is to fix the following issue and ensure that all relevant tests pass: \" + runInstancesValue.problem_statement) + \" * DON'T RESPOND UNTIL THE TESTS PASS OR YOU ARE COMPLETELY STUCK.\\n\\n\") + \"FAIL_TO_PASS: \") + runInstancesValue.FAIL_TO_PASS) + \"\\nPython env: \") + checkErrorResult_49797069)}"
+                                                          fund: "${1}"
+                                                          spent: "${default(0, null)}"
+                                                          task:
+                                                            title: "${\"[URGENT] Important Issue\"}"
+                                                            description: "${(((((((\"Your job is to fix the following issue and ensure that all relevant tests pass: \" + runInstancesValue.problem_statement) + \" * DON'T RESPOND UNTIL THE TESTS PASS OR YOU ARE COMPLETELY STUCK.\\n\\n\") + \"FAIL_TO_PASS: \") + runInstancesValue.FAIL_TO_PASS) + \"\\nPython env: \") + checkErrorResult_49797069) + buildTodoResult_59ad5e23)}"
+                                                            status: "${\"In Progress\"}"
+                                                          toolChoice: "${default(null, null)}"
+                                                          sideCall: "${default(false, null)}"
+                                                          env: "${initEnvResult_71e5323f}"
+                                                        location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                        project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                        connector_params:
+                                                          skip_polling: false
+                                                      result: "codebase_ProjectManagerResult_422b70ce"
+                                                retry: "${http.default_retry}"
+                                            - selectAgent_updateResult_0:
+                                                assign:
+                                                - selectAgentResult_2afab769: "${codebase_ProjectManagerResult_422b70ce}"
+                                  - runCommand_output_2:
+                                      steps:
+                                      - runCommand_call_block_2:
                                           steps:
-                                          - buildParams_updateResult_3:
+                                          - buildParams_3:
+                                              steps:
+                                              - buildParams_initResult_3:
+                                                  assign:
+                                                  - buildParamsResult_75804e5d: {}
+                                              - buildParams_steps_3:
+                                                  try:
+                                                    steps:
+                                                    - buildParams_updateResult_3:
+                                                        assign:
+                                                        - buildParamsResult_75804e5d:
+                                                            command: "${\"git diff --binary\"}"
+                                                  except:
+                                                    as: "buildParamsError"
+                                                    steps:
+                                                    - logError_7:
+                                                        try:
+                                                          steps:
+                                                          - logError_call_7:
+                                                              call: "sys.log"
+                                                              args:
+                                                                text: "${(\"[logError] \" + buildParamsError.message)}"
+                                                              result: "logErrorResult_1671996f"
+                                                        retry: "${http.default_retry}"
+                                                    - reRaise_7:
+                                                        raise: "${buildParamsError}"
+                                                    - buildParams_updateResultError_3:
+                                                        assign:
+                                                        - buildParamsResult_75804e5d: "${null}"
+                                          - runCommand_await_block_2:
+                                              steps:
+                                              - runCommand_run_2:
+                                                  try:
+                                                    steps:
+                                                    - runCommand_run_call_2:
+                                                        call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                                        args:
+                                                          workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                                                          argument:
+                                                            tool_call:
+                                                              id: "${\"runCommand\"}"
+                                                              type: "${\"function\"}"
+                                                              function:
+                                                                name: "${\"RUN_COMMAND\"}"
+                                                                arguments: "${json.encode_to_string(buildParamsResult_75804e5d)}"
+                                                            cost: 0.0
+                                                            timeoutSeconds: "${default(60, null)}"
+                                                            env: "${initEnvResult_71e5323f}"
+                                                          location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                          project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                          connector_params:
+                                                            skip_polling: false
+                                                        result: "runCommand_runResult_42cac976"
+                                                  retry: "${http.default_retry}"
+                                      - checkError_2:
+                                          steps:
+                                          - checkError_initResult_2:
                                               assign:
-                                              - buildParamsResult_75804e5d:
-                                                  command: "${\"git diff --binary\"}"
-                                        except:
-                                          as: "buildParamsError"
-                                          steps:
-                                          - logError_7:
-                                              try:
+                                              - checkErrorResult_ad40daa: {}
+                                          - checkError_steps_2:
+                                              switch:
+                                              - condition: "${(map.get(json.decode(runCommand_runResult_42cac976.encoded), \"exitCode\") == 0)}"
                                                 steps:
-                                                - logError_call_7:
-                                                    call: "sys.log"
-                                                    args:
-                                                      text: "${(\"[logError] \" + buildParamsError.message)}"
-                                                    result: "logErrorResult_1671996f"
-                                              retry: "${http.default_retry}"
-                                          - reRaise_7:
-                                              raise: "${buildParamsError}"
-                                          - buildParams_updateResultError_3:
-                                              assign:
-                                              - buildParamsResult_75804e5d: "${null}"
-                                - runCommand_await_block_2:
-                                    steps:
-                                    - runCommand_run_2:
-                                        try:
-                                          steps:
-                                          - runCommand_run_call_2:
-                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                              args:
-                                                workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
-                                                argument:
-                                                  tool_call:
-                                                    id: "${\"runCommand\"}"
-                                                    type: "${\"function\"}"
-                                                    function:
-                                                      name: "${\"RUN_COMMAND\"}"
-                                                      arguments: "${json.encode_to_string(buildParamsResult_75804e5d)}"
-                                                  cost: 0.0
-                                                  timeoutSeconds: "${default(60, null)}"
-                                                  env:
-                                                    userId: "${input.env.userId}"
-                                                    model: "${input.env.model}"
-                                                    callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                                    BASE_URL: "${input.env.BASE_URL}"
-                                                    background: "${default(default(map.get(input.env, \"background\"), false), null)}"
-                                                    projectId: "${input.env.projectId}"
-                                                    sessionId: "${input.env.sessionId}"
-                                                    workdir: "${default(initWorktreeResult_73081e62, null)}"
-                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                                connector_params:
-                                                  skip_polling: false
-                                              result: "runCommand_runResult_365241da"
-                                        retry: "${http.default_retry}"
-                            - checkError_2:
-                                steps:
-                                - checkError_initResult_2:
-                                    assign:
-                                    - checkErrorResult_443fd313: {}
-                                - checkError_steps_2:
-                                    switch:
-                                    - condition: "${(len(map.get(json.decode(runCommand_runResult_365241da.encoded), \"error\")) == 0)}"
+                                                - checkError_updateResult_0_2:
+                                                    assign:
+                                                    - checkErrorResult_ad40daa: "${map.get(json.decode(runCommand_runResult_42cac976.encoded), \"output\")}"
+                                              - condition: "${true}"
+                                                steps:
+                                                - checkError_updateResult_1_2:
+                                                    assign:
+                                                    - checkErrorResult_ad40daa: "${map.get(json.decode(runCommand_runResult_42cac976.encoded), \"output\")}"
+                                  - cleanup:
                                       steps:
-                                      - checkError_updateResult_0_2:
+                                      - cleanup_initResult:
                                           assign:
-                                          - checkErrorResult_443fd313: "${map.get(json.decode(runCommand_runResult_365241da.encoded), \"output\")}"
-                                    - condition: "${true}"
+                                          - cleanupResult_65e11e20: {}
+                                      - cleanup_steps:
+                                          try:
+                                            steps:
+                                            - stopProducer:
+                                                try:
+                                                  steps:
+                                                  - stopProducer_call:
+                                                      call: "http.post"
+                                                      args:
+                                                        url: "${((input.env.BASE_URL + \"/\") + \"producer/stop\")}"
+                                                        body: "${null}"
+                                                        auth:
+                                                          type: "${\"OIDC\"}"
+                                                          audience: "${input.env.BASE_URL}"
+                                                        headers:
+                                                          x-user-id: "${initEnvResult_71e5323f.userId}"
+                                                          x-project-id: "${initEnvResult_71e5323f.projectId}"
+                                                      result: "stopProducerResult_6fad3f6b"
+                                                retry: "${http.default_retry}"
+                                            - deleteProject:
+                                                try:
+                                                  steps:
+                                                  - deleteProject_call:
+                                                      call: "http.delete"
+                                                      args:
+                                                        url: "${((input.env.BASE_URL + \"/\") + (\"projects/\" + initEnvResult_71e5323f.projectId))}"
+                                                        auth:
+                                                          type: "${\"OIDC\"}"
+                                                          audience: "${input.env.BASE_URL}"
+                                                        headers:
+                                                          x-user-id: "${input.env.userId}"
+                                                          x-project-id: "${input.env.projectId}"
+                                                      result: "deleteProjectResult_ef3c7cb"
+                                                retry: "${http.default_retry}"
+                                            - cleanup_updateResult:
+                                                assign:
+                                                - cleanupResult_65e11e20: true
+                                          except:
+                                            as: "cleanupError"
+                                            steps:
+                                            - logError_8:
+                                                try:
+                                                  steps:
+                                                  - logError_call_8:
+                                                      call: "sys.log"
+                                                      args:
+                                                        text: "${(\"[logError] \" + cleanupError.message)}"
+                                                      result: "logErrorResult_3ec9e3a9"
+                                                retry: "${http.default_retry}"
+                                            - reRaise_8:
+                                                raise: "${cleanupError}"
+                                            - cleanup_updateResultError:
+                                                assign:
+                                                - cleanupResult_65e11e20: "${null}"
+                                  - safeRun_updateResult:
+                                      assign:
+                                      - safeRunResult_8533ea6:
+                                          instance_id: "${runInstancesValue.instance_id}"
+                                          model_patch: "${checkErrorResult_ad40daa}"
+                                          model_name_or_path: "${input.params.agent}"
+                                except:
+                                  as: "safeRunError"
+                                  steps:
+                                  - cleanup_1:
                                       steps:
-                                      - checkError_updateResult_1_2:
+                                      - cleanup_initResult_1:
                                           assign:
-                                          - checkErrorResult_443fd313: "${map.get(json.decode(runCommand_runResult_365241da.encoded), \"output\")}"
-                        - runInstances_assignIterResult:
-                            assign:
-                            - runInstances_assignIterResultVar:
-                                instance_id: "${runInstancesValue.instance_id}"
-                                model_patch: "${checkErrorResult_443fd313}"
-                                model_name_or_path: "${input.params.agent}"
+                                          - cleanupResult_65e11e20: {}
+                                      - cleanup_steps_1:
+                                          try:
+                                            steps:
+                                            - stopProducer_1:
+                                                try:
+                                                  steps:
+                                                  - stopProducer_call_1:
+                                                      call: "http.post"
+                                                      args:
+                                                        url: "${((input.env.BASE_URL + \"/\") + \"producer/stop\")}"
+                                                        body: "${null}"
+                                                        auth:
+                                                          type: "${\"OIDC\"}"
+                                                          audience: "${input.env.BASE_URL}"
+                                                        headers:
+                                                          x-user-id: "${initEnvResult_71e5323f.userId}"
+                                                          x-project-id: "${initEnvResult_71e5323f.projectId}"
+                                                      result: "stopProducerResult_6fad3f6b"
+                                                retry: "${http.default_retry}"
+                                            - deleteProject_1:
+                                                try:
+                                                  steps:
+                                                  - deleteProject_call_1:
+                                                      call: "http.delete"
+                                                      args:
+                                                        url: "${((input.env.BASE_URL + \"/\") + (\"projects/\" + initEnvResult_71e5323f.projectId))}"
+                                                        auth:
+                                                          type: "${\"OIDC\"}"
+                                                          audience: "${input.env.BASE_URL}"
+                                                        headers:
+                                                          x-user-id: "${input.env.userId}"
+                                                          x-project-id: "${input.env.projectId}"
+                                                      result: "deleteProjectResult_ef3c7cb"
+                                                retry: "${http.default_retry}"
+                                            - cleanup_updateResult_1:
+                                                assign:
+                                                - cleanupResult_65e11e20: true
+                                          except:
+                                            as: "cleanupError"
+                                            steps:
+                                            - logError_9:
+                                                try:
+                                                  steps:
+                                                  - logError_call_9:
+                                                      call: "sys.log"
+                                                      args:
+                                                        text: "${(\"[logError] \" + cleanupError.message)}"
+                                                      result: "logErrorResult_3ec9e3a9"
+                                                retry: "${http.default_retry}"
+                                            - reRaise_9:
+                                                raise: "${cleanupError}"
+                                            - cleanup_updateResultError_1:
+                                                assign:
+                                                - cleanupResult_65e11e20: "${null}"
+                                  - reRaiseAfterCleanup:
+                                      raise: "${safeRunError}"
+                                  - safeRun_updateResultError:
+                                      assign:
+                                      - safeRunResult_8533ea6: "${null}"
                         - runInstances_updateResult:
                             assign:
-                            - runInstancesResult_44473bce: "${list.concat(runInstancesResult_44473bce, runInstances_assignIterResultVar)}"
+                            - runInstancesResult_3f8315ec: "${list.concat(runInstancesResult_3f8315ec, safeRunResult_8533ea6)}"
             - buildPredictions:
                 steps:
                 - buildPredictions_initResult:
                     assign:
-                    - buildPredictionsResult_3fb7abf5: "${\"\"}"
+                    - buildPredictionsResult_79682afc: "${\"\"}"
                 - buildPredictions_steps:
                     for:
                       value: "buildPredictionsValue"
-                      in: "${runInstancesResult_44473bce}"
+                      in: "${runInstancesResult_3f8315ec}"
                       steps:
                       - buildPredictions_updateResult:
                           assign:
-                          - buildPredictionsResult_3fb7abf5: "${((buildPredictionsResult_3fb7abf5 + json.encode_to_string(buildPredictionsValue)) + \"\\n\")}"
+                          - buildPredictionsResult_79682afc: "${((buildPredictionsResult_79682afc + json.encode_to_string(buildPredictionsValue)) + \"\\n\")}"
             - writeFile_encoded:
                 steps:
                 - writeFile_call_block_1:
@@ -614,32 +728,32 @@ main:
                         steps:
                         - buildParams_initResult_4:
                             assign:
-                            - buildParamsResult_c311291: {}
+                            - buildParamsResult_7fbc7427: {}
                         - buildParams_steps_4:
                             try:
                               steps:
                               - buildParams_updateResult_4:
                                   assign:
-                                  - buildParamsResult_c311291:
+                                  - buildParamsResult_7fbc7427:
                                       filepath: "${(input.directory + \"/predictions.jsonl\")}"
-                                      content: "${buildPredictionsResult_3fb7abf5}"
+                                      content: "${buildPredictionsResult_79682afc}"
                             except:
                               as: "buildParamsError"
                               steps:
-                              - logError_8:
+                              - logError_10:
                                   try:
                                     steps:
-                                    - logError_call_8:
+                                    - logError_call_10:
                                         call: "sys.log"
                                         args:
                                           text: "${(\"[logError] \" + buildParamsError.message)}"
                                         result: "logErrorResult_1671996f"
                                   retry: "${http.default_retry}"
-                              - reRaise_8:
+                              - reRaise_10:
                                   raise: "${buildParamsError}"
                               - buildParams_updateResultError_4:
                                   assign:
-                                  - buildParamsResult_c311291: "${null}"
+                                  - buildParamsResult_7fbc7427: "${null}"
                     - writeFile_await_block_1:
                         steps:
                         - writeFile_run_1:
@@ -655,59 +769,60 @@ main:
                                         type: "${\"function\"}"
                                         function:
                                           name: "${\"UPDATE_FILE\"}"
-                                          arguments: "${json.encode_to_string(buildParamsResult_c311291)}"
+                                          arguments: "${json.encode_to_string(buildParamsResult_7fbc7427)}"
                                       cost: 0.0
                                       timeoutSeconds: "${default(60, null)}"
                                       env:
                                         userId: "${input.env.userId}"
                                         model: "${input.env.model}"
-                                        callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                        callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                                         BASE_URL: "${input.env.BASE_URL}"
-                                        background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                                        background: "${default(map.get(input.env, \"background\"), null)}"
                                         projectId: "${input.env.projectId}"
                                         sessionId: "${input.env.sessionId}"
-                                        workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                                        workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                                     location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                     project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                     connector_params:
                                       skip_polling: false
-                                  result: "writeFile_runResult_f6949fb"
+                                  result: "writeFile_runResult_7ee5a5b9"
                             retry: "${http.default_retry}"
             - buildInstanceIds:
                 steps:
                 - buildInstanceIds_initResult:
                     assign:
-                    - buildInstanceIdsResult_6d0925ed: []
+                    - buildInstanceIdsResult_562accb6: []
                 - buildInstanceIds_steps:
                     for:
                       value: "buildInstanceIdsValue"
-                      in: "${loadDatasetResult_384d65d6}"
+                      in: "${loadDatasetResult_f17e8d3}"
                       steps:
                       - buildInstanceIds_updateResult:
                           assign:
-                          - buildInstanceIdsResult_6d0925ed: "${list.concat(buildInstanceIdsResult_6d0925ed, buildInstanceIdsValue.instance_id)}"
+                          - buildInstanceIdsResult_562accb6: "${list.concat(buildInstanceIdsResult_562accb6, buildInstanceIdsValue.instance_id)}"
             - task_updateResult:
                 assign:
-                - taskResult_5426af26:
+                - taskResult_a6a3eb4:
                     predictionsFile: "${(input.directory + \"/predictions.jsonl\")}"
-                    instanceIds: "${buildInstanceIdsResult_6d0925ed}"
+                    instanceIds: "${buildInstanceIdsResult_562accb6}"
+                    model_name_or_path: "${input.params.agent}"
           except:
             as: "taskError"
             steps:
-            - logError_9:
+            - logError_11:
                 try:
                   steps:
-                  - logError_call_9:
+                  - logError_call_11:
                       call: "sys.log"
                       args:
                         text: "${(\"[logError] \" + taskError.message)}"
                       result: "logErrorResult_402a9161"
                 retry: "${http.default_retry}"
-            - reRaise_9:
+            - reRaise_11:
                 raise: "${taskError}"
             - task_updateResultError:
                 assign:
-                - taskResult_5426af26: "${null}"
+                - taskResult_a6a3eb4: "${null}"
   - writeFile_encoded_2:
       steps:
       - writeFile_call_block_2:
@@ -716,32 +831,32 @@ main:
               steps:
               - buildParams_initResult_5:
                   assign:
-                  - buildParamsResult_5d6e7874: {}
+                  - buildParamsResult_1d918472: {}
               - buildParams_steps_5:
                   try:
                     steps:
                     - buildParams_updateResult_5:
                         assign:
-                        - buildParamsResult_5d6e7874:
+                        - buildParamsResult_1d918472:
                             filepath: "${(input.directory + \"/answer.json\")}"
-                            content: "${json.encode_to_string(taskResult_5426af26)}"
+                            content: "${json.encode_to_string(taskResult_a6a3eb4)}"
                   except:
                     as: "buildParamsError"
                     steps:
-                    - logError_10:
+                    - logError_12:
                         try:
                           steps:
-                          - logError_call_10:
+                          - logError_call_12:
                               call: "sys.log"
                               args:
                                 text: "${(\"[logError] \" + buildParamsError.message)}"
                               result: "logErrorResult_1671996f"
                         retry: "${http.default_retry}"
-                    - reRaise_10:
+                    - reRaise_12:
                         raise: "${buildParamsError}"
                     - buildParams_updateResultError_5:
                         assign:
-                        - buildParamsResult_5d6e7874: "${null}"
+                        - buildParamsResult_1d918472: "${null}"
           - writeFile_await_block_2:
               steps:
               - writeFile_run_2:
@@ -757,29 +872,29 @@ main:
                               type: "${\"function\"}"
                               function:
                                 name: "${\"UPDATE_FILE\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_5d6e7874)}"
+                                arguments: "${json.encode_to_string(buildParamsResult_1d918472)}"
                             cost: 0.0
                             timeoutSeconds: "${default(60, null)}"
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
-                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                              callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                               BASE_URL: "${input.env.BASE_URL}"
-                              background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                              background: "${default(map.get(input.env, \"background\"), null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${input.env.sessionId}"
-                              workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "writeFile_runResult_51267387"
+                        result: "writeFile_runResult_123097b9"
                   retry: "${http.default_retry}"
   - eval:
       steps:
       - eval_initResult:
           assign:
-          - evalResult_64cb7d98: {}
+          - evalResult_3b6cedc7: {}
       - eval_steps:
           try:
             steps:
@@ -787,15 +902,15 @@ main:
                 steps:
                 - buildInstanceIds_initResult_1:
                     assign:
-                    - buildInstanceIdsResult_37a94617: "${\"\"}"
+                    - buildInstanceIdsResult_2545c6c4: "${\"\"}"
                 - buildInstanceIds_steps_1:
                     for:
                       value: "buildInstanceIdsValue"
-                      in: "${taskResult_5426af26.instanceIds}"
+                      in: "${taskResult_a6a3eb4.instanceIds}"
                       steps:
                       - buildInstanceIds_updateResult_1:
                           assign:
-                          - buildInstanceIdsResult_37a94617: "${((buildInstanceIdsResult_37a94617 + \" \") + buildInstanceIdsValue)}"
+                          - buildInstanceIdsResult_2545c6c4: "${((buildInstanceIdsResult_2545c6c4 + \" \") + buildInstanceIdsValue)}"
             - runCommand_output_3:
                 steps:
                 - runCommand_call_block_3:
@@ -804,31 +919,31 @@ main:
                         steps:
                         - buildParams_initResult_6:
                             assign:
-                            - buildParamsResult_73214688: {}
+                            - buildParamsResult_33f6ec43: {}
                         - buildParams_steps_6:
                             try:
                               steps:
                               - buildParams_updateResult_6:
                                   assign:
-                                  - buildParamsResult_73214688:
-                                      command: "${((((((((\"python -m swebench.harness.run_evaluation\" + \" --dataset_name \") + \"SWE-bench/SWE-bench_Lite\") + \" --predictions_path \") + taskResult_5426af26.predictionsFile) + \" --instance_ids \") + buildInstanceIdsResult_37a94617) + \" --run_id \") + \"awfl-run\")}"
+                                  - buildParamsResult_33f6ec43:
+                                      command: "${((((((((\"python -m swebench.harness.run_evaluation\" + \" --dataset_name \") + \"SWE-bench/SWE-bench_Lite\") + \" --predictions_path \") + taskResult_a6a3eb4.predictionsFile) + \" --instance_ids \") + buildInstanceIdsResult_2545c6c4) + \" --run_id \") + \"awfl-run\")}"
                             except:
                               as: "buildParamsError"
                               steps:
-                              - logError_11:
+                              - logError_13:
                                   try:
                                     steps:
-                                    - logError_call_11:
+                                    - logError_call_13:
                                         call: "sys.log"
                                         args:
                                           text: "${(\"[logError] \" + buildParamsError.message)}"
                                         result: "logErrorResult_1671996f"
                                   retry: "${http.default_retry}"
-                              - reRaise_11:
+                              - reRaise_13:
                                   raise: "${buildParamsError}"
                               - buildParams_updateResultError_6:
                                   assign:
-                                  - buildParamsResult_73214688: "${null}"
+                                  - buildParamsResult_33f6ec43: "${null}"
                     - runCommand_await_block_3:
                         steps:
                         - runCommand_run_3:
@@ -844,45 +959,45 @@ main:
                                         type: "${\"function\"}"
                                         function:
                                           name: "${\"RUN_COMMAND\"}"
-                                          arguments: "${json.encode_to_string(buildParamsResult_73214688)}"
+                                          arguments: "${json.encode_to_string(buildParamsResult_33f6ec43)}"
                                       cost: 0.0
                                       timeoutSeconds: "${default(900, null)}"
                                       env:
                                         userId: "${input.env.userId}"
                                         model: "${input.env.model}"
-                                        callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                        callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                                         BASE_URL: "${input.env.BASE_URL}"
-                                        background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                                        background: "${default(map.get(input.env, \"background\"), null)}"
                                         projectId: "${input.env.projectId}"
                                         sessionId: "${input.env.sessionId}"
-                                        workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                                        workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                                     location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                     project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                     connector_params:
                                       skip_polling: false
-                                  result: "runCommand_runResult_2f3596c6"
+                                  result: "runCommand_runResult_38a2820b"
                             retry: "${http.default_retry}"
                 - checkError_3:
                     steps:
                     - checkError_initResult_3:
                         assign:
-                        - checkErrorResult_1c103b15: {}
+                        - checkErrorResult_6075a335: {}
                     - checkError_steps_3:
                         switch:
-                        - condition: "${(len(map.get(json.decode(runCommand_runResult_2f3596c6.encoded), \"error\")) == 0)}"
+                        - condition: "${(map.get(json.decode(runCommand_runResult_38a2820b.encoded), \"exitCode\") == 0)}"
                           steps:
                           - checkError_updateResult_0_3:
                               assign:
-                              - checkErrorResult_1c103b15: "${map.get(json.decode(runCommand_runResult_2f3596c6.encoded), \"output\")}"
+                              - checkErrorResult_6075a335: "${map.get(json.decode(runCommand_runResult_38a2820b.encoded), \"output\")}"
                         - condition: "${true}"
                           steps:
-                          - raiseError_1:
+                          - raiseError:
                               raise:
-                                message: "${map.get(json.decode(runCommand_runResult_2f3596c6.encoded), \"error\")}"
-                                code: "${500}"
+                                message: "${map.get(json.decode(runCommand_runResult_38a2820b.encoded), \"error\")}"
+                                code: "${map.get(json.decode(runCommand_runResult_38a2820b.encoded), \"exitCode\")}"
                           - checkError_updateResult_1_3:
                               assign:
-                              - checkErrorResult_1c103b15: "${null}"
+                              - checkErrorResult_6075a335: "${null}"
             - readFile_decode_content:
                 steps:
                 - readFile_call_block:
@@ -891,31 +1006,31 @@ main:
                         steps:
                         - buildParams_initResult_7:
                             assign:
-                            - buildParamsResult_36697b78: {}
+                            - buildParamsResult_2b57f2fc: {}
                         - buildParams_steps_7:
                             try:
                               steps:
                               - buildParams_updateResult_7:
                                   assign:
-                                  - buildParamsResult_36697b78:
-                                      filepath: "${((\"evaluation_results/\" + \"awfl-run\") + \".json\")}"
+                                  - buildParamsResult_2b57f2fc:
+                                      filepath: "${(((taskResult_a6a3eb4.model_name_or_path + \".\") + \"awfl-run\") + \".json\")}"
                             except:
                               as: "buildParamsError"
                               steps:
-                              - logError_12:
+                              - logError_14:
                                   try:
                                     steps:
-                                    - logError_call_12:
+                                    - logError_call_14:
                                         call: "sys.log"
                                         args:
                                           text: "${(\"[logError] \" + buildParamsError.message)}"
                                         result: "logErrorResult_1671996f"
                                   retry: "${http.default_retry}"
-                              - reRaise_12:
+                              - reRaise_14:
                                   raise: "${buildParamsError}"
                               - buildParams_updateResultError_7:
                                   assign:
-                                  - buildParamsResult_36697b78: "${null}"
+                                  - buildParamsResult_2b57f2fc: "${null}"
                     - readFile_await_block:
                         steps:
                         - readFile_run:
@@ -931,44 +1046,44 @@ main:
                                         type: "${\"function\"}"
                                         function:
                                           name: "${\"READ_FILE\"}"
-                                          arguments: "${json.encode_to_string(buildParamsResult_36697b78)}"
+                                          arguments: "${json.encode_to_string(buildParamsResult_2b57f2fc)}"
                                       cost: 0.0
                                       timeoutSeconds: "${default(60, null)}"
                                       env:
                                         userId: "${input.env.userId}"
                                         model: "${input.env.model}"
-                                        callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                        callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                                         BASE_URL: "${input.env.BASE_URL}"
-                                        background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                                        background: "${default(map.get(input.env, \"background\"), null)}"
                                         projectId: "${input.env.projectId}"
                                         sessionId: "${input.env.sessionId}"
-                                        workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                                        workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                                     location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                     project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                     connector_params:
                                       skip_polling: false
-                                  result: "readFile_runResult_3e4686ee"
+                                  result: "readFile_runResult_50be324d"
                             retry: "${http.default_retry}"
             - eval_updateResult:
                 assign:
-                - evalResult_64cb7d98: "${map.get(json.decode(readFile_runResult_3e4686ee.encoded), \"content\")}"
+                - evalResult_3b6cedc7: "${map.get(json.decode(readFile_runResult_50be324d.encoded), \"content\")}"
           except:
             as: "evalError"
             steps:
-            - logError_13:
+            - logError_15:
                 try:
                   steps:
-                  - logError_call_13:
+                  - logError_call_15:
                       call: "sys.log"
                       args:
                         text: "${(\"[logError] \" + evalError.message)}"
                       result: "logErrorResult_2e23279d"
                 retry: "${http.default_retry}"
-            - reRaise_13:
+            - reRaise_15:
                 raise: "${evalError}"
             - eval_updateResultError:
                 assign:
-                - evalResult_64cb7d98: "${null}"
+                - evalResult_3b6cedc7: "${null}"
   - writeFile_encoded_3:
       steps:
       - writeFile_call_block_3:
@@ -977,32 +1092,32 @@ main:
               steps:
               - buildParams_initResult_8:
                   assign:
-                  - buildParamsResult_3f89c323: {}
+                  - buildParamsResult_65dce5ac: {}
               - buildParams_steps_8:
                   try:
                     steps:
                     - buildParams_updateResult_8:
                         assign:
-                        - buildParamsResult_3f89c323:
+                        - buildParamsResult_65dce5ac:
                             filepath: "${(input.directory + \"/results.json\")}"
-                            content: "${json.encode_to_string(evalResult_64cb7d98)}"
+                            content: "${json.encode_to_string(evalResult_3b6cedc7)}"
                   except:
                     as: "buildParamsError"
                     steps:
-                    - logError_14:
+                    - logError_16:
                         try:
                           steps:
-                          - logError_call_14:
+                          - logError_call_16:
                               call: "sys.log"
                               args:
                                 text: "${(\"[logError] \" + buildParamsError.message)}"
                               result: "logErrorResult_1671996f"
                         retry: "${http.default_retry}"
-                    - reRaise_14:
+                    - reRaise_16:
                         raise: "${buildParamsError}"
                     - buildParams_updateResultError_8:
                         assign:
-                        - buildParamsResult_3f89c323: "${null}"
+                        - buildParamsResult_65dce5ac: "${null}"
           - writeFile_await_block_3:
               steps:
               - writeFile_run_3:
@@ -1018,23 +1133,23 @@ main:
                               type: "${\"function\"}"
                               function:
                                 name: "${\"UPDATE_FILE\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_3f89c323)}"
+                                arguments: "${json.encode_to_string(buildParamsResult_65dce5ac)}"
                             cost: 0.0
                             timeoutSeconds: "${default(60, null)}"
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
-                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                              callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                               BASE_URL: "${input.env.BASE_URL}"
-                              background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                              background: "${default(map.get(input.env, \"background\"), null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${input.env.sessionId}"
-                              workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "writeFile_runResult_5c3cbe37"
+                        result: "writeFile_runResult_2af888d7"
                   retry: "${http.default_retry}"
   - return:
-      return: "${evalResult_64cb7d98}"
+      return: "${evalResult_3b6cedc7}"

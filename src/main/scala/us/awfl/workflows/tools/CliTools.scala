@@ -162,8 +162,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     filepath: BaseValue[String],
     opName: String = "readFile",
     cost: BaseValue[Double] = obj(0.0),
-    sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+    env: BaseValue[Env] = ENV
   ) = {
     val encoded = callToolEncoded(
       opName = opName,
@@ -171,8 +170,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       functionName = "READ_FILE",
       params = List("filepath" -> filepath),
       cost = cost,
-      sessionId = sessionId,
-      background = background
+      env = env
     )
     Block(s"${opName}_decode_content", List[Step[?, ?]](encoded) -> decodeField(encoded.resultValue, "content"))
   }
@@ -182,8 +180,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     content: BaseValue[String],
     opName: String = "writeFile",
     cost: BaseValue[Double] = obj(0.0),
-    sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false))
+    env: BaseValue[Env] = ENV
   ) = {
     val encoded = callToolEncoded(
       opName = opName,
@@ -191,8 +188,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       functionName = "UPDATE_FILE",
       params = List("filepath" -> filepath, "content" -> content),
       cost = cost,
-      sessionId = sessionId,
-      background = background
+      env = env
     )
     // Return the encoded callback body (not used by callers typically)
     Block(s"${opName}_encoded", List[Step[?, ?]](encoded) -> encoded.resultValue)
@@ -202,11 +198,9 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     command: BaseValue[String],
     opName: String = "runCommand",
     cost: BaseValue[Double] = obj(0.0),
-    sessionId: Value[String] = Env.sessionId,
-    background: Value[Boolean] = Env.background.getOrElse(Value(false)),
     raiseError: Boolean = false,
     timeoutSeconds: Value[Int] = Value(60),
-    workdir: Value[String] = Env.get.workdir.getOrElse(Value.nil)
+    env: BaseValue[Env] = ENV
   ) = {
     val encoded = callToolEncoded(
       opName = opName,
@@ -214,18 +208,17 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       functionName = "RUN_COMMAND",
       params = List("command" -> command),
       cost = cost,
-      sessionId = sessionId,
-      background = background,
       timeoutSeconds = timeoutSeconds,
-      workdir = workdir,
+      env = env
     )
+    val exitCode = decodeField(encoded.resultValue, "exitCode")
     val error = decodeField(encoded.resultValue, "error")
     val output = decodeField(encoded.resultValue, "output")
     val handleError = Switch("checkError", List(
-      (CelFunc("len", error) === 0) ->
+      (exitCode.cel === 0) ->
         (List() -> output),
       (true: Cel) -> (
-        if (raiseError) List(Raise("raiseError", obj(Error(error, Value(500))))) -> Value.nil[String]
+        if (raiseError) List(Raise("raiseError", obj(Error(error, Value(exitCode.cel))))) -> Value.nil[String]
         else List() -> output
       )
     ))

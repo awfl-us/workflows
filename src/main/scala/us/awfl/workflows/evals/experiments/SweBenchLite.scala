@@ -10,6 +10,8 @@ import us.awfl.workflows.evals.Datasets
 import us.awfl.workflows.tools.CliTools
 import us.awfl.workflows.tools.Tasks.Task
 import us.awfl.utils.Env
+import us.awfl.services.Cloud
+import us.awfl.utils.Projects
 
 object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
   val params = inputVal.flatMap(_.params).get
@@ -21,45 +23,81 @@ object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
 
   override def task: Step[Answer, Value[Answer]] = {
     val loadDataset = dataset.load(limit = Value(1))
+
     val runInstances = ParallelFor("runInstances", loadDataset.resultValue) { row =>
       val taskSession = str(CelFunc("uuid.generate"))
-      val initWorktree = Worktree.init(taskSession, row.get.repo, row.get.base_commit)
+      val initEnv = Try("initEnv", {
+        val tmpProject = Projects.create(str(("tmp/": Cel) + taskSession), Value.nil)
+        val env = Env.get.copy(
+          projectId = tmpProject.result.body.get.project.id,
+          sessionId = taskSession,
+          workdir = OptValue(str("/testbed"))//OptValue(initWorktree.resultValue)
+        )
+        val image = str(("ghcr.io/epoch-research/swe-bench.eval.x86_64.": Cel) + row.get.instance_id)
+        List[Step[?,?]](tmpProject, Cloud.start(env, image)) -> obj(env)
+      })
+      val findPython = CliTools.runCommand(
+        str(CelStr(
+          """echo "$PATH"
+            |which python || true
+            |which pytest || true
+            |find / -path '*bin/pytest' 2>/dev/null | head -20
+            |find / -path '*bin/python' 2>/dev/null | head -20
+            |""".stripMargin
+        ).safe),
+        env = initEnv.resultValue
+      )
+      
+      // val initWorktree = Worktree.init(taskSession, row.get.repo, row.get.base_commit)
       val query = str(
-        ("Your job is to fix the following issue and ensure that all tests pass: ": Cel) +
+        ("Your job is to fix the following issue and ensure that all relevant tests pass: ": Cel) +
         row.get.problem_statement +
-        " * DON'T RESPOND UNTIL THE TESTS PASS OR YOU ARE COMPLETELY STUCK."
+        CelStr(" * DON'T RESPOND UNTIL THE TESTS PASS OR YOU ARE COMPLETELY STUCK.\n\n").safe +
+        "FAIL_TO_PASS: " + row.get.FAIL_TO_PASS +
+        CelStr("\nPython env: ").safe + findPython.resultValue
+      )
+      val buildTodo = Try("buildTodo", List() ->
+        str(CelStr("""
+                  |TODO:
+                  |[ ] Investigate project architecture relevant to problem. Update this task.
+                  |[ ] Plan out implementation, changes needed, dependencies, etc. Update this task.
+                  |[ ] Implement changes. Update this task.
+                  |[ ] Run tests, check output.
+                  |[ ] Either: iterate back through this TODO list to fix tests, Or: mark task complete and respond.
+                  |            """.stripMargin).safe)
       )
       val task = Task(
         str("[URGENT] Important Issue"),
-        str(
-          row.get.problem_statement.cel +
-          CelStr("""
-            |TODO:
-            |[ ] Investigate project architecture relevant to problem. Update this task.
-            |[ ] Plan out implementation, changes needed, dependencies, etc. Update this task.
-            |[ ] Implement changes. Update this task.
-            |[ ] Run tests, check output.
-            |[ ] Either: iterate back through this TODO list to fix tests, Or: mark task complete and respond.
-            """.stripMargin).safe
-        ),
+        str(query.cel + buildTodo.resultValue),
         str("In Progress")
       )
+
       val runAgent = Switch("selectAgent", List(
         (params.agent.cel === "AWFL") -> ProjectManager(
           "runAgent",
           query,
           fund = Value(1),
           task = OptValue(obj(task)),
-          env = obj(Env.get.copy(
-            sessionId = taskSession,
-            workdir = OptValue(initWorktree.resultValue)
-          ))
+          env = initEnv.resultValue
         ).fn
       ))
-      val getDiff = CliTools.runCommand(str("git diff --binary"), workdir = initWorktree.resultValue)
+
+      val getDiff = CliTools.runCommand(str("git diff --binary"), env = initEnv.resultValue)
       val prediction = BenchmarkPrediction(row.get.instance_id, getDiff.resultValue, params.agent)
-      List[Step[?,?]](initWorktree, runAgent, getDiff) -> obj(prediction)
+      val cleanup = Try("cleanup", List(
+        Cloud.stop(initEnv.result),
+        Projects.delete(initEnv.result.projectId)
+      ) -> obj(true))
+
+      Try("safeRun",
+        List[Step[?,?]](initEnv, findPython, buildTodo, runAgent, getDiff, cleanup) -> obj(prediction),
+        err => List[Step[?,?]](
+          cleanup,
+          Raise("reRaiseAfterCleanup", err)
+        ) -> Value.nil
+      ).fn
     }
+
     val buildPredictions = Fold("buildPredictions", str(""), runInstances.resultValue) { (b, row) =>
       List() -> str(b.cel + CelFunc("json.encode_to_string", row) + CelStr("\n").safe)
     }
@@ -71,7 +109,7 @@ object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
 
     Try("task",
       List[Step[?,?]](loadDataset, runInstances, buildPredictions, savePredictions, buildInstanceIds) ->
-        obj(BenchmarkAnswer(predictionsFile, buildInstanceIds.resultValue))
+        obj(BenchmarkAnswer(predictionsFile, buildInstanceIds.resultValue, params.agent))
     )
   }
 
@@ -87,7 +125,7 @@ object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
         " --run_id " + runId
     )
     val runEval = CliTools.runCommand(evalCmd, raiseError = true, timeoutSeconds = Value(60 * 15))
-    val resultsFile = CliTools.readFile(str(("evaluation_results/": Cel) + runId + ".json"))
+    val resultsFile = CliTools.readFile(str(answer.get.model_name_or_path.cel + "." + runId + ".json"))
     Try("eval",
       List(buildInstanceIds, runEval, resultsFile) -> Value[Result](resultsFile.resultValue)
     )
@@ -98,7 +136,8 @@ case class BenchmarkParams(agent: Value[String])
 
 case class BenchmarkAnswer(
   predictionsFile: Value[String],
-  instanceIds: ListValue[String]
+  instanceIds: ListValue[String],
+  model_name_or_path: Value[String]
 )
 
 case class BenchmarkPrediction(

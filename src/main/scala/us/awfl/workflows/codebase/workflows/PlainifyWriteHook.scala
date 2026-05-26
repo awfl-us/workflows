@@ -5,6 +5,7 @@ import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ChatMessage
 import us.awfl.workflows.tools.CliTools
+import us.awfl.utils.Env
 
 /**
  * PlainifyWriteHook
@@ -36,12 +37,16 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
     val inPath: Value[String]  = inputVal.flatMap(_.filepath)
     val outPath: Value[String] = str((("plain/": Cel) + inPath.cel))
 
+    val env = obj(Env.get.copy(
+      sessionId = sessionId,
+      background = OptValue(true)
+    ))
+
     // 1) READ_FILE the raw source code from <filepath>
     val rawCode = CliTools.readFile(
       filepath = inPath,
       opName = "readRaw",
-      sessionId = sessionId,
-      background = Value(true)
+      env = env
     )
 
     // 2) Ask LLM to generate a complete plain-technical-English explanation
@@ -74,8 +79,7 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
     val doMkdir = CliTools.runCommand(
       command = str((("bash -lc 'mkdir -p $(dirname " : Cel) + outPath.cel + (")'" : Cel))),
       opName = "mkdirPlain",
-      sessionId = sessionId,
-      background = Value(true)
+      env = env
     )
 
     // 4) Write explanation to /plain<filepath>
@@ -83,8 +87,7 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
       filepath = outPath,
       content  = explanation,
       opName   = "writePlain",
-      sessionId = sessionId,
-      background = Value(true)
+      env = env
     )
 
     Workflow(
