@@ -6,11 +6,11 @@ main:
       steps:
       - spawn_initResult:
           assign:
-          - spawnResult_7f3a6752: []
+          - spawnResult_1f2cf2cf: []
       - spawn_steps:
           parallel:
             shared:
-            - "spawnResult_7f3a6752"
+            - "spawnResult_1f2cf2cf"
             for:
               value: "spawnValue"
               in: "${json.decode(input.tool_call.function.arguments).items}"
@@ -19,71 +19,155 @@ main:
                   steps:
                   - tryRun_initResult:
                       assign:
-                      - tryRunResult_6520d547: {}
+                      - tryRunResult_d4411e2: {}
                   - tryRun_steps:
                       try:
                         steps:
-                        - codebase_Crawler:
-                            try:
-                              steps:
-                              - codebase_Crawler_call:
-                                  call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                  args:
-                                    workflow_id: "${\"codebase-Crawler${WORKFLOW_ENV}\"}"
-                                    argument:
-                                      query: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + json.decode(input.tool_call.function.arguments).instructions)}"
-                                      fund: "${json.decode(input.tool_call.function.arguments).perCrawlerBudget}"
-                                      spent: "${default(0, null)}"
-                                      task:
-                                        title: "${json.decode(input.tool_call.function.arguments).task.title}"
-                                        description: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + json.decode(input.tool_call.function.arguments).task.description)}"
-                                        status: "${json.decode(input.tool_call.function.arguments).task.status}"
-                                      toolChoice: "${default(null, null)}"
-                                      sideCall: "${default(false, null)}"
-                                      env:
-                                        userId: "${input.env.userId}"
-                                        model: "${input.env.model}"
-                                        callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
-                                        BASE_URL: "${input.env.BASE_URL}"
-                                        background: "${default(map.get(input.env, \"background\"), null)}"
-                                        projectId: "${input.env.projectId}"
-                                        sessionId: "${(\"crawler_\" + base64.encode(text.encode(spawnValue, \"UTF-8\")))}"
-                                    location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                    project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                    connector_params:
-                                      skip_polling: false
-                                  result: "codebase_CrawlerResult_622744e2"
-                            retry: "${http.default_retry}"
+                        - updatedTask:
+                            steps:
+                            - updatedTask_initResult:
+                                assign:
+                                - updatedTaskResult_64bd2a85: {}
+                            - updatedTask_steps:
+                                switch:
+                                - condition: "${(\"task\" in json.decode(input.tool_call.function.arguments))}"
+                                  steps:
+                                  - updatedTask_updateResult_0:
+                                      assign:
+                                      - updatedTaskResult_64bd2a85:
+                                          title: "${default(map.get(json.decode(input.tool_call.function.arguments), \"task\"), null).title}"
+                                          description: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + default(map.get(json.decode(input.tool_call.function.arguments), \"task\"), null).description)}"
+                                          status: "${default(map.get(json.decode(input.tool_call.function.arguments), \"task\"), null).status}"
+                                - condition: "${true}"
+                                  steps:
+                                  - updatedTask_updateResult_1:
+                                      assign:
+                                      - updatedTaskResult_64bd2a85: "${null}"
+                        - createCallback_try:
+                            steps:
+                            - createCallback_try_initResult:
+                                assign:
+                                - createCallback_tryResult_3a1dc44b: {}
+                            - createCallback_try_steps:
+                                try:
+                                  steps:
+                                  - createCallback:
+                                      try:
+                                        steps:
+                                        - createCallback_call:
+                                            call: "events.create_callback_endpoint"
+                                            args:
+                                              http_callback_method: "${\"POST\"}"
+                                            result: "createCallbackResult_1c1251bf"
+                                      retry: "${http.default_retry}"
+                                  - saveCallback:
+                                      try:
+                                        steps:
+                                        - saveCallback_call:
+                                            call: "http.post"
+                                            args:
+                                              url: "${((input.env.BASE_URL + \"/\") + \"callbacks\")}"
+                                              body:
+                                                callback_url: "${createCallbackResult_1c1251bf.url}"
+                                              auth:
+                                                type: "${\"OIDC\"}"
+                                                audience: "${input.env.BASE_URL}"
+                                              headers:
+                                                x-user-id: "${input.env.userId}"
+                                                x-project-id: "${input.env.projectId}"
+                                            result: "saveCallbackResult_2ea0586d"
+                                      retry: "${http.default_retry}"
+                                  - codebase_Crawler:
+                                      try:
+                                        steps:
+                                        - codebase_Crawler_call:
+                                            call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                            args:
+                                              workflow_id: "${\"codebase-Crawler${WORKFLOW_ENV}\"}"
+                                              argument:
+                                                query: "${(((\"Your sole responsibility/area of focus is: \" + spawnValue) + \"\\n\") + json.decode(input.tool_call.function.arguments).instructions)}"
+                                                fund: "${json.decode(input.tool_call.function.arguments).perCrawlerBudget}"
+                                                spent: "${default(0, null)}"
+                                                task: "${default(updatedTaskResult_64bd2a85, null)}"
+                                                toolChoice: "${default(null, null)}"
+                                                sideCall: "${default(false, null)}"
+                                                callback:
+                                                  id: "${saveCallbackResult_2ea0586d.body.id}"
+                                                env:
+                                                  userId: "${input.env.userId}"
+                                                  model: "${input.env.model}"
+                                                  callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                                                  BASE_URL: "${input.env.BASE_URL}"
+                                                  background: "${default(map.get(input.env, \"background\"), null)}"
+                                                  projectId: "${input.env.projectId}"
+                                                  sessionId: "${(\"crawler_\" + base64.encode(text.encode(spawnValue, \"UTF-8\")))}"
+                                                  workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                              location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                              project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                              connector_params:
+                                                skip_polling: false
+                                            result: "codebase_CrawlerResult_5542e018"
+                                      retry: "${http.default_retry}"
+                                  - awaitCallback:
+                                      try:
+                                        steps:
+                                        - awaitCallback_call:
+                                            call: "events.await_callback"
+                                            args:
+                                              callback: "${createCallbackResult_1c1251bf}"
+                                              timeout: 3600
+                                            result: "awaitCallbackResult_1a1596d2"
+                                      retry: "${http.default_retry}"
+                                  - createCallback_try_updateResult:
+                                      assign:
+                                      - createCallback_tryResult_3a1dc44b: "${awaitCallbackResult_1a1596d2.http_request.body}"
+                                except:
+                                  as: "createCallback_tryError"
+                                  steps:
+                                  - logError:
+                                      try:
+                                        steps:
+                                        - logError_call:
+                                            call: "sys.log"
+                                            args:
+                                              text: "${(\"[logError] \" + createCallback_tryError.message)}"
+                                            result: "logErrorResult_59a77b5f"
+                                      retry: "${http.default_retry}"
+                                  - reRaise:
+                                      raise: "${createCallback_tryError}"
+                                  - createCallback_try_updateResultError:
+                                      assign:
+                                      - createCallback_tryResult_3a1dc44b: "${null}"
                         - tryRun_updateResult:
                             assign:
-                            - tryRunResult_6520d547:
-                                response: "${(((\"Response from the agent assigned to \" + spawnValue) + \":\\n\") + codebase_CrawlerResult_622744e2.message.content)}"
-                                cost: "${codebase_CrawlerResult_622744e2.total_cost}"
+                            - tryRunResult_d4411e2:
+                                response: "${(((\"Response from the agent assigned to \" + spawnValue) + \":\\n\") + createCallback_tryResult_3a1dc44b.message.content)}"
+                                cost: "${createCallback_tryResult_3a1dc44b.total_cost}"
                       except:
                         as: "tryRunError"
                         steps:
                         - tryRun_updateResultError:
                             assign:
-                            - tryRunResult_6520d547:
+                            - tryRunResult_d4411e2:
                                 response: "${(((\"The crawler assigned to \" + spawnValue) + \" failed: \") + tryRunError.message)}"
                                 cost: "${0}"
               - spawn_updateResult:
                   assign:
-                  - spawnResult_7f3a6752: "${list.concat(spawnResult_7f3a6752, tryRunResult_6520d547)}"
+                  - spawnResult_1f2cf2cf: "${list.concat(spawnResult_1f2cf2cf, tryRunResult_d4411e2)}"
   - sumSpent:
       steps:
       - sumSpent_initResult:
           assign:
-          - sumSpentResult_4e151569: "${0}"
+          - sumSpentResult_6f08135: "${0}"
       - sumSpent_steps:
           for:
             value: "sumSpentValue"
-            in: "${spawnResult_7f3a6752}"
+            in: "${spawnResult_1f2cf2cf}"
             steps:
             - sumSpent_updateResult:
                 assign:
-                - sumSpentResult_4e151569: "${(sumSpentResult_4e151569 + sumSpentValue.cost)}"
+                - sumSpentResult_6f08135: "${(sumSpentResult_6f08135 + sumSpentValue.cost)}"
   - return:
       return:
-        encoded: "${json.encode_to_string(spawnResult_7f3a6752)}"
-        cost: "${sumSpentResult_4e151569}"
+        encoded: "${json.encode_to_string(spawnResult_1f2cf2cf)}"
+        cost: "${sumSpentResult_6f08135}"

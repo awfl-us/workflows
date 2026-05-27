@@ -20,6 +20,7 @@ import us.awfl.utils.Locks
 import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents, Chain}
 import us.awfl.utils.{Env, ENV}
 import us.awfl.utils.Events
+import us.awfl.utils.Callback
 import us.awfl.workflows.cli.CliActions
 import us.awfl.workflows.Summaries
 import us.awfl.workflows.assistant.ExtractTopics
@@ -43,10 +44,6 @@ import us.awfl.services.Llm.ToolFunctionDef
 import us.awfl.workflows.tools.Tasks.Task
 
 trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools {
-
-  // Workflows callback request wrapper
-  case class CallbackRequest(http_request: BaseValue[us.awfl.utils.PostRequest[NoValueT]])
-
   // Single entry point: tool-enabled chat that surfaces tool_calls
   def eventHandler(
     message: ChatMessage = ChatMessage("user", input.query),
@@ -179,8 +176,13 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             val newSpent = Value[Double](input.spent.getOrElse(Value(0)).cel + totalCost)
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
-              obj(EventHandler.Input(str("Tool calls completed"), input.fund, OptValue(newSpent))),
-              connector_params = ConnectorParams(skip_polling = false)
+              obj(EventHandler.Input(
+                str("Tool calls completed"),
+                input.fund,
+                OptValue(newSpent),
+                callback = input.callback
+              )),
+              connector_params = ConnectorParams(skip_polling = true)
             )
             Call[RunWorkflowArgs[Input], ChatToolResponse](
               "toolCallsCompleted",
@@ -199,7 +201,12 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               "enqueueStatusDone",
               str("Done")
             )
-            List[Step[?, ?]](statusDone, enqueueDone) -> complete.resultValue
+            val maybeCallback = Switch("maybeCallback", List(
+              (("callback" in inputVal) && (input.callback.getOrElse(Value.nil) !== Cel.nil)) ->
+                input.callback.getOrElse(Value.nil).get.apply(complete.resultValue).fn,
+              (true: Cel) -> (List() -> Value.nil)
+            ))
+            List[Step[?, ?]](statusDone, enqueueDone, maybeCallback) -> complete.resultValue
           }
         ))
 
@@ -229,8 +236,8 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               summaries,
               extract,
               collapse
-            ) -> obj(maybeToolFeedback.result.copy(
-              total_cost = Value[Double](maybeToolFeedback.result.total_cost + totalCost)
+            ) -> obj(complete.result.copy(
+              total_cost = Value[Double](totalCost)
             ))
           },
           // If busy: exit without fetching a response (query message is already saved).
@@ -289,6 +296,7 @@ object EventHandler {
     task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
     sideCall: OptValue[Boolean] = OptValue(false),
+    callback: OptValue[Callback[ChatToolResponse]] = OptValue.nil,
     env: BaseValue[Env] = ENV
   )
 

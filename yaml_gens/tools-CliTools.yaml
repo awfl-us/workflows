@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_36c31a9e: {}
+          - mainTryResult_750ff7c5: {}
       - mainTry_steps:
           try:
             steps:
@@ -193,113 +193,126 @@ main:
                       - registerWorkflowExecLink_updateResult_1:
                           assign:
                           - registerWorkflowExecLinkResult_2923b725: "${\"skip\"}"
-            - createCallback:
-                try:
-                  steps:
-                  - createCallback_call:
-                      call: "events.create_callback_endpoint"
-                      args:
-                        http_callback_method: "${\"POST\"}"
-                      result: "createCallbackResult_1c1251bf"
-                retry: "${http.default_retry}"
-            - saveCallback:
-                try:
-                  steps:
-                  - saveCallback_call:
-                      call: "http.post"
-                      args:
-                        url: "${((input.env.BASE_URL + \"/\") + \"callbacks\")}"
-                        body:
-                          callback_url: "${createCallbackResult_1c1251bf.url}"
-                        auth:
-                          type: "${\"OIDC\"}"
-                          audience: "${input.env.BASE_URL}"
-                        headers:
-                          x-user-id: "${input.env.userId}"
-                          x-project-id: "${input.env.projectId}"
-                      result: "saveCallbackResult_2ea0586d"
-                retry: "${http.default_retry}"
-            - logSavedCallback:
-                try:
-                  steps:
-                  - logSavedCallback_call:
-                      call: "sys.log"
-                      args:
-                        text: "${(\"[logSavedCallback] \" + (\"[saveCallback] Saved callback: id=\" + saveCallbackResult_2ea0586d.body.id))}"
-                      result: "logSavedCallbackResult_52e1e139"
-                retry: "${http.default_retry}"
-            - relay_ingest_tool_call:
-                try:
-                  steps:
-                  - relay_ingest_tool_call_call:
-                      call: "http.post"
-                      args:
-                        url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
-                        body:
-                          sessionId: "${input.env.sessionId}"
-                          projectId: "${input.env.projectId}"
-                          data:
-                            create_time: "${sys.now()}"
-                            callback_id: "${saveCallbackResult_2ea0586d.body.id}"
-                            content: "${null}"
-                            tool_call: "${input.tool_call}"
-                            cost: "${input.cost}"
-                            background: "${default(map.get(input.env, \"background\"), false)}"
-                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                            timeout_seconds: "${default(map.get(input, \"timeoutSeconds\"), null)}"
-                            status: "${\"\"}"
-                            error: "${null}"
-                          background: "${default(map.get(input.env, \"background\"), false)}"
-                          type: "${\"message\"}"
-                          source: "${\"workflows.tools.CliTools\"}"
-                        auth:
-                          type: "${\"OIDC\"}"
-                          audience: "${input.env.BASE_URL}"
-                        headers:
-                          x-user-id: "${input.env.userId}"
-                          x-project-id: "${input.env.projectId}"
-                      result: "relay_ingest_tool_callResult_43c1222b"
-                retry: "${http.default_retry}"
-            - logIngest:
-                try:
-                  steps:
-                  - logIngest_call:
-                      call: "sys.log"
-                      args:
-                        text: "${(\"[logIngest] \" + (\"[ingest] Post event result: \" + json.encode_to_string(relay_ingest_tool_callResult_43c1222b)))}"
-                      result: "logIngestResult_1d09e5b3"
-                retry: "${http.default_retry}"
-            - maybeStartProducer:
-                try:
-                  steps:
-                  - maybeStartProducer_call:
-                      call: "http.post"
-                      args:
-                        url: "${((input.env.BASE_URL + \"/\") + \"producer/start\")}"
-                        body:
-                          sessionId: "${null}"
-                        auth:
-                          type: "${\"OIDC\"}"
-                          audience: "${input.env.BASE_URL}"
-                        headers:
-                          x-user-id: "${input.env.userId}"
-                          x-project-id: "${input.env.projectId}"
-                      result: "maybeStartProducerResult_41c54e02"
-                retry: "${http.default_retry}"
-            - awaitCallback:
-                try:
-                  steps:
-                  - awaitCallback_call:
-                      call: "events.await_callback"
-                      args:
-                        callback: "${createCallbackResult_1c1251bf}"
-                        timeout: 3600
-                      result: "awaitCallbackResult_1a1596d2"
-                retry: "${http.default_retry}"
+            - createCallback_try:
+                steps:
+                - createCallback_try_initResult:
+                    assign:
+                    - createCallback_tryResult_132bfa6a: {}
+                - createCallback_try_steps:
+                    try:
+                      steps:
+                      - createCallback:
+                          try:
+                            steps:
+                            - createCallback_call:
+                                call: "events.create_callback_endpoint"
+                                args:
+                                  http_callback_method: "${\"POST\"}"
+                                result: "createCallbackResult_1c1251bf"
+                          retry: "${http.default_retry}"
+                      - saveCallback:
+                          try:
+                            steps:
+                            - saveCallback_call:
+                                call: "http.post"
+                                args:
+                                  url: "${((input.env.BASE_URL + \"/\") + \"callbacks\")}"
+                                  body:
+                                    callback_url: "${createCallbackResult_1c1251bf.url}"
+                                  auth:
+                                    type: "${\"OIDC\"}"
+                                    audience: "${input.env.BASE_URL}"
+                                  headers:
+                                    x-user-id: "${input.env.userId}"
+                                    x-project-id: "${input.env.projectId}"
+                                result: "saveCallbackResult_2ea0586d"
+                          retry: "${http.default_retry}"
+                      - awaitCallback:
+                          steps:
+                          - relay_ingest_tool_call:
+                              try:
+                                steps:
+                                - relay_ingest_tool_call_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
+                                      body:
+                                        sessionId: "${input.env.sessionId}"
+                                        projectId: "${input.env.projectId}"
+                                        data:
+                                          create_time: "${sys.now()}"
+                                          callback_id: "${saveCallbackResult_2ea0586d.body.id}"
+                                          content: "${null}"
+                                          tool_call: "${input.tool_call}"
+                                          cost: "${input.cost}"
+                                          background: "${default(map.get(input.env, \"background\"), false)}"
+                                          workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                          timeout_seconds: "${default(map.get(input, \"timeoutSeconds\"), null)}"
+                                          status: "${\"\"}"
+                                          error: "${null}"
+                                        background: "${default(map.get(input.env, \"background\"), false)}"
+                                        type: "${\"message\"}"
+                                        source: "${\"workflows.tools.CliTools\"}"
+                                      auth:
+                                        type: "${\"OIDC\"}"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "relay_ingest_tool_callResult_43c1222b"
+                              retry: "${http.default_retry}"
+                          - startProducer:
+                              try:
+                                steps:
+                                - startProducer_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"producer/start\")}"
+                                      body:
+                                        sessionId: "${input.env.sessionId}"
+                                        image: "${null}"
+                                      auth:
+                                        type: "${\"OIDC\"}"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "startProducerResult_6df4db61"
+                              retry: "${http.default_retry}"
+                      - awaitCallback_1:
+                          try:
+                            steps:
+                            - awaitCallback_call:
+                                call: "events.await_callback"
+                                args:
+                                  callback: "${createCallbackResult_1c1251bf}"
+                                  timeout: 3600
+                                result: "awaitCallbackResult_1a1596d2"
+                          retry: "${http.default_retry}"
+                      - createCallback_try_updateResult:
+                          assign:
+                          - createCallback_tryResult_132bfa6a: "${awaitCallbackResult_1a1596d2.http_request.body}"
+                    except:
+                      as: "createCallback_tryError"
+                      steps:
+                      - logError:
+                          try:
+                            steps:
+                            - logError_call:
+                                call: "sys.log"
+                                args:
+                                  text: "${(\"[logError] \" + createCallback_tryError.message)}"
+                                result: "logErrorResult_59a77b5f"
+                          retry: "${http.default_retry}"
+                      - reRaise:
+                          raise: "${createCallback_tryError}"
+                      - createCallback_try_updateResultError:
+                          assign:
+                          - createCallback_tryResult_132bfa6a: "${null}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_36c31a9e:
-                    encoded: "${json.encode_to_string(awaitCallbackResult_1a1596d2.http_request.body)}"
+                - mainTryResult_750ff7c5:
+                    encoded: "${json.encode_to_string(createCallback_tryResult_132bfa6a)}"
                     cost: "${0}"
           except:
             as: "mainTryError"
@@ -308,6 +321,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_36c31a9e: "${null}"
+                - mainTryResult_750ff7c5: "${null}"
   - return:
-      return: "${mainTryResult_36c31a9e}"
+      return: "${mainTryResult_750ff7c5}"

@@ -27,6 +27,18 @@
       "query" : {
         "type" : "string"
       },
+      "callback" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "id"
+        ],
+        "additionalProperties" : true
+      },
       "fund" : {
         "type" : "integer"
       },
@@ -109,6 +121,7 @@
       "task",
       "toolChoice",
       "sideCall",
+      "callback",
       "env"
     ],
     "additionalProperties" : true,

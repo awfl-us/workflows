@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_7a04324d: {}
+          - mainTryResult_40366b67: {}
       - mainTry_steps:
           try:
             steps:
@@ -513,7 +513,7 @@ main:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_192f3485: {}
+                    - maybeRespondResult_33b2a583: {}
                 - maybeRespond_steps:
                     switch:
                     - condition: "${maybeBypassAquireResult_37369eb2}"
@@ -1091,7 +1091,7 @@ main:
                           steps:
                           - maybeToolFeedback_initResult:
                               assign:
-                              - maybeToolFeedbackResult_75f13c6a: {}
+                              - maybeToolFeedbackResult_3d9681bc: {}
                           - maybeToolFeedback_steps:
                               switch:
                               - condition: "${((len(processToolCallsResult_4eec80.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
@@ -1110,6 +1110,7 @@ main:
                                               task: "${default(null, null)}"
                                               toolChoice: "${default(null, null)}"
                                               sideCall: "${default(false, null)}"
+                                              callback: "${default(map.get(input, \"callback\"), null)}"
                                               env:
                                                 userId: "${input.env.userId}"
                                                 model: "${input.env.model}"
@@ -1122,12 +1123,12 @@ main:
                                             location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
-                                              skip_polling: false
-                                          result: "toolCallsCompletedResult_3e9fe419"
+                                              skip_polling: true
+                                          result: "toolCallsCompletedResult_7a711fae"
                                     retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_0:
                                     assign:
-                                    - maybeToolFeedbackResult_75f13c6a: "${toolCallsCompletedResult_3e9fe419}"
+                                    - maybeToolFeedbackResult_3d9681bc: "${toolCallsCompletedResult_7a711fae}"
                               - condition: "${true}"
                                 steps:
                                 - statusDone:
@@ -1186,9 +1187,42 @@ main:
                                                   x-project-id: "${input.env.projectId}"
                                               result: "relay_ingest_tool_callResult_6cf1d1ee"
                                         retry: "${http.default_retry}"
+                                - maybeCallback:
+                                    steps:
+                                    - maybeCallback_initResult:
+                                        assign:
+                                        - maybeCallbackResult_3c0ed711: {}
+                                    - maybeCallback_steps:
+                                        switch:
+                                        - condition: "${((\"callback\" in input) and (default(map.get(input, \"callback\"), null) != null))}"
+                                          steps:
+                                          - callback:
+                                              try:
+                                                steps:
+                                                - callback_call:
+                                                    call: "http.post"
+                                                    args:
+                                                      url: "${((input.env.BASE_URL + \"/\") + (\"callbacks/\" + default(map.get(input, \"callback\"), null).id))}"
+                                                      body: "${complete_switchResult_66376870}"
+                                                      auth:
+                                                        type: "${\"OIDC\"}"
+                                                        audience: "${input.env.BASE_URL}"
+                                                      headers:
+                                                        x-user-id: "${input.env.userId}"
+                                                        x-project-id: "${input.env.projectId}"
+                                                    result: "callbackResult_2519aef9"
+                                              retry: "${http.default_retry}"
+                                          - maybeCallback_updateResult_0:
+                                              assign:
+                                              - maybeCallbackResult_3c0ed711: "${callbackResult_2519aef9.body}"
+                                        - condition: "${true}"
+                                          steps:
+                                          - maybeCallback_updateResult_1:
+                                              assign:
+                                              - maybeCallbackResult_3c0ed711: "${null}"
                                 - maybeToolFeedback_updateResult_1:
                                     assign:
-                                    - maybeToolFeedbackResult_75f13c6a: "${complete_switchResult_66376870}"
+                                    - maybeToolFeedbackResult_3d9681bc: "${complete_switchResult_66376870}"
                       - runSummaries:
                           try:
                             steps:
@@ -1380,17 +1414,17 @@ main:
                                     - collapseMessages_tryResult_4aecf6ed: "${null}"
                       - maybeRespond_updateResult_0:
                           assign:
-                          - maybeRespondResult_192f3485:
-                              message: "${maybeToolFeedbackResult_75f13c6a.message}"
-                              total_cost: "${(maybeToolFeedbackResult_75f13c6a.total_cost + (complete_switchResult_66376870.total_cost + toolsCostResult_2687531f))}"
+                          - maybeRespondResult_33b2a583:
+                              message: "${complete_switchResult_66376870.message}"
+                              total_cost: "${(complete_switchResult_66376870.total_cost + toolsCostResult_2687531f)}"
                     - condition: "${true}"
                       steps:
                       - maybeRespond_updateResult_1:
                           assign:
-                          - maybeRespondResult_192f3485: "${null}"
+                          - maybeRespondResult_33b2a583: "${null}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_7a04324d: "${maybeRespondResult_192f3485}"
+                - mainTryResult_40366b67: "${maybeRespondResult_33b2a583}"
           except:
             as: "mainTryError"
             steps:
@@ -1491,6 +1525,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_7a04324d: "${null}"
+                - mainTryResult_40366b67: "${null}"
   - return:
-      return: "${mainTryResult_7a04324d}"
+      return: "${mainTryResult_40366b67}"

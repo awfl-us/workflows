@@ -12,19 +12,9 @@ import us.awfl.utils.Events
 import us.awfl.utils.Events.OperationEnvelope
 import us.awfl.utils.post
 import us.awfl.workflows.helpers.ToolDefs._
+import us.awfl.services.Cloud
 
 object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
-  // Workflows callback helpers
-  case class CreateCallbackArgs(http_callback_method: BaseValue[String])
-  case class CallbackDetails(url: BaseValue[String])
-  case class AwaitCallbackArgs(callback: BaseValue[CallbackDetails], timeout: BaseValue[Int])
-
-  case class CallbackRequest(http_request: BaseValue[PostRequest[NoValueT]])
-
-  // jobs/callbacks service payloads
-  case class CreateJobsCallbackBody(callback_url: BaseValue[String])
-  case class CreateCallbackResponse(id: Value[String])
-
   case class ProducerRequest(sessionId: Value[String] = Value.nil)
 
   val toolNames = List("READ_FILE", "UPDATE_FILE", "RUN_COMMAND")
@@ -74,65 +64,32 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
 
   // Standalone workflow to handle tool calls: create callback, persist it with an ID, enqueue via relay ingest, and await callback
   override def workflows = List({
-    val createCallback = Call[CreateCallbackArgs, CallbackDetails](
-      s"createCallback",
-      "events.create_callback_endpoint",
-      obj(CreateCallbackArgs(str("POST")))
-    )
-
-    // Save the callback on our server to receive a callback ID
-    // POST /jobs/callbacks with { callback_url }
-    val saveCallback = post[CreateJobsCallbackBody, CreateCallbackResponse](
-      "saveCallback",
-      "callbacks",
-      obj(CreateJobsCallbackBody(createCallback.resultValue.flatMap(_.url)))
-    )
-
-    val envelope = OperationEnvelope(
-      create_time = Value("sys.now()"),
-      callback_id = saveCallback.result.body.get.id,
-      content = Value("null"),
-      tool_call = input.tool_call,
-      cost = input.cost,
-      background = Env.background.getOrElse(Value(false)),
-      workdir = Env.workdir.getOrElse(Value.nil),
-      timeout_seconds = input.timeoutSeconds.getOrElse(Value.nil)
-    )
-
-    // POST to /workflows/events instead of Pub/Sub
-    val ingest = Events.postEvent(
-      data = envelope,
-      source = str("workflows.tools.CliTools")
-    )
-
-    val maybeStartProducer = post[ProducerRequest, NoValueT]("maybeStartProducer", "producer/start", obj(ProducerRequest()))
-
-    val awaitCallback = Call[AwaitCallbackArgs, CallbackRequest](
-      s"awaitCallback",
-      "events.await_callback",
-      obj(AwaitCallbackArgs(createCallback.resultValue, obj(3600)))
-    )
-
-    val encodedCallback = str(
-      CelFunc(
-        "json.encode_to_string",
-        awaitCallback.resultValue
-          .flatMap(_.http_request)
-          .flatMap(_.body)
-          .cel
+    val awaitCallback = Callback[NoValueT] { callback =>
+      val envelope = OperationEnvelope(
+        create_time = Value("sys.now()"),
+        callback_id = callback.id,
+        content = Value("null"),
+        tool_call = input.tool_call,
+        cost = input.cost,
+        background = Env.background.getOrElse(Value(false)),
+        workdir = Env.workdir.getOrElse(Value.nil),
+        timeout_seconds = input.timeoutSeconds.getOrElse(Value.nil)
       )
-    )
+
+      // POST to /workflows/events instead of Pub/Sub
+      val ingest = Events.postEvent(
+        data = envelope,
+        source = str("workflows.tools.CliTools")
+      )
+
+      Block("awaitCallback", List[Step[?,?]](ingest, Cloud.start(Env.get, Value.nil)) -> noValue)
+    }
 
     Workflow(buildSteps(
-      List[Step[?, ?]](
-        createCallback,
-        saveCallback,
-        Log("logSavedCallback", str(("[saveCallback] Saved callback: id=": Cel) + saveCallback.result.body.get.id)),
-        ingest,
-        Log("logIngest", str(("[ingest] Post event result: ": Cel) + CelFunc("json.encode_to_string", ingest.resultValue.cel))),
-        maybeStartProducer,
-        awaitCallback
-      ) -> obj(ToolWorkflow.Result(encodedCallback, Value(0))),
+      List[Step[?, ?]](awaitCallback) -> obj(ToolWorkflow.Result(
+        str(CelFunc("json.encode_to_string", awaitCallback.resultValue)),
+        Value(0)
+      )),
       _ => List() -> Value.nil[Result]
     ))
   })

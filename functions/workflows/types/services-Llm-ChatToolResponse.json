@@ -4,28 +4,75 @@
   "schema" : {
     "type" : "object",
     "properties" : {
-      "completed_instances" : {
-        "type" : "integer"
+      "message" : {
+        "type" : "object",
+        "properties" : {
+          "role" : {
+            "type" : "string"
+          },
+          "tool_calls" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "type" : {
+                "type" : "string"
+              },
+              "function" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "arguments" : {
+                    "type" : "string"
+                  }
+                },
+                "required" : [
+                  "name",
+                  "arguments"
+                ],
+                "additionalProperties" : true
+              }
+            },
+            "required" : [
+              "id",
+              "type",
+              "function"
+            ],
+            "additionalProperties" : true
+          },
+          "tool_call_id" : {
+            "type" : "string"
+          },
+          "create_time" : {
+            "type" : "integer"
+          },
+          "content" : {
+            "type" : "string"
+          },
+          "docId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "role",
+          "content",
+          "tool_calls",
+          "tool_call_id",
+          "create_time",
+          "docId"
+        ],
+        "additionalProperties" : true
       },
-      "resolved_instances" : {
-        "type" : "integer"
-      },
-      "total_instances" : {
-        "type" : "integer"
-      },
-      "unresolved_instances" : {
-        "type" : "integer"
-      },
-      "error_instances" : {
+      "total_cost" : {
         "type" : "integer"
       }
     },
     "required" : [
-      "total_instances",
-      "completed_instances",
-      "resolved_instances",
-      "unresolved_instances",
-      "error_instances"
+      "message",
+      "total_cost"
     ],
     "additionalProperties" : true,
     "$id" : "https://topaigents.dev/workflows/types/services-Llm-ChatToolResponse.json"

@@ -6,6 +6,7 @@ import us.awfl.dsl.CelOps._
 import us.awfl.workflows.EventHandler
 import us.awfl.services.Llm.ChatToolResponse
 import us.awfl.utils.Env
+import us.awfl.utils.Callback
 import us.awfl.ista.ChatMessage
 import us.awfl.workflows.helpers.ToolDefs._
 import us.awfl.services.Llm.ToolChoice
@@ -35,8 +36,11 @@ trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with T
     task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
     env: BaseValue[Env] = obj(Env.get.copy(sessionId = str(workflowName)))
-  ): Call[RunWorkflowArgs[Input], ChatToolResponse] = {
-    execute(workflowName, obj(EventHandler.Input(query, fund, OptValue(spent), task = task, toolChoice = toolChoice, env = env)))
+  ): Step[ChatToolResponse, Value[ChatToolResponse]] = Callback[ChatToolResponse]{ callback =>
+    execute[Input, ChatToolResponse](
+      workflowName,
+      obj(EventHandler.Input(query, fund, OptValue(spent), task = task, toolChoice = toolChoice, callback = OptValue(obj(callback)), env = env))
+    )
   }
 
   val toolParams = ToolDefObj(

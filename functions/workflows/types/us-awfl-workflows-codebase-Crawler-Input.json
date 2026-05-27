@@ -27,6 +27,18 @@
       "query" : {
         "type" : "string"
       },
+      "callback" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "id"
+        ],
+        "additionalProperties" : true
+      },
       "fund" : {
         "type" : "integer"
       },
@@ -70,6 +82,9 @@
           "background" : {
             "type" : "boolean"
           },
+          "workdir" : {
+            "type" : "string"
+          },
           "projectId" : {
             "type" : "string"
           },
@@ -90,7 +105,8 @@
           "BASE_URL",
           "background",
           "projectId",
-          "sessionId"
+          "sessionId",
+          "workdir"
         ],
         "additionalProperties" : true
       },
@@ -105,6 +121,7 @@
       "task",
       "toolChoice",
       "sideCall",
+      "callback",
       "env"
     ],
     "additionalProperties" : true,
