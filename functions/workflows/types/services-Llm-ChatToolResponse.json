@@ -68,11 +68,74 @@
       },
       "total_cost" : {
         "type" : "integer"
+      },
+      "usage" : {
+        "type" : "object",
+        "properties" : {
+          "completion_tokens" : {
+            "type" : "integer"
+          },
+          "prompt_tokens" : {
+            "type" : "integer"
+          },
+          "total_tokens" : {
+            "type" : "integer"
+          },
+          "prompt_tokens_details" : {
+            "type" : "object",
+            "properties" : {
+              "audio_tokens" : {
+                "type" : "integer"
+              },
+              "cached_tokens" : {
+                "type" : "integer"
+              }
+            },
+            "required" : [
+              "audio_tokens",
+              "cached_tokens"
+            ],
+            "additionalProperties" : true
+          },
+          "completion_tokens_details" : {
+            "type" : "object",
+            "properties" : {
+              "accepted_prediction_tokens" : {
+                "type" : "integer"
+              },
+              "audio_tokens" : {
+                "type" : "integer"
+              },
+              "reasoning_tokens" : {
+                "type" : "integer"
+              },
+              "rejected_prediction_tokens" : {
+                "type" : "integer"
+              }
+            },
+            "required" : [
+              "accepted_prediction_tokens",
+              "audio_tokens",
+              "reasoning_tokens",
+              "rejected_prediction_tokens"
+            ],
+            "additionalProperties" : true
+          }
+        },
+        "required" : [
+          "completion_tokens",
+          "completion_tokens_details",
+          "prompt_tokens",
+          "prompt_tokens_details",
+          "total_tokens"
+        ],
+        "additionalProperties" : true
       }
     },
     "required" : [
       "message",
-      "total_cost"
+      "total_cost",
+      "usage"
     ],
     "additionalProperties" : true,
     "$id" : "https://topaigents.dev/workflows/types/services-Llm-ChatToolResponse.json"

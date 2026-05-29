@@ -30,12 +30,12 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
   }
 
   val cacheTtl = 1000 * 60 * 60 * 24
-  def cacheReviews(name: String, placeId: PlaceId) = us.awfl.utils.Cache(
+  def cacheReviews(name: String, placeId: PlaceId) = us.awfl.utils.Cache(str("businesses.reviews"))(
     name = s"cacheReviews_$name",
-    collection = str("businesses.reviews"),
     id = placeId,
-    thresholdMillis = cacheTtl,
-    step = post[StepParams, Reviews](s"scrapeReviews_$name", "business-report/scrape-reviews", obj(StepParams(placeId))).flatMap(_.body)
+    thresholdMillis = Value(cacheTtl)
+  )(
+    post[StepParams, Reviews](s"scrapeReviews_$name", "business-report/scrape-reviews", obj(StepParams(placeId))).flatMap(_.body)
   )
 
   val generateKeywords = post[StepParams, GenerateKeywordsResult]("generateKeywords", "business-report/generate-keywords", params).flatMap(_.body)
@@ -118,7 +118,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
     ))
   ))
 
-  val analyzeReport = us.awfl.services.Llm.chatJson[AnalysisResponse]("analyze_business", buildPrompt.resultValue)
+  val analyzeReport = us.awfl.services.Llm.chatJson[AnalysisResponse]("analyze_business", buildPrompt.resultValue, str("BusinessAnalysis"))
 
   case class MarketAnalysis(
     totalCompetitors: Value[String],
@@ -132,7 +132,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
     reviews: ListValue[String]
   )
 
-  val cacheReport = us.awfl.utils.Cache("cacheReport", str("businesses.report"), input.placeId, cacheTtl, Try("cacheReportBlock", List[Step[?, ?]](
+  val cacheReport = us.awfl.utils.Cache(str("businesses.report"))("cacheReport", input.placeId, Value(cacheTtl)) { Try("cacheReportBlock", List[Step[?, ?]](
     status("started", "Generating keywords..."),
     generateKeywords,
     // us.awfl.services.Firebase.create("createRecord", "businesses", input.placeId, generateKeywords.resultValue),
@@ -154,7 +154,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
       analysis = analyzeReport.resultValue.flatMap(_.result),
       reviews = reviews.resultValue.flatMap(_.reviews)
     ))
-  ))
+  ) }
 
   override def workflows = List(Workflow(List[Step[?, ?]](
     cacheReport,

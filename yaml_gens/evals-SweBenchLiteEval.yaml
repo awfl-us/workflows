@@ -120,11 +120,11 @@ main:
       steps:
       - runExperiments_initResult:
           assign:
-          - runExperimentsResult_147a2ab2: []
+          - runExperimentsResult_320a4263: []
       - runExperiments_steps:
           parallel:
             shared:
-            - "runExperimentsResult_147a2ab2"
+            - "runExperimentsResult_320a4263"
             for:
               value: "runExperimentsValue"
               in: "${forValues_agentResult_5307efbc.list}"
@@ -146,7 +146,9 @@ main:
                         args:
                           workflow_id: "${\"evals-experiments-SweBenchLite${WORKFLOW_ENV}\"}"
                           argument:
-                            directory: "${((\"swe-bench-lite-eval\" + \"/\") + map.get(runExperimentsValue, \"agent\"))}"
+                            runId: "${input.arg1}"
+                            limit: "${int(input.arg2)}"
+                            directory: "${(((\"eval_runs/\" + input.arg1) + \"/\") + map.get(runExperimentsValue, \"agent\"))}"
                             params: "${runExperimentsValue}"
                             env:
                               userId: "${input.env.userId}"
@@ -161,16 +163,16 @@ main:
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "evals_experiments_SweBenchLiteResult_2f83b251"
+                        result: "evals_experiments_SweBenchLiteResult_1b609f9c"
                   retry: "${http.default_retry}"
               - runExperiments_updateResult:
                   assign:
-                  - runExperimentsResult_147a2ab2: "${list.concat(runExperimentsResult_147a2ab2, evals_experiments_SweBenchLiteResult_2f83b251)}"
+                  - runExperimentsResult_320a4263: "${list.concat(runExperimentsResult_320a4263, evals_experiments_SweBenchLiteResult_1b609f9c)}"
   - buildCsvRow_1:
       steps:
       - buildCsvRow_initResult:
           assign:
-          - buildCsvRowResult_97b98c: "${\"\"}"
+          - buildCsvRowResult_1a7ead5: "${\"\"}"
       - buildCsvRow_steps:
           for:
             value: "buildCsvRowValue"
@@ -178,16 +180,16 @@ main:
             steps:
             - buildCsvRow_updateResult:
                 assign:
-                - buildCsvRowResult_97b98c: "${text.substring(((buildCsvRowResult_97b98c + \",\") + buildCsvRowValue), 1, len(((buildCsvRowResult_97b98c + \",\") + buildCsvRowValue)))}"
+                - buildCsvRowResult_1a7ead5: "${text.substring(((buildCsvRowResult_1a7ead5 + \",\") + buildCsvRowValue), 0, len(((buildCsvRowResult_1a7ead5 + \",\") + buildCsvRowValue)))}"
   - buildCsv:
       steps:
       - buildCsv_initResult:
           assign:
-          - buildCsvResult_7c79710f: "${buildCsvRowResult_97b98c}"
+          - buildCsvResult_17d2554b: "${buildCsvRowResult_1a7ead5}"
       - buildCsv_steps:
           for:
             value: "buildCsvValue"
-            in: "${runExperimentsResult_147a2ab2}"
+            in: "${runExperimentsResult_320a4263}"
             steps:
             - csvRow:
                 steps:
@@ -206,7 +208,7 @@ main:
                 steps:
                 - buildCsvRow_initResult_1:
                     assign:
-                    - buildCsvRowResult_5f6a6128: "${\"\"}"
+                    - buildCsvRowResult_7214194c: "${\"\"}"
                 - buildCsvRow_steps_1:
                     for:
                       value: "buildCsvRowValue"
@@ -214,10 +216,10 @@ main:
                       steps:
                       - buildCsvRow_updateResult_1:
                           assign:
-                          - buildCsvRowResult_5f6a6128: "${text.substring(((buildCsvRowResult_5f6a6128 + \",\") + buildCsvRowValue), 1, len(((buildCsvRowResult_5f6a6128 + \",\") + buildCsvRowValue)))}"
+                          - buildCsvRowResult_7214194c: "${text.substring(((buildCsvRowResult_7214194c + \",\") + buildCsvRowValue), 0, len(((buildCsvRowResult_7214194c + \",\") + buildCsvRowValue)))}"
             - buildCsv_updateResult:
                 assign:
-                - buildCsvResult_7c79710f: "${((buildCsvResult_7c79710f + \"\\n\") + buildCsvRowResult_5f6a6128)}"
+                - buildCsvResult_17d2554b: "${((buildCsvResult_17d2554b + \"\\n\") + buildCsvRowResult_7214194c)}"
   - writeFile_encoded:
       steps:
       - writeFile_call_block:
@@ -226,15 +228,15 @@ main:
               steps:
               - buildParams_initResult:
                   assign:
-                  - buildParamsResult_75b25eb6: {}
+                  - buildParamsResult_ebdd649: {}
               - buildParams_steps:
                   try:
                     steps:
                     - buildParams_updateResult:
                         assign:
-                        - buildParamsResult_75b25eb6:
-                            filepath: "${(\"swe-bench-lite-eval\" + \"/results.csv\")}"
-                            content: "${buildCsvResult_7c79710f}"
+                        - buildParamsResult_ebdd649:
+                            filepath: "${((\"eval_runs/\" + input.arg1) + \"/results.csv\")}"
+                            content: "${buildCsvResult_17d2554b}"
                   except:
                     as: "buildParamsError"
                     steps:
@@ -251,7 +253,7 @@ main:
                         raise: "${buildParamsError}"
                     - buildParams_updateResultError:
                         assign:
-                        - buildParamsResult_75b25eb6: "${null}"
+                        - buildParamsResult_ebdd649: "${null}"
           - writeFile_await_block:
               steps:
               - writeFile_run:
@@ -267,23 +269,23 @@ main:
                               type: "${\"function\"}"
                               function:
                                 name: "${\"UPDATE_FILE\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_75b25eb6)}"
+                                arguments: "${json.encode_to_string(buildParamsResult_ebdd649)}"
                             cost: 0.0
                             timeoutSeconds: "${default(60, null)}"
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
-                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                              callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
                               BASE_URL: "${input.env.BASE_URL}"
-                              background: "${default(default(map.get(input.env, \"background\"), false), null)}"
+                              background: "${default(map.get(input.env, \"background\"), null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${input.env.sessionId}"
-                              workdir: "${default(default(map.get(input.env, \"workdir\"), null), null)}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "writeFile_runResult_55f7dc39"
+                        result: "writeFile_runResult_164a6f7d"
                   retry: "${http.default_retry}"
   - return:
-      return: "${runExperimentsResult_147a2ab2}"
+      return: "${runExperimentsResult_320a4263}"

@@ -4,9 +4,6 @@
   "schema" : {
     "type" : "object",
     "properties" : {
-      "directory" : {
-        "type" : "string"
-      },
       "params" : {
         "type" : "object",
         "properties" : {
@@ -18,6 +15,12 @@
           "agent"
         ],
         "additionalProperties" : true
+      },
+      "limit" : {
+        "type" : "integer"
+      },
+      "runId" : {
+        "type" : "string"
       },
       "env" : {
         "type" : "object",
@@ -58,9 +61,14 @@
           "workdir"
         ],
         "additionalProperties" : true
+      },
+      "directory" : {
+        "type" : "string"
       }
     },
     "required" : [
+      "runId",
+      "limit",
       "directory",
       "params",
       "env"

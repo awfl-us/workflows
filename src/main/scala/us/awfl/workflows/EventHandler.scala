@@ -33,7 +33,7 @@ import us.awfl.utils.strider.StriderInput
 import us.awfl.workflows.helpers.links.SaveReflection
 import us.awfl.utils.PostResult
 import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
-import us.awfl.services.Llm.Tool
+import us.awfl.services.Llm.{Tool, Usage}
 import us.awfl.workflows.helpers.ToolDefs.ToolDefValue
 import us.awfl.services.Llm.ToolDefProperty
 import us.awfl.workflows.helpers.ToolDefs.ToolDefStr
@@ -123,7 +123,8 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             "complete",
             promptsWorkflow.result.prompts,
             buildYojStep.resultValue,
-            tools = mapToolDefs.resultValue,
+            mapToolDefs.resultValue,
+            sessionId,
             toolChoice = input.toolChoice.getOrElse(ToolChoice.auto),
             model = model
           )
@@ -170,10 +171,19 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           List() -> Value(b.cel + toolResult.get.cost.cel)
         }
         val totalCost = complete.result.total_cost.cel + toolsCost.resultValue.cel
+        val newSpent = Value[Double](input.spent.getOrElse(Value(0)).cel + totalCost)
+        val addUsage = Switch("addUsage", List(
+          (input.usage.getOrElse(Value.nil) !== Cel.nil) ->
+            input.usage.getOrElse(Value.nil).get.plus(complete.result.usage).fn,
+          (true: Cel) -> (List() -> complete.result.usage)
+        ))
+        val responseWithCost = obj(complete.result.copy(
+          total_cost = newSpent,
+          usage = addUsage.resultValue
+        ))
 
         val maybeToolFeedback = Switch("maybeToolFeedback", List(
           ((CelFunc("len", processToolCalls.result.results) > 0) && !skipToolFeedback) -> {
-            val newSpent = Value[Double](input.spent.getOrElse(Value(0)).cel + totalCost)
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
               obj(EventHandler.Input(
@@ -202,11 +212,11 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               str("Done")
             )
             val maybeCallback = Switch("maybeCallback", List(
-              (("callback" in inputVal) && (input.callback.getOrElse(Value.nil) !== Cel.nil)) ->
-                input.callback.getOrElse(Value.nil).get.apply(complete.resultValue).fn,
+              (input.callback.getOrElse(Value.nil) !== Cel.nil) ->
+                input.callback.getOrElse(Value.nil).get.apply(responseWithCost).fn,
               (true: Cel) -> (List() -> Value.nil)
             ))
-            List[Step[?, ?]](statusDone, enqueueDone, maybeCallback) -> complete.resultValue
+            List[Step[?, ?]](statusDone, enqueueDone, maybeCallback) -> responseWithCost
           }
         ))
 
@@ -216,7 +226,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             .runSync(obj(StriderInput()))
             .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
         )
-        val collapse = ContextCollapser("collapseMessages", 60 * 4, 48)
+        val collapse = ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60)
 
         val whenAcquired = Switch("maybeRespond", List(
           // If lock acquired: build context, get response, save it, then release the lock.
@@ -232,6 +242,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               processToolCalls,
               release,
               toolsCost,
+              addUsage,
               maybeToolFeedback,
               summaries,
               extract,
@@ -278,7 +289,11 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           str("Failed"),
           error = errMsg
         )
-        List[Step[?, ?]](release, statusFailed, enqueueFailed) -> Value.nil[ChatToolResponse]
+        val callbackFailure = Switch("callbackFailure", List(
+          (input.callback.getOrElse(Value.nil) !== Cel.nil) -> input.callback.getOrElse(Value.nil).get.failure(err).fn,
+          (true: Cel) -> (List() -> Value.nil)
+        ))
+        List[Step[?, ?]](release, statusFailed, enqueueFailed, callbackFailure) -> Value.nil[ChatToolResponse]
       }
     )
 
@@ -291,7 +306,8 @@ object EventHandler {
   case class Input(
     query: Value[String],
     fund: Value[Double],
-    spent: OptValue[Double],
+    spent: OptValue[Double] = OptValue(0),
+    usage: OptValue[Usage] = OptValue.nil,
     // Optional task payload to seed a task for this session (title/description/status)
     task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],

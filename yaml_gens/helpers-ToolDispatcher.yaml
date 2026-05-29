@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_fb141fc: {}
+          - mainTryResult_39aad307: {}
       - mainTry_steps:
           try:
             steps:
@@ -14,7 +14,7 @@ main:
                 steps:
                 - registerExecForSessionTry_initResult:
                     assign:
-                    - registerExecForSessionTryResult_713e7009: {}
+                    - registerExecForSessionTryResult_134cfffa: {}
                 - registerExecForSessionTry_steps:
                     try:
                       steps:
@@ -43,7 +43,7 @@ main:
                           retry: "${http.default_retry}"
                       - registerExecForSessionTry_updateResult:
                           assign:
-                          - registerExecForSessionTryResult_713e7009: "${\"ok\"}"
+                          - registerExecForSessionTryResult_134cfffa: "${\"ok\"}"
                     except:
                       as: "registerExecForSessionTryError"
                       steps:
@@ -51,10 +51,10 @@ main:
                           steps:
                           - registerExecForSessionSwitch_initResult:
                               assign:
-                              - registerExecForSessionSwitchResult_41b93d54: {}
+                              - registerExecForSessionSwitchResult_78c29a22: {}
                           - registerExecForSessionSwitch_steps:
                               switch:
-                              - condition: "${((\"code\" in registerExecForSessionTryError) and (registerExecForSessionTryError.code == 409))}"
+                              - condition: "${((\"code\" in registerExecForSessionTryError) and (default(map.get(registerExecForSessionTryError, \"code\"), 0) == 409))}"
                                 steps:
                                 - registerExecForSessionUpdate:
                                     try:
@@ -81,22 +81,22 @@ main:
                                     retry: "${http.default_retry}"
                                 - registerExecForSessionSwitch_updateResult_0:
                                     assign:
-                                    - registerExecForSessionSwitchResult_41b93d54: "${\"ok\"}"
+                                    - registerExecForSessionSwitchResult_78c29a22: "${\"ok\"}"
                               - condition: "${true}"
                                 steps:
                                 - registerExecForSessionRethrow:
                                     raise: "${registerExecForSessionTryError}"
                                 - registerExecForSessionSwitch_updateResult_1:
                                     assign:
-                                    - registerExecForSessionSwitchResult_41b93d54: "${\"fail\"}"
+                                    - registerExecForSessionSwitchResult_78c29a22: "${\"fail\"}"
                       - registerExecForSessionTry_updateResultError:
                           assign:
-                          - registerExecForSessionTryResult_713e7009: "${registerExecForSessionSwitchResult_41b93d54}"
+                          - registerExecForSessionTryResult_134cfffa: "${registerExecForSessionSwitchResult_78c29a22}"
             - registerWorkflowExecLink:
                 steps:
                 - registerWorkflowExecLink_initResult:
                     assign:
-                    - registerWorkflowExecLinkResult_2923b725: {}
+                    - registerWorkflowExecLinkResult_23f07d68: {}
                 - registerWorkflowExecLink_steps:
                     switch:
                     - condition: "${(len(default(default(map.get(input.env, \"callingWorkflowExec\"), null), \"\")) > 0)}"
@@ -105,7 +105,7 @@ main:
                           steps:
                           - registerWorkflowExecLinkTry_initResult:
                               assign:
-                              - registerWorkflowExecLinkTryResult_386ba042: {}
+                              - registerWorkflowExecLinkTryResult_4e2a0dfd: {}
                           - registerWorkflowExecLinkTry_steps:
                               try:
                                 steps:
@@ -135,7 +135,7 @@ main:
                                     retry: "${http.default_retry}"
                                 - registerWorkflowExecLinkTry_updateResult:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_386ba042: "${\"ok\"}"
+                                    - registerWorkflowExecLinkTryResult_4e2a0dfd: "${\"ok\"}"
                               except:
                                 as: "registerWorkflowExecLinkTryError"
                                 steps:
@@ -143,10 +143,10 @@ main:
                                     steps:
                                     - registerWorkflowExecLinkSwitch_initResult:
                                         assign:
-                                        - registerWorkflowExecLinkSwitchResult_6e7fb631: {}
+                                        - registerWorkflowExecLinkSwitchResult_107cd5a2: {}
                                     - registerWorkflowExecLinkSwitch_steps:
                                         switch:
-                                        - condition: "${(registerWorkflowExecLinkTryError.code == 409)}"
+                                        - condition: "${(default(map.get(registerWorkflowExecLinkTryError, \"code\"), 0) == 409)}"
                                           steps:
                                           - registerWorkflowExecLinkUpdate:
                                               try:
@@ -174,25 +174,25 @@ main:
                                               retry: "${http.default_retry}"
                                           - registerWorkflowExecLinkSwitch_updateResult_0:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_6e7fb631: "${\"ok\"}"
+                                              - registerWorkflowExecLinkSwitchResult_107cd5a2: "${\"ok\"}"
                                         - condition: "${true}"
                                           steps:
                                           - registerWorkflowExecLinkRethrow:
                                               raise: "${registerWorkflowExecLinkTryError}"
                                           - registerWorkflowExecLinkSwitch_updateResult_1:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_6e7fb631: "${\"fail\"}"
+                                              - registerWorkflowExecLinkSwitchResult_107cd5a2: "${\"fail\"}"
                                 - registerWorkflowExecLinkTry_updateResultError:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_386ba042: "${registerWorkflowExecLinkSwitchResult_6e7fb631}"
+                                    - registerWorkflowExecLinkTryResult_4e2a0dfd: "${registerWorkflowExecLinkSwitchResult_107cd5a2}"
                       - registerWorkflowExecLink_updateResult_0:
                           assign:
-                          - registerWorkflowExecLinkResult_2923b725: "${registerWorkflowExecLinkTryResult_386ba042}"
+                          - registerWorkflowExecLinkResult_23f07d68: "${registerWorkflowExecLinkTryResult_4e2a0dfd}"
                     - condition: "${true}"
                       steps:
                       - registerWorkflowExecLink_updateResult_1:
                           assign:
-                          - registerWorkflowExecLinkResult_2923b725: "${\"skip\"}"
+                          - registerWorkflowExecLinkResult_23f07d68: "${\"skip\"}"
             - forToolCall:
                 steps:
                 - forToolCall_initResult:
@@ -345,7 +345,7 @@ main:
                           - forToolCallResult_37096fda: "${list.concat(forToolCallResult_37096fda, foldResult_57ea3ab9)}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_fb141fc:
+                - mainTryResult_39aad307:
                     results: "${forToolCallResult_37096fda}"
           except:
             as: "mainTryError"
@@ -354,6 +354,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_fb141fc: "${null}"
+                - mainTryResult_39aad307: "${null}"
   - return:
-      return: "${mainTryResult_fb141fc}"
+      return: "${mainTryResult_39aad307}"

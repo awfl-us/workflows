@@ -175,7 +175,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
       (exitCode.cel === 0) ->
         (List() -> output),
       (true: Cel) -> (
-        if (raiseError) List(Raise("raiseError", obj(Error(error, Value(exitCode.cel))))) -> Value.nil[String]
+        if (raiseError) List(Raise("raiseError", obj(Error(error, OptValue[Int](exitCode.cel))))) -> Value.nil[String]
         else List() -> output
       )
     ))

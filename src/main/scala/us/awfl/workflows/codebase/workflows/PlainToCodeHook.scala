@@ -72,6 +72,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
       name = "plain_to_code",
       messages = messages.resultValue,
       tools = ListValue.nil,
+      sessionId = sessionId,
       tool_choice = Value.nil,
       model = str("gpt-4o"),
       temperature = 0.2,

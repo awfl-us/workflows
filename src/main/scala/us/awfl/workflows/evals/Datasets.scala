@@ -30,10 +30,15 @@ object Datasets {
         "';LIMIT='" + limit +
         "';RANDOMIZE='" + randomize +
         "';SEED='" + seed + "';"
-      val loadScript = Files.scripts("load_dataset.sh")
+      val loadScript = Files.scripts("evals/load_dataset.sh")
       val runScript = CliTools.runCommand(str(params + loadScript.resultValue))
       val decode = For("decode", ListValue(CelFunc("text.split", runScript.resultValue, CelStr("\n").safe))) { row =>
-        List() -> Value[Row](CelFunc("json.decode", row))
+        Try("tryDecode",
+          List() -> Value[Row](CelFunc("json.decode", row)),
+          err => List(Raise("decodeFailed", obj(err.get.copy(message = str(
+            ("Failed to decode dataset row: ": Cel) + row + CelStr("\n").safe + err.get.message
+          ))))) -> Value.nil
+        ).fn
       }
 
       Try(

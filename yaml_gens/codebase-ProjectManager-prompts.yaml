@@ -47,7 +47,7 @@ main:
                           steps:
                           - preloadScript_initResult:
                               assign:
-                              - preloadScriptResult_1688997a: {}
+                              - preloadScriptResult_7a6e9885: {}
                           - preloadScript_steps:
                               try:
                                 steps:
@@ -115,11 +115,28 @@ main:
                                                     alt: "${\"media\"}"
                                                   result: "readFileResult_47a72c9a"
                                             retry: "${http.default_retry}"
+                                        - maybeDecode:
+                                            steps:
+                                            - maybeDecode_initResult:
+                                                assign:
+                                                - maybeDecodeResult_7bf1e0e5: {}
+                                            - maybeDecode_steps:
+                                                switch:
+                                                - condition: "${(get_type(readFileResult_47a72c9a) == \"bytes\")}"
+                                                  steps:
+                                                  - maybeDecode_updateResult_0:
+                                                      assign:
+                                                      - maybeDecodeResult_7bf1e0e5: "${text.decode(readFileResult_47a72c9a)}"
+                                                - condition: "${true}"
+                                                  steps:
+                                                  - maybeDecode_updateResult_1:
+                                                      assign:
+                                                      - maybeDecodeResult_7bf1e0e5: "${readFileResult_47a72c9a}"
                                 - runScript_block:
                                     steps:
                                     - runScript_block_initResult:
                                         assign:
-                                        - runScript_blockResult_7d778eeb: {}
+                                        - runScript_blockResult_37e6451f: {}
                                     - runScript_block_steps:
                                         try:
                                           steps:
@@ -131,14 +148,14 @@ main:
                                                       steps:
                                                       - buildParams_initResult:
                                                           assign:
-                                                          - buildParamsResult_a353fd6: {}
+                                                          - buildParamsResult_19fd222e: {}
                                                       - buildParams_steps:
                                                           try:
                                                             steps:
                                                             - buildParams_updateResult:
                                                                 assign:
-                                                                - buildParamsResult_a353fd6:
-                                                                    command: "${text.decode(readFileResult_47a72c9a)}"
+                                                                - buildParamsResult_19fd222e:
+                                                                    command: "${maybeDecodeResult_7bf1e0e5}"
                                                           except:
                                                             as: "buildParamsError"
                                                             steps:
@@ -155,7 +172,7 @@ main:
                                                                 raise: "${buildParamsError}"
                                                             - buildParams_updateResultError:
                                                                 assign:
-                                                                - buildParamsResult_a353fd6: "${null}"
+                                                                - buildParamsResult_19fd222e: "${null}"
                                                   - runCommand_await_block:
                                                       steps:
                                                       - runCommand_run:
@@ -171,7 +188,7 @@ main:
                                                                       type: "${\"function\"}"
                                                                       function:
                                                                         name: "${\"RUN_COMMAND\"}"
-                                                                        arguments: "${json.encode_to_string(buildParamsResult_a353fd6)}"
+                                                                        arguments: "${json.encode_to_string(buildParamsResult_19fd222e)}"
                                                                     cost: 0.0
                                                                     timeoutSeconds: "${default(60, null)}"
                                                                     env:
@@ -187,30 +204,30 @@ main:
                                                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                                   connector_params:
                                                                     skip_polling: false
-                                                                result: "runCommand_runResult_42776ed1"
+                                                                result: "runCommand_runResult_4b1f8746"
                                                           retry: "${http.default_retry}"
                                               - checkError:
                                                   steps:
                                                   - checkError_initResult:
                                                       assign:
-                                                      - checkErrorResult_57b3c255: {}
+                                                      - checkErrorResult_47ee9ae2: {}
                                                   - checkError_steps:
                                                       switch:
-                                                      - condition: "${(map.get(json.decode(runCommand_runResult_42776ed1.encoded), \"exitCode\") == 0)}"
+                                                      - condition: "${(map.get(json.decode(runCommand_runResult_4b1f8746.encoded), \"exitCode\") == 0)}"
                                                         steps:
                                                         - checkError_updateResult_0:
                                                             assign:
-                                                            - checkErrorResult_57b3c255: "${map.get(json.decode(runCommand_runResult_42776ed1.encoded), \"output\")}"
+                                                            - checkErrorResult_47ee9ae2: "${map.get(json.decode(runCommand_runResult_4b1f8746.encoded), \"output\")}"
                                                       - condition: "${true}"
                                                         steps:
                                                         - checkError_updateResult_1:
                                                             assign:
-                                                            - checkErrorResult_57b3c255: "${map.get(json.decode(runCommand_runResult_42776ed1.encoded), \"output\")}"
+                                                            - checkErrorResult_47ee9ae2: "${map.get(json.decode(runCommand_runResult_4b1f8746.encoded), \"output\")}"
                                           - runScript_block_updateResult:
                                               assign:
-                                              - runScript_blockResult_7d778eeb:
+                                              - runScript_blockResult_37e6451f:
                                                   role: "${\"system\"}"
-                                                  content: "${(((\"[Preload \" + text.decode(readFileResult_47a72c9a)) + \"]\r\") + checkErrorResult_57b3c255)}"
+                                                  content: "${(((\"[Preload \" + maybeDecodeResult_7bf1e0e5) + \"]\r\") + checkErrorResult_47ee9ae2)}"
                                                   tool_calls: "${[]}"
                                                   tool_call_id: "${null}"
                                                   create_time: "${sys.now()}"
@@ -231,10 +248,10 @@ main:
                                               raise: "${runScript_blockError}"
                                           - runScript_block_updateResultError:
                                               assign:
-                                              - runScript_blockResult_7d778eeb: "${null}"
+                                              - runScript_blockResult_37e6451f: "${null}"
                                 - preloadScript_updateResult:
                                     assign:
-                                    - preloadScriptResult_1688997a: "${runScript_blockResult_7d778eeb}"
+                                    - preloadScriptResult_7a6e9885: "${runScript_blockResult_37e6451f}"
                               except:
                                 as: "preloadScriptError"
                                 steps:
@@ -251,7 +268,7 @@ main:
                                     raise: "${preloadScriptError}"
                                 - preloadScript_updateResultError:
                                     assign:
-                                    - preloadScriptResult_1688997a: "${null}"
+                                    - preloadScriptResult_7a6e9885: "${null}"
                       - preloadCommand_block:
                           steps:
                           - preloadCommand_block_initResult:
@@ -373,7 +390,7 @@ main:
                           steps:
                           - joinPreloads_initResult:
                               assign:
-                              - joinPreloadsResult_4ef6d2f2: []
+                              - joinPreloadsResult_5e522a82: []
                           - joinPreloads_steps:
                               for:
                                 value: "joinPreloadsIdx"
@@ -383,52 +400,52 @@ main:
                                     steps:
                                     - joinPreloads_switch_initResult:
                                         assign:
-                                        - joinPreloads_switchResult_32f89af2: {}
+                                        - joinPreloads_switchResult_3a93ed94: {}
                                     - joinPreloads_switch_steps:
                                         switch:
                                         - condition: "${(joinPreloadsIdx == 0)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_0:
                                               assign:
-                                              - joinPreloads_switchResult_32f89af2: "${preloadScriptResult_1688997a}"
+                                              - joinPreloads_switchResult_3a93ed94: "${preloadScriptResult_7a6e9885}"
                                         - condition: "${(joinPreloadsIdx == 1)}"
                                           steps:
                                           - joinPreloads_switch_updateResult_1:
                                               assign:
-                                              - joinPreloads_switchResult_32f89af2: "${preloadCommand_blockResult_1a4a3984}"
+                                              - joinPreloads_switchResult_3a93ed94: "${preloadCommand_blockResult_1a4a3984}"
                                 - joinPreloads_updateResult:
                                     assign:
-                                    - joinPreloadsResult_4ef6d2f2: "${list.concat(joinPreloadsResult_4ef6d2f2, joinPreloads_switchResult_32f89af2)}"
+                                    - joinPreloadsResult_5e522a82: "${list.concat(joinPreloadsResult_5e522a82, joinPreloads_switchResult_3a93ed94)}"
                   - preloads_joinSteps:
                       steps:
                       - preloads_joinSteps_initResult:
                           assign:
-                          - preloads_joinStepsResult_2815a034: []
+                          - preloads_joinStepsResult_1e81bc9a: []
                       - preloads_joinSteps_steps:
                           for:
                             value: "preloads_joinStepsIdx"
-                            range: "${[0, (((0 + len(buildPromptListResult_25165fe8)) + len(joinPreloadsResult_4ef6d2f2)) - 1)]}"
+                            range: "${[0, (((0 + len(buildPromptListResult_25165fe8)) + len(joinPreloadsResult_5e522a82)) - 1)]}"
                             steps:
                             - preloads_joinSteps_switch:
                                 steps:
                                 - preloads_joinSteps_switch_initResult:
                                     assign:
-                                    - preloads_joinSteps_switchResult_741da886: {}
+                                    - preloads_joinSteps_switchResult_2da99878: {}
                                 - preloads_joinSteps_switch_steps:
                                     switch:
                                     - condition: "${(preloads_joinStepsIdx >= (0 + len(buildPromptListResult_25165fe8)))}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_0:
                                           assign:
-                                          - preloads_joinSteps_switchResult_741da886: "${joinPreloadsResult_4ef6d2f2[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_25165fe8)))]}"
+                                          - preloads_joinSteps_switchResult_2da99878: "${joinPreloadsResult_5e522a82[(preloads_joinStepsIdx - (0 + len(buildPromptListResult_25165fe8)))]}"
                                     - condition: "${(preloads_joinStepsIdx >= 0)}"
                                       steps:
                                       - preloads_joinSteps_switch_updateResult_1:
                                           assign:
-                                          - preloads_joinSteps_switchResult_741da886: "${buildPromptListResult_25165fe8[(preloads_joinStepsIdx - 0)]}"
+                                          - preloads_joinSteps_switchResult_2da99878: "${buildPromptListResult_25165fe8[(preloads_joinStepsIdx - 0)]}"
                             - preloads_joinSteps_updateResult:
                                 assign:
-                                - preloads_joinStepsResult_2815a034: "${list.concat(preloads_joinStepsResult_2815a034, preloads_joinSteps_switchResult_741da886)}"
+                                - preloads_joinStepsResult_1e81bc9a: "${list.concat(preloads_joinStepsResult_1e81bc9a, preloads_joinSteps_switchResult_2da99878)}"
               - buildPromptsWithTasks:
                   steps:
                   - buildPromptsWithTasks_initResult:
@@ -578,32 +595,32 @@ main:
                   steps:
                   - taskPrompts_joinSteps_initResult:
                       assign:
-                      - taskPrompts_joinStepsResult_12910a39: []
+                      - taskPrompts_joinStepsResult_7197c5fd: []
                   - taskPrompts_joinSteps_steps:
                       for:
                         value: "taskPrompts_joinStepsIdx"
-                        range: "${[0, (((0 + len(preloads_joinStepsResult_2815a034)) + len(buildPromptsWithTasksResult_11e720ab)) - 1)]}"
+                        range: "${[0, (((0 + len(preloads_joinStepsResult_1e81bc9a)) + len(buildPromptsWithTasksResult_11e720ab)) - 1)]}"
                         steps:
                         - taskPrompts_joinSteps_switch:
                             steps:
                             - taskPrompts_joinSteps_switch_initResult:
                                 assign:
-                                - taskPrompts_joinSteps_switchResult_28a7928b: {}
+                                - taskPrompts_joinSteps_switchResult_5e723411: {}
                             - taskPrompts_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_2815a034)))}"
+                                - condition: "${(taskPrompts_joinStepsIdx >= (0 + len(preloads_joinStepsResult_1e81bc9a)))}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_28a7928b: "${buildPromptsWithTasksResult_11e720ab[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_2815a034)))]}"
+                                      - taskPrompts_joinSteps_switchResult_5e723411: "${buildPromptsWithTasksResult_11e720ab[(taskPrompts_joinStepsIdx - (0 + len(preloads_joinStepsResult_1e81bc9a)))]}"
                                 - condition: "${(taskPrompts_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskPrompts_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskPrompts_joinSteps_switchResult_28a7928b: "${preloads_joinStepsResult_2815a034[(taskPrompts_joinStepsIdx - 0)]}"
+                                      - taskPrompts_joinSteps_switchResult_5e723411: "${preloads_joinStepsResult_1e81bc9a[(taskPrompts_joinStepsIdx - 0)]}"
                         - taskPrompts_joinSteps_updateResult:
                             assign:
-                            - taskPrompts_joinStepsResult_12910a39: "${list.concat(taskPrompts_joinStepsResult_12910a39, taskPrompts_joinSteps_switchResult_28a7928b)}"
+                            - taskPrompts_joinStepsResult_7197c5fd: "${list.concat(taskPrompts_joinStepsResult_7197c5fd, taskPrompts_joinSteps_switchResult_5e723411)}"
           - cliPrompt:
               steps:
               - cliPrompt_initResult:
@@ -639,32 +656,32 @@ main:
               steps:
               - cli_joinSteps_initResult:
                   assign:
-                  - cli_joinStepsResult_10034128: []
+                  - cli_joinStepsResult_710ce85f: []
               - cli_joinSteps_steps:
                   for:
                     value: "cli_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_12910a39)) + len(cliPromptResult_636741be)) - 1)]}"
+                    range: "${[0, (((0 + len(taskPrompts_joinStepsResult_7197c5fd)) + len(cliPromptResult_636741be)) - 1)]}"
                     steps:
                     - cli_joinSteps_switch:
                         steps:
                         - cli_joinSteps_switch_initResult:
                             assign:
-                            - cli_joinSteps_switchResult_4220c10d: {}
+                            - cli_joinSteps_switchResult_36fbb478: {}
                         - cli_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_12910a39)))}"
+                            - condition: "${(cli_joinStepsIdx >= (0 + len(taskPrompts_joinStepsResult_7197c5fd)))}"
                               steps:
                               - cli_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cli_joinSteps_switchResult_4220c10d: "${cliPromptResult_636741be[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_12910a39)))]}"
+                                  - cli_joinSteps_switchResult_36fbb478: "${cliPromptResult_636741be[(cli_joinStepsIdx - (0 + len(taskPrompts_joinStepsResult_7197c5fd)))]}"
                             - condition: "${(cli_joinStepsIdx >= 0)}"
                               steps:
                               - cli_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cli_joinSteps_switchResult_4220c10d: "${taskPrompts_joinStepsResult_12910a39[(cli_joinStepsIdx - 0)]}"
+                                  - cli_joinSteps_switchResult_36fbb478: "${taskPrompts_joinStepsResult_7197c5fd[(cli_joinStepsIdx - 0)]}"
                     - cli_joinSteps_updateResult:
                         assign:
-                        - cli_joinStepsResult_10034128: "${list.concat(cli_joinStepsResult_10034128, cli_joinSteps_switchResult_4220c10d)}"
+                        - cli_joinStepsResult_710ce85f: "${list.concat(cli_joinStepsResult_710ce85f, cli_joinSteps_switchResult_36fbb478)}"
       - fundPrompt:
           steps:
           - fundPrompt_initResult:
@@ -711,32 +728,32 @@ main:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_43359943: []
+              - fundsPrompts_joinStepsResult_46e79fb1: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_10034128)) + len(fundPromptResult_79374364)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_710ce85f)) + len(fundPromptResult_79374364)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_741d880: {}
+                        - fundsPrompts_joinSteps_switchResult_e4b3770: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_10034128)))}"
+                        - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_710ce85f)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_741d880: "${fundPromptResult_79374364[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_10034128)))]}"
+                              - fundsPrompts_joinSteps_switchResult_e4b3770: "${fundPromptResult_79374364[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_710ce85f)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_741d880: "${cli_joinStepsResult_10034128[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_e4b3770: "${cli_joinStepsResult_710ce85f[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_43359943: "${list.concat(fundsPrompts_joinStepsResult_43359943, fundsPrompts_joinSteps_switchResult_741d880)}"
+                    - fundsPrompts_joinStepsResult_46e79fb1: "${list.concat(fundsPrompts_joinStepsResult_46e79fb1, fundsPrompts_joinSteps_switchResult_e4b3770)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_43359943}"
+        prompts: "${fundsPrompts_joinStepsResult_46e79fb1}"

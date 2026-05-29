@@ -1,4 +1,9 @@
-set -euo pipefail
+#!/usr/bin/env sh
+# shellcheck shell=sh
+# Portable POSIX sh version (works on Debian/Ubuntu dash and macOS)
+set -eu
+# Enable pipefail if supported (bash/zsh); harmless no-op elsewhere
+if (set -o pipefail) 2>/dev/null; then :; fi
 
 : "${DATASET:?DATASET is required}"
 : "${SPLIT:?SPLIT is required}"
@@ -22,12 +27,28 @@ try:
 except ImportError:
     raise SystemExit("Missing dependency: pip install datasets")
 
+
+def _clean_patch(obj):
+    if isinstance(obj, dict):
+        for key in ("patch", "test_patch"):
+            if key in obj:
+                # Keep key for schema stability but strip the large diff/test content
+                obj[key] = ""
+        for v in obj.values():
+            _clean_patch(v)
+    elif isinstance(obj, list):
+        for i in obj:
+            _clean_patch(i)
+
+
 ds = load_dataset(dataset, split=split)
 
 out_path.parent.mkdir(parents=True, exist_ok=True)
 with out_path.open("w") as f:
     for row in ds:
-        f.write(json.dumps(dict(row)) + "\n")
+        row_dict = dict(row)
+        _clean_patch(row_dict)
+        f.write(json.dumps(row_dict) + "\n")
 PY
 fi
 
@@ -42,6 +63,18 @@ limit = int(sys.argv[2])
 randomize = sys.argv[3].lower() in {"1", "true", "yes", "y"}
 seed = int(sys.argv[4])
 
+
+def _clean_patch(obj):
+    if isinstance(obj, dict):
+        for key in ("patch", "test_patch"):
+            if key in obj:
+                obj[key] = ""
+        for v in obj.values():
+            _clean_patch(v)
+    elif isinstance(obj, list):
+        for i in obj:
+            _clean_patch(i)
+
 rows = []
 with path.open() as f:
     for line in f:
@@ -53,5 +86,6 @@ if randomize:
     rng.shuffle(rows)
 
 for row in rows[:limit]:
+    _clean_patch(row)
     print(json.dumps(row))
 PY

@@ -2,5 +2,7 @@
   "files": [
     "AGENT.md"
   ],
-  "commands": []
+  "commands": [
+    "/opt/miniconda3/envs/testbed/bin/pytest tests/test_a.py::test_x"
+  ]
 }

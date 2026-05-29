@@ -26,11 +26,19 @@ trait Experiment[P: Spec, R: Spec] extends us.awfl.core.Workflow {
 
   def apply(
     name: String,
+    runId: Value[String],
+    limit: Value[Int],
     directory: Value[String],
     params: BaseValue[P],
     env: BaseValue[Env] = obj(Env.get.copy(sessionId = str(workflowName)))
   ): Call[RunWorkflowArgs[Experiment.Input[P]], R] = {
-    execute(workflowName, obj(Experiment.Input(directory, params, env = env)))
+    execute(workflowName, obj(Experiment.Input(
+      runId = runId,
+      limit = limit,
+      directory = directory,
+      params = params,
+      env = env
+    )))
   }
 
   override def workflows: List[Workflow[?]] = List({
@@ -46,6 +54,8 @@ trait Experiment[P: Spec, R: Spec] extends us.awfl.core.Workflow {
 
 object Experiment {
   case class Input[P](
+    runId: Value[String],
+    limit: Value[Int],
     directory: Value[String],
     params: BaseValue[P],
     env: BaseValue[Env] = ENV

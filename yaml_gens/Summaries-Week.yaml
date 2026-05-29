@@ -8,7 +8,7 @@ main:
           steps:
           - lock_acquire_try_initResult:
               assign:
-              - lock_acquire_tryResult_4c0a8e2e: {}
+              - lock_acquire_tryResult_1c485560: {}
           - lock_acquire_try_steps:
               try:
                 steps:
@@ -35,7 +35,7 @@ main:
                     retry: "${http.default_retry}"
                 - lock_acquire_try_updateResult:
                     assign:
-                    - lock_acquire_tryResult_4c0a8e2e: "${lock_acquireResult_4fe11ff3.body.acquired}"
+                    - lock_acquire_tryResult_1c485560: "${lock_acquireResult_4fe11ff3.body.acquired}"
               except:
                 as: "lock_acquire_tryError"
                 steps:
@@ -43,10 +43,10 @@ main:
                     steps:
                     - lock_acquire_err_initResult:
                         assign:
-                        - lock_acquire_errResult_7d3c3b2: {}
+                        - lock_acquire_errResult_499fd57f: {}
                     - lock_acquire_err_steps:
                         switch:
-                        - condition: "${((\"code\" in lock_acquire_tryError) and (lock_acquire_tryError.code == 409))}"
+                        - condition: "${((\"code\" in lock_acquire_tryError) and (default(map.get(lock_acquire_tryError, \"code\"), 0) == 409))}"
                           steps:
                           - lock_acquire_busy:
                               try:
@@ -59,25 +59,25 @@ main:
                               retry: "${http.default_retry}"
                           - lock_acquire_err_updateResult_0:
                               assign:
-                              - lock_acquire_errResult_7d3c3b2: "${false}"
+                              - lock_acquire_errResult_499fd57f: "${false}"
                         - condition: "${true}"
                           steps:
                           - lock_acquire_rethrow:
                               raise: "${lock_acquire_tryError}"
                           - lock_acquire_err_updateResult_1:
                               assign:
-                              - lock_acquire_errResult_7d3c3b2: "${false}"
+                              - lock_acquire_errResult_499fd57f: "${false}"
                 - lock_acquire_try_updateResultError:
                     assign:
-                    - lock_acquire_tryResult_4c0a8e2e: "${lock_acquire_errResult_7d3c3b2}"
+                    - lock_acquire_tryResult_1c485560: "${lock_acquire_errResult_499fd57f}"
       - lock_switch:
           steps:
           - lock_switch_initResult:
               assign:
-              - lock_switchResult_6e3e6a8f: {}
+              - lock_switchResult_3cc5b959: {}
           - lock_switch_steps:
               switch:
-              - condition: "${(lock_acquire_tryResult_4c0a8e2e == true)}"
+              - condition: "${(lock_acquire_tryResult_1c485560 == true)}"
                 steps:
                 - work_block:
                     steps:
@@ -272,7 +272,7 @@ main:
                         steps:
                         - ista_write_switch_initResult:
                             assign:
-                            - ista_write_switchResult_18680e77: {}
+                            - ista_write_switchResult_33defd3c: {}
                         - ista_write_switch_steps:
                             switch:
                             - condition: "${((len(for_messages_items_SegKalaResult_1282c13c) > 0) and ((len(for_summariesIstaResult_56a02049) == 0) or (for_summariesIstaResult_56a02049[(len(for_summariesIstaResult_56a02049) - 1)].create_time < input.segmentEnd)))}"
@@ -468,7 +468,7 @@ main:
                                       steps:
                                       - complete_switch_initResult:
                                           assign:
-                                          - complete_switchResult_7848849b: {}
+                                          - complete_switchResult_24b133a8: {}
                                       - complete_switch_steps:
                                           switch:
                                           - condition: "${(len(for_convoContext_items_WeekKalaResult_4fc1303c) > 0)}"
@@ -625,6 +625,8 @@ main:
                                                               max_completion_tokens: "${null}"
                                                               response_format:
                                                                 type: "json_object"
+                                                              sessionId: "${input.env.sessionId}"
+                                                              workflow_name: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                                                               tools: "${[]}"
                                                               tool_choice: "${\"auto\"}"
                                                             auth:
@@ -633,21 +635,21 @@ main:
                                                             headers:
                                                               x-user-id: "${input.env.userId}"
                                                               x-project-id: "${input.env.projectId}"
-                                                          result: "complete_chat_postResult_41f3cd57"
+                                                          result: "complete_chat_postResult_6f475133"
                                                     retry: "${http.default_retry}"
                                                 - decoded:
                                                     steps:
                                                     - decoded_initResult:
                                                         assign:
-                                                        - decodedResult_6ae9c914: {}
+                                                        - decodedResult_8362af3: {}
                                                     - decoded_steps:
                                                         try:
                                                           steps:
                                                           - decoded_updateResult:
                                                               assign:
-                                                              - decodedResult_6ae9c914:
-                                                                  result: "${json.decode(complete_chat_postResult_41f3cd57.body.message.content)}"
-                                                                  total_cost: "${complete_chat_postResult_41f3cd57.body.total_cost}"
+                                                              - decodedResult_8362af3:
+                                                                  result: "${json.decode(complete_chat_postResult_6f475133.body.message.content)}"
+                                                                  total_cost: "${complete_chat_postResult_6f475133.body.total_cost}"
                                                         except:
                                                           as: "decodedError"
                                                           steps:
@@ -664,29 +666,29 @@ main:
                                                               raise: "${decodedError}"
                                                           - decoded_updateResultError:
                                                               assign:
-                                                              - decodedResult_6ae9c914: "${null}"
+                                                              - decodedResult_8362af3: "${null}"
                                             - complete_switch_updateResult_0:
                                                 assign:
-                                                - complete_switchResult_7848849b: "${decodedResult_6ae9c914}"
+                                                - complete_switchResult_24b133a8: "${decodedResult_8362af3}"
                                           - condition: "${true}"
                                             steps:
                                             - emptyYoj:
                                                 raise:
                                                   message: "${\"Empty Yoj returned\"}"
-                                                  code: "${400}"
+                                                  code: "${default(400, null)}"
                                             - complete_switch_updateResult_1:
                                                 assign:
-                                                - complete_switchResult_7848849b: "${null}"
+                                                - complete_switchResult_24b133a8: "${null}"
                               - do_write_other_block:
                                   steps:
                                   - writeIstaResult_switch:
                                       steps:
                                       - writeIstaResult_switch_initResult:
                                           assign:
-                                          - writeIstaResult_switchResult_2dc37e5c: {}
+                                          - writeIstaResult_switchResult_5e7bb96d: {}
                                       - writeIstaResult_switch_steps:
                                           switch:
-                                          - condition: "${(complete_switchResult_7848849b.result != null)}"
+                                          - condition: "${(complete_switchResult_24b133a8.result != null)}"
                                             steps:
                                             - writeIstaResult_write_summariesIsta_WeekKala:
                                                 try:
@@ -699,9 +701,9 @@ main:
                                                           collection: "${(\"log.weekly.\" + \"summaries\")}"
                                                           id: "${time.format((259200 + ((((input.segmentEnd - 259200) // 604800) + 1) * 604800)), \"America/New_York\")}"
                                                           contents:
-                                                            value: "${complete_switchResult_7848849b.result}"
+                                                            value: "${complete_switchResult_24b133a8.result}"
                                                             create_time: "${input.segmentEnd}"
-                                                            cost: "${complete_switchResult_7848849b.total_cost}"
+                                                            cost: "${complete_switchResult_24b133a8.total_cost}"
                                                             execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                                           userId: "${input.env.userId}"
                                                         auth:
@@ -710,19 +712,19 @@ main:
                                                         headers:
                                                           x-user-id: "${input.env.userId}"
                                                           x-project-id: "${input.env.projectId}"
-                                                      result: "writeIstaResult_write_summariesIsta_WeekKalaResult_59799f02"
+                                                      result: "writeIstaResult_write_summariesIsta_WeekKalaResult_52baca50"
                                                 retry: "${http.default_retry}"
                                             - writeIstaResult_switch_updateResult_0:
                                                 assign:
-                                                - writeIstaResult_switchResult_2dc37e5c: "${writeIstaResult_write_summariesIsta_WeekKalaResult_59799f02}"
+                                                - writeIstaResult_switchResult_5e7bb96d: "${writeIstaResult_write_summariesIsta_WeekKalaResult_52baca50}"
                                           - condition: "${true}"
                                             steps:
                                             - writeIstaResult_switch_updateResult_1:
                                                 assign:
-                                                - writeIstaResult_switchResult_2dc37e5c: "${null}"
+                                                - writeIstaResult_switchResult_5e7bb96d: "${null}"
                               - ista_write_switch_updateResult_0:
                                   assign:
-                                  - ista_write_switchResult_18680e77: "${complete_switchResult_7848849b.result}"
+                                  - ista_write_switchResult_33defd3c: "${complete_switchResult_24b133a8.result}"
                             - condition: "${true}"
                               steps:
                               - write_skipped:
@@ -736,7 +738,7 @@ main:
                                   retry: "${http.default_retry}"
                               - ista_write_switch_updateResult_1:
                                   assign:
-                                  - ista_write_switchResult_18680e77: "${null}"
+                                  - ista_write_switchResult_33defd3c: "${null}"
                 - lock_release:
                     try:
                       steps:
@@ -759,11 +761,11 @@ main:
                     retry: "${http.default_retry}"
                 - lock_switch_updateResult_0:
                     assign:
-                    - lock_switchResult_6e3e6a8f: "${ista_write_switchResult_18680e77}"
+                    - lock_switchResult_3cc5b959: "${ista_write_switchResult_33defd3c}"
               - condition: "${true}"
                 steps:
                 - lock_switch_updateResult_1:
                     assign:
-                    - lock_switchResult_6e3e6a8f: "${null}"
+                    - lock_switchResult_3cc5b959: "${null}"
   - return:
-      return: "${lock_switchResult_6e3e6a8f}"
+      return: "${lock_switchResult_3cc5b959}"

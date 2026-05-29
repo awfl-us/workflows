@@ -67,7 +67,8 @@ object PlainifyWriteHook extends us.awfl.core.Workflow {
     val chat = us.awfl.services.Llm.chatWithTools(
       name = "plainify",
       messages = messages.resultValue,
-      tools = ListValue.nil,
+      ListValue.nil,
+      sessionId,
       tool_choice = Value.nil,
       model = str("gpt-5"),
       maxTokens = Value.nil

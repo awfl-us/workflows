@@ -67,6 +67,17 @@ jobs:
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
 
+      - name: Upload files directory to GCS
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -d files ]]; then
+            echo "Uploading contents of files/ to gs://awfl-us-workflow-files"
+            gcloud storage rsync -r files gs://awfl-us-workflow-files
+          else
+            echo "No files/ directory present; skipping upload."
+          fi
+
       - name: Deploy Workflows
         env:
           GCP_PROJECT_ID: ${{ env.GCP_PROJECT_ID }}

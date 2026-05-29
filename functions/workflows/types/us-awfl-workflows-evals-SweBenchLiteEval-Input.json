@@ -2,7 +2,20 @@
   "name" : "us-awfl-workflows-evals-SweBenchLiteEval-Input",
   "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.evals.SweBenchLiteEval.Input.",
   "schema" : {
-    "type" : "string",
+    "type" : "object",
+    "properties" : {
+      "arg1" : {
+        "type" : "string"
+      },
+      "arg2" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "arg1",
+      "arg2"
+    ],
+    "additionalProperties" : true,
     "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-evals-SweBenchLiteEval-Input.json"
   }
 }
