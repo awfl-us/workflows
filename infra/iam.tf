@@ -71,10 +71,10 @@ resource "google_storage_bucket_iam_member" "deploy_bucket_object_admin" {
   member   = local.deploy_sa_member
 }
 
-# Bucket metadata/object viewer (includes storage.buckets.get) on target buckets
-resource "google_storage_bucket_iam_member" "deploy_bucket_viewer" {
+# Bucket metadata read (includes storage.buckets.get) on target buckets
+resource "google_storage_bucket_iam_member" "deploy_bucket_legacy_reader" {
   for_each = local.deploy_sa_member != null ? local.deploy_target_buckets : toset([])
   bucket   = each.value
-  role     = "roles/storage.viewer"
+  role     = "roles/storage.legacyBucketReader"
   member   = local.deploy_sa_member
 }
