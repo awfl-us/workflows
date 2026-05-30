@@ -50,3 +50,31 @@ resource "google_service_account_iam_member" "deploy_actas_compute_default" {
   role               = "roles/iam.serviceAccountUser"
   member             = local.deploy_sa_member
 }
+
+# -----------------------------------------------------------------------------------
+# Grant the deploy SA permissions to read bucket metadata and upload/update objects
+# Use the buckets already defined in storage.tf (prod + dev) — no extra variables.
+# -----------------------------------------------------------------------------------
+
+locals {
+  deploy_target_buckets = toset([
+    google_storage_bucket.workflow_scripts.name,
+    google_storage_bucket.workflow_scripts_dev.name,
+  ])
+}
+
+# Object-level admin (create/update/delete/list objects) on target buckets
+resource "google_storage_bucket_iam_member" "deploy_bucket_object_admin" {
+  for_each = local.deploy_sa_member != null ? local.deploy_target_buckets : toset([])
+  bucket   = each.value
+  role     = "roles/storage.objectAdmin"
+  member   = local.deploy_sa_member
+}
+
+# Bucket metadata/object viewer (includes storage.buckets.get) on target buckets
+resource "google_storage_bucket_iam_member" "deploy_bucket_viewer" {
+  for_each = local.deploy_sa_member != null ? local.deploy_target_buckets : toset([])
+  bucket   = each.value
+  role     = "roles/storage.viewer"
+  member   = local.deploy_sa_member
+}
