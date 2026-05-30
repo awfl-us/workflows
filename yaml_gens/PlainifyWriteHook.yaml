@@ -10,29 +10,31 @@ main:
               steps:
               - buildParams_initResult:
                   assign:
-                  - buildParamsResult_1978d66f: {}
+                  - buildParamsResult_1e4de94: {}
               - buildParams_steps:
                   try:
                     steps:
                     - buildParams_updateResult:
                         assign:
-                        - buildParamsResult_1978d66f:
+                        - buildParamsResult_1e4de94:
                             filepath: "${input.filepath}"
                   except:
                     as: "buildParamsError"
                     steps:
-                    - buildParams_logError:
+                    - logError:
                         try:
                           steps:
-                          - buildParams_logError_call:
+                          - logError_call:
                               call: "sys.log"
                               args:
-                                text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
-                              result: "buildParams_logErrorResult_240d3253"
+                                text: "${(\"[logError] \" + buildParamsError.message)}"
+                              result: "logErrorResult_1671996f"
                         retry: "${http.default_retry}"
+                    - reRaise:
+                        raise: "${buildParamsError}"
                     - buildParams_updateResultError:
                         assign:
-                        - buildParamsResult_1978d66f: "${null}"
+                        - buildParamsResult_1e4de94: "${null}"
           - readRaw_await_block:
               steps:
               - readRaw_run:
@@ -48,8 +50,9 @@ main:
                               type: "${\"function\"}"
                               function:
                                 name: "${\"READ_FILE\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_1978d66f)}"
+                                arguments: "${json.encode_to_string(buildParamsResult_1e4de94)}"
                             cost: 0.0
+                            timeoutSeconds: "${default(60, null)}"
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
@@ -58,17 +61,18 @@ main:
                               background: "${default(true, null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${\"plaintify_write_hook\"}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "readRaw_runResult_407a3fe3"
+                        result: "readRaw_runResult_23ed5c15"
                   retry: "${http.default_retry}"
   - plainifyMessages:
       steps:
       - plainifyMessages_initResult:
           assign:
-          - plainifyMessagesResult_1e24b9b0: []
+          - plainifyMessagesResult_3ca7a2ac: []
       - plainifyMessages_steps:
           for:
             value: "plainifyMessagesIdx"
@@ -78,14 +82,14 @@ main:
                 steps:
                 - plainifyMessages_switch_initResult:
                     assign:
-                    - plainifyMessages_switchResult_3bcd9d9d: {}
+                    - plainifyMessages_switchResult_25605fb5: {}
                 - plainifyMessages_switch_steps:
                     switch:
                     - condition: "${(plainifyMessagesIdx == 0)}"
                       steps:
                       - plainifyMessages_switch_updateResult_0:
                           assign:
-                          - plainifyMessages_switchResult_3bcd9d9d:
+                          - plainifyMessages_switchResult_25605fb5:
                               role: "${\"system\"}"
                               content: "${(\"Translate the following code completely into precise, plain technical English. Include all types, methods, data flow, control flow, external interactions, and intent. No omissions. Include the full class signature in code, but the implementation and logic should be in plain English.\n\nTarget filepath: \" + input.filepath)}"
                               tool_calls: "${[]}"
@@ -96,16 +100,16 @@ main:
                       steps:
                       - plainifyMessages_switch_updateResult_1:
                           assign:
-                          - plainifyMessages_switchResult_3bcd9d9d:
+                          - plainifyMessages_switchResult_25605fb5:
                               role: "${\"user\"}"
-                              content: "${(\"Code follows:\n\n\" + map.get(json.decode(readRaw_runResult_407a3fe3.encoded), \"content\"))}"
+                              content: "${(\"Code follows:\n\n\" + map.get(json.decode(readRaw_runResult_23ed5c15.encoded), \"content\"))}"
                               tool_calls: "${[]}"
                               tool_call_id: "${null}"
                               create_time: "${sys.now()}"
                               docId: "${null}"
             - plainifyMessages_updateResult:
                 assign:
-                - plainifyMessagesResult_1e24b9b0: "${list.concat(plainifyMessagesResult_1e24b9b0, plainifyMessages_switchResult_3bcd9d9d)}"
+                - plainifyMessagesResult_3ca7a2ac: "${list.concat(plainifyMessagesResult_3ca7a2ac, plainifyMessages_switchResult_25605fb5)}"
   - chatBlock:
       steps:
       - toolChoice:
@@ -133,12 +137,14 @@ main:
                 args:
                   url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
                   body:
-                    messages: "${plainifyMessagesResult_1e24b9b0}"
+                    messages: "${plainifyMessagesResult_3ca7a2ac}"
                     model: "${\"gpt-5\"}"
                     temperature: 0.8
                     max_completion_tokens: "${null}"
                     response_format:
                       type: "text"
+                    sessionId: "${\"plaintify_write_hook\"}"
+                    workflow_name: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                     tools: "${null}"
                     tool_choice: "${toolChoiceResult_6055570a}"
                   auth:
@@ -147,7 +153,7 @@ main:
                   headers:
                     x-user-id: "${input.env.userId}"
                     x-project-id: "${input.env.projectId}"
-                result: "plainifyResult_24b39cc0"
+                result: "plainifyResult_80c12af"
           retry: "${http.default_retry}"
   - mkdirPlain_output:
       steps:
@@ -157,29 +163,31 @@ main:
               steps:
               - buildParams_initResult_1:
                   assign:
-                  - buildParamsResult_43f4ed8d: {}
+                  - buildParamsResult_487c4fcd: {}
               - buildParams_steps_1:
                   try:
                     steps:
                     - buildParams_updateResult_1:
                         assign:
-                        - buildParamsResult_43f4ed8d:
+                        - buildParamsResult_487c4fcd:
                             command: "${((\"bash -lc 'mkdir -p $(dirname \" + (\"plain/\" + input.filepath)) + \")'\")}"
                   except:
                     as: "buildParamsError"
                     steps:
-                    - buildParams_logError_1:
+                    - logError_1:
                         try:
                           steps:
-                          - buildParams_logError_call_1:
+                          - logError_call_1:
                               call: "sys.log"
                               args:
-                                text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
-                              result: "buildParams_logErrorResult_240d3253"
+                                text: "${(\"[logError] \" + buildParamsError.message)}"
+                              result: "logErrorResult_1671996f"
                         retry: "${http.default_retry}"
+                    - reRaise_1:
+                        raise: "${buildParamsError}"
                     - buildParams_updateResultError_1:
                         assign:
-                        - buildParamsResult_43f4ed8d: "${null}"
+                        - buildParamsResult_487c4fcd: "${null}"
           - mkdirPlain_await_block:
               steps:
               - mkdirPlain_run:
@@ -195,8 +203,9 @@ main:
                               type: "${\"function\"}"
                               function:
                                 name: "${\"RUN_COMMAND\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_43f4ed8d)}"
+                                arguments: "${json.encode_to_string(buildParamsResult_487c4fcd)}"
                             cost: 0.0
+                            timeoutSeconds: "${default(60, null)}"
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
@@ -205,12 +214,30 @@ main:
                               background: "${default(true, null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${\"plaintify_write_hook\"}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "mkdirPlain_runResult_1a0a9772"
+                        result: "mkdirPlain_runResult_34a7314b"
                   retry: "${http.default_retry}"
+      - checkError:
+          steps:
+          - checkError_initResult:
+              assign:
+              - checkErrorResult_7d0aa2f6: {}
+          - checkError_steps:
+              switch:
+              - condition: "${(map.get(json.decode(mkdirPlain_runResult_34a7314b.encoded), \"exitCode\") == 0)}"
+                steps:
+                - checkError_updateResult_0:
+                    assign:
+                    - checkErrorResult_7d0aa2f6: "${map.get(json.decode(mkdirPlain_runResult_34a7314b.encoded), \"output\")}"
+              - condition: "${true}"
+                steps:
+                - checkError_updateResult_1:
+                    assign:
+                    - checkErrorResult_7d0aa2f6: "${map.get(json.decode(mkdirPlain_runResult_34a7314b.encoded), \"output\")}"
   - writePlain_encoded:
       steps:
       - writePlain_call_block:
@@ -219,30 +246,32 @@ main:
               steps:
               - buildParams_initResult_2:
                   assign:
-                  - buildParamsResult_3c939778: {}
+                  - buildParamsResult_7a7085d7: {}
               - buildParams_steps_2:
                   try:
                     steps:
                     - buildParams_updateResult_2:
                         assign:
-                        - buildParamsResult_3c939778:
+                        - buildParamsResult_7a7085d7:
                             filepath: "${(\"plain/\" + input.filepath)}"
-                            content: "${plainifyResult_24b39cc0.body.message.content}"
+                            content: "${plainifyResult_80c12af.body.message.content}"
                   except:
                     as: "buildParamsError"
                     steps:
-                    - buildParams_logError_2:
+                    - logError_2:
                         try:
                           steps:
-                          - buildParams_logError_call_2:
+                          - logError_call_2:
                               call: "sys.log"
                               args:
-                                text: "${(\"[buildParams_logError] \" + buildParamsError.message)}"
-                              result: "buildParams_logErrorResult_240d3253"
+                                text: "${(\"[logError] \" + buildParamsError.message)}"
+                              result: "logErrorResult_1671996f"
                         retry: "${http.default_retry}"
+                    - reRaise_2:
+                        raise: "${buildParamsError}"
                     - buildParams_updateResultError_2:
                         assign:
-                        - buildParamsResult_3c939778: "${null}"
+                        - buildParamsResult_7a7085d7: "${null}"
           - writePlain_await_block:
               steps:
               - writePlain_run:
@@ -258,8 +287,9 @@ main:
                               type: "${\"function\"}"
                               function:
                                 name: "${\"UPDATE_FILE\"}"
-                                arguments: "${json.encode_to_string(buildParamsResult_3c939778)}"
+                                arguments: "${json.encode_to_string(buildParamsResult_7a7085d7)}"
                             cost: 0.0
+                            timeoutSeconds: "${default(60, null)}"
                             env:
                               userId: "${input.env.userId}"
                               model: "${input.env.model}"
@@ -268,11 +298,12 @@ main:
                               background: "${default(true, null)}"
                               projectId: "${input.env.projectId}"
                               sessionId: "${\"plaintify_write_hook\"}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                           location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                           project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                           connector_params:
                             skip_polling: false
-                        result: "writePlain_runResult_2600acd5"
+                        result: "writePlain_runResult_632d36cc"
                   retry: "${http.default_retry}"
   - return:
       return: "${(\"plain/\" + input.filepath)}"

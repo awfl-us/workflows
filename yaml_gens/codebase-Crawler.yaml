@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_191d95fb: {}
+          - mainTryResult_41a42d51: {}
       - mainTry_steps:
           try:
             steps:
@@ -14,7 +14,7 @@ main:
                 steps:
                 - registerExecForSessionTry_initResult:
                     assign:
-                    - registerExecForSessionTryResult_713e7009: {}
+                    - registerExecForSessionTryResult_134cfffa: {}
                 - registerExecForSessionTry_steps:
                     try:
                       steps:
@@ -43,7 +43,7 @@ main:
                           retry: "${http.default_retry}"
                       - registerExecForSessionTry_updateResult:
                           assign:
-                          - registerExecForSessionTryResult_713e7009: "${\"ok\"}"
+                          - registerExecForSessionTryResult_134cfffa: "${\"ok\"}"
                     except:
                       as: "registerExecForSessionTryError"
                       steps:
@@ -51,10 +51,10 @@ main:
                           steps:
                           - registerExecForSessionSwitch_initResult:
                               assign:
-                              - registerExecForSessionSwitchResult_41b93d54: {}
+                              - registerExecForSessionSwitchResult_78c29a22: {}
                           - registerExecForSessionSwitch_steps:
                               switch:
-                              - condition: "${((\"code\" in registerExecForSessionTryError) and (registerExecForSessionTryError.code == 409))}"
+                              - condition: "${((\"code\" in registerExecForSessionTryError) and (default(map.get(registerExecForSessionTryError, \"code\"), 0) == 409))}"
                                 steps:
                                 - registerExecForSessionUpdate:
                                     try:
@@ -81,22 +81,22 @@ main:
                                     retry: "${http.default_retry}"
                                 - registerExecForSessionSwitch_updateResult_0:
                                     assign:
-                                    - registerExecForSessionSwitchResult_41b93d54: "${\"ok\"}"
+                                    - registerExecForSessionSwitchResult_78c29a22: "${\"ok\"}"
                               - condition: "${true}"
                                 steps:
                                 - registerExecForSessionRethrow:
                                     raise: "${registerExecForSessionTryError}"
                                 - registerExecForSessionSwitch_updateResult_1:
                                     assign:
-                                    - registerExecForSessionSwitchResult_41b93d54: "${\"fail\"}"
+                                    - registerExecForSessionSwitchResult_78c29a22: "${\"fail\"}"
                       - registerExecForSessionTry_updateResultError:
                           assign:
-                          - registerExecForSessionTryResult_713e7009: "${registerExecForSessionSwitchResult_41b93d54}"
+                          - registerExecForSessionTryResult_134cfffa: "${registerExecForSessionSwitchResult_78c29a22}"
             - registerWorkflowExecLink:
                 steps:
                 - registerWorkflowExecLink_initResult:
                     assign:
-                    - registerWorkflowExecLinkResult_2923b725: {}
+                    - registerWorkflowExecLinkResult_23f07d68: {}
                 - registerWorkflowExecLink_steps:
                     switch:
                     - condition: "${(len(default(default(map.get(input.env, \"callingWorkflowExec\"), null), \"\")) > 0)}"
@@ -105,7 +105,7 @@ main:
                           steps:
                           - registerWorkflowExecLinkTry_initResult:
                               assign:
-                              - registerWorkflowExecLinkTryResult_386ba042: {}
+                              - registerWorkflowExecLinkTryResult_4e2a0dfd: {}
                           - registerWorkflowExecLinkTry_steps:
                               try:
                                 steps:
@@ -135,7 +135,7 @@ main:
                                     retry: "${http.default_retry}"
                                 - registerWorkflowExecLinkTry_updateResult:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_386ba042: "${\"ok\"}"
+                                    - registerWorkflowExecLinkTryResult_4e2a0dfd: "${\"ok\"}"
                               except:
                                 as: "registerWorkflowExecLinkTryError"
                                 steps:
@@ -143,10 +143,10 @@ main:
                                     steps:
                                     - registerWorkflowExecLinkSwitch_initResult:
                                         assign:
-                                        - registerWorkflowExecLinkSwitchResult_6e7fb631: {}
+                                        - registerWorkflowExecLinkSwitchResult_107cd5a2: {}
                                     - registerWorkflowExecLinkSwitch_steps:
                                         switch:
-                                        - condition: "${(registerWorkflowExecLinkTryError.code == 409)}"
+                                        - condition: "${(default(map.get(registerWorkflowExecLinkTryError, \"code\"), 0) == 409)}"
                                           steps:
                                           - registerWorkflowExecLinkUpdate:
                                               try:
@@ -174,25 +174,25 @@ main:
                                               retry: "${http.default_retry}"
                                           - registerWorkflowExecLinkSwitch_updateResult_0:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_6e7fb631: "${\"ok\"}"
+                                              - registerWorkflowExecLinkSwitchResult_107cd5a2: "${\"ok\"}"
                                         - condition: "${true}"
                                           steps:
                                           - registerWorkflowExecLinkRethrow:
                                               raise: "${registerWorkflowExecLinkTryError}"
                                           - registerWorkflowExecLinkSwitch_updateResult_1:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_6e7fb631: "${\"fail\"}"
+                                              - registerWorkflowExecLinkSwitchResult_107cd5a2: "${\"fail\"}"
                                 - registerWorkflowExecLinkTry_updateResultError:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_386ba042: "${registerWorkflowExecLinkSwitchResult_6e7fb631}"
+                                    - registerWorkflowExecLinkTryResult_4e2a0dfd: "${registerWorkflowExecLinkSwitchResult_107cd5a2}"
                       - registerWorkflowExecLink_updateResult_0:
                           assign:
-                          - registerWorkflowExecLinkResult_2923b725: "${registerWorkflowExecLinkTryResult_386ba042}"
+                          - registerWorkflowExecLinkResult_23f07d68: "${registerWorkflowExecLinkTryResult_4e2a0dfd}"
                     - condition: "${true}"
                       steps:
                       - registerWorkflowExecLink_updateResult_1:
                           assign:
-                          - registerWorkflowExecLinkResult_2923b725: "${\"skip\"}"
+                          - registerWorkflowExecLinkResult_23f07d68: "${\"skip\"}"
             - tryInitStatus:
                 steps:
                 - tryInitStatus_initResult:
@@ -430,21 +430,21 @@ main:
                 steps:
                 - maybeBypassAquire_initResult:
                     assign:
-                    - maybeBypassAquireResult_37369eb2: {}
+                    - maybeBypassAquireResult_4e2d11a4: {}
                 - maybeBypassAquire_steps:
                     switch:
                     - condition: "${default(map.get(input, \"sideCall\"), false)}"
                       steps:
                       - maybeBypassAquire_updateResult_0:
                           assign:
-                          - maybeBypassAquireResult_37369eb2: "${true}"
+                          - maybeBypassAquireResult_4e2d11a4: "${true}"
                     - condition: "${true}"
                       steps:
                       - acquireResponseLock_try:
                           steps:
                           - acquireResponseLock_try_initResult:
                               assign:
-                              - acquireResponseLock_tryResult_d0a24db: {}
+                              - acquireResponseLock_tryResult_196bcc86: {}
                           - acquireResponseLock_try_steps:
                               try:
                                 steps:
@@ -471,7 +471,7 @@ main:
                                     retry: "${http.default_retry}"
                                 - acquireResponseLock_try_updateResult:
                                     assign:
-                                    - acquireResponseLock_tryResult_d0a24db: "${acquireResponseLockResult_187876de.body.acquired}"
+                                    - acquireResponseLock_tryResult_196bcc86: "${acquireResponseLockResult_187876de.body.acquired}"
                               except:
                                 as: "acquireResponseLock_tryError"
                                 steps:
@@ -479,10 +479,10 @@ main:
                                     steps:
                                     - acquireResponseLock_err_initResult:
                                         assign:
-                                        - acquireResponseLock_errResult_7b27ebae: {}
+                                        - acquireResponseLock_errResult_5c167539: {}
                                     - acquireResponseLock_err_steps:
                                         switch:
-                                        - condition: "${((\"code\" in acquireResponseLock_tryError) and (acquireResponseLock_tryError.code == 409))}"
+                                        - condition: "${((\"code\" in acquireResponseLock_tryError) and (default(map.get(acquireResponseLock_tryError, \"code\"), 0) == 409))}"
                                           steps:
                                           - acquireResponseLock_busy:
                                               try:
@@ -495,28 +495,28 @@ main:
                                               retry: "${http.default_retry}"
                                           - acquireResponseLock_err_updateResult_0:
                                               assign:
-                                              - acquireResponseLock_errResult_7b27ebae: "${false}"
+                                              - acquireResponseLock_errResult_5c167539: "${false}"
                                         - condition: "${true}"
                                           steps:
                                           - acquireResponseLock_rethrow:
                                               raise: "${acquireResponseLock_tryError}"
                                           - acquireResponseLock_err_updateResult_1:
                                               assign:
-                                              - acquireResponseLock_errResult_7b27ebae: "${false}"
+                                              - acquireResponseLock_errResult_5c167539: "${false}"
                                 - acquireResponseLock_try_updateResultError:
                                     assign:
-                                    - acquireResponseLock_tryResult_d0a24db: "${acquireResponseLock_errResult_7b27ebae}"
+                                    - acquireResponseLock_tryResult_196bcc86: "${acquireResponseLock_errResult_5c167539}"
                       - maybeBypassAquire_updateResult_1:
                           assign:
-                          - maybeBypassAquireResult_37369eb2: "${acquireResponseLock_tryResult_d0a24db}"
+                          - maybeBypassAquireResult_4e2d11a4: "${acquireResponseLock_tryResult_196bcc86}"
             - maybeRespond:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_3870e67d: {}
+                    - maybeRespondResult_55ef037c: {}
                 - maybeRespond_steps:
                     switch:
-                    - condition: "${maybeBypassAquireResult_37369eb2}"
+                    - condition: "${maybeBypassAquireResult_4e2d11a4}"
                       steps:
                       - loadContext:
                           steps:
@@ -772,7 +772,7 @@ main:
                                   steps:
                                   - complete_switch_initResult:
                                       assign:
-                                      - complete_switchResult_116cf0bb: {}
+                                      - complete_switchResult_4dd34dc0: {}
                                   - complete_switch_steps:
                                       switch:
                                       - condition: "${(len(for_topicContext_items_SegKalaResult_6bde807f) > 0)}"
@@ -840,6 +840,8 @@ main:
                                                           max_completion_tokens: "${null}"
                                                           response_format:
                                                             type: "text"
+                                                          sessionId: "${input.env.sessionId}"
+                                                          workflow_name: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                                                           tools: "${mapToolDefsResult_6666b453}"
                                                           tool_choice: "${toolChoiceResult_10dfe1c2}"
                                                         auth:
@@ -848,32 +850,32 @@ main:
                                                         headers:
                                                           x-user-id: "${input.env.userId}"
                                                           x-project-id: "${input.env.projectId}"
-                                                      result: "complete_chatResult_267d337b"
+                                                      result: "complete_chatResult_68f6cc11"
                                                 retry: "${http.default_retry}"
                                         - complete_switch_updateResult_0:
                                             assign:
-                                            - complete_switchResult_116cf0bb: "${complete_chatResult_267d337b.body}"
+                                            - complete_switchResult_4dd34dc0: "${complete_chatResult_68f6cc11.body}"
                                       - condition: "${true}"
                                         steps:
                                         - emptyYoj:
                                             raise:
                                               message: "${\"Empty Yoj returned\"}"
-                                              code: "${400}"
+                                              code: "${default(400, null)}"
                                         - complete_switch_updateResult_1:
                                             assign:
-                                            - complete_switchResult_116cf0bb: "${null}"
+                                            - complete_switchResult_4dd34dc0: "${null}"
                           - maybeAddResponse:
                               steps:
                               - maybeAddResponse_initResult:
                                   assign:
-                                  - maybeAddResponseResult_2174db76: {}
+                                  - maybeAddResponseResult_507de4f7: {}
                               - maybeAddResponse_steps:
                                   switch:
                                   - condition: "${default(map.get(input, \"sideCall\"), false)}"
                                     steps:
                                     - maybeAddResponse_updateResult_0:
                                         assign:
-                                        - maybeAddResponseResult_2174db76: "${null}"
+                                        - maybeAddResponseResult_507de4f7: "${null}"
                                   - condition: "${true}"
                                     steps:
                                     - addResponse_seg_write_with_session_update:
@@ -918,14 +920,14 @@ main:
                                                       id: "${addResponse_newIdResult_54c689dc}"
                                                       contents:
                                                         value:
-                                                          role: "${complete_switchResult_116cf0bb.message.role}"
-                                                          content: "${complete_switchResult_116cf0bb.message.content}"
-                                                          tool_calls: "${map.get(complete_switchResult_116cf0bb.message, \"tool_calls\")}"
+                                                          role: "${complete_switchResult_4dd34dc0.message.role}"
+                                                          content: "${complete_switchResult_4dd34dc0.message.content}"
+                                                          tool_calls: "${map.get(complete_switchResult_4dd34dc0.message, \"tool_calls\")}"
                                                           tool_call_id: "${null}"
                                                           create_time: "${sys.now()}"
                                                           docId: "${null}"
                                                         create_time: "${sys.now()}"
-                                                        cost: "${complete_switchResult_116cf0bb.total_cost}"
+                                                        cost: "${complete_switchResult_4dd34dc0.total_cost}"
                                                         execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                                       userId: "${input.env.userId}"
                                                     auth:
@@ -934,7 +936,7 @@ main:
                                                     headers:
                                                       x-user-id: "${input.env.userId}"
                                                       x-project-id: "${input.env.projectId}"
-                                                  result: "addResponse_write_messagesIsta_SegKalaResult_3450c0c0"
+                                                  result: "addResponse_write_messagesIsta_SegKalaResult_564dda0b"
                                             retry: "${http.default_retry}"
                                         - addResponse_update_session_update_time:
                                             try:
@@ -959,15 +961,15 @@ main:
                                             retry: "${http.default_retry}"
                                     - maybeAddResponse_updateResult_1:
                                         assign:
-                                        - maybeAddResponseResult_2174db76: "${addResponse_write_messagesIsta_SegKalaResult_3450c0c0}"
+                                        - maybeAddResponseResult_507de4f7: "${addResponse_write_messagesIsta_SegKalaResult_564dda0b}"
                       - sendContents:
                           steps:
                           - sendContents_initResult:
                               assign:
-                              - sendContentsResult_17f8c0f9: {}
+                              - sendContentsResult_7af5cf0b: {}
                           - sendContents_steps:
                               switch:
-                              - condition: "${(\"content\" in complete_switchResult_116cf0bb.message)}"
+                              - condition: "${(\"content\" in complete_switchResult_4dd34dc0.message)}"
                                 steps:
                                 - enqueueContent_enqueue_block:
                                     steps:
@@ -984,9 +986,9 @@ main:
                                                   data:
                                                     create_time: "${sys.now()}"
                                                     callback_id: "${null}"
-                                                    content: "${complete_switchResult_116cf0bb.message.content}"
+                                                    content: "${complete_switchResult_4dd34dc0.message.content}"
                                                     tool_call: "${null}"
-                                                    cost: "${complete_switchResult_116cf0bb.total_cost}"
+                                                    cost: "${complete_switchResult_4dd34dc0.total_cost}"
                                                     background: "${default(map.get(input.env, \"background\"), false)}"
                                                     workdir: "${null}"
                                                     timeout_seconds: "${60}"
@@ -1001,16 +1003,16 @@ main:
                                                 headers:
                                                   x-user-id: "${input.env.userId}"
                                                   x-project-id: "${input.env.projectId}"
-                                              result: "relay_ingest_tool_callResult_7c3200b4"
+                                              result: "relay_ingest_tool_callResult_afa0392"
                                         retry: "${http.default_retry}"
                                 - sendContents_updateResult_0:
                                     assign:
-                                    - sendContentsResult_17f8c0f9: "${null}"
+                                    - sendContentsResult_7af5cf0b: "${null}"
                               - condition: "${true}"
                                 steps:
                                 - sendContents_updateResult_1:
                                     assign:
-                                    - sendContentsResult_17f8c0f9: "${null}"
+                                    - sendContentsResult_7af5cf0b: "${null}"
                       - processToolCalls:
                           try:
                             steps:
@@ -1019,8 +1021,8 @@ main:
                                 args:
                                   workflow_id: "${\"helpers-ToolDispatcher${WORKFLOW_ENV}\"}"
                                   argument:
-                                    totalCost: "${complete_switchResult_116cf0bb.total_cost}"
-                                    toolCalls: "${default(map.get(complete_switchResult_116cf0bb.message, \"tool_calls\"), [])}"
+                                    totalCost: "${complete_switchResult_4dd34dc0.total_cost}"
+                                    toolCalls: "${default(map.get(complete_switchResult_4dd34dc0.message, \"tool_calls\"), [])}"
                                     toolDefs: "${codebase_Crawler_toolsResult_5efd794.tools}"
                                     env:
                                       userId: "${input.env.userId}"
@@ -1035,7 +1037,7 @@ main:
                                   project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                   connector_params:
                                     skip_polling: false
-                                result: "processToolCallsResult_2ac9deb3"
+                                result: "processToolCallsResult_4d34ed91"
                           retry: "${http.default_retry}"
                       - maybeNBypassRelease:
                           steps:
@@ -1078,23 +1080,135 @@ main:
                           steps:
                           - toolsCost_initResult:
                               assign:
-                              - toolsCostResult_57e1e80e: "${0}"
+                              - toolsCostResult_3a7abefc: "${0}"
                           - toolsCost_steps:
                               for:
                                 value: "toolsCostValue"
-                                in: "${processToolCallsResult_2ac9deb3.results}"
+                                in: "${processToolCallsResult_4d34ed91.results}"
                                 steps:
                                 - toolsCost_updateResult:
                                     assign:
-                                    - toolsCostResult_57e1e80e: "${(toolsCostResult_57e1e80e + toolsCostValue.cost)}"
+                                    - toolsCostResult_3a7abefc: "${(toolsCostResult_3a7abefc + toolsCostValue.cost)}"
+                      - addUsage:
+                          steps:
+                          - addUsage_initResult:
+                              assign:
+                              - addUsageResult_520e98e3: {}
+                          - addUsage_steps:
+                              switch:
+                              - condition: "${(default(map.get(input, \"usage\"), null) != null)}"
+                                steps:
+                                - plusUsage:
+                                    steps:
+                                    - plusUsage_initResult:
+                                        assign:
+                                        - plusUsageResult_2b47d522: {}
+                                    - plusUsage_steps:
+                                        try:
+                                          steps:
+                                          - addCompleteDetails:
+                                              steps:
+                                              - addCompleteDetails_initResult:
+                                                  assign:
+                                                  - addCompleteDetailsResult_6ed53b83: {}
+                                              - addCompleteDetails_steps:
+                                                  try:
+                                                    steps:
+                                                    - addCompleteDetails_updateResult:
+                                                        assign:
+                                                        - addCompleteDetailsResult_6ed53b83: "${default(map.get(input, \"usage\"), null).completion_tokens_details}"
+                                                  except:
+                                                    as: "addCompleteDetailsError"
+                                                    steps:
+                                                    - logError_4:
+                                                        try:
+                                                          steps:
+                                                          - logError_call_4:
+                                                              call: "sys.log"
+                                                              args:
+                                                                text: "${(\"[logError] \" + addCompleteDetailsError.message)}"
+                                                              result: "logErrorResult_932112c"
+                                                        retry: "${http.default_retry}"
+                                                    - reRaise_4:
+                                                        raise: "${addCompleteDetailsError}"
+                                                    - addCompleteDetails_updateResultError:
+                                                        assign:
+                                                        - addCompleteDetailsResult_6ed53b83: "${null}"
+                                          - addPromptDetails:
+                                              steps:
+                                              - addPromptDetails_initResult:
+                                                  assign:
+                                                  - addPromptDetailsResult_c920d9e: {}
+                                              - addPromptDetails_steps:
+                                                  try:
+                                                    steps:
+                                                    - addPromptDetails_updateResult:
+                                                        assign:
+                                                        - addPromptDetailsResult_c920d9e: "${default(map.get(input, \"usage\"), null).prompt_tokens_details}"
+                                                  except:
+                                                    as: "addPromptDetailsError"
+                                                    steps:
+                                                    - logError_5:
+                                                        try:
+                                                          steps:
+                                                          - logError_call_5:
+                                                              call: "sys.log"
+                                                              args:
+                                                                text: "${(\"[logError] \" + addPromptDetailsError.message)}"
+                                                              result: "logErrorResult_7804d5e9"
+                                                        retry: "${http.default_retry}"
+                                                    - reRaise_5:
+                                                        raise: "${addPromptDetailsError}"
+                                                    - addPromptDetails_updateResultError:
+                                                        assign:
+                                                        - addPromptDetailsResult_c920d9e: "${null}"
+                                          - plusUsage_updateResult:
+                                              assign:
+                                              - plusUsageResult_2b47d522:
+                                                  completion_tokens: "${(default(map.get(input, \"usage\"), null).completion_tokens + complete_switchResult_4dd34dc0.usage.completion_tokens)}"
+                                                  completion_tokens_details:
+                                                    accepted_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.accepted_prediction_tokens + complete_switchResult_4dd34dc0.usage.completion_tokens_details.accepted_prediction_tokens)}"
+                                                    audio_tokens: "${(addCompleteDetailsResult_6ed53b83.audio_tokens + complete_switchResult_4dd34dc0.usage.completion_tokens_details.audio_tokens)}"
+                                                    reasoning_tokens: "${(addCompleteDetailsResult_6ed53b83.reasoning_tokens + complete_switchResult_4dd34dc0.usage.completion_tokens_details.reasoning_tokens)}"
+                                                    rejected_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.rejected_prediction_tokens + complete_switchResult_4dd34dc0.usage.completion_tokens_details.rejected_prediction_tokens)}"
+                                                  prompt_tokens: "${(default(map.get(input, \"usage\"), null).prompt_tokens + complete_switchResult_4dd34dc0.usage.prompt_tokens)}"
+                                                  prompt_tokens_details:
+                                                    audio_tokens: "${(addPromptDetailsResult_c920d9e.audio_tokens + complete_switchResult_4dd34dc0.usage.prompt_tokens_details.audio_tokens)}"
+                                                    cached_tokens: "${(addPromptDetailsResult_c920d9e.cached_tokens + complete_switchResult_4dd34dc0.usage.prompt_tokens_details.cached_tokens)}"
+                                                  total_tokens: "${(default(map.get(input, \"usage\"), null).total_tokens + complete_switchResult_4dd34dc0.usage.total_tokens)}"
+                                        except:
+                                          as: "plusUsageError"
+                                          steps:
+                                          - logError_6:
+                                              try:
+                                                steps:
+                                                - logError_call_6:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[logError] \" + plusUsageError.message)}"
+                                                    result: "logErrorResult_7317ca91"
+                                              retry: "${http.default_retry}"
+                                          - reRaise_6:
+                                              raise: "${plusUsageError}"
+                                          - plusUsage_updateResultError:
+                                              assign:
+                                              - plusUsageResult_2b47d522: "${null}"
+                                - addUsage_updateResult_0:
+                                    assign:
+                                    - addUsageResult_520e98e3: "${plusUsageResult_2b47d522}"
+                              - condition: "${true}"
+                                steps:
+                                - addUsage_updateResult_1:
+                                    assign:
+                                    - addUsageResult_520e98e3: "${complete_switchResult_4dd34dc0.usage}"
                       - maybeToolFeedback:
                           steps:
                           - maybeToolFeedback_initResult:
                               assign:
-                              - maybeToolFeedbackResult_58e8e4c0: {}
+                              - maybeToolFeedbackResult_564677b: {}
                           - maybeToolFeedback_steps:
                               switch:
-                              - condition: "${((len(processToolCallsResult_2ac9deb3.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
+                              - condition: "${((len(processToolCallsResult_4d34ed91.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
                                 steps:
                                 - toolCallsCompleted:
                                     try:
@@ -1106,7 +1220,8 @@ main:
                                             argument:
                                               query: "${\"Tool calls completed\"}"
                                               fund: "${input.fund}"
-                                              spent: "${default((default(map.get(input, \"spent\"), 0) + (complete_switchResult_116cf0bb.total_cost + toolsCostResult_57e1e80e)), null)}"
+                                              spent: "${default((default(map.get(input, \"spent\"), 0) + (complete_switchResult_4dd34dc0.total_cost + toolsCostResult_3a7abefc)), null)}"
+                                              usage: "${default(null, null)}"
                                               task: "${default(null, null)}"
                                               toolChoice: "${default(null, null)}"
                                               sideCall: "${default(false, null)}"
@@ -1124,11 +1239,11 @@ main:
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
                                               skip_polling: true
-                                          result: "toolCallsCompletedResult_11b2b1db"
+                                          result: "toolCallsCompletedResult_6af2dda1"
                                     retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_0:
                                     assign:
-                                    - maybeToolFeedbackResult_58e8e4c0: "${toolCallsCompletedResult_11b2b1db}"
+                                    - maybeToolFeedbackResult_564677b: "${toolCallsCompletedResult_6af2dda1}"
                               - condition: "${true}"
                                 steps:
                                 - statusDone:
@@ -1191,10 +1306,10 @@ main:
                                     steps:
                                     - maybeCallback_initResult:
                                         assign:
-                                        - maybeCallbackResult_960af5e: {}
+                                        - maybeCallbackResult_1d87dab7: {}
                                     - maybeCallback_steps:
                                         switch:
-                                        - condition: "${((\"callback\" in input) and (default(map.get(input, \"callback\"), null) != null))}"
+                                        - condition: "${(default(map.get(input, \"callback\"), null) != null)}"
                                           steps:
                                           - callback:
                                               try:
@@ -1203,26 +1318,32 @@ main:
                                                     call: "http.post"
                                                     args:
                                                       url: "${((input.env.BASE_URL + \"/\") + (\"callbacks/\" + default(map.get(input, \"callback\"), null).id))}"
-                                                      body: "${complete_switchResult_116cf0bb}"
+                                                      body:
+                                                        message: "${complete_switchResult_4dd34dc0.message}"
+                                                        total_cost: "${(default(map.get(input, \"spent\"), 0) + (complete_switchResult_4dd34dc0.total_cost + toolsCostResult_3a7abefc))}"
+                                                        usage: "${addUsageResult_520e98e3}"
                                                       auth:
                                                         type: "${\"OIDC\"}"
                                                         audience: "${input.env.BASE_URL}"
                                                       headers:
                                                         x-user-id: "${input.env.userId}"
                                                         x-project-id: "${input.env.projectId}"
-                                                    result: "callbackResult_79226159"
+                                                    result: "callbackResult_6649a4d"
                                               retry: "${http.default_retry}"
                                           - maybeCallback_updateResult_0:
                                               assign:
-                                              - maybeCallbackResult_960af5e: "${callbackResult_79226159.body}"
+                                              - maybeCallbackResult_1d87dab7: "${callbackResult_6649a4d.body}"
                                         - condition: "${true}"
                                           steps:
                                           - maybeCallback_updateResult_1:
                                               assign:
-                                              - maybeCallbackResult_960af5e: "${null}"
+                                              - maybeCallbackResult_1d87dab7: "${null}"
                                 - maybeToolFeedback_updateResult_1:
                                     assign:
-                                    - maybeToolFeedbackResult_58e8e4c0: "${complete_switchResult_116cf0bb}"
+                                    - maybeToolFeedbackResult_564677b:
+                                        message: "${complete_switchResult_4dd34dc0.message}"
+                                        total_cost: "${(default(map.get(input, \"spent\"), 0) + (complete_switchResult_4dd34dc0.total_cost + toolsCostResult_3a7abefc))}"
+                                        usage: "${addUsageResult_520e98e3}"
                       - runSummaries:
                           try:
                             steps:
@@ -1321,7 +1442,7 @@ main:
                           steps:
                           - collapseMessages_try_initResult:
                               assign:
-                              - collapseMessages_tryResult_4aecf6ed: {}
+                              - collapseMessages_tryResult_138280e4: {}
                           - collapseMessages_try_steps:
                               try:
                                 steps:
@@ -1336,8 +1457,8 @@ main:
                                                 url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
                                                 body:
                                                   collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
-                                                  windowSeconds: "${240}"
-                                                  overlapSeconds: "${48}"
+                                                  windowSeconds: "${420}"
+                                                  overlapSeconds: "${60}"
                                                   userId: "${input.env.userId}"
                                                 auth:
                                                   type: "${\"OIDC\"}"
@@ -1345,27 +1466,27 @@ main:
                                                 headers:
                                                   x-user-id: "${input.env.userId}"
                                                   x-project-id: "${input.env.projectId}"
-                                              result: "segmentsForSession_fetchResult_6812d17c"
+                                              result: "segmentsForSession_fetchResult_6027e6fd"
                                         retry: "${http.default_retry}"
                                     - segmentsForSession_convert:
                                         steps:
                                         - segmentsForSession_convert_initResult:
                                             assign:
-                                            - segmentsForSession_convertResult_498f2687: []
+                                            - segmentsForSession_convertResult_323d5453: []
                                         - segmentsForSession_convert_steps:
                                             for:
                                               value: "segmentsForSession_convertValue"
-                                              in: "${segmentsForSession_fetchResult_6812d17c.body.segments}"
+                                              in: "${segmentsForSession_fetchResult_6027e6fd.body.segments}"
                                               steps:
                                               - segmentsForSession_convert_assignIterResult:
                                                   assign:
                                                   - segmentsForSession_convert_assignIterResultVar:
                                                       sessionId: "${input.env.sessionId}"
                                                       end: "${segmentsForSession_convertValue.end}"
-                                                      windowSeconds: "${240}"
+                                                      windowSeconds: "${420}"
                                               - segmentsForSession_convert_updateResult:
                                                   assign:
-                                                  - segmentsForSession_convertResult_498f2687: "${list.concat(segmentsForSession_convertResult_498f2687, segmentsForSession_convert_assignIterResultVar)}"
+                                                  - segmentsForSession_convertResult_323d5453: "${list.concat(segmentsForSession_convertResult_323d5453, segmentsForSession_convert_assignIterResultVar)}"
                                 - collapseMessages:
                                     try:
                                       steps:
@@ -1374,9 +1495,9 @@ main:
                                           args:
                                             workflow_id: "${\"context-ContextCollapser-SegKala${WORKFLOW_ENV}\"}"
                                             argument:
-                                              segmentEnd: "${segmentsForSession_convertResult_498f2687[(len(segmentsForSession_convertResult_498f2687) - 1)].end}"
-                                              windowSeconds: "${240}"
-                                              overlapSeconds: "${48}"
+                                              segmentEnd: "${segmentsForSession_convertResult_323d5453[(len(segmentsForSession_convertResult_323d5453) - 1)].end}"
+                                              windowSeconds: "${420}"
+                                              overlapSeconds: "${60}"
                                               env:
                                                 userId: "${input.env.userId}"
                                                 model: "${input.env.model}"
@@ -1390,41 +1511,42 @@ main:
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
                                               skip_polling: true
-                                          result: "collapseMessagesResult_7a2bba68"
+                                          result: "collapseMessagesResult_445cb1c6"
                                     retry: "${http.default_retry}"
                                 - collapseMessages_try_updateResult:
                                     assign:
-                                    - collapseMessages_tryResult_4aecf6ed: "${collapseMessagesResult_7a2bba68}"
+                                    - collapseMessages_tryResult_138280e4: "${collapseMessagesResult_445cb1c6}"
                               except:
                                 as: "collapseMessages_tryError"
                                 steps:
-                                - logError_4:
+                                - logError_7:
                                     try:
                                       steps:
-                                      - logError_call_4:
+                                      - logError_call_7:
                                           call: "sys.log"
                                           args:
                                             text: "${(\"[logError] \" + collapseMessages_tryError.message)}"
                                           result: "logErrorResult_645e84ef"
                                     retry: "${http.default_retry}"
-                                - reRaise_4:
+                                - reRaise_7:
                                     raise: "${collapseMessages_tryError}"
                                 - collapseMessages_try_updateResultError:
                                     assign:
-                                    - collapseMessages_tryResult_4aecf6ed: "${null}"
+                                    - collapseMessages_tryResult_138280e4: "${null}"
                       - maybeRespond_updateResult_0:
                           assign:
-                          - maybeRespondResult_3870e67d:
-                              message: "${complete_switchResult_116cf0bb.message}"
-                              total_cost: "${(complete_switchResult_116cf0bb.total_cost + toolsCostResult_57e1e80e)}"
+                          - maybeRespondResult_55ef037c:
+                              message: "${complete_switchResult_4dd34dc0.message}"
+                              total_cost: "${(complete_switchResult_4dd34dc0.total_cost + toolsCostResult_3a7abefc)}"
+                              usage: "${complete_switchResult_4dd34dc0.usage}"
                     - condition: "${true}"
                       steps:
                       - maybeRespond_updateResult_1:
                           assign:
-                          - maybeRespondResult_3870e67d: "${null}"
+                          - maybeRespondResult_55ef037c: "${null}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_191d95fb: "${maybeRespondResult_3870e67d}"
+                - mainTryResult_41a42d51: "${maybeRespondResult_55ef037c}"
           except:
             as: "mainTryError"
             steps:
@@ -1521,10 +1643,44 @@ main:
                               x-project-id: "${input.env.projectId}"
                           result: "relay_ingest_tool_callResult_3f93d137"
                     retry: "${http.default_retry}"
+            - callbackFailure:
+                steps:
+                - callbackFailure_initResult:
+                    assign:
+                    - callbackFailureResult_3e228642: {}
+                - callbackFailure_steps:
+                    switch:
+                    - condition: "${(default(map.get(input, \"callback\"), null) != null)}"
+                      steps:
+                      - callback_1:
+                          try:
+                            steps:
+                            - callback_call_1:
+                                call: "http.post"
+                                args:
+                                  url: "${((input.env.BASE_URL + \"/\") + (\"callbacks/\" + default(map.get(input, \"callback\"), null).id))}"
+                                  body:
+                                    error: "${mainTryError}"
+                                  auth:
+                                    type: "${\"OIDC\"}"
+                                    audience: "${input.env.BASE_URL}"
+                                  headers:
+                                    x-user-id: "${input.env.userId}"
+                                    x-project-id: "${input.env.projectId}"
+                                result: "callbackResult_2e7fae09"
+                          retry: "${http.default_retry}"
+                      - callbackFailure_updateResult_0:
+                          assign:
+                          - callbackFailureResult_3e228642: "${callbackResult_2e7fae09.body}"
+                    - condition: "${true}"
+                      steps:
+                      - callbackFailure_updateResult_1:
+                          assign:
+                          - callbackFailureResult_3e228642: "${null}"
             - ReRaise_error:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_191d95fb: "${null}"
+                - mainTryResult_41a42d51: "${null}"
   - return:
-      return: "${mainTryResult_191d95fb}"
+      return: "${mainTryResult_41a42d51}"

@@ -12,7 +12,7 @@ main:
                   steps:
                   - buildTools_initResult:
                       assign:
-                      - buildToolsResult_644a4211: {}
+                      - buildToolsResult_31aac8b2: {}
                   - buildTools_steps:
                       try:
                         steps:
@@ -80,30 +80,33 @@ main:
                                         background: "${default(map.get(input.env, \"background\"), null)}"
                                         projectId: "${input.env.projectId}"
                                         sessionId: "${input.env.sessionId}"
+                                        workdir: "${default(map.get(input.env, \"workdir\"), null)}"
                                     location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
                                     project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                     connector_params:
                                       skip_polling: false
-                                  result: "toolDefsResult_5c8633d0"
+                                  result: "toolDefsResult_7c9f9fe8"
                             retry: "${http.default_retry}"
                         - buildTools_updateResult:
                             assign:
-                            - buildToolsResult_644a4211: "${toolDefsResult_5c8633d0}"
+                            - buildToolsResult_31aac8b2: "${toolDefsResult_7c9f9fe8}"
                       except:
                         as: "buildToolsError"
                         steps:
-                        - buildTools_logError:
+                        - logError:
                             try:
                               steps:
-                              - buildTools_logError_call:
+                              - logError_call:
                                   call: "sys.log"
                                   args:
-                                    text: "${(\"[buildTools_logError] \" + buildToolsError.message)}"
-                                  result: "buildTools_logErrorResult_7787cabf"
+                                    text: "${(\"[logError] \" + buildToolsError.message)}"
+                                  result: "logErrorResult_6f4105f3"
                             retry: "${http.default_retry}"
+                        - reRaise:
+                            raise: "${buildToolsError}"
                         - buildTools_updateResultError:
                             assign:
-                            - buildToolsResult_644a4211: "${null}"
+                            - buildToolsResult_31aac8b2: "${null}"
               - buildTaskTools:
                   steps:
                   - buildTaskTools_initResult:
@@ -202,32 +205,32 @@ main:
                   steps:
                   - taskTools_joinSteps_initResult:
                       assign:
-                      - taskTools_joinStepsResult_580f60a6: []
+                      - taskTools_joinStepsResult_3b9016ee: []
                   - taskTools_joinSteps_steps:
                       for:
                         value: "taskTools_joinStepsIdx"
-                        range: "${[0, (((0 + len(buildToolsResult_644a4211.defs)) + len(buildTaskToolsResult_21f843f3)) - 1)]}"
+                        range: "${[0, (((0 + len(buildToolsResult_31aac8b2.defs)) + len(buildTaskToolsResult_21f843f3)) - 1)]}"
                         steps:
                         - taskTools_joinSteps_switch:
                             steps:
                             - taskTools_joinSteps_switch_initResult:
                                 assign:
-                                - taskTools_joinSteps_switchResult_44b3129a: {}
+                                - taskTools_joinSteps_switchResult_6732623b: {}
                             - taskTools_joinSteps_switch_steps:
                                 switch:
-                                - condition: "${(taskTools_joinStepsIdx >= (0 + len(buildToolsResult_644a4211.defs)))}"
+                                - condition: "${(taskTools_joinStepsIdx >= (0 + len(buildToolsResult_31aac8b2.defs)))}"
                                   steps:
                                   - taskTools_joinSteps_switch_updateResult_0:
                                       assign:
-                                      - taskTools_joinSteps_switchResult_44b3129a: "${buildTaskToolsResult_21f843f3[(taskTools_joinStepsIdx - (0 + len(buildToolsResult_644a4211.defs)))]}"
+                                      - taskTools_joinSteps_switchResult_6732623b: "${buildTaskToolsResult_21f843f3[(taskTools_joinStepsIdx - (0 + len(buildToolsResult_31aac8b2.defs)))]}"
                                 - condition: "${(taskTools_joinStepsIdx >= 0)}"
                                   steps:
                                   - taskTools_joinSteps_switch_updateResult_1:
                                       assign:
-                                      - taskTools_joinSteps_switchResult_44b3129a: "${buildToolsResult_644a4211.defs[(taskTools_joinStepsIdx - 0)]}"
+                                      - taskTools_joinSteps_switchResult_6732623b: "${buildToolsResult_31aac8b2.defs[(taskTools_joinStepsIdx - 0)]}"
                         - taskTools_joinSteps_updateResult:
                             assign:
-                            - taskTools_joinStepsResult_580f60a6: "${list.concat(taskTools_joinStepsResult_580f60a6, taskTools_joinSteps_switchResult_44b3129a)}"
+                            - taskTools_joinStepsResult_3b9016ee: "${list.concat(taskTools_joinStepsResult_3b9016ee, taskTools_joinSteps_switchResult_6732623b)}"
           - buildCliTools:
               steps:
               - buildCliTools_initResult:
@@ -324,32 +327,32 @@ main:
               steps:
               - cliTools_joinSteps_initResult:
                   assign:
-                  - cliTools_joinStepsResult_274cf857: []
+                  - cliTools_joinStepsResult_327dca46: []
               - cliTools_joinSteps_steps:
                   for:
                     value: "cliTools_joinStepsIdx"
-                    range: "${[0, (((0 + len(taskTools_joinStepsResult_580f60a6)) + len(buildCliToolsResult_5b6a634a)) - 1)]}"
+                    range: "${[0, (((0 + len(taskTools_joinStepsResult_3b9016ee)) + len(buildCliToolsResult_5b6a634a)) - 1)]}"
                     steps:
                     - cliTools_joinSteps_switch:
                         steps:
                         - cliTools_joinSteps_switch_initResult:
                             assign:
-                            - cliTools_joinSteps_switchResult_125d6297: {}
+                            - cliTools_joinSteps_switchResult_2d1e2e16: {}
                         - cliTools_joinSteps_switch_steps:
                             switch:
-                            - condition: "${(cliTools_joinStepsIdx >= (0 + len(taskTools_joinStepsResult_580f60a6)))}"
+                            - condition: "${(cliTools_joinStepsIdx >= (0 + len(taskTools_joinStepsResult_3b9016ee)))}"
                               steps:
                               - cliTools_joinSteps_switch_updateResult_0:
                                   assign:
-                                  - cliTools_joinSteps_switchResult_125d6297: "${buildCliToolsResult_5b6a634a[(cliTools_joinStepsIdx - (0 + len(taskTools_joinStepsResult_580f60a6)))]}"
+                                  - cliTools_joinSteps_switchResult_2d1e2e16: "${buildCliToolsResult_5b6a634a[(cliTools_joinStepsIdx - (0 + len(taskTools_joinStepsResult_3b9016ee)))]}"
                             - condition: "${(cliTools_joinStepsIdx >= 0)}"
                               steps:
                               - cliTools_joinSteps_switch_updateResult_1:
                                   assign:
-                                  - cliTools_joinSteps_switchResult_125d6297: "${taskTools_joinStepsResult_580f60a6[(cliTools_joinStepsIdx - 0)]}"
+                                  - cliTools_joinSteps_switchResult_2d1e2e16: "${taskTools_joinStepsResult_3b9016ee[(cliTools_joinStepsIdx - 0)]}"
                     - cliTools_joinSteps_updateResult:
                         assign:
-                        - cliTools_joinStepsResult_274cf857: "${list.concat(cliTools_joinStepsResult_274cf857, cliTools_joinSteps_switchResult_125d6297)}"
+                        - cliTools_joinStepsResult_327dca46: "${list.concat(cliTools_joinStepsResult_327dca46, cliTools_joinSteps_switchResult_2d1e2e16)}"
       - buildTools_1:
           steps:
           - buildTools_initResult_1:
@@ -466,32 +469,32 @@ main:
           steps:
           - tools_joinSteps_initResult:
               assign:
-              - tools_joinStepsResult_3bdf221b: []
+              - tools_joinStepsResult_4cd49723: []
           - tools_joinSteps_steps:
               for:
                 value: "tools_joinStepsIdx"
-                range: "${[0, (((0 + len(cliTools_joinStepsResult_274cf857)) + len(buildToolsResult_1c81ca30)) - 1)]}"
+                range: "${[0, (((0 + len(cliTools_joinStepsResult_327dca46)) + len(buildToolsResult_1c81ca30)) - 1)]}"
                 steps:
                 - tools_joinSteps_switch:
                     steps:
                     - tools_joinSteps_switch_initResult:
                         assign:
-                        - tools_joinSteps_switchResult_218ed659: {}
+                        - tools_joinSteps_switchResult_16be8730: {}
                     - tools_joinSteps_switch_steps:
                         switch:
-                        - condition: "${(tools_joinStepsIdx >= (0 + len(cliTools_joinStepsResult_274cf857)))}"
+                        - condition: "${(tools_joinStepsIdx >= (0 + len(cliTools_joinStepsResult_327dca46)))}"
                           steps:
                           - tools_joinSteps_switch_updateResult_0:
                               assign:
-                              - tools_joinSteps_switchResult_218ed659: "${buildToolsResult_1c81ca30[(tools_joinStepsIdx - (0 + len(cliTools_joinStepsResult_274cf857)))]}"
+                              - tools_joinSteps_switchResult_16be8730: "${buildToolsResult_1c81ca30[(tools_joinStepsIdx - (0 + len(cliTools_joinStepsResult_327dca46)))]}"
                         - condition: "${(tools_joinStepsIdx >= 0)}"
                           steps:
                           - tools_joinSteps_switch_updateResult_1:
                               assign:
-                              - tools_joinSteps_switchResult_218ed659: "${cliTools_joinStepsResult_274cf857[(tools_joinStepsIdx - 0)]}"
+                              - tools_joinSteps_switchResult_16be8730: "${cliTools_joinStepsResult_327dca46[(tools_joinStepsIdx - 0)]}"
                 - tools_joinSteps_updateResult:
                     assign:
-                    - tools_joinStepsResult_3bdf221b: "${list.concat(tools_joinStepsResult_3bdf221b, tools_joinSteps_switchResult_218ed659)}"
+                    - tools_joinStepsResult_4cd49723: "${list.concat(tools_joinStepsResult_4cd49723, tools_joinSteps_switchResult_16be8730)}"
   - return:
       return:
-        tools: "${tools_joinStepsResult_3bdf221b}"
+        tools: "${tools_joinStepsResult_4cd49723}"

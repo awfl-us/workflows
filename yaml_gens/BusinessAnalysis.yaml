@@ -8,7 +8,7 @@ main:
           steps:
           - cacheReportRead_tryRead_initResult:
               assign:
-              - cacheReportRead_tryReadResult_59688c4c: {}
+              - cacheReportRead_tryReadResult_218e7919: {}
           - cacheReportRead_tryRead_steps:
               try:
                 steps:
@@ -29,11 +29,11 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "cacheReportReadResult_25d9261d"
+                          result: "cacheReportReadResult_4d4b51f7"
                     retry: "${http.default_retry}"
                 - cacheReportRead_tryRead_updateResult:
                     assign:
-                    - cacheReportRead_tryReadResult_59688c4c: "${cacheReportReadResult_25d9261d}"
+                    - cacheReportRead_tryReadResult_218e7919: "${cacheReportReadResult_4d4b51f7}"
               except:
                 as: "cacheReportRead_tryReadError"
                 steps:
@@ -41,10 +41,10 @@ main:
                     steps:
                     - cacheReportRead_switchRead_initResult:
                         assign:
-                        - cacheReportRead_switchReadResult_7bf0edc0: {}
+                        - cacheReportRead_switchReadResult_5b2fcbbe: {}
                     - cacheReportRead_switchRead_steps:
                         switch:
-                        - condition: "${(cacheReportRead_tryReadError.code == 404)}"
+                        - condition: "${(default(map.get(cacheReportRead_tryReadError, \"code\"), 0) == 404)}"
                           steps:
                           - cacheReportRead_log404:
                               try:
@@ -57,31 +57,31 @@ main:
                               retry: "${http.default_retry}"
                           - cacheReportRead_switchRead_updateResult_0:
                               assign:
-                              - cacheReportRead_switchReadResult_7bf0edc0: "${cacheReportReadResult_25d9261d}"
+                              - cacheReportRead_switchReadResult_5b2fcbbe: "${cacheReportReadResult_4d4b51f7}"
                         - condition: "${true}"
                           steps:
                           - cacheReportRead_rethrow:
                               raise: "${cacheReportRead_tryReadError}"
                           - cacheReportRead_switchRead_updateResult_1:
                               assign:
-                              - cacheReportRead_switchReadResult_7bf0edc0: "${cacheReportReadResult_25d9261d}"
+                              - cacheReportRead_switchReadResult_5b2fcbbe: "${cacheReportReadResult_4d4b51f7}"
                 - cacheReportRead_tryRead_updateResultError:
                     assign:
-                    - cacheReportRead_tryReadResult_59688c4c: "${cacheReportRead_switchReadResult_7bf0edc0}"
+                    - cacheReportRead_tryReadResult_218e7919: "${cacheReportRead_switchReadResult_5b2fcbbe}"
       - cacheReportIfStale:
           steps:
           - cacheReportIfStale_initResult:
               assign:
-              - cacheReportIfStaleResult_23792c9b: {}
+              - cacheReportIfStaleResult_1bb32853: {}
           - cacheReportIfStale_steps:
               switch:
-              - condition: "${(((not  (\"body\" in cacheReportRead_tryReadResult_59688c4c)) or (not  (\"updatedAt\" in cacheReportRead_tryReadResult_59688c4c.body))) or ((sys.now() - cacheReportRead_tryReadResult_59688c4c.body.updatedAt) > 86400000))}"
+              - condition: "${((((cacheReportRead_tryReadResult_218e7919 == null) or (not  (\"body\" in cacheReportRead_tryReadResult_218e7919))) or (not  (\"updatedAt\" in cacheReportRead_tryReadResult_218e7919.body))) or ((86400000 != null) and ((sys.now() - cacheReportRead_tryReadResult_218e7919.body.updatedAt) > 86400000)))}"
                 steps:
                 - cacheReportBlock:
                     steps:
                     - cacheReportBlock_initResult:
                         assign:
-                        - cacheReportBlockResult_512c391d: {}
+                        - cacheReportBlockResult_2d59eec4: {}
                     - cacheReportBlock_steps:
                         try:
                           steps:
@@ -152,7 +152,7 @@ main:
                                   steps:
                                   - cacheReviews_businessReviewsRead_tryRead_initResult:
                                       assign:
-                                      - cacheReviews_businessReviewsRead_tryReadResult_5f2024ce: {}
+                                      - cacheReviews_businessReviewsRead_tryReadResult_2b3ce175: {}
                                   - cacheReviews_businessReviewsRead_tryRead_steps:
                                       try:
                                         steps:
@@ -173,11 +173,11 @@ main:
                                                     headers:
                                                       x-user-id: "${input.env.userId}"
                                                       x-project-id: "${input.env.projectId}"
-                                                  result: "cacheReviews_businessReviewsReadResult_2302d01b"
+                                                  result: "cacheReviews_businessReviewsReadResult_18362776"
                                             retry: "${http.default_retry}"
                                         - cacheReviews_businessReviewsRead_tryRead_updateResult:
                                             assign:
-                                            - cacheReviews_businessReviewsRead_tryReadResult_5f2024ce: "${cacheReviews_businessReviewsReadResult_2302d01b}"
+                                            - cacheReviews_businessReviewsRead_tryReadResult_2b3ce175: "${cacheReviews_businessReviewsReadResult_18362776}"
                                       except:
                                         as: "cacheReviews_businessReviewsRead_tryReadError"
                                         steps:
@@ -185,10 +185,10 @@ main:
                                             steps:
                                             - cacheReviews_businessReviewsRead_switchRead_initResult:
                                                 assign:
-                                                - cacheReviews_businessReviewsRead_switchReadResult_7ad34125: {}
+                                                - cacheReviews_businessReviewsRead_switchReadResult_d39921c: {}
                                             - cacheReviews_businessReviewsRead_switchRead_steps:
                                                 switch:
-                                                - condition: "${(cacheReviews_businessReviewsRead_tryReadError.code == 404)}"
+                                                - condition: "${(default(map.get(cacheReviews_businessReviewsRead_tryReadError, \"code\"), 0) == 404)}"
                                                   steps:
                                                   - cacheReviews_businessReviewsRead_log404:
                                                       try:
@@ -201,25 +201,25 @@ main:
                                                       retry: "${http.default_retry}"
                                                   - cacheReviews_businessReviewsRead_switchRead_updateResult_0:
                                                       assign:
-                                                      - cacheReviews_businessReviewsRead_switchReadResult_7ad34125: "${cacheReviews_businessReviewsReadResult_2302d01b}"
+                                                      - cacheReviews_businessReviewsRead_switchReadResult_d39921c: "${cacheReviews_businessReviewsReadResult_18362776}"
                                                 - condition: "${true}"
                                                   steps:
                                                   - cacheReviews_businessReviewsRead_rethrow:
                                                       raise: "${cacheReviews_businessReviewsRead_tryReadError}"
                                                   - cacheReviews_businessReviewsRead_switchRead_updateResult_1:
                                                       assign:
-                                                      - cacheReviews_businessReviewsRead_switchReadResult_7ad34125: "${cacheReviews_businessReviewsReadResult_2302d01b}"
+                                                      - cacheReviews_businessReviewsRead_switchReadResult_d39921c: "${cacheReviews_businessReviewsReadResult_18362776}"
                                         - cacheReviews_businessReviewsRead_tryRead_updateResultError:
                                             assign:
-                                            - cacheReviews_businessReviewsRead_tryReadResult_5f2024ce: "${cacheReviews_businessReviewsRead_switchReadResult_7ad34125}"
+                                            - cacheReviews_businessReviewsRead_tryReadResult_2b3ce175: "${cacheReviews_businessReviewsRead_switchReadResult_d39921c}"
                               - cacheReviews_businessReviewsIfStale:
                                   steps:
                                   - cacheReviews_businessReviewsIfStale_initResult:
                                       assign:
-                                      - cacheReviews_businessReviewsIfStaleResult_3aca1daa: {}
+                                      - cacheReviews_businessReviewsIfStaleResult_45085f7d: {}
                                   - cacheReviews_businessReviewsIfStale_steps:
                                       switch:
-                                      - condition: "${(((not  (\"body\" in cacheReviews_businessReviewsRead_tryReadResult_5f2024ce)) or (not  (\"updatedAt\" in cacheReviews_businessReviewsRead_tryReadResult_5f2024ce.body))) or ((sys.now() - cacheReviews_businessReviewsRead_tryReadResult_5f2024ce.body.updatedAt) > 86400000))}"
+                                      - condition: "${((((cacheReviews_businessReviewsRead_tryReadResult_2b3ce175 == null) or (not  (\"body\" in cacheReviews_businessReviewsRead_tryReadResult_2b3ce175))) or (not  (\"updatedAt\" in cacheReviews_businessReviewsRead_tryReadResult_2b3ce175.body))) or ((86400000 != null) and ((sys.now() - cacheReviews_businessReviewsRead_tryReadResult_2b3ce175.body.updatedAt) > 86400000)))}"
                                         steps:
                                         - scrapeReviews_businessReviews:
                                             try:
@@ -262,21 +262,21 @@ main:
                                             retry: "${http.default_retry}"
                                         - cacheReviews_businessReviewsIfStale_updateResult_0:
                                             assign:
-                                            - cacheReviews_businessReviewsIfStaleResult_3aca1daa: "${scrapeReviews_businessReviewsResult_4eea5d2d.body}"
-                                      - condition: "${(\"body\" in cacheReviews_businessReviewsRead_tryReadResult_5f2024ce)}"
+                                            - cacheReviews_businessReviewsIfStaleResult_45085f7d: "${scrapeReviews_businessReviewsResult_4eea5d2d.body}"
+                                      - condition: "${(\"body\" in cacheReviews_businessReviewsRead_tryReadResult_2b3ce175)}"
                                         steps:
                                         - cacheReviews_businessReviewsIfStale_updateResult_1:
                                             assign:
-                                            - cacheReviews_businessReviewsIfStaleResult_3aca1daa: "${cacheReviews_businessReviewsRead_tryReadResult_5f2024ce.body.result}"
+                                            - cacheReviews_businessReviewsIfStaleResult_45085f7d: "${cacheReviews_businessReviewsRead_tryReadResult_2b3ce175.body.result}"
                                       - condition: "${true}"
                                         steps:
                                         - cacheReviews_businessReviews_raiseFailedCache:
                                             raise:
                                               message: "${\"Cache run failed\"}"
-                                              code: "${500}"
+                                              code: "${default(500, null)}"
                                         - cacheReviews_businessReviewsIfStale_updateResult_2:
                                             assign:
-                                            - cacheReviews_businessReviewsIfStaleResult_3aca1daa: "${scrapeReviews_businessReviewsResult_4eea5d2d.body}"
+                                            - cacheReviews_businessReviewsIfStaleResult_45085f7d: "${scrapeReviews_businessReviewsResult_4eea5d2d.body}"
                           - Status_competitorReviews:
                               try:
                                 steps:
@@ -303,7 +303,7 @@ main:
                               steps:
                               - scrapeReviewsForCompetitors_initResult:
                                   assign:
-                                  - scrapeReviewsForCompetitorsResult_6be90c13: []
+                                  - scrapeReviewsForCompetitorsResult_1692bf86: []
                               - scrapeReviewsForCompetitors_steps:
                                   for:
                                     value: "scrapeReviewsForCompetitorsValue"
@@ -315,7 +315,7 @@ main:
                                             steps:
                                             - cacheReviews_competitorReviewsRead_tryRead_initResult:
                                                 assign:
-                                                - cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a: {}
+                                                - cacheReviews_competitorReviewsRead_tryReadResult_7317c63d: {}
                                             - cacheReviews_competitorReviewsRead_tryRead_steps:
                                                 try:
                                                   steps:
@@ -336,11 +336,11 @@ main:
                                                               headers:
                                                                 x-user-id: "${input.env.userId}"
                                                                 x-project-id: "${input.env.projectId}"
-                                                            result: "cacheReviews_competitorReviewsReadResult_37f72cf1"
+                                                            result: "cacheReviews_competitorReviewsReadResult_2f9b0f9c"
                                                       retry: "${http.default_retry}"
                                                   - cacheReviews_competitorReviewsRead_tryRead_updateResult:
                                                       assign:
-                                                      - cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a: "${cacheReviews_competitorReviewsReadResult_37f72cf1}"
+                                                      - cacheReviews_competitorReviewsRead_tryReadResult_7317c63d: "${cacheReviews_competitorReviewsReadResult_2f9b0f9c}"
                                                 except:
                                                   as: "cacheReviews_competitorReviewsRead_tryReadError"
                                                   steps:
@@ -348,10 +348,10 @@ main:
                                                       steps:
                                                       - cacheReviews_competitorReviewsRead_switchRead_initResult:
                                                           assign:
-                                                          - cacheReviews_competitorReviewsRead_switchReadResult_54adcc15: {}
+                                                          - cacheReviews_competitorReviewsRead_switchReadResult_382f6540: {}
                                                       - cacheReviews_competitorReviewsRead_switchRead_steps:
                                                           switch:
-                                                          - condition: "${(cacheReviews_competitorReviewsRead_tryReadError.code == 404)}"
+                                                          - condition: "${(default(map.get(cacheReviews_competitorReviewsRead_tryReadError, \"code\"), 0) == 404)}"
                                                             steps:
                                                             - cacheReviews_competitorReviewsRead_log404:
                                                                 try:
@@ -364,25 +364,25 @@ main:
                                                                 retry: "${http.default_retry}"
                                                             - cacheReviews_competitorReviewsRead_switchRead_updateResult_0:
                                                                 assign:
-                                                                - cacheReviews_competitorReviewsRead_switchReadResult_54adcc15: "${cacheReviews_competitorReviewsReadResult_37f72cf1}"
+                                                                - cacheReviews_competitorReviewsRead_switchReadResult_382f6540: "${cacheReviews_competitorReviewsReadResult_2f9b0f9c}"
                                                           - condition: "${true}"
                                                             steps:
                                                             - cacheReviews_competitorReviewsRead_rethrow:
                                                                 raise: "${cacheReviews_competitorReviewsRead_tryReadError}"
                                                             - cacheReviews_competitorReviewsRead_switchRead_updateResult_1:
                                                                 assign:
-                                                                - cacheReviews_competitorReviewsRead_switchReadResult_54adcc15: "${cacheReviews_competitorReviewsReadResult_37f72cf1}"
+                                                                - cacheReviews_competitorReviewsRead_switchReadResult_382f6540: "${cacheReviews_competitorReviewsReadResult_2f9b0f9c}"
                                                   - cacheReviews_competitorReviewsRead_tryRead_updateResultError:
                                                       assign:
-                                                      - cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a: "${cacheReviews_competitorReviewsRead_switchReadResult_54adcc15}"
+                                                      - cacheReviews_competitorReviewsRead_tryReadResult_7317c63d: "${cacheReviews_competitorReviewsRead_switchReadResult_382f6540}"
                                         - cacheReviews_competitorReviewsIfStale:
                                             steps:
                                             - cacheReviews_competitorReviewsIfStale_initResult:
                                                 assign:
-                                                - cacheReviews_competitorReviewsIfStaleResult_2c570056: {}
+                                                - cacheReviews_competitorReviewsIfStaleResult_2d12606: {}
                                             - cacheReviews_competitorReviewsIfStale_steps:
                                                 switch:
-                                                - condition: "${(((not  (\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a)) or (not  (\"updatedAt\" in cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a.body))) or ((sys.now() - cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a.body.updatedAt) > 86400000))}"
+                                                - condition: "${((((cacheReviews_competitorReviewsRead_tryReadResult_7317c63d == null) or (not  (\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_7317c63d))) or (not  (\"updatedAt\" in cacheReviews_competitorReviewsRead_tryReadResult_7317c63d.body))) or ((86400000 != null) and ((sys.now() - cacheReviews_competitorReviewsRead_tryReadResult_7317c63d.body.updatedAt) > 86400000)))}"
                                                   steps:
                                                   - scrapeReviews_competitorReviews:
                                                       try:
@@ -425,29 +425,29 @@ main:
                                                       retry: "${http.default_retry}"
                                                   - cacheReviews_competitorReviewsIfStale_updateResult_0:
                                                       assign:
-                                                      - cacheReviews_competitorReviewsIfStaleResult_2c570056: "${scrapeReviews_competitorReviewsResult_202ca838.body}"
-                                                - condition: "${(\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a)}"
+                                                      - cacheReviews_competitorReviewsIfStaleResult_2d12606: "${scrapeReviews_competitorReviewsResult_202ca838.body}"
+                                                - condition: "${(\"body\" in cacheReviews_competitorReviewsRead_tryReadResult_7317c63d)}"
                                                   steps:
                                                   - cacheReviews_competitorReviewsIfStale_updateResult_1:
                                                       assign:
-                                                      - cacheReviews_competitorReviewsIfStaleResult_2c570056: "${cacheReviews_competitorReviewsRead_tryReadResult_2ff65d4a.body.result}"
+                                                      - cacheReviews_competitorReviewsIfStaleResult_2d12606: "${cacheReviews_competitorReviewsRead_tryReadResult_7317c63d.body.result}"
                                                 - condition: "${true}"
                                                   steps:
                                                   - cacheReviews_competitorReviews_raiseFailedCache:
                                                       raise:
                                                         message: "${\"Cache run failed\"}"
-                                                        code: "${500}"
+                                                        code: "${default(500, null)}"
                                                   - cacheReviews_competitorReviewsIfStale_updateResult_2:
                                                       assign:
-                                                      - cacheReviews_competitorReviewsIfStaleResult_2c570056: "${scrapeReviews_competitorReviewsResult_202ca838.body}"
+                                                      - cacheReviews_competitorReviewsIfStaleResult_2d12606: "${scrapeReviews_competitorReviewsResult_202ca838.body}"
                                     - scrapeReviewsForCompetitors_updateResult:
                                         assign:
-                                        - scrapeReviewsForCompetitorsResult_6be90c13: "${list.concat(scrapeReviewsForCompetitorsResult_6be90c13, cacheReviews_competitorReviewsIfStaleResult_2c570056)}"
+                                        - scrapeReviewsForCompetitorsResult_1692bf86: "${list.concat(scrapeReviewsForCompetitorsResult_1692bf86, cacheReviews_competitorReviewsIfStaleResult_2d12606)}"
                           - zipCompetitorReviews:
                               steps:
                               - zipCompetitorReviews_initResult:
                                   assign:
-                                  - zipCompetitorReviewsResult_52dbacf2: []
+                                  - zipCompetitorReviewsResult_6e817f98: []
                               - zipCompetitorReviews_steps:
                                   for:
                                     value: "zipCompetitorReviewsIdx"
@@ -457,10 +457,10 @@ main:
                                         assign:
                                         - zipCompetitorReviews_assignIterResultVar:
                                             businessInfo: "${generateKeywordsResult_79dd2b68.body.competitors[zipCompetitorReviewsIdx]}"
-                                            reviews: "${scrapeReviewsForCompetitorsResult_6be90c13[zipCompetitorReviewsIdx].reviews}"
+                                            reviews: "${scrapeReviewsForCompetitorsResult_1692bf86[zipCompetitorReviewsIdx].reviews}"
                                     - zipCompetitorReviews_updateResult:
                                         assign:
-                                        - zipCompetitorReviewsResult_52dbacf2: "${list.concat(zipCompetitorReviewsResult_52dbacf2, zipCompetitorReviews_assignIterResultVar)}"
+                                        - zipCompetitorReviewsResult_6e817f98: "${list.concat(zipCompetitorReviewsResult_6e817f98, zipCompetitorReviews_assignIterResultVar)}"
                           - Status_analyze:
                               try:
                                 steps:
@@ -487,7 +487,7 @@ main:
                               steps:
                               - buildPrompt_initResult:
                                   assign:
-                                  - buildPromptResult_20cfc8b8: []
+                                  - buildPromptResult_6f11be8: []
                               - buildPrompt_steps:
                                   for:
                                     value: "buildPromptIdx"
@@ -497,14 +497,14 @@ main:
                                         steps:
                                         - buildPrompt_switch_initResult:
                                             assign:
-                                            - buildPrompt_switchResult_64a8808d: {}
+                                            - buildPrompt_switchResult_20676609: {}
                                         - buildPrompt_switch_steps:
                                             switch:
                                             - condition: "${(buildPromptIdx == 0)}"
                                               steps:
                                               - buildPrompt_switch_updateResult_0:
                                                   assign:
-                                                  - buildPrompt_switchResult_64a8808d:
+                                                  - buildPrompt_switchResult_20676609:
                                                       role: "${\"system\"}"
                                                       content: "${\"You are an expert business analyst specializing in customer feedback analysis.\n          Analyze the provided business and competitor data to generate comprehensive insights.\n          Focus on actionable insights and specific recommendations. \n          \n          In addition to general analysis, return:\n          - Three recent reviews or urgent concerns.\n          - Two of the most notable positive and two most notable negative reviews.\n          - A ranked list of the target business among competitors based on rating and weighted by price level.\n          - The two most relatable competitors with a review from each to highlight comparison.\n\n          Use line breaks and markdown to format larger text blocks.\n          Really try to identify important pieces of information that the owner might not be aware of, especially when comparing with competitors as far as local market trends.\n      \"}"
                                                       tool_calls: "${[]}"
@@ -515,49 +515,51 @@ main:
                                               steps:
                                               - buildPrompt_switch_updateResult_1:
                                                   assign:
-                                                  - buildPrompt_switchResult_64a8808d:
+                                                  - buildPrompt_switchResult_20676609:
                                                       role: "${\"user\"}"
-                                                      content: "${((((((\"\rTarget Business:\r\" + json.encode_to_string(generateKeywordsResult_79dd2b68.body)) + \"\rTarget Business Reviews: \r\") + json.encode_to_string(cacheReviews_businessReviewsIfStaleResult_3aca1daa.reviews)) + \"\rCompetitors: \r\") + json.encode_to_string(zipCompetitorReviewsResult_52dbacf2)) + \"\r\rPlease provide a detailed analysis following the specified format.\")}"
+                                                      content: "${((((((\"\rTarget Business:\r\" + json.encode_to_string(generateKeywordsResult_79dd2b68.body)) + \"\rTarget Business Reviews: \r\") + json.encode_to_string(cacheReviews_businessReviewsIfStaleResult_45085f7d.reviews)) + \"\rCompetitors: \r\") + json.encode_to_string(zipCompetitorReviewsResult_6e817f98)) + \"\r\rPlease provide a detailed analysis following the specified format.\")}"
                                                       tool_calls: "${[]}"
                                                       tool_call_id: "${null}"
                                                       create_time: "${sys.now()}"
                                                       docId: "${null}"
                                     - buildPrompt_updateResult:
                                         assign:
-                                        - buildPromptResult_20cfc8b8: "${list.concat(buildPromptResult_20cfc8b8, buildPrompt_switchResult_64a8808d)}"
+                                        - buildPromptResult_6f11be8: "${list.concat(buildPromptResult_6f11be8, buildPrompt_switchResult_20676609)}"
                           - analyze_business_block:
                               steps:
                               - spec:
                                   steps:
                                   - spec_initResult:
                                       assign:
-                                      - specResult_41b2fcda: {}
+                                      - specResult_5403fcc8: {}
                                   - spec_steps:
                                       try:
                                         steps:
                                         - spec_updateResult:
                                             assign:
-                                            - specResult_41b2fcda: "${{\n  \"targetBusinessSummary\" : \"${example.targetBusinessSummary}\",\n  \"competitorAnalysis\" : \"${example.competitorAnalysis}\",\n  \"keyStrengths\" : \"${example.keyStrengths}\",\n  \"areasForImprovement\" : \"${example.areasForImprovement}\",\n  \"marketPositioning\" : \"${example.marketPositioning}\",\n  \"recommendations\" : \"${example.recommendations}\",\n  \"recentOrUrgentConcerns\" : {\n    \"author\" : \"${example.recentOrUrgentConcerns.author}\",\n    \"rating\" : \"${example.recentOrUrgentConcerns.rating}\",\n    \"text\" : \"${example.recentOrUrgentConcerns.text}\",\n    \"time\" : \"${example.recentOrUrgentConcerns.time}\"\n  },\n  \"positiveHighlights\" : {\n    \"author\" : \"${example.positiveHighlights.author}\",\n    \"rating\" : \"${example.positiveHighlights.rating}\",\n    \"text\" : \"${example.positiveHighlights.text}\",\n    \"time\" : \"${example.positiveHighlights.time}\"\n  },\n  \"negativeHighlights\" : {\n    \"author\" : \"${example.negativeHighlights.author}\",\n    \"rating\" : \"${example.negativeHighlights.rating}\",\n    \"text\" : \"${example.negativeHighlights.text}\",\n    \"time\" : \"${example.negativeHighlights.time}\"\n  },\n  \"competitorRanking\" : {\n    \"name\" : \"${example.competitorRanking.name}\",\n    \"rating\" : \"${example.competitorRanking.rating}\",\n    \"priceLevel\" : \"${example.competitorRanking.priceLevel}\",\n    \"weightedScore\" : \"${example.competitorRanking.weightedScore}\"\n  },\n  \"competitorComparison\" : {\n    \"name\" : \"${example.competitorComparison.name}\",\n    \"priceLevel\" : \"${example.competitorComparison.priceLevel}\",\n    \"rating\" : \"${example.competitorComparison.rating}\",\n    \"comparisonReview\" : {\n      \"author\" : \"${example.competitorComparison.comparisonReview.author}\",\n      \"rating\" : \"${example.competitorComparison.comparisonReview.rating}\",\n      \"text\" : \"${example.competitorComparison.comparisonReview.text}\",\n      \"time\" : \"${example.competitorComparison.comparisonReview.time}\"\n    }\n  }\n}}"
+                                            - specResult_5403fcc8: "${{\n  \"targetBusinessSummary\" : \"${example.targetBusinessSummary}\",\n  \"competitorAnalysis\" : \"${example.competitorAnalysis}\",\n  \"keyStrengths\" : \"${example.keyStrengths}\",\n  \"areasForImprovement\" : \"${example.areasForImprovement}\",\n  \"marketPositioning\" : \"${example.marketPositioning}\",\n  \"recommendations\" : \"${example.recommendations}\",\n  \"recentOrUrgentConcerns\" : {\n    \"author\" : \"${example.recentOrUrgentConcerns.author}\",\n    \"rating\" : \"${example.recentOrUrgentConcerns.rating}\",\n    \"text\" : \"${example.recentOrUrgentConcerns.text}\",\n    \"time\" : \"${example.recentOrUrgentConcerns.time}\"\n  },\n  \"positiveHighlights\" : {\n    \"author\" : \"${example.positiveHighlights.author}\",\n    \"rating\" : \"${example.positiveHighlights.rating}\",\n    \"text\" : \"${example.positiveHighlights.text}\",\n    \"time\" : \"${example.positiveHighlights.time}\"\n  },\n  \"negativeHighlights\" : {\n    \"author\" : \"${example.negativeHighlights.author}\",\n    \"rating\" : \"${example.negativeHighlights.rating}\",\n    \"text\" : \"${example.negativeHighlights.text}\",\n    \"time\" : \"${example.negativeHighlights.time}\"\n  },\n  \"competitorRanking\" : {\n    \"name\" : \"${example.competitorRanking.name}\",\n    \"rating\" : \"${example.competitorRanking.rating}\",\n    \"priceLevel\" : \"${example.competitorRanking.priceLevel}\",\n    \"weightedScore\" : \"${example.competitorRanking.weightedScore}\"\n  },\n  \"competitorComparison\" : {\n    \"name\" : \"${example.competitorComparison.name}\",\n    \"priceLevel\" : \"${example.competitorComparison.priceLevel}\",\n    \"rating\" : \"${example.competitorComparison.rating}\",\n    \"comparisonReview\" : {\n      \"author\" : \"${example.competitorComparison.comparisonReview.author}\",\n      \"rating\" : \"${example.competitorComparison.comparisonReview.rating}\",\n      \"text\" : \"${example.competitorComparison.comparisonReview.text}\",\n      \"time\" : \"${example.competitorComparison.comparisonReview.time}\"\n    }\n  }\n}}"
                                       except:
                                         as: "specError"
                                         steps:
-                                        - spec_logError:
+                                        - logError:
                                             try:
                                               steps:
-                                              - spec_logError_call:
+                                              - logError_call:
                                                   call: "sys.log"
                                                   args:
-                                                    text: "${(\"[spec_logError] \" + specError.message)}"
-                                                  result: "spec_logErrorResult_3c7c09ca"
+                                                    text: "${(\"[logError] \" + specError.message)}"
+                                                  result: "logErrorResult_2dbc43d"
                                             retry: "${http.default_retry}"
+                                        - reRaise:
+                                            raise: "${specError}"
                                         - spec_updateResultError:
                                             assign:
-                                            - specResult_41b2fcda: "${null}"
+                                            - specResult_5403fcc8: "${null}"
                               - analyze_business_buildSchemaList:
                                   steps:
                                   - analyze_business_buildSchemaList_initResult:
                                       assign:
-                                      - analyze_business_buildSchemaListResult_66090fe8: []
+                                      - analyze_business_buildSchemaListResult_f8b297f: []
                                   - analyze_business_buildSchemaList_steps:
                                       for:
                                         value: "analyze_business_buildSchemaListIdx"
@@ -567,23 +569,23 @@ main:
                                             steps:
                                             - analyze_business_buildSchemaList_switch_initResult:
                                                 assign:
-                                                - analyze_business_buildSchemaList_switchResult_6fe7b05f: {}
+                                                - analyze_business_buildSchemaList_switchResult_15edfd60: {}
                                             - analyze_business_buildSchemaList_switch_steps:
                                                 switch:
                                                 - condition: "${(analyze_business_buildSchemaListIdx == 0)}"
                                                   steps:
                                                   - analyze_business_buildSchemaList_switch_updateResult_0:
                                                       assign:
-                                                      - analyze_business_buildSchemaList_switchResult_6fe7b05f:
+                                                      - analyze_business_buildSchemaList_switchResult_15edfd60:
                                                           role: "${\"system\"}"
-                                                          content: "${(\"Respond with a JSON in this format:\r\" + specResult_41b2fcda)}"
+                                                          content: "${(\"Respond with a JSON in this format:\r\" + specResult_5403fcc8)}"
                                                           tool_calls: "${[]}"
                                                           tool_call_id: "${null}"
                                                           create_time: "${sys.now()}"
                                                           docId: "${null}"
                                         - analyze_business_buildSchemaList_updateResult:
                                             assign:
-                                            - analyze_business_buildSchemaListResult_66090fe8: "${list.concat(analyze_business_buildSchemaListResult_66090fe8, analyze_business_buildSchemaList_switchResult_6fe7b05f)}"
+                                            - analyze_business_buildSchemaListResult_f8b297f: "${list.concat(analyze_business_buildSchemaListResult_f8b297f, analyze_business_buildSchemaList_switchResult_15edfd60)}"
                               - analyze_business_post:
                                   try:
                                     steps:
@@ -592,12 +594,14 @@ main:
                                         args:
                                           url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
                                           body:
-                                            messages: "${list.concat(buildPromptResult_20cfc8b8, analyze_business_buildSchemaListResult_66090fe8[0])}"
+                                            messages: "${list.concat(buildPromptResult_6f11be8, analyze_business_buildSchemaListResult_f8b297f[0])}"
                                             model: "${\"gpt-5\"}"
                                             temperature: 0.8
                                             max_completion_tokens: "${null}"
                                             response_format:
                                               type: "json_object"
+                                            sessionId: "${\"BusinessAnalysis\"}"
+                                            workflow_name: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                                             tools: "${[]}"
                                             tool_choice: "${\"auto\"}"
                                           auth:
@@ -606,60 +610,64 @@ main:
                                           headers:
                                             x-user-id: "${input.env.userId}"
                                             x-project-id: "${input.env.projectId}"
-                                        result: "analyze_business_postResult_16892004"
+                                        result: "analyze_business_postResult_1996f463"
                                   retry: "${http.default_retry}"
                               - decoded:
                                   steps:
                                   - decoded_initResult:
                                       assign:
-                                      - decodedResult_2e59fb9d: {}
+                                      - decodedResult_76617737: {}
                                   - decoded_steps:
                                       try:
                                         steps:
                                         - decoded_updateResult:
                                             assign:
-                                            - decodedResult_2e59fb9d:
-                                                result: "${json.decode(analyze_business_postResult_16892004.body.message.content)}"
-                                                total_cost: "${analyze_business_postResult_16892004.body.total_cost}"
+                                            - decodedResult_76617737:
+                                                result: "${json.decode(analyze_business_postResult_1996f463.body.message.content)}"
+                                                total_cost: "${analyze_business_postResult_1996f463.body.total_cost}"
                                       except:
                                         as: "decodedError"
                                         steps:
-                                        - decoded_logError:
+                                        - logError_1:
                                             try:
                                               steps:
-                                              - decoded_logError_call:
+                                              - logError_call_1:
                                                   call: "sys.log"
                                                   args:
-                                                    text: "${(\"[decoded_logError] \" + decodedError.message)}"
-                                                  result: "decoded_logErrorResult_15fd6f1"
+                                                    text: "${(\"[logError] \" + decodedError.message)}"
+                                                  result: "logErrorResult_6985fda"
                                             retry: "${http.default_retry}"
+                                        - reRaise_1:
+                                            raise: "${decodedError}"
                                         - decoded_updateResultError:
                                             assign:
-                                            - decodedResult_2e59fb9d: "${null}"
+                                            - decodedResult_76617737: "${null}"
                           - cacheReportBlock_updateResult:
                               assign:
-                              - cacheReportBlockResult_512c391d:
+                              - cacheReportBlockResult_2d59eec4:
                                   businessInfo: "${generateKeywordsResult_79dd2b68.body.businessInfo}"
                                   marketAnalysis:
                                     totalCompetitors: "${len(generateKeywordsResult_79dd2b68.body.competitors)}"
                                     topCompetitors: "${generateKeywordsResult_79dd2b68.body.competitors}"
-                                  analysis: "${decodedResult_2e59fb9d.result}"
-                                  reviews: "${cacheReviews_businessReviewsIfStaleResult_3aca1daa.reviews}"
+                                  analysis: "${decodedResult_76617737.result}"
+                                  reviews: "${cacheReviews_businessReviewsIfStaleResult_45085f7d.reviews}"
                         except:
                           as: "cacheReportBlockError"
                           steps:
-                          - cacheReportBlock_logError:
+                          - logError_2:
                               try:
                                 steps:
-                                - cacheReportBlock_logError_call:
+                                - logError_call_2:
                                     call: "sys.log"
                                     args:
-                                      text: "${(\"[cacheReportBlock_logError] \" + cacheReportBlockError.message)}"
-                                    result: "cacheReportBlock_logErrorResult_1b58d624"
+                                      text: "${(\"[logError] \" + cacheReportBlockError.message)}"
+                                    result: "logErrorResult_3b74468a"
                               retry: "${http.default_retry}"
+                          - reRaise_2:
+                              raise: "${cacheReportBlockError}"
                           - cacheReportBlock_updateResultError:
                               assign:
-                              - cacheReportBlockResult_512c391d: "${null}"
+                              - cacheReportBlockResult_2d59eec4: "${null}"
                 - cacheReportWrite:
                     try:
                       steps:
@@ -672,7 +680,7 @@ main:
                               id: "${input.placeId}"
                               contents:
                                 updatedAt: "${sys.now()}"
-                                result: "${cacheReportBlockResult_512c391d}"
+                                result: "${cacheReportBlockResult_2d59eec4}"
                               userId: "${input.env.userId}"
                             auth:
                               type: "${\"OIDC\"}"
@@ -680,25 +688,25 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "cacheReportWriteResult_67b76752"
+                          result: "cacheReportWriteResult_5383ece"
                     retry: "${http.default_retry}"
                 - cacheReportIfStale_updateResult_0:
                     assign:
-                    - cacheReportIfStaleResult_23792c9b: "${cacheReportBlockResult_512c391d}"
-              - condition: "${(\"body\" in cacheReportRead_tryReadResult_59688c4c)}"
+                    - cacheReportIfStaleResult_1bb32853: "${cacheReportBlockResult_2d59eec4}"
+              - condition: "${(\"body\" in cacheReportRead_tryReadResult_218e7919)}"
                 steps:
                 - cacheReportIfStale_updateResult_1:
                     assign:
-                    - cacheReportIfStaleResult_23792c9b: "${cacheReportRead_tryReadResult_59688c4c.body.result}"
+                    - cacheReportIfStaleResult_1bb32853: "${cacheReportRead_tryReadResult_218e7919.body.result}"
               - condition: "${true}"
                 steps:
                 - cacheReport_raiseFailedCache:
                     raise:
                       message: "${\"Cache run failed\"}"
-                      code: "${500}"
+                      code: "${default(500, null)}"
                 - cacheReportIfStale_updateResult_2:
                     assign:
-                    - cacheReportIfStaleResult_23792c9b: "${cacheReportBlockResult_512c391d}"
+                    - cacheReportIfStaleResult_1bb32853: "${cacheReportBlockResult_2d59eec4}"
   - Status_done:
       try:
         steps:
