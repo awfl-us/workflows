@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_7bd816b4: {}
+          - mainTryResult_2d7e6870: {}
       - mainTry_steps:
           try:
             steps:
@@ -332,14 +332,14 @@ main:
                 steps:
                 - maybeAddMessage_initResult:
                     assign:
-                    - maybeAddMessageResult_3e20f71d: {}
+                    - maybeAddMessageResult_4d0743ae: {}
                 - maybeAddMessage_steps:
                     switch:
                     - condition: "${default(map.get(input, \"sideCall\"), false)}"
                       steps:
                       - maybeAddMessage_updateResult_0:
                           assign:
-                          - maybeAddMessageResult_3e20f71d: "${null}"
+                          - maybeAddMessageResult_4d0743ae: "${null}"
                     - condition: "${true}"
                       steps:
                       - addMessage_seg_write_with_session_update:
@@ -385,7 +385,7 @@ main:
                                         contents:
                                           value:
                                             role: "${\"user\"}"
-                                            content: "${input.query}"
+                                            content: "${default(map.get(input, \"query\"), )}"
                                             tool_calls: "${[]}"
                                             tool_call_id: "${null}"
                                             create_time: "${sys.now()}"
@@ -400,7 +400,7 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "addMessage_write_messagesIsta_SegKalaResult_37f0a614"
+                                    result: "addMessage_write_messagesIsta_SegKalaResult_d42fb52"
                               retry: "${http.default_retry}"
                           - addMessage_update_session_update_time:
                               try:
@@ -425,7 +425,7 @@ main:
                               retry: "${http.default_retry}"
                       - maybeAddMessage_updateResult_1:
                           assign:
-                          - maybeAddMessageResult_3e20f71d: "${addMessage_write_messagesIsta_SegKalaResult_37f0a614}"
+                          - maybeAddMessageResult_4d0743ae: "${addMessage_write_messagesIsta_SegKalaResult_d42fb52}"
             - maybeBypassAquire:
                 steps:
                 - maybeBypassAquire_initResult:
@@ -513,7 +513,7 @@ main:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_1ab18cf7: {}
+                    - maybeRespondResult_4e075b12: {}
                 - maybeRespond_steps:
                     switch:
                     - condition: "${maybeBypassAquireResult_4e2d11a4}"
@@ -1205,7 +1205,7 @@ main:
                           steps:
                           - maybeToolFeedback_initResult:
                               assign:
-                              - maybeToolFeedbackResult_574301ea: {}
+                              - maybeToolFeedbackResult_5a193f0: {}
                           - maybeToolFeedback_steps:
                               switch:
                               - condition: "${((len(processToolCallsResult_59b58561.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
@@ -1218,7 +1218,7 @@ main:
                                           args:
                                             workflow_id: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                                             argument:
-                                              query: "${\"Tool calls completed\"}"
+                                              query: "${default(\"Tool calls completed\", null)}"
                                               fund: "${input.fund}"
                                               spent: "${default((default(map.get(input, \"spent\"), 0) + (complete_switchResult_3e95eff9.total_cost + toolsCostResult_3bc64c68)), null)}"
                                               usage: "${default(null, null)}"
@@ -1239,11 +1239,11 @@ main:
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
                                               skip_polling: true
-                                          result: "toolCallsCompletedResult_3b4a36dc"
+                                          result: "toolCallsCompletedResult_61413e60"
                                     retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_0:
                                     assign:
-                                    - maybeToolFeedbackResult_574301ea: "${toolCallsCompletedResult_3b4a36dc}"
+                                    - maybeToolFeedbackResult_5a193f0: "${toolCallsCompletedResult_61413e60}"
                               - condition: "${true}"
                                 steps:
                                 - statusDone:
@@ -1340,7 +1340,7 @@ main:
                                               - maybeCallbackResult_66ccd5da: "${null}"
                                 - maybeToolFeedback_updateResult_1:
                                     assign:
-                                    - maybeToolFeedbackResult_574301ea:
+                                    - maybeToolFeedbackResult_5a193f0:
                                         message: "${complete_switchResult_3e95eff9.message}"
                                         total_cost: "${(default(map.get(input, \"spent\"), 0) + (complete_switchResult_3e95eff9.total_cost + toolsCostResult_3bc64c68))}"
                                         usage: "${addUsageResult_55250899}"
@@ -1535,7 +1535,7 @@ main:
                                     - collapseMessages_tryResult_138280e4: "${null}"
                       - maybeRespond_updateResult_0:
                           assign:
-                          - maybeRespondResult_1ab18cf7:
+                          - maybeRespondResult_4e075b12:
                               message: "${complete_switchResult_3e95eff9.message}"
                               total_cost: "${(complete_switchResult_3e95eff9.total_cost + toolsCostResult_3bc64c68)}"
                               usage: "${complete_switchResult_3e95eff9.usage}"
@@ -1543,10 +1543,10 @@ main:
                       steps:
                       - maybeRespond_updateResult_1:
                           assign:
-                          - maybeRespondResult_1ab18cf7: "${null}"
+                          - maybeRespondResult_4e075b12: "${null}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_7bd816b4: "${maybeRespondResult_1ab18cf7}"
+                - mainTryResult_2d7e6870: "${maybeRespondResult_4e075b12}"
           except:
             as: "mainTryError"
             steps:
@@ -1600,14 +1600,14 @@ main:
                           ended: "${true}"
                           workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
                           updated: "${sys.now()}"
-                          error: "${default(default(default(map.get(mainTryError, [\"body\", \"error\", \"message\"]), map.get(mainTryError, [\"body\", \"error\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
+                          error: "${default(default(default(map.get(mainTryError, [\\\"body\\\", \\\"error\\\", \\\"message\\\"]), map.get(mainTryError, [\\\"body\\\", \\\"error\\\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
                         auth:
                           type: "${\"OIDC\"}"
                           audience: "${input.env.BASE_URL}"
                         headers:
                           x-user-id: "${input.env.userId}"
                           x-project-id: "${input.env.projectId}"
-                      result: "statusFailedResult_32138e2a"
+                      result: "statusFailedResult_aa96ae8"
                 retry: "${http.default_retry}"
             - enqueueStatusFailed_enqueue_block:
                 steps:
@@ -1631,7 +1631,7 @@ main:
                                 workdir: "${null}"
                                 timeout_seconds: "${60}"
                                 status: "${\"Failed\"}"
-                                error: "${default(default(default(map.get(mainTryError, [\"body\", \"error\", \"message\"]), map.get(mainTryError, [\"body\", \"error\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
+                                error: "${default(default(default(map.get(mainTryError, [\\\"body\\\", \\\"error\\\", \\\"message\\\"]), map.get(mainTryError, [\\\"body\\\", \\\"error\\\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
                               background: "${default(map.get(input.env, \"background\"), false)}"
                               type: "${\"message\"}"
                               source: "${\"workflows.tools.CliTools\"}"
@@ -1641,7 +1641,7 @@ main:
                             headers:
                               x-user-id: "${input.env.userId}"
                               x-project-id: "${input.env.projectId}"
-                          result: "relay_ingest_tool_callResult_3f93d137"
+                          result: "relay_ingest_tool_callResult_7826aebe"
                     retry: "${http.default_retry}"
             - callbackFailure:
                 steps:
@@ -1681,6 +1681,6 @@ main:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_7bd816b4: "${null}"
+                - mainTryResult_2d7e6870: "${null}"
   - return:
-      return: "${mainTryResult_7bd816b4}"
+      return: "${mainTryResult_2d7e6870}"

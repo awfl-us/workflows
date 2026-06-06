@@ -46,7 +46,7 @@ import us.awfl.workflows.tools.Tasks.Task
 trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools {
   // Single entry point: tool-enabled chat that surfaces tool_calls
   def eventHandler(
-    message: ChatMessage = ChatMessage("user", input.query),
+    message: ChatMessage = ChatMessage("user", input.query.getOrElse(Value("") ) ),
     tools: List[String] = List()
   ): Workflow[ChatToolResponse] = {
     val model = inputVal.flatMap(_.env).get.model
@@ -187,9 +187,9 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
               obj(EventHandler.Input(
-                str("Tool calls completed"),
-                input.fund,
-                OptValue(newSpent),
+                query = OptValue(str("Tool calls completed")),
+                fund = input.fund,
+                spent = OptValue(newSpent),
                 callback = input.callback
               )),
               connector_params = ConnectorParams(skip_polling = true)
@@ -270,8 +270,8 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             "default",
             CelFunc(
               "default",
-              CelFunc("map.get", err.cel, CelConst("""["body", "error", "message"]""")),
-              CelFunc("map.get", err.cel, CelConst("""["body", "error"]"""))
+              CelFunc("map.get", err.cel, CelConst("""[\"body\", \"error\", \"message\"]""")),
+              CelFunc("map.get", err.cel, CelConst("""[\"body\", \"error\"]"""))
             ),
             CelFunc("map.get", err.cel, "message")
           ),
@@ -304,7 +304,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
 }
 object EventHandler {
   case class Input(
-    query: Value[String],
+    query: OptValue[String],
     fund: Value[Double],
     spent: OptValue[Double] = OptValue(0),
     usage: OptValue[Usage] = OptValue.nil,

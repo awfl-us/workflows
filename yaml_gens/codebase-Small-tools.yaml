@@ -1,0 +1,424 @@
+main:
+  params:
+  - "input"
+  steps:
+  - buildSmallTools_joinSteps_1:
+      steps:
+      - cliTools_joinSteps_1:
+          steps:
+          - taskTools_joinSteps_1:
+              steps:
+              - buildTools:
+                  steps:
+                  - buildTools_initResult:
+                      assign:
+                      - buildToolsResult_31aac8b2: {}
+                  - buildTools_steps:
+                      try:
+                        steps:
+                        - sessionAgent_1:
+                            steps:
+                            - sessionAgent_initResult:
+                                assign:
+                                - sessionAgentResult_1afc1290: {}
+                            - sessionAgent_steps:
+                                try:
+                                  steps:
+                                  - sessionAgent:
+                                      try:
+                                        steps:
+                                        - sessionAgent_call:
+                                            call: "http.get"
+                                            args:
+                                              url: "${((input.env.BASE_URL + \"/\") + (\"agents/session/\" + input.env.sessionId))}"
+                                              auth:
+                                                type: "${\"OIDC\"}"
+                                                audience: "${input.env.BASE_URL}"
+                                              headers:
+                                                x-user-id: "${input.env.userId}"
+                                                x-project-id: "${input.env.projectId}"
+                                            result: "sessionAgentResult_5e9712fd"
+                                      retry: "${http.default_retry}"
+                                  - sessionAgent_updateResult:
+                                      assign:
+                                      - sessionAgentResult_1afc1290: "${sessionAgentResult_5e9712fd.body.agentId}"
+                                except:
+                                  as: "sessionAgentError"
+                                  steps:
+                                  - sessionAgent_updateResultError:
+                                      assign:
+                                      - sessionAgentResult_1afc1290: "${\"default\"}"
+                        - agentTools:
+                            try:
+                              steps:
+                              - agentTools_call:
+                                  call: "http.get"
+                                  args:
+                                    url: "${((input.env.BASE_URL + \"/\") + ((\"agents/\" + sessionAgentResult_1afc1290) + \"/tools\"))}"
+                                    auth:
+                                      type: "${\"OIDC\"}"
+                                      audience: "${input.env.BASE_URL}"
+                                    headers:
+                                      x-user-id: "${input.env.userId}"
+                                      x-project-id: "${input.env.projectId}"
+                                  result: "agentToolsResult_2aec73a5"
+                            retry: "${http.default_retry}"
+                        - toolDefs:
+                            try:
+                              steps:
+                              - toolDefs_call:
+                                  call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                  args:
+                                    workflow_id: "${\"helpers-ToolDefs${WORKFLOW_ENV}\"}"
+                                    argument:
+                                      toolNames: "${agentToolsResult_2aec73a5.body.tools}"
+                                      env:
+                                        userId: "${input.env.userId}"
+                                        model: "${input.env.model}"
+                                        callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                        BASE_URL: "${input.env.BASE_URL}"
+                                        background: "${default(map.get(input.env, \"background\"), null)}"
+                                        projectId: "${input.env.projectId}"
+                                        sessionId: "${input.env.sessionId}"
+                                        workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                    location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                    project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                    connector_params:
+                                      skip_polling: false
+                                  result: "toolDefsResult_7c9f9fe8"
+                            retry: "${http.default_retry}"
+                        - buildTools_updateResult:
+                            assign:
+                            - buildToolsResult_31aac8b2: "${toolDefsResult_7c9f9fe8}"
+                      except:
+                        as: "buildToolsError"
+                        steps:
+                        - logError:
+                            try:
+                              steps:
+                              - logError_call:
+                                  call: "sys.log"
+                                  args:
+                                    text: "${(\"[logError] \" + buildToolsError.message)}"
+                                  result: "logErrorResult_6f4105f3"
+                            retry: "${http.default_retry}"
+                        - reRaise:
+                            raise: "${buildToolsError}"
+                        - buildTools_updateResultError:
+                            assign:
+                            - buildToolsResult_31aac8b2: "${null}"
+              - buildTaskTools:
+                  steps:
+                  - buildTaskTools_initResult:
+                      assign:
+                      - buildTaskToolsResult_21f843f3: []
+                  - buildTaskTools_steps:
+                      for:
+                        value: "buildTaskToolsIdx"
+                        range: "${[0, (2 - 1)]}"
+                        steps:
+                        - buildTaskTools_switch:
+                            steps:
+                            - buildTaskTools_switch_initResult:
+                                assign:
+                                - buildTaskTools_switchResult_68700c30: {}
+                            - buildTaskTools_switch_steps:
+                                switch:
+                                - condition: "${(buildTaskToolsIdx == 0)}"
+                                  steps:
+                                  - buildTaskTools_switch_updateResult_0:
+                                      assign:
+                                      - buildTaskTools_switchResult_68700c30:
+                                          type: "${\"function\"}"
+                                          function:
+                                            name: "${\"CREATE_TASK\"}"
+                                            description: "${\"Create a task in the current user's scope. Session is inferred by the current CLI workflow session.\"}"
+                                            parameters:
+                                              type: "object"
+                                              properties:
+                                                title:
+                                                  type: "string"
+                                                  properties: {}
+                                                  enum: "${default(null, null)}"
+                                                  required: "${default(null, null)}"
+                                                  items: "${null}"
+                                                description:
+                                                  type: "string"
+                                                  properties: {}
+                                                  enum: "${default(null, null)}"
+                                                  required: "${default(null, null)}"
+                                                  items: "${null}"
+                                                status:
+                                                  type: "string"
+                                                  properties: {}
+                                                  enum: "${default([\"Queued\", \"In Progress\", \"Done\", \"Stuck\"], null)}"
+                                                  required: "${default(null, null)}"
+                                                  items: "${null}"
+                                              enum: "${default(null, null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
+                                          workflowName: "${\"tools-Tasks\"}"
+                                - condition: "${(buildTaskToolsIdx == 1)}"
+                                  steps:
+                                  - buildTaskTools_switch_updateResult_1:
+                                      assign:
+                                      - buildTaskTools_switchResult_68700c30:
+                                          type: "${\"function\"}"
+                                          function:
+                                            name: "${\"UPDATE_TASK\"}"
+                                            description: "${\"Update a task by id in the current user's scope (session inferred).\"}"
+                                            parameters:
+                                              type: "object"
+                                              properties:
+                                                id:
+                                                  type: "string"
+                                                  properties: {}
+                                                  enum: "${default(null, null)}"
+                                                  required: "${default(null, null)}"
+                                                  items: "${null}"
+                                                title:
+                                                  type: "string"
+                                                  properties: {}
+                                                  enum: "${default(null, null)}"
+                                                  required: "${default(null, null)}"
+                                                  items: "${null}"
+                                                description:
+                                                  type: "string"
+                                                  properties: {}
+                                                  enum: "${default(null, null)}"
+                                                  required: "${default(null, null)}"
+                                                  items: "${null}"
+                                                status:
+                                                  type: "string"
+                                                  properties: {}
+                                                  enum: "${default([\"Queued\", \"In Progress\", \"Done\", \"Stuck\"], null)}"
+                                                  required: "${default(null, null)}"
+                                                  items: "${null}"
+                                              enum: "${default(null, null)}"
+                                              required: "${default([\"id\"], null)}"
+                                              items: "${null}"
+                                          workflowName: "${\"tools-Tasks\"}"
+                        - buildTaskTools_updateResult:
+                            assign:
+                            - buildTaskToolsResult_21f843f3: "${list.concat(buildTaskToolsResult_21f843f3, buildTaskTools_switchResult_68700c30)}"
+              - taskTools_joinSteps:
+                  steps:
+                  - taskTools_joinSteps_initResult:
+                      assign:
+                      - taskTools_joinStepsResult_3b9016ee: []
+                  - taskTools_joinSteps_steps:
+                      for:
+                        value: "taskTools_joinStepsIdx"
+                        range: "${[0, (((0 + len(buildToolsResult_31aac8b2.defs)) + len(buildTaskToolsResult_21f843f3)) - 1)]}"
+                        steps:
+                        - taskTools_joinSteps_switch:
+                            steps:
+                            - taskTools_joinSteps_switch_initResult:
+                                assign:
+                                - taskTools_joinSteps_switchResult_6732623b: {}
+                            - taskTools_joinSteps_switch_steps:
+                                switch:
+                                - condition: "${(taskTools_joinStepsIdx >= (0 + len(buildToolsResult_31aac8b2.defs)))}"
+                                  steps:
+                                  - taskTools_joinSteps_switch_updateResult_0:
+                                      assign:
+                                      - taskTools_joinSteps_switchResult_6732623b: "${buildTaskToolsResult_21f843f3[(taskTools_joinStepsIdx - (0 + len(buildToolsResult_31aac8b2.defs)))]}"
+                                - condition: "${(taskTools_joinStepsIdx >= 0)}"
+                                  steps:
+                                  - taskTools_joinSteps_switch_updateResult_1:
+                                      assign:
+                                      - taskTools_joinSteps_switchResult_6732623b: "${buildToolsResult_31aac8b2.defs[(taskTools_joinStepsIdx - 0)]}"
+                        - taskTools_joinSteps_updateResult:
+                            assign:
+                            - taskTools_joinStepsResult_3b9016ee: "${list.concat(taskTools_joinStepsResult_3b9016ee, taskTools_joinSteps_switchResult_6732623b)}"
+          - buildCliTools:
+              steps:
+              - buildCliTools_initResult:
+                  assign:
+                  - buildCliToolsResult_5b6a634a: []
+              - buildCliTools_steps:
+                  for:
+                    value: "buildCliToolsIdx"
+                    range: "${[0, (3 - 1)]}"
+                    steps:
+                    - buildCliTools_switch:
+                        steps:
+                        - buildCliTools_switch_initResult:
+                            assign:
+                            - buildCliTools_switchResult_2f25c872: {}
+                        - buildCliTools_switch_steps:
+                            switch:
+                            - condition: "${(buildCliToolsIdx == 0)}"
+                              steps:
+                              - buildCliTools_switch_updateResult_0:
+                                  assign:
+                                  - buildCliTools_switchResult_2f25c872:
+                                      type: "${\"function\"}"
+                                      function:
+                                        name: "${\"READ_FILE\"}"
+                                        description: "${\"Read a file from disk.\"}"
+                                        parameters:
+                                          type: "object"
+                                          properties:
+                                            filepath:
+                                              type: "string"
+                                              properties: {}
+                                              enum: "${default(null, null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
+                                          enum: "${default(null, null)}"
+                                          required: "${default([\"filepath\"], null)}"
+                                          items: "${null}"
+                                      workflowName: "${\"tools-CliTools\"}"
+                            - condition: "${(buildCliToolsIdx == 1)}"
+                              steps:
+                              - buildCliTools_switch_updateResult_1:
+                                  assign:
+                                  - buildCliTools_switchResult_2f25c872:
+                                      type: "${\"function\"}"
+                                      function:
+                                        name: "${\"RUN_COMMAND\"}"
+                                        description: "${\"Execute a shell command.\"}"
+                                        parameters:
+                                          type: "object"
+                                          properties:
+                                            command:
+                                              type: "string"
+                                              properties: {}
+                                              enum: "${default(null, null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
+                                          enum: "${default(null, null)}"
+                                          required: "${default([\"command\"], null)}"
+                                          items: "${null}"
+                                      workflowName: "${\"tools-CliTools\"}"
+                            - condition: "${(buildCliToolsIdx == 2)}"
+                              steps:
+                              - buildCliTools_switch_updateResult_2:
+                                  assign:
+                                  - buildCliTools_switchResult_2f25c872:
+                                      type: "${\"function\"}"
+                                      function:
+                                        name: "${\"UPDATE_FILE\"}"
+                                        description: "${\"Update a file on disk with provided content\"}"
+                                        parameters:
+                                          type: "object"
+                                          properties:
+                                            filepath:
+                                              type: "string"
+                                              properties: {}
+                                              enum: "${default(null, null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
+                                            content:
+                                              type: "string"
+                                              properties: {}
+                                              enum: "${default(null, null)}"
+                                              required: "${default(null, null)}"
+                                              items: "${null}"
+                                          enum: "${default(null, null)}"
+                                          required: "${default([\"filepath\", \"content\"], null)}"
+                                          items: "${null}"
+                                      workflowName: "${\"tools-CliTools\"}"
+                    - buildCliTools_updateResult:
+                        assign:
+                        - buildCliToolsResult_5b6a634a: "${list.concat(buildCliToolsResult_5b6a634a, buildCliTools_switchResult_2f25c872)}"
+          - cliTools_joinSteps:
+              steps:
+              - cliTools_joinSteps_initResult:
+                  assign:
+                  - cliTools_joinStepsResult_327dca46: []
+              - cliTools_joinSteps_steps:
+                  for:
+                    value: "cliTools_joinStepsIdx"
+                    range: "${[0, (((0 + len(taskTools_joinStepsResult_3b9016ee)) + len(buildCliToolsResult_5b6a634a)) - 1)]}"
+                    steps:
+                    - cliTools_joinSteps_switch:
+                        steps:
+                        - cliTools_joinSteps_switch_initResult:
+                            assign:
+                            - cliTools_joinSteps_switchResult_2d1e2e16: {}
+                        - cliTools_joinSteps_switch_steps:
+                            switch:
+                            - condition: "${(cliTools_joinStepsIdx >= (0 + len(taskTools_joinStepsResult_3b9016ee)))}"
+                              steps:
+                              - cliTools_joinSteps_switch_updateResult_0:
+                                  assign:
+                                  - cliTools_joinSteps_switchResult_2d1e2e16: "${buildCliToolsResult_5b6a634a[(cliTools_joinStepsIdx - (0 + len(taskTools_joinStepsResult_3b9016ee)))]}"
+                            - condition: "${(cliTools_joinStepsIdx >= 0)}"
+                              steps:
+                              - cliTools_joinSteps_switch_updateResult_1:
+                                  assign:
+                                  - cliTools_joinSteps_switchResult_2d1e2e16: "${taskTools_joinStepsResult_3b9016ee[(cliTools_joinStepsIdx - 0)]}"
+                    - cliTools_joinSteps_updateResult:
+                        assign:
+                        - cliTools_joinStepsResult_327dca46: "${list.concat(cliTools_joinStepsResult_327dca46, cliTools_joinSteps_switchResult_2d1e2e16)}"
+      - buildSleepTools:
+          steps:
+          - buildSleepTools_initResult:
+              assign:
+              - buildSleepToolsResult_4cdf5da4: []
+          - buildSleepTools_steps:
+              for:
+                value: "buildSleepToolsIdx"
+                range: "${[0, (1 - 1)]}"
+                steps:
+                - buildSleepTools_switch:
+                    steps:
+                    - buildSleepTools_switch_initResult:
+                        assign:
+                        - buildSleepTools_switchResult_1a8f32e8: {}
+                    - buildSleepTools_switch_steps:
+                        switch:
+                        - condition: "${(buildSleepToolsIdx == 0)}"
+                          steps:
+                          - buildSleepTools_switch_updateResult_0:
+                              assign:
+                              - buildSleepTools_switchResult_1a8f32e8:
+                                  type: "${\"function\"}"
+                                  function:
+                                    name: "${\"SLEEP\"}"
+                                    description: "${\"No-op workflow. Use it when the Small agent should deliberately pause/defer without side effects.\"}"
+                                    parameters:
+                                      type: "object"
+                                      properties: {}
+                                      enum: "${default(null, null)}"
+                                      required: "${default(null, null)}"
+                                      items: "${null}"
+                                  workflowName: "${\"tools-Sleep\"}"
+                - buildSleepTools_updateResult:
+                    assign:
+                    - buildSleepToolsResult_4cdf5da4: "${list.concat(buildSleepToolsResult_4cdf5da4, buildSleepTools_switchResult_1a8f32e8)}"
+      - buildSmallTools_joinSteps:
+          steps:
+          - buildSmallTools_joinSteps_initResult:
+              assign:
+              - buildSmallTools_joinStepsResult_64f1e5b1: []
+          - buildSmallTools_joinSteps_steps:
+              for:
+                value: "buildSmallTools_joinStepsIdx"
+                range: "${[0, (((0 + len(cliTools_joinStepsResult_327dca46)) + len(buildSleepToolsResult_4cdf5da4)) - 1)]}"
+                steps:
+                - buildSmallTools_joinSteps_switch:
+                    steps:
+                    - buildSmallTools_joinSteps_switch_initResult:
+                        assign:
+                        - buildSmallTools_joinSteps_switchResult_103c0905: {}
+                    - buildSmallTools_joinSteps_switch_steps:
+                        switch:
+                        - condition: "${(buildSmallTools_joinStepsIdx >= (0 + len(cliTools_joinStepsResult_327dca46)))}"
+                          steps:
+                          - buildSmallTools_joinSteps_switch_updateResult_0:
+                              assign:
+                              - buildSmallTools_joinSteps_switchResult_103c0905: "${buildSleepToolsResult_4cdf5da4[(buildSmallTools_joinStepsIdx - (0 + len(cliTools_joinStepsResult_327dca46)))]}"
+                        - condition: "${(buildSmallTools_joinStepsIdx >= 0)}"
+                          steps:
+                          - buildSmallTools_joinSteps_switch_updateResult_1:
+                              assign:
+                              - buildSmallTools_joinSteps_switchResult_103c0905: "${cliTools_joinStepsResult_327dca46[(buildSmallTools_joinStepsIdx - 0)]}"
+                - buildSmallTools_joinSteps_updateResult:
+                    assign:
+                    - buildSmallTools_joinStepsResult_64f1e5b1: "${list.concat(buildSmallTools_joinStepsResult_64f1e5b1, buildSmallTools_joinSteps_switchResult_103c0905)}"
+  - return:
+      return:
+        tools: "${buildSmallTools_joinStepsResult_64f1e5b1}"

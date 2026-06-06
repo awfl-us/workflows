@@ -29,7 +29,7 @@ object SaveReflection extends Linkable {
     )
     val args = RunWorkflowArgs(
       inputVal.flatMap(_.params).get.agentWorkflow,
-      obj(EventHandler.Input(query, Value(0), OptValue.nil, toolChoice = OptObj(obj(ToolChoice.Function("UPDATE_FILE"))), sideCall = OptValue(Value[Boolean](true))))
+      obj(EventHandler.Input(query = OptValue(query), fund = Value[Double](0), toolChoice = OptObj(obj(ToolChoice.Function("UPDATE_FILE"))), sideCall = OptValue(Value[Boolean](true))))
     )
     val call = Call[RunWorkflowArgs[EventHandler.Input], AnyValueT](
       "callAgent",

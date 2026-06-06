@@ -1,8 +1,11 @@
 {
   "files": [
-    "AGENT.md"
+    "AGENT.md",
+    "Cel.scala",
+    "Steps.scala",
+    "Value.scala"
   ],
   "commands": [
-    "/opt/miniconda3/envs/testbed/bin/pytest tests/test_a.py::test_x"
+    "pwd"
   ]
 }
