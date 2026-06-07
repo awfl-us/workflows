@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_2d7e6870: {}
+          - mainTryResult_bf9e819: {}
       - mainTry_steps:
           try:
             steps:
@@ -277,6 +277,195 @@ main:
                       - tryInitStatus_updateResultError:
                           assign:
                           - tryInitStatusResult_6a75fab9: "${null}"
+            - runSummaries:
+                try:
+                  steps:
+                  - runSummaries_call:
+                      call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                      args:
+                        workflow_id: "${\"Summaries${WORKFLOW_ENV}\"}"
+                        argument:
+                          segmentEnd: "${null}"
+                          windowSeconds: "${1200}"
+                          overlapSeconds: "${240}"
+                          env:
+                            userId: "${input.env.userId}"
+                            model: "${input.env.model}"
+                            callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                            BASE_URL: "${input.env.BASE_URL}"
+                            background: "${default(map.get(input.env, \"background\"), null)}"
+                            projectId: "${input.env.projectId}"
+                            sessionId: "${input.env.sessionId}"
+                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                        location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                        project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                        connector_params:
+                          skip_polling: true
+                      result: "runSummariesResult_69b4c3a0"
+                retry: "${http.default_retry}"
+            - chainBlock:
+                steps:
+                - buildWorkflows:
+                    steps:
+                    - buildWorkflows_initResult:
+                        assign:
+                        - buildWorkflowsResult_644e1124: []
+                    - buildWorkflows_steps:
+                        for:
+                          value: "buildWorkflowsIdx"
+                          range: "${[0, (1 - 1)]}"
+                          steps:
+                          - buildWorkflows_switch:
+                              steps:
+                              - buildWorkflows_switch_initResult:
+                                  assign:
+                                  - buildWorkflows_switchResult_a7c0e28: {}
+                              - buildWorkflows_switch_steps:
+                                  switch:
+                                  - condition: "${(buildWorkflowsIdx == 0)}"
+                                    steps:
+                                    - buildWorkflows_switch_updateResult_0:
+                                        assign:
+                                        - buildWorkflows_switchResult_a7c0e28:
+                                            workflowName: "${\"helpers-links-SaveReflection\"}"
+                                            params:
+                                              agentWorkflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
+                          - buildWorkflows_updateResult:
+                              assign:
+                              - buildWorkflowsResult_644e1124: "${list.concat(buildWorkflowsResult_644e1124, buildWorkflows_switchResult_a7c0e28)}"
+                - callChain:
+                    try:
+                      steps:
+                      - callChain_call:
+                          call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                          args:
+                            workflow_id: "${\"helpers-Chain${WORKFLOW_ENV}\"}"
+                            argument:
+                              input:
+                                segmentEnd: "${null}"
+                                windowSeconds: "${1200}"
+                                overlapSeconds: "${240}"
+                                env:
+                                  userId: "${input.env.userId}"
+                                  model: "${input.env.model}"
+                                  callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                  BASE_URL: "${input.env.BASE_URL}"
+                                  background: "${default(map.get(input.env, \"background\"), null)}"
+                                  projectId: "${input.env.projectId}"
+                                  sessionId: "${input.env.sessionId}"
+                                  workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                              headWorkflow: "${\"assistant-ExtractTopics\"}"
+                              tail: "${buildWorkflowsResult_644e1124}"
+                              env:
+                                userId: "${input.env.userId}"
+                                model: "${input.env.model}"
+                                callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                BASE_URL: "${input.env.BASE_URL}"
+                                background: "${default(map.get(input.env, \"background\"), null)}"
+                                projectId: "${input.env.projectId}"
+                                sessionId: "${input.env.sessionId}"
+                                workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                            location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                            project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                            connector_params:
+                              skip_polling: true
+                          result: "callChainResult_47dee693"
+                    retry: "${http.default_retry}"
+            - collapseMessages_try:
+                steps:
+                - collapseMessages_try_initResult:
+                    assign:
+                    - collapseMessages_tryResult_138280e4: {}
+                - collapseMessages_try_steps:
+                    try:
+                      steps:
+                      - segmentsForSession_block:
+                          steps:
+                          - segmentsForSession_fetch:
+                              try:
+                                steps:
+                                - segmentsForSession_fetch_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
+                                      body:
+                                        collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
+                                        windowSeconds: "${420}"
+                                        overlapSeconds: "${60}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "${\"OIDC\"}"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "segmentsForSession_fetchResult_6027e6fd"
+                              retry: "${http.default_retry}"
+                          - segmentsForSession_convert:
+                              steps:
+                              - segmentsForSession_convert_initResult:
+                                  assign:
+                                  - segmentsForSession_convertResult_323d5453: []
+                              - segmentsForSession_convert_steps:
+                                  for:
+                                    value: "segmentsForSession_convertValue"
+                                    in: "${segmentsForSession_fetchResult_6027e6fd.body.segments}"
+                                    steps:
+                                    - segmentsForSession_convert_assignIterResult:
+                                        assign:
+                                        - segmentsForSession_convert_assignIterResultVar:
+                                            sessionId: "${input.env.sessionId}"
+                                            end: "${segmentsForSession_convertValue.end}"
+                                            windowSeconds: "${420}"
+                                    - segmentsForSession_convert_updateResult:
+                                        assign:
+                                        - segmentsForSession_convertResult_323d5453: "${list.concat(segmentsForSession_convertResult_323d5453, segmentsForSession_convert_assignIterResultVar)}"
+                      - collapseMessages:
+                          try:
+                            steps:
+                            - collapseMessages_call:
+                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                args:
+                                  workflow_id: "${\"context-ContextCollapser-SegKala${WORKFLOW_ENV}\"}"
+                                  argument:
+                                    segmentEnd: "${segmentsForSession_convertResult_323d5453[(len(segmentsForSession_convertResult_323d5453) - 1)].end}"
+                                    windowSeconds: "${420}"
+                                    overlapSeconds: "${60}"
+                                    env:
+                                      userId: "${input.env.userId}"
+                                      model: "${input.env.model}"
+                                      callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                      BASE_URL: "${input.env.BASE_URL}"
+                                      background: "${default(map.get(input.env, \"background\"), null)}"
+                                      projectId: "${input.env.projectId}"
+                                      sessionId: "${input.env.sessionId}"
+                                      workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                  connector_params:
+                                    skip_polling: true
+                                result: "collapseMessagesResult_445cb1c6"
+                          retry: "${http.default_retry}"
+                      - collapseMessages_try_updateResult:
+                          assign:
+                          - collapseMessages_tryResult_138280e4: "${collapseMessagesResult_445cb1c6}"
+                    except:
+                      as: "collapseMessages_tryError"
+                      steps:
+                      - logError_1:
+                          try:
+                            steps:
+                            - logError_call_1:
+                                call: "sys.log"
+                                args:
+                                  text: "${(\"[logError] \" + collapseMessages_tryError.message)}"
+                                result: "logErrorResult_645e84ef"
+                          retry: "${http.default_retry}"
+                      - reRaise_1:
+                          raise: "${collapseMessages_tryError}"
+                      - collapseMessages_try_updateResultError:
+                          assign:
+                          - collapseMessages_tryResult_138280e4: "${null}"
             - maybeSaveInputTask:
                 steps:
                 - maybeSaveInputTask_switch:
@@ -332,14 +521,14 @@ main:
                 steps:
                 - maybeAddMessage_initResult:
                     assign:
-                    - maybeAddMessageResult_4d0743ae: {}
+                    - maybeAddMessageResult_2cae0fcd: {}
                 - maybeAddMessage_steps:
                     switch:
-                    - condition: "${default(map.get(input, \"sideCall\"), false)}"
+                    - condition: "${(default(map.get(input, \"sideCall\"), false) or (not  default(true, false)))}"
                       steps:
                       - maybeAddMessage_updateResult_0:
                           assign:
-                          - maybeAddMessageResult_4d0743ae: "${null}"
+                          - maybeAddMessageResult_2cae0fcd: "${null}"
                     - condition: "${true}"
                       steps:
                       - addMessage_seg_write_with_session_update:
@@ -358,16 +547,16 @@ main:
                                   except:
                                     as: "addMessage_newIdError"
                                     steps:
-                                    - logError_1:
+                                    - logError_2:
                                         try:
                                           steps:
-                                          - logError_call_1:
+                                          - logError_call_2:
                                               call: "sys.log"
                                               args:
                                                 text: "${(\"[logError] \" + addMessage_newIdError.message)}"
                                               result: "logErrorResult_23ca3a34"
                                         retry: "${http.default_retry}"
-                                    - reRaise_1:
+                                    - reRaise_2:
                                         raise: "${addMessage_newIdError}"
                                     - addMessage_newId_updateResultError:
                                         assign:
@@ -385,7 +574,7 @@ main:
                                         contents:
                                           value:
                                             role: "${\"user\"}"
-                                            content: "${default(map.get(input, \"query\"), )}"
+                                            content: "${default(map.get(input, \"query\"), null)}"
                                             tool_calls: "${[]}"
                                             tool_call_id: "${null}"
                                             create_time: "${sys.now()}"
@@ -400,7 +589,7 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "addMessage_write_messagesIsta_SegKalaResult_d42fb52"
+                                    result: "addMessage_write_messagesIsta_SegKalaResult_cccffff"
                               retry: "${http.default_retry}"
                           - addMessage_update_session_update_time:
                               try:
@@ -425,7 +614,7 @@ main:
                               retry: "${http.default_retry}"
                       - maybeAddMessage_updateResult_1:
                           assign:
-                          - maybeAddMessageResult_4d0743ae: "${addMessage_write_messagesIsta_SegKalaResult_d42fb52}"
+                          - maybeAddMessageResult_2cae0fcd: "${addMessage_write_messagesIsta_SegKalaResult_cccffff}"
             - maybeBypassAquire:
                 steps:
                 - maybeBypassAquire_initResult:
@@ -513,7 +702,7 @@ main:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_4e075b12: {}
+                    - maybeRespondResult_f841b0b: {}
                 - maybeRespond_steps:
                     switch:
                     - condition: "${maybeBypassAquireResult_4e2d11a4}"
@@ -712,16 +901,16 @@ main:
                                       except:
                                         as: "topicContext_model_SegKalaError"
                                         steps:
-                                        - logError_2:
+                                        - logError_3:
                                             try:
                                               steps:
-                                              - logError_call_2:
+                                              - logError_call_3:
                                                   call: "sys.log"
                                                   args:
                                                     text: "${(\"[logError] \" + topicContext_model_SegKalaError.message)}"
                                                   result: "logErrorResult_6d04f39d"
                                             retry: "${http.default_retry}"
-                                        - reRaise_2:
+                                        - reRaise_3:
                                             raise: "${topicContext_model_SegKalaError}"
                                         - topicContext_model_SegKala_updateResultError:
                                             assign:
@@ -894,16 +1083,16 @@ main:
                                                 except:
                                                   as: "addResponse_newIdError"
                                                   steps:
-                                                  - logError_3:
+                                                  - logError_4:
                                                       try:
                                                         steps:
-                                                        - logError_call_3:
+                                                        - logError_call_4:
                                                             call: "sys.log"
                                                             args:
                                                               text: "${(\"[logError] \" + addResponse_newIdError.message)}"
                                                             result: "logErrorResult_4b664d8e"
                                                       retry: "${http.default_retry}"
-                                                  - reRaise_3:
+                                                  - reRaise_4:
                                                       raise: "${addResponse_newIdError}"
                                                   - addResponse_newId_updateResultError:
                                                       assign:
@@ -962,250 +1151,286 @@ main:
                                     - maybeAddResponse_updateResult_1:
                                         assign:
                                         - maybeAddResponseResult_3eff225d: "${addResponse_write_messagesIsta_SegKalaResult_7604167a}"
-                      - sendContents:
+                      - followup:
                           steps:
-                          - sendContents_initResult:
+                          - followup_initResults:
                               assign:
                               - sendContentsResult_19006bb1: {}
-                          - sendContents_steps:
-                              switch:
-                              - condition: "${(\"content\" in complete_switchResult_3e95eff9.message)}"
-                                steps:
-                                - enqueueContent_enqueue_block:
-                                    steps:
-                                    - relay_ingest_tool_call_1:
-                                        try:
-                                          steps:
-                                          - relay_ingest_tool_call_call_1:
-                                              call: "http.post"
-                                              args:
-                                                url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
-                                                body:
-                                                  sessionId: "${input.env.sessionId}"
-                                                  projectId: "${input.env.projectId}"
-                                                  data:
-                                                    create_time: "${sys.now()}"
-                                                    callback_id: "${null}"
-                                                    content: "${complete_switchResult_3e95eff9.message.content}"
-                                                    tool_call: "${null}"
-                                                    cost: "${complete_switchResult_3e95eff9.total_cost}"
-                                                    background: "${default(map.get(input.env, \"background\"), false)}"
-                                                    workdir: "${null}"
-                                                    timeout_seconds: "${60}"
-                                                    status: "${\"\"}"
-                                                    error: "${null}"
-                                                  background: "${default(map.get(input.env, \"background\"), false)}"
-                                                  type: "${\"message\"}"
-                                                  source: "${\"workflows.tools.CliTools\"}"
-                                                auth:
-                                                  type: "${\"OIDC\"}"
-                                                  audience: "${input.env.BASE_URL}"
-                                                headers:
-                                                  x-user-id: "${input.env.userId}"
-                                                  x-project-id: "${input.env.projectId}"
-                                              result: "relay_ingest_tool_callResult_143e99c0"
-                                        retry: "${http.default_retry}"
-                                - sendContents_updateResult_0:
-                                    assign:
-                                    - sendContentsResult_19006bb1: "${null}"
-                              - condition: "${true}"
-                                steps:
-                                - sendContents_updateResult_1:
-                                    assign:
-                                    - sendContentsResult_19006bb1: "${null}"
-                      - processToolCalls:
-                          try:
-                            steps:
-                            - processToolCalls_call:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"helpers-ToolDispatcher${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    totalCost: "${complete_switchResult_3e95eff9.total_cost}"
-                                    toolCalls: "${default(map.get(complete_switchResult_3e95eff9.message, \"tool_calls\"), [])}"
-                                    toolDefs: "${codebase_ProjectManager_toolsResult_771142ae.tools}"
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(map.get(input.env, \"background\"), null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                      workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: false
-                                result: "processToolCallsResult_59b58561"
-                          retry: "${http.default_retry}"
-                      - maybeNBypassRelease:
-                          steps:
-                          - maybeNBypassRelease_initResult:
-                              assign:
+                              - processToolCallsResult_59b58561: {}
                               - maybeNBypassReleaseResult_2ef4f074: {}
-                          - maybeNBypassRelease_steps:
-                              switch:
-                              - condition: "${default(map.get(input, \"sideCall\"), false)}"
-                                steps:
-                                - maybeNBypassRelease_updateResult_0:
-                                    assign:
-                                    - maybeNBypassReleaseResult_2ef4f074: "${null}"
-                              - condition: "${true}"
-                                steps:
-                                - releaseResponseLock:
-                                    try:
-                                      steps:
-                                      - releaseResponseLock_call:
-                                          call: "http.post"
-                                          args:
-                                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
-                                            body:
-                                              collection: "${\"locks.Convo.Session\"}"
-                                              id: "${input.env.sessionId}"
-                                              owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                              userId: "${input.env.userId}"
-                                            auth:
-                                              type: "${\"OIDC\"}"
-                                              audience: "${input.env.BASE_URL}"
-                                            headers:
-                                              x-user-id: "${input.env.userId}"
-                                              x-project-id: "${input.env.projectId}"
-                                          result: "releaseResponseLockResult_62bc2b8e"
-                                    retry: "${http.default_retry}"
-                                - maybeNBypassRelease_updateResult_1:
-                                    assign:
-                                    - maybeNBypassReleaseResult_2ef4f074: "${releaseResponseLockResult_62bc2b8e}"
-                      - toolsCost:
-                          steps:
-                          - toolsCost_initResult:
-                              assign:
-                              - toolsCostResult_3bc64c68: "${0}"
-                          - toolsCost_steps:
-                              for:
-                                value: "toolsCostValue"
-                                in: "${processToolCallsResult_59b58561.results}"
-                                steps:
-                                - toolsCost_updateResult:
-                                    assign:
-                                    - toolsCostResult_3bc64c68: "${(toolsCostResult_3bc64c68 + toolsCostValue.cost)}"
-                      - addUsage:
-                          steps:
-                          - addUsage_initResult:
-                              assign:
-                              - addUsageResult_55250899: {}
-                          - addUsage_steps:
-                              switch:
-                              - condition: "${(default(map.get(input, \"usage\"), null) != null)}"
-                                steps:
-                                - plusUsage:
+                          - followup_run:
+                              parallel:
+                                shared:
+                                - "sendContentsResult_19006bb1"
+                                - "processToolCallsResult_59b58561"
+                                - "maybeNBypassReleaseResult_2ef4f074"
+                                branches:
+                                - sendContentsBranch:
                                     steps:
-                                    - plusUsage_initResult:
-                                        assign:
-                                        - plusUsageResult_68e5a91: {}
-                                    - plusUsage_steps:
+                                    - sendContents:
+                                        steps:
+                                        - sendContents_initResult:
+                                            assign:
+                                            - sendContentsResult_19006bb1: {}
+                                        - sendContents_steps:
+                                            switch:
+                                            - condition: "${(\"content\" in complete_switchResult_3e95eff9.message)}"
+                                              steps:
+                                              - enqueueContent_enqueue_block:
+                                                  steps:
+                                                  - relay_ingest_tool_call_1:
+                                                      try:
+                                                        steps:
+                                                        - relay_ingest_tool_call_call_1:
+                                                            call: "http.post"
+                                                            args:
+                                                              url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
+                                                              body:
+                                                                sessionId: "${input.env.sessionId}"
+                                                                projectId: "${input.env.projectId}"
+                                                                data:
+                                                                  create_time: "${sys.now()}"
+                                                                  callback_id: "${null}"
+                                                                  content: "${complete_switchResult_3e95eff9.message.content}"
+                                                                  tool_call: "${null}"
+                                                                  cost: "${complete_switchResult_3e95eff9.total_cost}"
+                                                                  background: "${default(map.get(input.env, \"background\"), false)}"
+                                                                  workdir: "${null}"
+                                                                  timeout_seconds: "${60}"
+                                                                  status: "${\"\"}"
+                                                                  error: "${null}"
+                                                                background: "${default(map.get(input.env, \"background\"), false)}"
+                                                                type: "${\"message\"}"
+                                                                source: "${\"workflows.tools.CliTools\"}"
+                                                              auth:
+                                                                type: "${\"OIDC\"}"
+                                                                audience: "${input.env.BASE_URL}"
+                                                              headers:
+                                                                x-user-id: "${input.env.userId}"
+                                                                x-project-id: "${input.env.projectId}"
+                                                            result: "relay_ingest_tool_callResult_143e99c0"
+                                                      retry: "${http.default_retry}"
+                                              - sendContents_updateResult_0:
+                                                  assign:
+                                                  - sendContentsResult_19006bb1: "${null}"
+                                            - condition: "${true}"
+                                              steps:
+                                              - sendContents_updateResult_1:
+                                                  assign:
+                                                  - sendContentsResult_19006bb1: "${null}"
+                                - processToolCallsBranch:
+                                    steps:
+                                    - processToolCalls:
                                         try:
                                           steps:
-                                          - addCompleteDetails:
+                                          - processToolCalls_call:
+                                              call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                              args:
+                                                workflow_id: "${\"helpers-ToolDispatcher${WORKFLOW_ENV}\"}"
+                                                argument:
+                                                  totalCost: "${complete_switchResult_3e95eff9.total_cost}"
+                                                  toolCalls: "${default(map.get(complete_switchResult_3e95eff9.message, \"tool_calls\"), [])}"
+                                                  toolDefs: "${codebase_ProjectManager_toolsResult_771142ae.tools}"
+                                                  env:
+                                                    userId: "${input.env.userId}"
+                                                    model: "${input.env.model}"
+                                                    callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                                    BASE_URL: "${input.env.BASE_URL}"
+                                                    background: "${default(map.get(input.env, \"background\"), null)}"
+                                                    projectId: "${input.env.projectId}"
+                                                    sessionId: "${input.env.sessionId}"
+                                                    workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                                location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                                project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                                connector_params:
+                                                  skip_polling: false
+                                              result: "processToolCallsResult_59b58561"
+                                        retry: "${http.default_retry}"
+                                - maybeNBypassReleaseBranch:
+                                    steps:
+                                    - maybeNBypassRelease:
+                                        steps:
+                                        - maybeNBypassRelease_initResult:
+                                            assign:
+                                            - maybeNBypassReleaseResult_2ef4f074: {}
+                                        - maybeNBypassRelease_steps:
+                                            switch:
+                                            - condition: "${default(map.get(input, \"sideCall\"), false)}"
                                               steps:
-                                              - addCompleteDetails_initResult:
+                                              - maybeNBypassRelease_updateResult_0:
                                                   assign:
-                                                  - addCompleteDetailsResult_6ed53b83: {}
-                                              - addCompleteDetails_steps:
+                                                  - maybeNBypassReleaseResult_2ef4f074: "${null}"
+                                            - condition: "${true}"
+                                              steps:
+                                              - releaseResponseLock:
                                                   try:
                                                     steps:
-                                                    - addCompleteDetails_updateResult:
-                                                        assign:
-                                                        - addCompleteDetailsResult_6ed53b83: "${default(map.get(input, \"usage\"), null).completion_tokens_details}"
-                                                  except:
-                                                    as: "addCompleteDetailsError"
-                                                    steps:
-                                                    - logError_4:
-                                                        try:
-                                                          steps:
-                                                          - logError_call_4:
-                                                              call: "sys.log"
-                                                              args:
-                                                                text: "${(\"[logError] \" + addCompleteDetailsError.message)}"
-                                                              result: "logErrorResult_932112c"
-                                                        retry: "${http.default_retry}"
-                                                    - reRaise_4:
-                                                        raise: "${addCompleteDetailsError}"
-                                                    - addCompleteDetails_updateResultError:
-                                                        assign:
-                                                        - addCompleteDetailsResult_6ed53b83: "${null}"
-                                          - addPromptDetails:
-                                              steps:
-                                              - addPromptDetails_initResult:
+                                                    - releaseResponseLock_call:
+                                                        call: "http.post"
+                                                        args:
+                                                          url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
+                                                          body:
+                                                            collection: "${\"locks.Convo.Session\"}"
+                                                            id: "${input.env.sessionId}"
+                                                            owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                                            userId: "${input.env.userId}"
+                                                          auth:
+                                                            type: "${\"OIDC\"}"
+                                                            audience: "${input.env.BASE_URL}"
+                                                          headers:
+                                                            x-user-id: "${input.env.userId}"
+                                                            x-project-id: "${input.env.projectId}"
+                                                        result: "releaseResponseLockResult_62bc2b8e"
+                                                  retry: "${http.default_retry}"
+                                              - maybeNBypassRelease_updateResult_1:
                                                   assign:
-                                                  - addPromptDetailsResult_c920d9e: {}
-                                              - addPromptDetails_steps:
-                                                  try:
-                                                    steps:
-                                                    - addPromptDetails_updateResult:
-                                                        assign:
-                                                        - addPromptDetailsResult_c920d9e: "${default(map.get(input, \"usage\"), null).prompt_tokens_details}"
-                                                  except:
-                                                    as: "addPromptDetailsError"
-                                                    steps:
-                                                    - logError_5:
-                                                        try:
-                                                          steps:
-                                                          - logError_call_5:
-                                                              call: "sys.log"
-                                                              args:
-                                                                text: "${(\"[logError] \" + addPromptDetailsError.message)}"
-                                                              result: "logErrorResult_7804d5e9"
-                                                        retry: "${http.default_retry}"
-                                                    - reRaise_5:
-                                                        raise: "${addPromptDetailsError}"
-                                                    - addPromptDetails_updateResultError:
-                                                        assign:
-                                                        - addPromptDetailsResult_c920d9e: "${null}"
-                                          - plusUsage_updateResult:
-                                              assign:
-                                              - plusUsageResult_68e5a91:
-                                                  completion_tokens: "${(default(map.get(input, \"usage\"), null).completion_tokens + complete_switchResult_3e95eff9.usage.completion_tokens)}"
-                                                  completion_tokens_details:
-                                                    accepted_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.accepted_prediction_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.accepted_prediction_tokens)}"
-                                                    audio_tokens: "${(addCompleteDetailsResult_6ed53b83.audio_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.audio_tokens)}"
-                                                    reasoning_tokens: "${(addCompleteDetailsResult_6ed53b83.reasoning_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.reasoning_tokens)}"
-                                                    rejected_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.rejected_prediction_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.rejected_prediction_tokens)}"
-                                                  prompt_tokens: "${(default(map.get(input, \"usage\"), null).prompt_tokens + complete_switchResult_3e95eff9.usage.prompt_tokens)}"
-                                                  prompt_tokens_details:
-                                                    audio_tokens: "${(addPromptDetailsResult_c920d9e.audio_tokens + complete_switchResult_3e95eff9.usage.prompt_tokens_details.audio_tokens)}"
-                                                    cached_tokens: "${(addPromptDetailsResult_c920d9e.cached_tokens + complete_switchResult_3e95eff9.usage.prompt_tokens_details.cached_tokens)}"
-                                                  total_tokens: "${(default(map.get(input, \"usage\"), null).total_tokens + complete_switchResult_3e95eff9.usage.total_tokens)}"
-                                        except:
-                                          as: "plusUsageError"
-                                          steps:
-                                          - logError_6:
-                                              try:
-                                                steps:
-                                                - logError_call_6:
-                                                    call: "sys.log"
-                                                    args:
-                                                      text: "${(\"[logError] \" + plusUsageError.message)}"
-                                                    result: "logErrorResult_7317ca91"
-                                              retry: "${http.default_retry}"
-                                          - reRaise_6:
-                                              raise: "${plusUsageError}"
-                                          - plusUsage_updateResultError:
-                                              assign:
-                                              - plusUsageResult_68e5a91: "${null}"
-                                - addUsage_updateResult_0:
-                                    assign:
-                                    - addUsageResult_55250899: "${plusUsageResult_68e5a91}"
-                              - condition: "${true}"
-                                steps:
-                                - addUsage_updateResult_1:
-                                    assign:
-                                    - addUsageResult_55250899: "${complete_switchResult_3e95eff9.usage}"
+                                                  - maybeNBypassReleaseResult_2ef4f074: "${releaseResponseLockResult_62bc2b8e}"
+                      - calcStats:
+                          steps:
+                          - calcStats_initResults:
+                              assign:
+                              - toolsCostResult_3bc64c68: {}
+                              - addUsageResult_55250899: {}
+                          - calcStats_run:
+                              parallel:
+                                shared:
+                                - "toolsCostResult_3bc64c68"
+                                - "addUsageResult_55250899"
+                                branches:
+                                - toolsCostBranch:
+                                    steps:
+                                    - toolsCost:
+                                        steps:
+                                        - toolsCost_initResult:
+                                            assign:
+                                            - toolsCostResult_3bc64c68: "${0}"
+                                        - toolsCost_steps:
+                                            for:
+                                              value: "toolsCostValue"
+                                              in: "${processToolCallsResult_59b58561.results}"
+                                              steps:
+                                              - toolsCost_updateResult:
+                                                  assign:
+                                                  - toolsCostResult_3bc64c68: "${(toolsCostResult_3bc64c68 + toolsCostValue.cost)}"
+                                - addUsageBranch:
+                                    steps:
+                                    - addUsage:
+                                        steps:
+                                        - addUsage_initResult:
+                                            assign:
+                                            - addUsageResult_55250899: {}
+                                        - addUsage_steps:
+                                            switch:
+                                            - condition: "${(default(map.get(input, \"usage\"), null) != null)}"
+                                              steps:
+                                              - plusUsage:
+                                                  steps:
+                                                  - plusUsage_initResult:
+                                                      assign:
+                                                      - plusUsageResult_68e5a91: {}
+                                                  - plusUsage_steps:
+                                                      try:
+                                                        steps:
+                                                        - addCompleteDetails:
+                                                            steps:
+                                                            - addCompleteDetails_initResult:
+                                                                assign:
+                                                                - addCompleteDetailsResult_6ed53b83: {}
+                                                            - addCompleteDetails_steps:
+                                                                try:
+                                                                  steps:
+                                                                  - addCompleteDetails_updateResult:
+                                                                      assign:
+                                                                      - addCompleteDetailsResult_6ed53b83: "${default(map.get(input, \"usage\"), null).completion_tokens_details}"
+                                                                except:
+                                                                  as: "addCompleteDetailsError"
+                                                                  steps:
+                                                                  - logError_5:
+                                                                      try:
+                                                                        steps:
+                                                                        - logError_call_5:
+                                                                            call: "sys.log"
+                                                                            args:
+                                                                              text: "${(\"[logError] \" + addCompleteDetailsError.message)}"
+                                                                            result: "logErrorResult_932112c"
+                                                                      retry: "${http.default_retry}"
+                                                                  - reRaise_5:
+                                                                      raise: "${addCompleteDetailsError}"
+                                                                  - addCompleteDetails_updateResultError:
+                                                                      assign:
+                                                                      - addCompleteDetailsResult_6ed53b83: "${null}"
+                                                        - addPromptDetails:
+                                                            steps:
+                                                            - addPromptDetails_initResult:
+                                                                assign:
+                                                                - addPromptDetailsResult_c920d9e: {}
+                                                            - addPromptDetails_steps:
+                                                                try:
+                                                                  steps:
+                                                                  - addPromptDetails_updateResult:
+                                                                      assign:
+                                                                      - addPromptDetailsResult_c920d9e: "${default(map.get(input, \"usage\"), null).prompt_tokens_details}"
+                                                                except:
+                                                                  as: "addPromptDetailsError"
+                                                                  steps:
+                                                                  - logError_6:
+                                                                      try:
+                                                                        steps:
+                                                                        - logError_call_6:
+                                                                            call: "sys.log"
+                                                                            args:
+                                                                              text: "${(\"[logError] \" + addPromptDetailsError.message)}"
+                                                                            result: "logErrorResult_7804d5e9"
+                                                                      retry: "${http.default_retry}"
+                                                                  - reRaise_6:
+                                                                      raise: "${addPromptDetailsError}"
+                                                                  - addPromptDetails_updateResultError:
+                                                                      assign:
+                                                                      - addPromptDetailsResult_c920d9e: "${null}"
+                                                        - plusUsage_updateResult:
+                                                            assign:
+                                                            - plusUsageResult_68e5a91:
+                                                                completion_tokens: "${(default(map.get(input, \"usage\"), null).completion_tokens + complete_switchResult_3e95eff9.usage.completion_tokens)}"
+                                                                completion_tokens_details:
+                                                                  accepted_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.accepted_prediction_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.accepted_prediction_tokens)}"
+                                                                  audio_tokens: "${(addCompleteDetailsResult_6ed53b83.audio_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.audio_tokens)}"
+                                                                  reasoning_tokens: "${(addCompleteDetailsResult_6ed53b83.reasoning_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.reasoning_tokens)}"
+                                                                  rejected_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.rejected_prediction_tokens + complete_switchResult_3e95eff9.usage.completion_tokens_details.rejected_prediction_tokens)}"
+                                                                prompt_tokens: "${(default(map.get(input, \"usage\"), null).prompt_tokens + complete_switchResult_3e95eff9.usage.prompt_tokens)}"
+                                                                prompt_tokens_details:
+                                                                  audio_tokens: "${(addPromptDetailsResult_c920d9e.audio_tokens + complete_switchResult_3e95eff9.usage.prompt_tokens_details.audio_tokens)}"
+                                                                  cached_tokens: "${(addPromptDetailsResult_c920d9e.cached_tokens + complete_switchResult_3e95eff9.usage.prompt_tokens_details.cached_tokens)}"
+                                                                total_tokens: "${(default(map.get(input, \"usage\"), null).total_tokens + complete_switchResult_3e95eff9.usage.total_tokens)}"
+                                                      except:
+                                                        as: "plusUsageError"
+                                                        steps:
+                                                        - logError_7:
+                                                            try:
+                                                              steps:
+                                                              - logError_call_7:
+                                                                  call: "sys.log"
+                                                                  args:
+                                                                    text: "${(\"[logError] \" + plusUsageError.message)}"
+                                                                  result: "logErrorResult_7317ca91"
+                                                            retry: "${http.default_retry}"
+                                                        - reRaise_7:
+                                                            raise: "${plusUsageError}"
+                                                        - plusUsage_updateResultError:
+                                                            assign:
+                                                            - plusUsageResult_68e5a91: "${null}"
+                                              - addUsage_updateResult_0:
+                                                  assign:
+                                                  - addUsageResult_55250899: "${plusUsageResult_68e5a91}"
+                                            - condition: "${true}"
+                                              steps:
+                                              - addUsage_updateResult_1:
+                                                  assign:
+                                                  - addUsageResult_55250899: "${complete_switchResult_3e95eff9.usage}"
                       - maybeToolFeedback:
                           steps:
                           - maybeToolFeedback_initResult:
                               assign:
-                              - maybeToolFeedbackResult_5a193f0: {}
+                              - maybeToolFeedbackResult_6c11ba13: {}
                           - maybeToolFeedback_steps:
                               switch:
                               - condition: "${((len(processToolCallsResult_59b58561.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
@@ -1243,65 +1468,95 @@ main:
                                     retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_0:
                                     assign:
-                                    - maybeToolFeedbackResult_5a193f0: "${toolCallsCompletedResult_61413e60}"
+                                    - maybeToolFeedbackResult_6c11ba13: "${toolCallsCompletedResult_61413e60}"
                               - condition: "${true}"
                                 steps:
-                                - statusDone:
-                                    try:
-                                      steps:
-                                      - statusDone_call:
-                                          call: "http.post"
-                                          args:
-                                            url: "${((input.env.BASE_URL + \"/\") + \"workflows/exec/status/update\")}"
-                                            body:
-                                              execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                              status: "${\"Done\"}"
-                                              ended: "${true}"
-                                              workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
-                                              updated: "${sys.now()}"
-                                              error: "${null}"
-                                            auth:
-                                              type: "${\"OIDC\"}"
-                                              audience: "${input.env.BASE_URL}"
-                                            headers:
-                                              x-user-id: "${input.env.userId}"
-                                              x-project-id: "${input.env.projectId}"
-                                          result: "statusDoneResult_16af3483"
-                                    retry: "${http.default_retry}"
-                                - enqueueStatusDone_enqueue_block:
+                                - statusStop:
                                     steps:
-                                    - relay_ingest_tool_call_2:
+                                    - statusStop_initResult:
+                                        assign:
+                                        - statusStopResult_55e17c0a: {}
+                                    - statusStop_steps:
                                         try:
                                           steps:
-                                          - relay_ingest_tool_call_call_2:
-                                              call: "http.post"
-                                              args:
-                                                url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
-                                                body:
-                                                  sessionId: "${input.env.sessionId}"
-                                                  projectId: "${input.env.projectId}"
-                                                  data:
-                                                    create_time: "${sys.now()}"
-                                                    callback_id: "${null}"
-                                                    content: "${null}"
-                                                    tool_call: "${null}"
-                                                    cost: "${0.0}"
-                                                    background: "${default(map.get(input.env, \"background\"), false)}"
-                                                    workdir: "${null}"
-                                                    timeout_seconds: "${60}"
-                                                    status: "${\"Done\"}"
-                                                    error: "${null}"
-                                                  background: "${default(map.get(input.env, \"background\"), false)}"
-                                                  type: "${\"message\"}"
-                                                  source: "${\"workflows.tools.CliTools\"}"
-                                                auth:
-                                                  type: "${\"OIDC\"}"
-                                                  audience: "${input.env.BASE_URL}"
-                                                headers:
-                                                  x-user-id: "${input.env.userId}"
-                                                  x-project-id: "${input.env.projectId}"
-                                              result: "relay_ingest_tool_callResult_6cf1d1ee"
-                                        retry: "${http.default_retry}"
+                                          - statusDone:
+                                              try:
+                                                steps:
+                                                - statusDone_call:
+                                                    call: "http.post"
+                                                    args:
+                                                      url: "${((input.env.BASE_URL + \"/\") + \"workflows/exec/status/update\")}"
+                                                      body:
+                                                        execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                                        status: "${\"Done\"}"
+                                                        ended: "${true}"
+                                                        workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
+                                                        updated: "${sys.now()}"
+                                                        error: "${null}"
+                                                      auth:
+                                                        type: "${\"OIDC\"}"
+                                                        audience: "${input.env.BASE_URL}"
+                                                      headers:
+                                                        x-user-id: "${input.env.userId}"
+                                                        x-project-id: "${input.env.projectId}"
+                                                    result: "statusDoneResult_16af3483"
+                                              retry: "${http.default_retry}"
+                                          - enqueueStatusDone_enqueue_block:
+                                              steps:
+                                              - relay_ingest_tool_call_2:
+                                                  try:
+                                                    steps:
+                                                    - relay_ingest_tool_call_call_2:
+                                                        call: "http.post"
+                                                        args:
+                                                          url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
+                                                          body:
+                                                            sessionId: "${input.env.sessionId}"
+                                                            projectId: "${input.env.projectId}"
+                                                            data:
+                                                              create_time: "${sys.now()}"
+                                                              callback_id: "${null}"
+                                                              content: "${null}"
+                                                              tool_call: "${null}"
+                                                              cost: "${0.0}"
+                                                              background: "${default(map.get(input.env, \"background\"), false)}"
+                                                              workdir: "${null}"
+                                                              timeout_seconds: "${60}"
+                                                              status: "${\"Done\"}"
+                                                              error: "${null}"
+                                                            background: "${default(map.get(input.env, \"background\"), false)}"
+                                                            type: "${\"message\"}"
+                                                            source: "${\"workflows.tools.CliTools\"}"
+                                                          auth:
+                                                            type: "${\"OIDC\"}"
+                                                            audience: "${input.env.BASE_URL}"
+                                                          headers:
+                                                            x-user-id: "${input.env.userId}"
+                                                            x-project-id: "${input.env.projectId}"
+                                                        result: "relay_ingest_tool_callResult_6cf1d1ee"
+                                                  retry: "${http.default_retry}"
+                                          - stopInit:
+                                              steps: []
+                                          - statusStop_updateResult:
+                                              assign:
+                                              - statusStopResult_55e17c0a: "${null}"
+                                        except:
+                                          as: "statusStopError"
+                                          steps:
+                                          - logError_8:
+                                              try:
+                                                steps:
+                                                - logError_call_8:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[logError] \" + statusStopError.message)}"
+                                                    result: "logErrorResult_32c967ba"
+                                              retry: "${http.default_retry}"
+                                          - reRaise_8:
+                                              raise: "${statusStopError}"
+                                          - statusStop_updateResultError:
+                                              assign:
+                                              - statusStopResult_55e17c0a: "${null}"
                                 - maybeCallback:
                                     steps:
                                     - maybeCallback_initResult:
@@ -1340,202 +1595,13 @@ main:
                                               - maybeCallbackResult_66ccd5da: "${null}"
                                 - maybeToolFeedback_updateResult_1:
                                     assign:
-                                    - maybeToolFeedbackResult_5a193f0:
+                                    - maybeToolFeedbackResult_6c11ba13:
                                         message: "${complete_switchResult_3e95eff9.message}"
                                         total_cost: "${(default(map.get(input, \"spent\"), 0) + (complete_switchResult_3e95eff9.total_cost + toolsCostResult_3bc64c68))}"
                                         usage: "${addUsageResult_55250899}"
-                      - runSummaries:
-                          try:
-                            steps:
-                            - runSummaries_call:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"Summaries${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    segmentEnd: "${null}"
-                                    windowSeconds: "${1200}"
-                                    overlapSeconds: "${240}"
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(map.get(input.env, \"background\"), null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                      workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: true
-                                result: "runSummariesResult_69b4c3a0"
-                          retry: "${http.default_retry}"
-                      - chainBlock:
-                          steps:
-                          - buildWorkflows:
-                              steps:
-                              - buildWorkflows_initResult:
-                                  assign:
-                                  - buildWorkflowsResult_644e1124: []
-                              - buildWorkflows_steps:
-                                  for:
-                                    value: "buildWorkflowsIdx"
-                                    range: "${[0, (1 - 1)]}"
-                                    steps:
-                                    - buildWorkflows_switch:
-                                        steps:
-                                        - buildWorkflows_switch_initResult:
-                                            assign:
-                                            - buildWorkflows_switchResult_a7c0e28: {}
-                                        - buildWorkflows_switch_steps:
-                                            switch:
-                                            - condition: "${(buildWorkflowsIdx == 0)}"
-                                              steps:
-                                              - buildWorkflows_switch_updateResult_0:
-                                                  assign:
-                                                  - buildWorkflows_switchResult_a7c0e28:
-                                                      workflowName: "${\"helpers-links-SaveReflection\"}"
-                                                      params:
-                                                        agentWorkflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
-                                    - buildWorkflows_updateResult:
-                                        assign:
-                                        - buildWorkflowsResult_644e1124: "${list.concat(buildWorkflowsResult_644e1124, buildWorkflows_switchResult_a7c0e28)}"
-                          - callChain:
-                              try:
-                                steps:
-                                - callChain_call:
-                                    call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                    args:
-                                      workflow_id: "${\"helpers-Chain${WORKFLOW_ENV}\"}"
-                                      argument:
-                                        input:
-                                          segmentEnd: "${null}"
-                                          windowSeconds: "${1200}"
-                                          overlapSeconds: "${240}"
-                                          env:
-                                            userId: "${input.env.userId}"
-                                            model: "${input.env.model}"
-                                            callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                            BASE_URL: "${input.env.BASE_URL}"
-                                            background: "${default(map.get(input.env, \"background\"), null)}"
-                                            projectId: "${input.env.projectId}"
-                                            sessionId: "${input.env.sessionId}"
-                                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                                        headWorkflow: "${\"assistant-ExtractTopics\"}"
-                                        tail: "${buildWorkflowsResult_644e1124}"
-                                        env:
-                                          userId: "${input.env.userId}"
-                                          model: "${input.env.model}"
-                                          callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                          BASE_URL: "${input.env.BASE_URL}"
-                                          background: "${default(map.get(input.env, \"background\"), null)}"
-                                          projectId: "${input.env.projectId}"
-                                          sessionId: "${input.env.sessionId}"
-                                          workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                                      location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                      project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                      connector_params:
-                                        skip_polling: true
-                                    result: "callChainResult_47dee693"
-                              retry: "${http.default_retry}"
-                      - collapseMessages_try:
-                          steps:
-                          - collapseMessages_try_initResult:
-                              assign:
-                              - collapseMessages_tryResult_138280e4: {}
-                          - collapseMessages_try_steps:
-                              try:
-                                steps:
-                                - segmentsForSession_block:
-                                    steps:
-                                    - segmentsForSession_fetch:
-                                        try:
-                                          steps:
-                                          - segmentsForSession_fetch_call:
-                                              call: "http.post"
-                                              args:
-                                                url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
-                                                body:
-                                                  collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
-                                                  windowSeconds: "${420}"
-                                                  overlapSeconds: "${60}"
-                                                  userId: "${input.env.userId}"
-                                                auth:
-                                                  type: "${\"OIDC\"}"
-                                                  audience: "${input.env.BASE_URL}"
-                                                headers:
-                                                  x-user-id: "${input.env.userId}"
-                                                  x-project-id: "${input.env.projectId}"
-                                              result: "segmentsForSession_fetchResult_6027e6fd"
-                                        retry: "${http.default_retry}"
-                                    - segmentsForSession_convert:
-                                        steps:
-                                        - segmentsForSession_convert_initResult:
-                                            assign:
-                                            - segmentsForSession_convertResult_323d5453: []
-                                        - segmentsForSession_convert_steps:
-                                            for:
-                                              value: "segmentsForSession_convertValue"
-                                              in: "${segmentsForSession_fetchResult_6027e6fd.body.segments}"
-                                              steps:
-                                              - segmentsForSession_convert_assignIterResult:
-                                                  assign:
-                                                  - segmentsForSession_convert_assignIterResultVar:
-                                                      sessionId: "${input.env.sessionId}"
-                                                      end: "${segmentsForSession_convertValue.end}"
-                                                      windowSeconds: "${420}"
-                                              - segmentsForSession_convert_updateResult:
-                                                  assign:
-                                                  - segmentsForSession_convertResult_323d5453: "${list.concat(segmentsForSession_convertResult_323d5453, segmentsForSession_convert_assignIterResultVar)}"
-                                - collapseMessages:
-                                    try:
-                                      steps:
-                                      - collapseMessages_call:
-                                          call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                          args:
-                                            workflow_id: "${\"context-ContextCollapser-SegKala${WORKFLOW_ENV}\"}"
-                                            argument:
-                                              segmentEnd: "${segmentsForSession_convertResult_323d5453[(len(segmentsForSession_convertResult_323d5453) - 1)].end}"
-                                              windowSeconds: "${420}"
-                                              overlapSeconds: "${60}"
-                                              env:
-                                                userId: "${input.env.userId}"
-                                                model: "${input.env.model}"
-                                                callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                                BASE_URL: "${input.env.BASE_URL}"
-                                                background: "${default(map.get(input.env, \"background\"), null)}"
-                                                projectId: "${input.env.projectId}"
-                                                sessionId: "${input.env.sessionId}"
-                                                workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                                            location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                            project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                            connector_params:
-                                              skip_polling: true
-                                          result: "collapseMessagesResult_445cb1c6"
-                                    retry: "${http.default_retry}"
-                                - collapseMessages_try_updateResult:
-                                    assign:
-                                    - collapseMessages_tryResult_138280e4: "${collapseMessagesResult_445cb1c6}"
-                              except:
-                                as: "collapseMessages_tryError"
-                                steps:
-                                - logError_7:
-                                    try:
-                                      steps:
-                                      - logError_call_7:
-                                          call: "sys.log"
-                                          args:
-                                            text: "${(\"[logError] \" + collapseMessages_tryError.message)}"
-                                          result: "logErrorResult_645e84ef"
-                                    retry: "${http.default_retry}"
-                                - reRaise_7:
-                                    raise: "${collapseMessages_tryError}"
-                                - collapseMessages_try_updateResultError:
-                                    assign:
-                                    - collapseMessages_tryResult_138280e4: "${null}"
                       - maybeRespond_updateResult_0:
                           assign:
-                          - maybeRespondResult_4e075b12:
+                          - maybeRespondResult_f841b0b:
                               message: "${complete_switchResult_3e95eff9.message}"
                               total_cost: "${(complete_switchResult_3e95eff9.total_cost + toolsCostResult_3bc64c68)}"
                               usage: "${complete_switchResult_3e95eff9.usage}"
@@ -1543,144 +1609,172 @@ main:
                       steps:
                       - maybeRespond_updateResult_1:
                           assign:
-                          - maybeRespondResult_4e075b12: "${null}"
+                          - maybeRespondResult_f841b0b: "${null}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_2d7e6870: "${maybeRespondResult_4e075b12}"
+                - mainTryResult_bf9e819: "${maybeRespondResult_f841b0b}"
           except:
             as: "mainTryError"
             steps:
-            - maybeNBypassRelease_1:
+            - errorStatus:
                 steps:
-                - maybeNBypassRelease_initResult_1:
+                - errorStatus_initResult:
                     assign:
-                    - maybeNBypassReleaseResult_2ef4f074: {}
-                - maybeNBypassRelease_steps_1:
-                    switch:
-                    - condition: "${default(map.get(input, \"sideCall\"), false)}"
-                      steps:
-                      - maybeNBypassRelease_updateResult_0_1:
-                          assign:
-                          - maybeNBypassReleaseResult_2ef4f074: "${null}"
-                    - condition: "${true}"
-                      steps:
-                      - releaseResponseLock_1:
-                          try:
-                            steps:
-                            - releaseResponseLock_call_1:
-                                call: "http.post"
-                                args:
-                                  url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
-                                  body:
-                                    collection: "${\"locks.Convo.Session\"}"
-                                    id: "${input.env.sessionId}"
-                                    owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                    userId: "${input.env.userId}"
-                                  auth:
-                                    type: "${\"OIDC\"}"
-                                    audience: "${input.env.BASE_URL}"
-                                  headers:
-                                    x-user-id: "${input.env.userId}"
-                                    x-project-id: "${input.env.projectId}"
-                                result: "releaseResponseLockResult_62bc2b8e"
-                          retry: "${http.default_retry}"
-                      - maybeNBypassRelease_updateResult_1_1:
-                          assign:
-                          - maybeNBypassReleaseResult_2ef4f074: "${releaseResponseLockResult_62bc2b8e}"
-            - statusFailed:
-                try:
-                  steps:
-                  - statusFailed_call:
-                      call: "http.post"
-                      args:
-                        url: "${((input.env.BASE_URL + \"/\") + \"workflows/exec/status/update\")}"
-                        body:
-                          execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                          status: "${\"Failed\"}"
-                          ended: "${true}"
-                          workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
-                          updated: "${sys.now()}"
-                          error: "${default(default(default(map.get(mainTryError, [\\\"body\\\", \\\"error\\\", \\\"message\\\"]), map.get(mainTryError, [\\\"body\\\", \\\"error\\\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
-                        auth:
-                          type: "${\"OIDC\"}"
-                          audience: "${input.env.BASE_URL}"
-                        headers:
-                          x-user-id: "${input.env.userId}"
-                          x-project-id: "${input.env.projectId}"
-                      result: "statusFailedResult_aa96ae8"
-                retry: "${http.default_retry}"
-            - enqueueStatusFailed_enqueue_block:
-                steps:
-                - relay_ingest_tool_call_3:
+                    - errorStatusResult_3f509bdb: {}
+                - errorStatus_steps:
                     try:
                       steps:
-                      - relay_ingest_tool_call_call_3:
-                          call: "http.post"
-                          args:
-                            url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
-                            body:
-                              sessionId: "${input.env.sessionId}"
-                              projectId: "${input.env.projectId}"
-                              data:
-                                create_time: "${sys.now()}"
-                                callback_id: "${null}"
-                                content: "${null}"
-                                tool_call: "${null}"
-                                cost: "${0.0}"
-                                background: "${default(map.get(input.env, \"background\"), false)}"
-                                workdir: "${null}"
-                                timeout_seconds: "${60}"
-                                status: "${\"Failed\"}"
-                                error: "${default(default(default(map.get(mainTryError, [\\\"body\\\", \\\"error\\\", \\\"message\\\"]), map.get(mainTryError, [\\\"body\\\", \\\"error\\\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
-                              background: "${default(map.get(input.env, \"background\"), false)}"
-                              type: "${\"message\"}"
-                              source: "${\"workflows.tools.CliTools\"}"
-                            auth:
-                              type: "${\"OIDC\"}"
-                              audience: "${input.env.BASE_URL}"
-                            headers:
-                              x-user-id: "${input.env.userId}"
-                              x-project-id: "${input.env.projectId}"
-                          result: "relay_ingest_tool_callResult_7826aebe"
-                    retry: "${http.default_retry}"
-            - callbackFailure:
-                steps:
-                - callbackFailure_initResult:
-                    assign:
-                    - callbackFailureResult_3e228642: {}
-                - callbackFailure_steps:
-                    switch:
-                    - condition: "${(default(map.get(input, \"callback\"), null) != null)}"
-                      steps:
-                      - callback_1:
+                      - statusFailed:
                           try:
                             steps:
-                            - callback_call_1:
+                            - statusFailed_call:
                                 call: "http.post"
                                 args:
-                                  url: "${((input.env.BASE_URL + \"/\") + (\"callbacks/\" + default(map.get(input, \"callback\"), null).id))}"
+                                  url: "${((input.env.BASE_URL + \"/\") + \"workflows/exec/status/update\")}"
                                   body:
-                                    error: "${mainTryError}"
+                                    execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                    status: "${\"Failed\"}"
+                                    ended: "${true}"
+                                    workflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
+                                    updated: "${sys.now()}"
+                                    error: "${default(default(default(map.get(mainTryError, [\"body\", \"error\", \"message\"]), map.get(mainTryError, [\"body\", \"error\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
                                   auth:
                                     type: "${\"OIDC\"}"
                                     audience: "${input.env.BASE_URL}"
                                   headers:
                                     x-user-id: "${input.env.userId}"
                                     x-project-id: "${input.env.projectId}"
-                                result: "callbackResult_2e7fae09"
+                                result: "statusFailedResult_32138e2a"
                           retry: "${http.default_retry}"
-                      - callbackFailure_updateResult_0:
+                      - enqueueStatusFailed_enqueue_block:
+                          steps:
+                          - relay_ingest_tool_call_3:
+                              try:
+                                steps:
+                                - relay_ingest_tool_call_call_3:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"events\")}"
+                                      body:
+                                        sessionId: "${input.env.sessionId}"
+                                        projectId: "${input.env.projectId}"
+                                        data:
+                                          create_time: "${sys.now()}"
+                                          callback_id: "${null}"
+                                          content: "${null}"
+                                          tool_call: "${null}"
+                                          cost: "${0.0}"
+                                          background: "${default(map.get(input.env, \"background\"), false)}"
+                                          workdir: "${null}"
+                                          timeout_seconds: "${60}"
+                                          status: "${\"Failed\"}"
+                                          error: "${default(default(default(map.get(mainTryError, [\"body\", \"error\", \"message\"]), map.get(mainTryError, [\"body\", \"error\"])), map.get(mainTryError, \"message\")), \"Unknown error\")}"
+                                        background: "${default(map.get(input.env, \"background\"), false)}"
+                                        type: "${\"message\"}"
+                                        source: "${\"workflows.tools.CliTools\"}"
+                                      auth:
+                                        type: "${\"OIDC\"}"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "relay_ingest_tool_callResult_3f93d137"
+                              retry: "${http.default_retry}"
+                      - maybeNBypassRelease_1:
+                          steps:
+                          - maybeNBypassRelease_initResult_1:
+                              assign:
+                              - maybeNBypassReleaseResult_2ef4f074: {}
+                          - maybeNBypassRelease_steps_1:
+                              switch:
+                              - condition: "${default(map.get(input, \"sideCall\"), false)}"
+                                steps:
+                                - maybeNBypassRelease_updateResult_0_1:
+                                    assign:
+                                    - maybeNBypassReleaseResult_2ef4f074: "${null}"
+                              - condition: "${true}"
+                                steps:
+                                - releaseResponseLock_1:
+                                    try:
+                                      steps:
+                                      - releaseResponseLock_call_1:
+                                          call: "http.post"
+                                          args:
+                                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
+                                            body:
+                                              collection: "${\"locks.Convo.Session\"}"
+                                              id: "${input.env.sessionId}"
+                                              owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                                              userId: "${input.env.userId}"
+                                            auth:
+                                              type: "${\"OIDC\"}"
+                                              audience: "${input.env.BASE_URL}"
+                                            headers:
+                                              x-user-id: "${input.env.userId}"
+                                              x-project-id: "${input.env.projectId}"
+                                          result: "releaseResponseLockResult_62bc2b8e"
+                                    retry: "${http.default_retry}"
+                                - maybeNBypassRelease_updateResult_1_1:
+                                    assign:
+                                    - maybeNBypassReleaseResult_2ef4f074: "${releaseResponseLockResult_62bc2b8e}"
+                      - callbackFailure:
+                          steps:
+                          - callbackFailure_initResult:
+                              assign:
+                              - callbackFailureResult_3e228642: {}
+                          - callbackFailure_steps:
+                              switch:
+                              - condition: "${(default(map.get(input, \"callback\"), null) != null)}"
+                                steps:
+                                - callback_1:
+                                    try:
+                                      steps:
+                                      - callback_call_1:
+                                          call: "http.post"
+                                          args:
+                                            url: "${((input.env.BASE_URL + \"/\") + (\"callbacks/\" + default(map.get(input, \"callback\"), null).id))}"
+                                            body:
+                                              error: "${mainTryError}"
+                                            auth:
+                                              type: "${\"OIDC\"}"
+                                              audience: "${input.env.BASE_URL}"
+                                            headers:
+                                              x-user-id: "${input.env.userId}"
+                                              x-project-id: "${input.env.projectId}"
+                                          result: "callbackResult_2e7fae09"
+                                    retry: "${http.default_retry}"
+                                - callbackFailure_updateResult_0:
+                                    assign:
+                                    - callbackFailureResult_3e228642: "${callbackResult_2e7fae09.body}"
+                              - condition: "${true}"
+                                steps:
+                                - callbackFailure_updateResult_1:
+                                    assign:
+                                    - callbackFailureResult_3e228642: "${null}"
+                      - errorStatus_updateResult:
                           assign:
-                          - callbackFailureResult_3e228642: "${callbackResult_2e7fae09.body}"
-                    - condition: "${true}"
+                          - errorStatusResult_3f509bdb: "${null}"
+                    except:
+                      as: "errorStatusError"
                       steps:
-                      - callbackFailure_updateResult_1:
+                      - logError_9:
+                          try:
+                            steps:
+                            - logError_call_9:
+                                call: "sys.log"
+                                args:
+                                  text: "${(\"[logError] \" + errorStatusError.message)}"
+                                result: "logErrorResult_365965ec"
+                          retry: "${http.default_retry}"
+                      - reRaise_9:
+                          raise: "${errorStatusError}"
+                      - errorStatus_updateResultError:
                           assign:
-                          - callbackFailureResult_3e228642: "${null}"
+                          - errorStatusResult_3f509bdb: "${null}"
             - ReRaise_error:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_2d7e6870: "${null}"
+                - mainTryResult_bf9e819: "${errorStatusResult_3f509bdb}"
   - return:
-      return: "${mainTryResult_2d7e6870}"
+      return: "${mainTryResult_bf9e819}"

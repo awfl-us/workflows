@@ -8,13 +8,25 @@ import us.awfl.services.Llm.ChatToolResponse
 import us.awfl.utils.Env
 import us.awfl.utils.Callback
 import us.awfl.ista.ChatMessage
+import us.awfl.workflows.Summaries
+import us.awfl.workflows.assistant.ExtractTopics
+import us.awfl.workflows.context.ContextCollapser
 import us.awfl.workflows.helpers.ToolDefs._
 import us.awfl.services.Llm.ToolChoice
 import us.awfl.workflows.tools.Tasks.Task
+import us.awfl.workflows.event.Status
 
-trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks with Cli with Funds {
-  override type Result = ChatToolResponse
-
+trait Agent
+  extends EventHandler
+  with Preloads
+  with Tasks
+  with Cli
+  with Funds
+  with Status
+  with Summaries
+  with ExtractTopics
+  with ContextCollapser {
+    
   // Use a single JSON config at .awfl/config.json; avoid temp files. Keep each command < 400 chars.
   override def preloads: List[PreloadItem] = List(
     // Consolidated preload script (excludes the session files listing)
@@ -58,5 +70,5 @@ trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with T
     required = ListValue(List("query").cel)
   )
 
-  override def workflows = eventHandler() :: super.workflows
+  override def workflows = Workflow(eventHandler()) :: super.workflows
 }

@@ -59,6 +59,6 @@ object ToolDispatcher extends us.awfl.core.Workflow {
       List[Step[?, ?]](toolFold, saveResult) -> toolFold.resultValue
     }
 
-    Workflow(buildSteps[Result](List(dispatch) -> obj(Result(dispatch.resultValue)), _ => List() -> Value.nil))
+    Workflow(buildSteps(List(dispatch) -> obj(Result(dispatch.resultValue)), _ => List() -> Value.nil))
   })
 }

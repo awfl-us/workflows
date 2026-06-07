@@ -16,6 +16,9 @@ import us.awfl.utils.strider.Strider
 import us.awfl.utils.TopicContextYoj
 import us.awfl.utils.YojComposer
 import us.awfl.utils.Env
+import us.awfl.utils.strider.StriderInput
+import us.awfl.workflows.helpers.links.SaveReflection
+import us.awfl.workflows.helpers.Chain
 
 case class TopicContext(prevTopics: ListValue[TopicInfo], convoContext: BaseValue[ConvoContext])
 object TopicContext:
@@ -41,18 +44,19 @@ object TopicContext:
       )
     )
 
-// Default prompt used by Strider workflows
-// given Convo.Prompt = Convo.Prompt(
-//   buildList(
-//     "buildPrompt",
-//     List(
-//       ChatMessage(
-//         "system",
-//         str("You're a background assistant, scrutanizing live or recorded conversations. You're the 'unconsciouse' part of the conversation agent, adding depth and structured memory to the conversation.")
-//       )
-//     )
-//   )
-// )
+trait ExtractTopics extends us.awfl.core.Workflow {
+  override def buildSteps(
+    main: (List[Step[?, ?]], BaseValue[Result]),
+    except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
+  )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
+    (Chain(
+      ExtractTopics
+        .runSync(obj(StriderInput()))
+        .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
+    ) :: main._1) -> main._2,
+    except
+  )
+}
 
 object ExtractTopics extends us.awfl.utils.strider.Latest[TopicContext, TopicInfo]("assistant-ExtractTopics") {
   override def prompt = "You're a background assistant, scrutanizing live or recorded conversations. You're the 'unconsciouse' part of the conversation agent, adding depth and structured memory to the conversation."

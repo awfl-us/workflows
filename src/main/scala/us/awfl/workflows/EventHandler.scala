@@ -42,13 +42,15 @@ import us.awfl.workflows.helpers.ToolDefs.ToolDefObj
 import scala.annotation.tailrec
 import us.awfl.services.Llm.ToolFunctionDef
 import us.awfl.workflows.tools.Tasks.Task
+import us.awfl.workflows.event.Recursion
 
-trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools {
+trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools with Recursion {
+  override type Result = ChatToolResponse
   // Single entry point: tool-enabled chat that surfaces tool_calls
   def eventHandler(
-    message: ChatMessage = ChatMessage("user", input.query.getOrElse(Value("") ) ),
-    tools: List[String] = List()
-  ): Workflow[ChatToolResponse] = {
+    // message: OptValue[ChatMessage],
+    // tools: List[String] = List()
+  ): (List[Step[?, ?]], BaseValue[ChatToolResponse]) = {
     val model = inputVal.flatMap(_.env).get.model
     val userId = inputVal.flatMap(_.env).flatMap(_.userId)
 
@@ -56,20 +58,6 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
 
     // Best-effort: if an input.task object is provided, create it for this session before completion logic
     val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", inputVal.flatMap(_.task.getOrElse(Value.nil)))
-
-    val triggeredExecId: Value[String] = Exec.currentExecId
-
-    // Mark this execution as Running at the start (best-effort, non-fatal if it fails)
-    val statusRunning = Exec.updateExecStatus(
-      "statusRunning",
-      triggeredExecId,
-      str("Running"),
-      Value(false)
-    )
-    val enqueueRunning = Exec.enqueueExecStatus(
-      "enqueueStatusRunning",
-      str("Running")
-    )
 
     val mapToolDefs = For("mapToolDefs", toolsWorkflow.resultValue.flatMap(_.tools)) { toolDef =>
       List(Log("logTool", str(encodeJson(toolDef)))) -> obj(Tool(
@@ -96,16 +84,11 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
     ))
 
     // Main body wrapped in Try so we can update status to Done or Failed
-    val mainTry = buildSteps(
+    buildSteps(
       {
-        // Best-effort init status; don't fail the workflow if this call errors.
-        val tryInitStatus = Try(
-          "tryInitStatus",
-          List[Step[?, ?]](statusRunning, enqueueRunning) -> Value.nil[NoValueT]
-        )
-
+        def message = ChatMessage("user", input.query.getOrElse(Value.nil))
         val addMessage = Switch("maybeAddMessage", List(
-          skipAddMessages.cel -> (List() -> Value.nil[PostResult[Nothing]]),
+          (skipAddMessages || !input.query.present)  -> (List() -> Value.nil[PostResult[Nothing]]),
           (true: Cel) -> Convo.addMessage("addMessage", obj(message)).fn
         ))
 
@@ -113,7 +96,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         val complete = Convo.inSession[ChatToolResponse]("inSession", sessionId) {
           val buildYojStep = summon[Yoj[TopicContext]].build
           val messages = Switch.list("messages", List(
-            skipAddMessages.cel -> {
+            (skipAddMessages && input.query.present) -> {
               val buildMessage = Try("buildMessage", List() -> obj(message))
               List(buildMessage) -> ListValue[ChatMessage](CelFunc("list.concat", buildYojStep.resultValue, buildMessage.resultValue))
             },
@@ -201,32 +184,14 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             ).fn
           },
           (true: Cel) -> {
-            val statusDone = Exec.updateExecStatus(
-              "statusDone",
-              triggeredExecId,
-              str("Done"),
-              Value(true)
-            )
-            val enqueueDone = Exec.enqueueExecStatus(
-              "enqueueStatusDone",
-              str("Done")
-            )
             val maybeCallback = Switch("maybeCallback", List(
               (input.callback.getOrElse(Value.nil) !== Cel.nil) ->
                 input.callback.getOrElse(Value.nil).get.apply(responseWithCost).fn,
               (true: Cel) -> (List() -> Value.nil)
             ))
-            List[Step[?, ?]](statusDone, enqueueDone, maybeCallback) -> responseWithCost
+            List[Step[?, ?]](stop, maybeCallback) -> responseWithCost
           }
         ))
-
-        val summaries = Summaries("runSummaries")
-        val extract = Chain(
-          ExtractTopics
-            .runSync(obj(StriderInput()))
-            .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
-        )
-        val collapse = ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60)
 
         val whenAcquired = Switch("maybeRespond", List(
           // If lock acquired: build context, get response, save it, then release the lock.
@@ -238,15 +203,16 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               )),
               mapToolDefs,
               complete,
-              sendContents,
-              processToolCalls,
-              release,
-              toolsCost,
-              addUsage,
+              Parallel("followup", List(
+                sendContents,
+                processToolCalls,
+                release
+              )),
+              Parallel("calcStats", List(
+                toolsCost,
+                addUsage
+              )),
               maybeToolFeedback,
-              summaries,
-              extract,
-              collapse
             ) -> obj(complete.result.copy(
               total_cost = Value[Double](totalCost)
             ))
@@ -256,7 +222,6 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         ))
 
         List[Step[?, ?]](
-          tryInitStatus,
           maybeSaveTask,
           addMessage,
           acquiredTry,
@@ -264,41 +229,12 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         ) -> whenAcquired.resultValue
       },
       err => {
-        val errMsg = str(CelFunc(
-          "default",
-          CelFunc(
-            "default",
-            CelFunc(
-              "default",
-              CelFunc("map.get", err.cel, CelConst("""[\"body\", \"error\", \"message\"]""")),
-              CelFunc("map.get", err.cel, CelConst("""[\"body\", \"error\"]"""))
-            ),
-            CelFunc("map.get", err.cel, "message")
-          ),
-          "Unknown error"
-        ))
-        val statusFailed = Exec.updateExecStatus(
-          "statusFailed",
-          triggeredExecId,
-          str("Failed"),
-          Value(true),
-          error = errMsg
-        )
-        val enqueueFailed = Exec.enqueueExecStatus(
-          "enqueueStatusFailed",
-          str("Failed"),
-          error = errMsg
-        )
         val callbackFailure = Switch("callbackFailure", List(
           (input.callback.getOrElse(Value.nil) !== Cel.nil) -> input.callback.getOrElse(Value.nil).get.failure(err).fn,
           (true: Cel) -> (List() -> Value.nil)
         ))
-        List[Step[?, ?]](release, statusFailed, enqueueFailed, callbackFailure) -> Value.nil[ChatToolResponse]
+        List[Step[?, ?]](release, callbackFailure) -> Value.nil[ChatToolResponse]
       }
-    )
-
-    Workflow(
-      mainTry
     )
   }
 }

@@ -15,21 +15,6 @@ import us.awfl.utils.Convo.StepName
 import us.awfl.utils.post
 import us.awfl.utils.TopicContextYoj
 
-// Minimal prompt; core JSON schema/instructions live in Ista[CollapseResponse]
-// private given Convo.Prompt = Convo.Prompt(
-//   buildList(
-//     "buildPrompt",
-//     List(
-//       ChatMessage(
-//         "system",
-//         str(
-//           "You're a background assistant that helps compress older conversation context into expandable, named groups."
-//         )
-//       )
-//     )
-//   )
-// )
-
 trait CollapserMessages
 object CollapserMessages {
   // Build a Yoj that serializes the full TopicContext (joined yoj) into a single ChatMessage
@@ -64,6 +49,16 @@ object CollapserMessages {
       // even though we collapse it down to a single serialized message.
       Yoj.component("topicContext", "Serialized TopicContext (single message)")
     )
+}
+
+trait ContextCollapser extends us.awfl.core.Workflow {
+  override def buildSteps(
+    main: (List[Step[?, ?]], BaseValue[Result]),
+    except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
+  )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
+    (ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60) :: main._1) -> main._2,
+    except
+  )
 }
 
 // Rework ContextCollapser to use the Strider pattern (Latest wrapper) similar to ExtractTopics.
