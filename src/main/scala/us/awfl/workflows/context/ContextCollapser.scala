@@ -56,7 +56,7 @@ trait ContextCollapser extends us.awfl.core.Workflow {
     main: (List[Step[?, ?]], BaseValue[Result]),
     except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
   )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
-    (ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60) :: main._1) -> main._2,
+    (main._1 :+ ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60)) -> main._2,
     except
   )
 }

@@ -36,8 +36,11 @@ trait Tools extends us.awfl.core.Workflow with EventHandler.WithInput {
 
   override def workflows: List[Workflow[?]] = Workflow(
     {
-      val tools = buildTools
-      List(tools) -> obj(ToolsResult(tools.resultValue))
+      val maybeSelectChoice = Switch("maybeFilterChoice", List(
+        input.toolChoice.present -> (List() -> ListValue(List(input.toolChoice.getOrElse(Value.nil).cel)))
+        (true: Cel) -> buildTools.fn
+      ))
+      List(maybeSelectChoice) -> obj(ToolsResult(maybeSelectChoice.resultValue))
     },
     Some("tools")
   ) :: super.workflows

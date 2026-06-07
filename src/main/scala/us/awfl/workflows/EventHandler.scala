@@ -54,7 +54,11 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
     val model = inputVal.flatMap(_.env).get.model
     val userId = inputVal.flatMap(_.env).flatMap(_.userId)
 
-    given KalaVibhaga = SegKala(sessionId, Value("sys.now()"), Value(20 * 60))
+    given KalaVibhaga = SegKala(
+      sessionId,
+      input.windowEnd.getOrElse(Value("sys.now()")),
+      input.windowSeconds.getOrElse(Value(20 * 60))
+    )
 
     // Best-effort: if an input.task object is provided, create it for this session before completion logic
     val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", inputVal.flatMap(_.task.getOrElse(Value.nil)))
@@ -246,9 +250,11 @@ object EventHandler {
     usage: OptValue[Usage] = OptValue.nil,
     // Optional task payload to seed a task for this session (title/description/status)
     task: OptBase[Task] = OptValue.nil,
-    toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
+    toolChoice: OptBase[ToolWithWorkflow] = OptValue.nil,
     sideCall: OptValue[Boolean] = OptValue(false),
     callback: OptValue[Callback[ChatToolResponse]] = OptValue.nil,
+    windowSeconds: OptValue[Double] = OptValue.nil,
+    windowEnd: OptValue[Double] = OptValue.nil,
     env: BaseValue[Env] = ENV
   )
 

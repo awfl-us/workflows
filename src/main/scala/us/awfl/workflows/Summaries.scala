@@ -18,7 +18,7 @@ trait Summaries extends us.awfl.core.Workflow {
     main: (List[Step[?, ?]], BaseValue[Result]),
     except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
   )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
-    (Summaries("runSummaries") :: main._1) -> main._2,
+    (main._1 :+ Summaries("runSummaries")) -> main._2,
     except
   )
 }

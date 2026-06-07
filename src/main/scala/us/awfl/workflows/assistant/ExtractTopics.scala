@@ -49,11 +49,11 @@ trait ExtractTopics extends us.awfl.core.Workflow {
     main: (List[Step[?, ?]], BaseValue[Result]),
     except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
   )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
-    (Chain(
+    (main._1 :+ Chain(
       ExtractTopics
         .runSync(obj(StriderInput()))
         .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
-    ) :: main._1) -> main._2,
+    )) -> main._2,
     except
   )
 }
