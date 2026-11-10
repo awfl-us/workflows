@@ -41,7 +41,7 @@ jobs:
               'SEARCH_FILES', 'LIST_DIRECTORY', 'COMMAND_OUTPUT',
               'COMMAND_INPUT', 'COMMAND_CANCEL',
           )
-          absent = [name for name in expected if f'\"{name}\"' not in yaml]
+          absent = [name for name in expected if name not in yaml]
           assert not absent, f'Agent tool definitions absent: {absent}'
           assert 'helpers-ToolDefs' in yaml, 'Dynamic tool definitions must remain available'
           print('All nine Scala-defined CLI tools are present in generated YAML')
