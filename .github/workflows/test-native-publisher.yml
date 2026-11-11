@@ -1,0 +1,56 @@
+name: Verify native Rust release on Alpine
+
+on:
+  push:
+    paths:
+      - '.github/workflows/test-native-publisher.yml'
+      - '.github/workflows/publish-native.yml'
+      - 'scripts/publish-native.sh'
+  pull_request:
+    paths:
+      - '.github/workflows/test-native-publisher.yml'
+      - '.github/workflows/publish-native.yml'
+      - 'scripts/publish-native.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pinned Scala-generated Rust fixtures
+        uses: actions/checkout@v4
+        with:
+          repository: awfl-us/compiler-rust
+          ref: f0029f45caa8a0d0d7c0b1b87da8d6d2ae5f4274
+          path: compiler-rust
+
+      - name: Build statically linked ABI 3 executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/build-native-static.sh \
+            compiler-rust/fixtures/native-v2-pure-nested "$RUNNER_TEMP/native-rust-build"
+          binary=$(find "$RUNNER_TEMP/native-rust-build/target/x86_64-unknown-linux-musl/release" \
+            -maxdepth 1 -type f -executable -name 'awfl_native*' -print -quit)
+          test -n "$binary"
+
+          # The production Jobs service runs node:22-alpine (musl), not
+          # Ubuntu/glibc. Execute the binary inside the actual base image.
+          result=$(printf '%s\n' '{"protocol_version":2,"input":{}}' |
+            docker run --rm -i --mount "type=bind,source=$binary,target=/awfl-native,readonly" \
+              --entrypoint /awfl-native node:22-alpine)
+          jq -e '.protocol_version == 2 and .status == "completed" and
+            .result == [2,3,9,9]' <<<"$result"
+          echo 'Static ABI 3 Rust executed successfully in Alpine'
+
+      - name: Archive verified static pilot for GCS integration check
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-pilot-static
+          path: ${{ runner.temp }}/native-rust-build/target/x86_64-unknown-linux-musl/release/awfl_native_v2_pure_nested_e874dd6d
+          retention-days: 1
+          if-no-files-found: error
