@@ -46,3 +46,11 @@ jobs:
           jq -e '.protocol_version == 2 and .status == "completed" and
             .result == [2,3,9,9]' <<<"$result"
           echo 'Static ABI 3 Rust executed successfully in Alpine'
+
+      - name: Archive verified static pilot for GCS integration check
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-pilot-static
+          path: ${{ runner.temp }}/native-rust-build/target/x86_64-unknown-linux-musl/release/awfl_native_v2_pure_nested_e874dd6d
+          retention-days: 1
+          if-no-files-found: error
