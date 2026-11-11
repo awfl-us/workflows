@@ -1,0 +1,48 @@
+name: Scala agent tool catalog tests
+on:
+  pull_request:
+    paths:
+      - 'src/main/scala/us/awfl/workflows/tools/**'
+      - 'src/main/scala/us/awfl/workflows/helpers/ToolDefs.scala'
+      - 'src/main/scala/us/awfl/workflows/traits/Cli.scala'
+      - '.github/workflows/test-agent-tools.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/main/scala/us/awfl/workflows/tools/**'
+      - 'src/main/scala/us/awfl/workflows/helpers/ToolDefs.scala'
+      - 'src/main/scala/us/awfl/workflows/traits/Cli.scala'
+      - '.github/workflows/test-agent-tools.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      # No cloud credentials, network LLM calls, or deployed workflows.
+      - name: Compile and generate Scala agent workflows
+        run: sbt -batch "run us.awfl.workflows.codebase.ProjectManager"
+      - name: Verify Scala-generated tools are in the agent workflow
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          yaml = Path('yaml_gens/codebase-ProjectManager-tools.yaml').read_text()
+          expected = (
+              'READ_FILE', 'UPDATE_FILE', 'RUN_COMMAND', 'APPLY_PATCH',
+              'SEARCH_FILES', 'LIST_DIRECTORY', 'COMMAND_OUTPUT',
+              'COMMAND_INPUT', 'COMMAND_CANCEL',
+          )
+          absent = [name for name in expected if name not in yaml]
+          assert not absent, f'Agent tool definitions absent: {absent}'
+          assert 'helpers-ToolDefs' in yaml, 'Dynamic tool definitions must remain available'
+          print('All nine Scala-defined CLI tools are present in generated YAML')
+          PY
