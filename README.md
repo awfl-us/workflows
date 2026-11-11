@@ -87,6 +87,33 @@ Under the hood, EventHandler resolves the agent for the session, determines the 
   - codebase/ – ProjectManager, AWFL CLI examples, builder workflows, domain samples
 - yaml_gens/ – generated workflow YAML
 
+## Native Rust backend: experimental, no workflow migration yet
+
+The current default deployment target is **Google Cloud Workflows YAML**.
+`awfl-us/compiler-rust` can also compile compatible constructed Scala DSL
+workflows to statically generated Rust ABI 3 / IPC protocol 2 executables.
+The published DSL's step/CEL constructors are unchanged; only optional
+`CelFunctions`/`CallOperations` name constants were added. **Do not rewrite
+or bulk-migrate application workflows to native** while coverage and
+rollback are being verified.
+
+As of November 11, 2026, native compiler PRs #1–#7 and server execution PRs
+#72/#78/#79 are merged. Real unchanged `LoadConversationHistory` and
+`evals/Product` Scala source compiled and ran through generated Rust fixtures.
+Only a *pure* `NativePilot` was exercised through tagged Cloud Run Jobs in
+GCP; the regular native routing flag remains **disabled**. The separate
+private GCS native-artifact publisher is described in the
+[native publication/canary runbook](docs/native-rust-publication.md).
+The canonical feature/compatibility inventory, remaining gates, and next
+steps are in
+[compiler-rust's verified roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
+
+Pending features include durable `Parallel`/`ParallelFor`, callbacks, child
+workflows, provider-specific adapters, full CEL/error/retry parity, OS
+sandboxing, public API end-to-end tests, and measured latency/throughput.
+Google Workflows remains the required fallback for unsupported workflows;
+production native routing must not be enabled based on pure-fixture tests.
+
 ## Prerequisites
 - Java 17+
 - sbt 1.11+
