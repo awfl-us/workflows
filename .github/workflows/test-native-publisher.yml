@@ -1,0 +1,67 @@
+name: Verify native Rust release on Alpine
+
+on:
+  push:
+    paths:
+      - '.github/workflows/test-native-publisher.yml'
+      - '.github/workflows/publish-native.yml'
+      - 'scripts/publish-native.sh'
+  pull_request:
+    paths:
+      - '.github/workflows/test-native-publisher.yml'
+      - '.github/workflows/publish-native.yml'
+      - 'scripts/publish-native.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pinned Scala-generated Rust fixtures
+        uses: actions/checkout@v4
+        with:
+          repository: awfl-us/compiler-rust
+          ref: f0029f45caa8a0d0d7c0b1b87da8d6d2ae5f4274
+          path: compiler-rust
+
+      - name: Set up native Rust musl target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.99.1'
+          targets: x86_64-unknown-linux-musl
+
+      - name: Install musl compiler and ELF tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools binutils
+
+      - name: Build statically linked ABI 3 executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc
+          CARGO_TARGET_DIR="$RUNNER_TEMP/native-rust-build"
+          cargo build --locked --release --target x86_64-unknown-linux-musl \
+            --manifest-path compiler-rust/fixtures/native-v2-pure-nested/Cargo.toml \
+            --target-dir "$CARGO_TARGET_DIR"
+          binary=$(find "$CARGO_TARGET_DIR/x86_64-unknown-linux-musl/release" \
+            -maxdepth 1 -type f -executable -name 'awfl_native*' -print -quit)
+          test -n "$binary"
+          test "$(od -An -N4 -tx1 "$binary" | tr -d ' \n')" = 7f454c46
+          if readelf -l "$binary" | grep -q INTERP; then
+            echo 'Native binary unexpectedly requires a dynamic linker' >&2
+            exit 1
+          fi
+
+          # The production Jobs service runs node:22-alpine (musl), not
+          # Ubuntu/glibc. Execute the binary inside the actual base image.
+          result=$(printf '%s\n' '{"protocol_version":2,"input":{}}' |
+            docker run --rm -i --mount "type=bind,source=$binary,target=/awfl-native,readonly" \
+              --entrypoint /awfl-native node:22-alpine)
+          jq -e '.protocol_version == 2 and .status == "completed" and
+            .result == [2,3,9,9]' <<<"$result"
+          echo 'Static ABI 3 Rust executed successfully in Alpine'
