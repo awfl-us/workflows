@@ -1,5 +1,9 @@
 # AWFL Workflows (Scala)
 
+> Native Rust workflow releases: see [native publication and rollout notes](docs/native-rust-publication.md).
+> Native compilation and effectful workflow support remain experimental;
+> Google Workflows is the default production backend.
+
 AWFL Workflows is a Scala 3 toolkit for building, generating, and deploying Google Cloud Workflows with the AWFL DSL. It includes a ready-to-deploy, tool-enabled chat EventHandler, common CLI/task tools, and reusable helpers to accelerate new workflow development.
 
 ## Features
