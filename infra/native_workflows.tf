@@ -25,7 +25,9 @@ resource "google_storage_bucket_iam_member" "native_artifact_deployer" {
   count  = local.deploy_sa_member != null ? 1 : 0
   bucket = google_storage_bucket.native_artifacts.name
   role   = "roles/storage.objectAdmin"
-  member = local.deploy_sa_member
+  # Reference the GCP-managed deployer identity without introducing a
+  # Terraform dependency on refreshing its unrelated deletion_policy.
+  member = "serviceAccount:${var.create_deploy_sa ? "${var.deploy_sa_name}@${var.project_id}.iam.gserviceaccount.com" : var.deploy_sa_email}"
 }
 
 # API and Jobs currently use the default Compute runtime service account.
