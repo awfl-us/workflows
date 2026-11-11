@@ -1,6 +1,14 @@
 # Native Rust workflow publication and canary status
 
 Status: **pure-workflow canary succeeded on 2026-11-11; broad rollout is disabled**.
+Compiler PRs #1–#7 and server native PRs #72/#78/#79 are merged, but this
+**does not** authorize non-pilot artifacts or change the runtime flag.
+The published `NativePilot` is explicitly **no-effect**; newly implemented
+`Try`/HTTP-error recovery and restricted `log.write` are verified in
+locally generated Rust plus Node transaction-compatible tests, **not**
+through live Jobs/GCP effect traffic. For the canonical feature matrix and
+ordered acceptance gates, see
+[compiler-rust current state and roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
 
 ## Deployment ownership
 
@@ -81,18 +89,40 @@ explicit `--execute`; omitting it performs a dry run without creating tasks.
 It initializes an isolated Firestore execution and **does not** represent
 an end-user API smoke test.
 
-## Remaining rollout gates
+## Remaining rollout gates (status and required evidence)
 
-1. Test the authenticated shared `/workflows/execute` API and agent/MCP
-   session, history, status/cancel, callback and Google fallback paths.
-2. Complete effect reconciliation, retry/lease handling, orphan cleanup,
-   process sandboxing, real authenticated HTTP handlers and adversarial
-   authorization tests. Reject unknown or side-effecting release capabilities
-   until proven safe.
-3. Verify GCP IAM/WIF publication from the intended workflow, crash
-   recovery, Terraform state ownership, and rollback under realistic load.
-4. Add differential YAML/native conformance fixtures and p50/p95/p99
-   measurements before expanding beyond the pure deterministic pilot.
+**Completed foundational milestones:** private content-addressed GCS bucket
+and IAM-owned publisher, verified static musl ELF/Alpine compatibility, shared
+opt-in launcher, typed continuation storage and Firestore journal, one isolated
+pure GCP canary, compiler ABI 3/IPC 2, `Try`/`Raise` error recovery and
+log handler integration **in merged source code**. These are necessary, not
+sufficient, for production use.
+
+1. **Compatibility inventory and differential tests:** enumerate actually
+   constructed DSL/CEL/Call operations across helper dependencies; compare
+   deterministic Google and native results, error/retry envelopes, null/bytes,
+   globals, time/UUID, ordering and valid failure paths. Verify more real
+   unchanged workflows than `LoadConversationHistory`/`Product`, including
+   full `ProjectManager` dependencies.
+2. **Effects/orchestration:** validate real, IAM-authorized HTTP dispatch,
+   uncertainty reconciliation and remote idempotency (including crash *before*
+   journal commit). Add durable callbacks, child workflow start/await,
+   provider storage/PubSub adapters and real `Parallel`/`ParallelFor` joins.
+3. **Security/reliability:** independent OS/network sandbox with no native
+   GCP credentials, lease heartbeat and worker takeover, orphan sweeper,
+   concurrent effects, Firestore contention, cancellation propagation,
+   authenticated public launcher and session/status APIs.
+4. **Publisher/rollback:** authorized CI dispatch of `publish-native.yml`,
+   artifact provenance, active alias atomicity, retained pinned binary for
+   in-flight runs, and a demonstrated rollback with Terraform state unchanged.
+5. **Performance evidence:** repeat warm/cold experiments with representative
+   workflows and equivalent durability, publishing p50/p95/p99, throughput,
+   CPU/RSS, Firestore operations and cost. The one **6,836 ms** GCP canary
+   includes cold startup and cannot substantiate an engine speedup claim.
+
+**Go/no-go rule:** keep `AWFL_NATIVE_EXECUTION_ENABLED=0` in regular API/Jobs
+until these gates pass; a merged PR or enabled zero-traffic tagged Jobs
+revision is not a normal production switch.
 
 Rollback for new executions is to keep/restore the **public API** native
 feature flag to `0`. Continue to preserve pinned binary digests and execution
