@@ -1,0 +1,80 @@
+name: Publish native Rust workflow (manual)
+
+# Deployment uses existing GitHub WIF/GCP deployer IAM,
+# not AWFL user credentials or a new site-owner role.
+on:
+  workflow_dispatch:
+    inputs:
+      workflow_name:
+        description: "Deployed name, including environment suffix"
+        type: string
+        required: true
+        default: NativePilot
+      fixture:
+        description: "Scala-generated ABI 3 pure pilot crate"
+        type: choice
+        options:
+          - native-v2-pure-nested
+          - native-v2-each
+          - native-v2-fold
+        required: true
+        default: native-v2-pure-nested
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+    steps:
+      - name: Checkout Workflows publisher
+        uses: actions/checkout@v4
+
+      # Same checked-in Terraform outputs as deploy-workflows.yml. The
+      # Workflows repo does not require separate GitHub variable setup.
+      - name: Load existing GCP deployment variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .github/actions-variables.json
+          jq -r 'to_entries[] | [.key, .value] | @tsv' .github/actions-variables.json |
+            while IFS=$'\t' read -r key value; do
+              printf '%s=%s\n' "$key" "$value" >> "$GITHUB_ENV"
+            done
+
+      - name: Checkout pinned AWFL Rust compiler
+        uses: actions/checkout@v4
+        with:
+          repository: awfl-us/compiler-rust
+          ref: f0029f45caa8a0d0d7c0b1b87da8d6d2ae5f4274
+          path: compiler-rust
+
+      - name: Use tested Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.99.1'
+
+      - name: Authenticate with Workflows deployer IAM
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER || vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT || vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Install gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Publish immutable binary then activate release
+        shell: bash
+        env:
+          WORKFLOW_NAME: ${{ inputs.workflow_name }}
+          FIXTURE: ${{ inputs.fixture }}
+        run: |
+          set -euo pipefail
+          bash scripts/publish-native.sh "$WORKFLOW_NAME" \
+            "compiler-rust/fixtures/$FIXTURE" \
+            "$GCP_PROJECT_ID-native-workflows"
