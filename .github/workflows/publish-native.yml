@@ -52,16 +52,8 @@ jobs:
           ref: f0029f45caa8a0d0d7c0b1b87da8d6d2ae5f4274
           path: compiler-rust
 
-      - name: Use tested Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: '1.99.1'
-          targets: x86_64-unknown-linux-musl
-
-      - name: Install static musl compiler and ELF inspector
-        timeout-minutes: 5
-        run: |
-          sudo apt-get install -y --no-install-recommends musl-tools binutils
+      # A Dockerized Alpine Rust compiler creates static Linux executables
+      # without relying on Ubuntu package installation or host glibc.
 
       - name: Authenticate with Workflows deployer IAM
         uses: google-github-actions/auth@v2

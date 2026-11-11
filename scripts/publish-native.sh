@@ -24,7 +24,7 @@ bucket="$3"
   echo "Missing generated Scala-to-Rust crate files" >&2
   exit 2
 }
-for required in jq cargo sha256sum gcloud readelf musl-gcc; do
+for required in jq sha256sum gcloud python3 docker; do
   command -v "$required" >/dev/null || {
     echo "Missing required command: $required" >&2
     exit 2
@@ -52,34 +52,19 @@ jq -e 'all(.[]; . == "http.get" or . == "http.post" or
   exit 2
 }
 
-# The Jobs service image is node:22-alpine (musl). Host-built Ubuntu/glibc
-# executables would fail there. Build a fully static musl ELF that is portable
-# across the Cloud Run service and native testing environments.
+# Build inside the same musl family as the Jobs Alpine image. The common
+# static-builder checks ELF architecture and forbids a dynamic interpreter.
 target_dir=$(mktemp -d)
 trap 'rm -rf "$target_dir"' EXIT
-export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc
-cargo build --locked --release --target x86_64-unknown-linux-musl \
-  --manifest-path "$crate/Cargo.toml" \
-  --target-dir "$target_dir/build"
-package=$(cargo metadata --format-version 1 --no-deps \
-  --manifest-path "$crate/Cargo.toml" | jq -r '.packages[0].name')
-[[ "$package" =~ ^[A-Za-z0-9_-]+$ ]] || {
-  echo "Invalid compiled Cargo package name" >&2
-  exit 2
-}
-binary="$target_dir/build/x86_64-unknown-linux-musl/release/$package"
-[[ -f "$binary" ]] || { echo "Missing compiled executable" >&2; exit 2; }
-magic=$(od -An -N4 -tx1 "$binary" | tr -d ' \n')
-[[ "$magic" == "7f454c46" ]] || {
-  echo "Expected native Linux ELF executable" >&2
-  exit 2
-}
-# A static executable does not depend on glibc, musl dynamic loaders, or
-# libraries unavailable in the minimal Alpine Jobs container.
-if readelf -l "$binary" | grep -q INTERP; then
-  echo "Compiled native workflow has a dynamic interpreter; expected static musl" >&2
-  exit 2
-fi
+bash "$(dirname "$0")/build-native-static.sh" "$crate" "$target_dir"
+package=$(python3 - "$crate/Cargo.toml" <<'PY'
+import sys
+import tomllib
+with open(sys.argv[1], "rb") as stream:
+    print(tomllib.load(stream)["package"]["name"])
+PY
+)
+binary="$target_dir/target/x86_64-unknown-linux-musl/release/$package"
 digest=$(sha256sum "$binary" | cut -d' ' -f1)
 source_workflow=$(jq -r '.workflow' "$crate/manifest.json")
 prefix="native-workflows"
