@@ -59,9 +59,9 @@ jobs:
           targets: x86_64-unknown-linux-musl
 
       - name: Install static musl compiler and ELF inspector
+        timeout-minutes: 5
         run: |
-          sudo apt-get update
-          sudo apt-get install -y musl-tools binutils
+          sudo apt-get install -y --no-install-recommends musl-tools binutils
 
       - name: Authenticate with Workflows deployer IAM
         uses: google-github-actions/auth@v2
