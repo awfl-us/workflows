@@ -30,6 +30,15 @@ resource "google_storage_bucket_iam_member" "native_artifact_deployer" {
   member = "serviceAccount:${var.create_deploy_sa ? "${var.deploy_sa_name}@${var.project_id}.iam.gserviceaccount.com" : var.deploy_sa_email}"
 }
 
+# Match existing Workflows publication permissions: the gcloud storage
+# client may read bucket metadata as well as create GCS objects.
+resource "google_storage_bucket_iam_member" "native_artifact_deployer_metadata" {
+  count  = local.deploy_sa_member != null ? 1 : 0
+  bucket = google_storage_bucket.native_artifacts.name
+  role   = "roles/storage.legacyBucketReader"
+  member = "serviceAccount:${var.create_deploy_sa ? "${var.deploy_sa_name}@${var.project_id}.iam.gserviceaccount.com" : var.deploy_sa_email}"
+}
+
 # API and Jobs currently use the default Compute runtime service account.
 # It may read approved releases but cannot overwrite or deploy them.
 resource "google_storage_bucket_iam_member" "native_artifact_runtime_reader" {
