@@ -115,7 +115,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           val messages = Switch.list("messages", List(
             skipAddMessages.cel -> {
               val buildMessage = Try("buildMessage", List() -> obj(message))
-              List(buildMessage) -> ListValue[ChatMessage](CelFunc("list.concat", buildYojStep.resultValue, buildMessage.resultValue))
+              List(buildMessage) -> ListValue[ChatMessage](list.concat( buildYojStep.resultValue, buildMessage.resultValue))
             },
             (true: Cel) -> (List() -> buildYojStep.resultValue)
           ))
@@ -136,7 +136,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               obj(us.awfl.ista.ChatMessage(
                 role = responseMessage.flatMap(_.role),
                 content = responseMessage.flatMap(_.content),
-                tool_calls = ListValue(CelFunc("map.get", responseMessage, "tool_calls")),
+                tool_calls = ListValue(map.get( responseMessage, "tool_calls")),
                 create_time = Value(time.now())
               )),
               cost = completeStep.result.total_cost
@@ -152,9 +152,8 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         ))
 
         val toolCalls = ListValue[ToolCall](
-          CelFunc(
-            "default",
-            CelFunc("map.get", complete.resultValue.flatMap(_.message).cel, "tool_calls"),
+          core.default(
+            map.get( complete.resultValue.flatMap(_.message).cel, "tool_calls"),
             CelConst("[]")
           )
         )
@@ -183,7 +182,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         ))
 
         val maybeToolFeedback = Switch("maybeToolFeedback", List(
-          ((CelFunc("len", processToolCalls.result.results) > 0) && !skipToolFeedback) -> {
+          ((core.len( processToolCalls.result.results) > 0) && !skipToolFeedback) -> {
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
               obj(EventHandler.Input(
@@ -196,7 +195,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             )
             Call[RunWorkflowArgs[Input], ChatToolResponse](
               "toolCallsCompleted",
-              "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+              CallOperations.WorkflowRun,
               obj(toolFeedbackArgs)
             ).fn
           },
@@ -264,16 +263,13 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         ) -> whenAcquired.resultValue
       },
       err => {
-        val errMsg = str(CelFunc(
-          "default",
-          CelFunc(
-            "default",
-            CelFunc(
-              "default",
-              CelFunc("map.get", err.cel, CelConst("""["body", "error", "message"]""")),
-              CelFunc("map.get", err.cel, CelConst("""["body", "error"]"""))
+        val errMsg = str(core.default(
+          core.default(
+            core.default(
+              map.get( err.cel, CelConst("""["body", "error", "message"]""")),
+              map.get( err.cel, CelConst("""["body", "error"]"""))
             ),
-            CelFunc("map.get", err.cel, "message")
+            map.get( err.cel, "message")
           ),
           "Unknown error"
         ))

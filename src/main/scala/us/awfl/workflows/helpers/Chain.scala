@@ -28,7 +28,7 @@ object Chain extends us.awfl.core.Workflow {
     )
     val initCall = Call[RunWorkflowArgs[AnyValueT], AnyValueT](
       "Run",
-      "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+      CallOperations.WorkflowRun,
       obj(initArgs)
     )
     val runTail = Fold("foldWorkflows", initCall.resultValue, input.tail) { case (b, wfArgs) =>
@@ -38,7 +38,7 @@ object Chain extends us.awfl.core.Workflow {
       )
       Call[RunWorkflowArgs[ChainableInput[AnyValueT, AnyValueT]], AnyValueT](
         "Run",
-        "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+        CallOperations.WorkflowRun,
         obj(args)
       ).fn
     }
@@ -56,7 +56,7 @@ object Chain extends us.awfl.core.Workflow {
     )
     val call = Call[RunWorkflowArgs[Input], AnyValueT](
       "callChain",
-      "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+      CallOperations.WorkflowRun,
       obj(args)
     )
     Block("chainBlock", List[Step[?, ?]](buildWorkflows, call) -> call.resultValue)

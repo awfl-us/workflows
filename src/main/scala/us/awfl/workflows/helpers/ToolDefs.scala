@@ -85,7 +85,7 @@ object ToolDefs extends us.awfl.core.Workflow {
   // Expose as callable workflow (query-only: returns value list of Tool definitions)
   def apply(name: String, sessionId: Value[String], toolNames: ListValue[String]): Call[RunWorkflowArgs[Input], Result] = {
     val args = RunWorkflowArgs(str("helpers-ToolDefs${WORKFLOW_ENV}"), obj(Input(toolNames)))
-    Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    Call(name, CallOperations.WorkflowRun, obj(args))
   }
 
   override def workflows = {
@@ -97,7 +97,7 @@ object ToolDefs extends us.awfl.core.Workflow {
       .flatMapList(_.items)
 
     val maybeFetch = Switch.list("maybeFetch", List(
-      (CelFunc("len", input.toolNames) > 0) -> fetchItems.fn,
+      (core.len( input.toolNames) > 0) -> fetchItems.fn,
       (true: Cel) -> (List.empty[Step[?, ?]] -> ListValue.empty)
     ))
 

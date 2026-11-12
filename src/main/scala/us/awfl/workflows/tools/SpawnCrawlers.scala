@@ -62,8 +62,7 @@ object SpawnCrawlers extends ToolWorkflow {
   ))
 
   override def workflows = List({
-    val argsVal = Value[Args](CelFunc(
-      "json.decode",
+    val argsVal = Value[Args](json.decode(
       inputVal.flatMap(_.tool_call).flatMap(_.function).flatMap(_.arguments)
     ))
     val args = argsVal.get
@@ -72,7 +71,7 @@ object SpawnCrawlers extends ToolWorkflow {
 
     val spawn = ParallelFor("spawn", args.items) { item =>
       val itemPrompt = ("Your sole responsibility/area of focus is: ": Cel) + item + CelStr("\n").safe
-      val crawlerSession = str(("crawler_": Cel) + CelFunc("base64.encode", CelFunc("text.encode", item, "UTF-8")))
+      val crawlerSession = str(("crawler_": Cel) + base64.encode( text.encode( item, "UTF-8")))
       val updatedTask = Switch("updatedTask", List(
         (("task": Cel) in argsVal) -> (List() -> {
           val safeTask = args.task.getOrElse(Value.nil).get
@@ -110,7 +109,7 @@ object SpawnCrawlers extends ToolWorkflow {
 
     Workflow(
       List[Step[?, ?]](spawn, sumSpent) -> obj(ToolWorkflow.Result(
-        str(CelFunc("json.encode_to_string", spawn.resultValue)),
+        str(json.encode_to_string( spawn.resultValue)),
         sumSpent.resultValue
       ))
     )

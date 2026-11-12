@@ -47,6 +47,6 @@ trait ExtractLesson(using kala: SegKala) {
 
   def apply(name: String, sessionId: Value[String]): Call[RunWorkflowArgs[ExtractLessonInput], Lesson] = {
     val args = RunWorkflowArgs(str("homeschool-ExtractLesson${WORKFLOW_ENV}"), obj(ExtractLessonInput(sessionId)), connector_params = ConnectorParams(true))
-    Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    Call(name, CallOperations.WorkflowRun, obj(args))
   }
 }

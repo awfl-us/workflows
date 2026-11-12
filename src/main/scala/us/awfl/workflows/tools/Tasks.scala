@@ -50,7 +50,7 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
     val cost     = input.cost
 
     val nameV: Value[String] = toolCall.flatMap(_.function).get.name
-    val nameStr: Cel = CelFunc("string", nameV)
+    val nameStr: Cel = core.string( nameV)
 
     // Build branches
     val (createSteps, createMsg) = TaskRunners.runCreate(toolCall = toolCall )
@@ -96,6 +96,6 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
     cost: BaseValue[Double],
   ): Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result] = {
     val args = RunWorkflowArgs(str("tools-Tasks${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, cost)))
-    Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    Call(name, CallOperations.WorkflowRun, obj(args))
   }
 }

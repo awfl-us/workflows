@@ -20,7 +20,7 @@ object TaskRunners {
     val title = fn.arg("title")
     val desc  = fn.arg("description")
     // Default to In Progress if omitted
-    val status = str(CelFunc("default", fn.arg("status").cel, "In Progress"))
+    val status = str(core.default( fn.arg("status").cel, "In Progress"))
 
     // Important: execute the POST exactly once inside Try to avoid duplicate creation on retries
     val tryCreate = Try("tryCreateTask", {
@@ -29,7 +29,7 @@ object TaskRunners {
       val line = Tasks.taskToLine("Created task", body)
       List(create) -> line
     }, err => {
-      val msg = str((("Task create failed: ": Cel)) + CelFunc("string", err.cel))
+      val msg = str((("Task create failed: ": Cel)) + core.string( err.cel))
       List() -> msg
     })
 
@@ -54,7 +54,7 @@ object TaskRunners {
       // Do not include `patch` here to avoid double execution
       List() -> line
     }, err => {
-      val msg = str((("Task update failed: ": Cel)) + CelFunc("string", err.cel))
+      val msg = str((("Task update failed: ": Cel)) + core.string( err.cel))
       List() -> msg
     })
 
@@ -64,14 +64,14 @@ object TaskRunners {
     // - Do nothing if there is already an In Progress task for the session.
     // - Promote only the oldest Queued task (limit=1, order=asc).
     val updatedStatus = patch.resultValue.flatMap(_.body).flatMap(_.task).flatMap(_.status)
-    val isDoneCel: Cel = CelFunc("string", updatedStatus.cel) === ("Done": Cel)
+    val isDoneCel: Cel = core.string( updatedStatus.cel) === ("Done": Cel)
 
     val maybePromoteInner: Step[String, Value[String]] = {
       val getInProgress = get[Tasks.TasksList](
         "promote_get_in_progress",
         Tasks.bySessionUrl("In%20Progress", 1, "desc")
       )
-      val inProgLen: Cel = CelFunc("len", getInProgress.resultValue.flatMap(_.body).flatMap(_.tasks).cel)
+      val inProgLen: Cel = core.len( getInProgress.resultValue.flatMap(_.body).flatMap(_.tasks).cel)
 
       val promoteIfNoCurrent = Switch[String, Value[String]]("promote_if_no_current_in_progress", List(
         (inProgLen === 0) -> {
@@ -79,7 +79,7 @@ object TaskRunners {
             "promote_get_oldest_queued",
             Tasks.bySessionUrl("Queued", 1, "asc")
           )
-          val queuedLen: Cel = CelFunc("len", getQueued.resultValue.flatMap(_.body).flatMap(_.tasks).cel)
+          val queuedLen: Cel = core.len( getQueued.resultValue.flatMap(_.body).flatMap(_.tasks).cel)
 
           val promoteIfHasQueued = Switch[String, Value[String]]("promote_if_has_queued", List(
             (queuedLen > 0) -> {

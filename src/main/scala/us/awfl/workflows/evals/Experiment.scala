@@ -42,11 +42,11 @@ trait Experiment[P: Spec, R: Spec] extends us.awfl.core.Workflow {
   }
 
   override def workflows: List[Workflow[?]] = List({
-    val saveInput = CliTools.writeFile(inputFile, str(CelFunc("json.encode_to_string", inputVal)))
-    val saveAnswer = CliTools.writeFile(answerFile, str(CelFunc("json.encode_to_string", task.resultValue)))
+    val saveInput = CliTools.writeFile(inputFile, str(json.encode_to_string( inputVal)))
+    val saveAnswer = CliTools.writeFile(answerFile, str(json.encode_to_string( task.resultValue)))
 
     val runEval = eval(task.resultValue)
-    val saveResult = CliTools.writeFile(resultsFile, str(CelFunc("json.encode_to_string", runEval.resultValue)))
+    val saveResult = CliTools.writeFile(resultsFile, str(json.encode_to_string( runEval.resultValue)))
 
     Workflow(List[Step[?, ?]](saveInput, task, saveAnswer, runEval, saveResult) -> runEval.resultValue)
   })

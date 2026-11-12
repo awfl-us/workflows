@@ -48,7 +48,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
 
     Workflow(buildSteps(
       List[Step[?, ?]](awaitCallback) -> obj(ToolWorkflow.Result(
-        str(CelFunc("json.encode_to_string", awaitCallback.resultValue)),
+        str(json.encode_to_string( awaitCallback.resultValue)),
         Value(0)
       )),
       _ => List() -> Value.nil[Result]
@@ -66,7 +66,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     val args = RunWorkflowArgs(str("tools-CliTools${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, cost, env = obj(Env.get.copy(sessionId = sessionId, background = OptValue(background))))))
     val run = Call[RunWorkflowArgs[Input], Result](
       s"${opName}_run_tools_CliTools",
-      "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+      CallOperations.WorkflowRun,
       obj(args)
     )
 

@@ -30,14 +30,14 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
 
     // Target workflow name is the tool name itself (no prefixing); caller is responsible for matching deployment name
     val nameV: Value[String] = toolCall.flatMap(_.function).get.name
-    val nameStr: Cel = CelFunc("string", nameV.cel)
+    val nameStr: Cel = core.string( nameV.cel)
 
     val fn = toolCall.flatMap(_.function).get
     val query: Value[String] = fn.arg("query")
-    val task: Value[Task] = Value(CelFunc("default", fn.arg("task").cel, CelConst("null")))
+    val task: Value[Task] = Value(core.default( fn.arg("task").cel, CelConst("null")))
     // Model is optional; provide a conservative default suitable for tooling if omitted
-    val modelField: Value[String] = str(CelFunc("default", fn.arg("model").cel, "gpt-5"))
-    val fund = Value[Double](CelFunc("default", fn.arg("fund").cel, 0))
+    val modelField: Value[String] = str(core.default( fn.arg("model").cel, "gpt-5"))
+    val fund = Value[Double](core.default( fn.arg("fund").cel, 0))
 
     val args = RunWorkflowArgs(
       // Invoke the workflow whose name matches the tool name directly
@@ -55,11 +55,11 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
 
     val run = Call[RunWorkflowArgs[EventHandler.Input], ChatToolResponse](
       "run_agent_workflow",
-      "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+      CallOperations.WorkflowRun,
       obj(args)
     )
 
-    val encoded = str(CelFunc("json.encode_to_string", run.resultValue.cel))
+    val encoded = str(json.encode_to_string( run.resultValue.cel))
 
     Workflow(
       List(run) -> obj(ToolWorkflow.Result(encoded, run.result.total_cost))
@@ -73,6 +73,6 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
     cost: BaseValue[Double],
   ): Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result] = {
     val args = RunWorkflowArgs(str("tools-Agent${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, cost)))
-    Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    Call(name, CallOperations.WorkflowRun, obj(args))
   }
 }

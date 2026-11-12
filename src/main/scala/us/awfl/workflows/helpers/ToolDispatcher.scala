@@ -30,7 +30,7 @@ object ToolDispatcher extends us.awfl.core.Workflow {
   // Standalone workflow (uses the default runner set: standard + Tasks)
   def apply(name: String, totalCost: BaseValue[Double], toolCalls: ListValue[ToolCall], toolDefs: ListValue[ToolWithWorkflow]): Call[RunWorkflowArgs[Input], Result] = {
     val args = RunWorkflowArgs(str("helpers-ToolDispatcher${WORKFLOW_ENV}"), obj(Input(totalCost, toolCalls, toolDefs)))
-    Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    Call(name, CallOperations.WorkflowRun, obj(args))
   }
 
   override def workflows = List({
@@ -42,7 +42,7 @@ object ToolDispatcher extends us.awfl.core.Workflow {
         Switch("matchFunction", List(
           (functionName === d.flatMap(_.function).flatMap(_.name)) -> {
             val args = RunWorkflowArgs(str(d.get.workflowName + "${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, input.totalCost)))
-            Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result]("callToolWorkflow", "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args)).fn
+            Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result]("callToolWorkflow", CallOperations.WorkflowRun, obj(args)).fn
           },
           (true: Cel) -> (List() -> b)
         )).fn
