@@ -29,6 +29,19 @@ the compatible server change before publishing or activating crates that
 require globals; keep the normal native enablement flag off until all
 production-readiness gates are passed.
 
+## Parallel fork/join capability (opt-in)
+
+A compiler-generated \`manifest.json\` advertises \`parallel_version: 1\`
+**only** if it emits native \`Parallel\` or \`ParallelFor\`.
+The IAM-owned publisher requires exact agreement between that version
+and the internal \`native.parallel\` effect and writes the corresponding
+\`parallelVersion: 1\` to the signed active release mapping. The server
+pins this version and allowed operation at execution creation. Existing
+ABI-3 executables with no parallel capability remain unchanged, and the
+normal \`AWFL_NATIVE_EXECUTION_ENABLED\` flag remains disabled until the
+full runner and recovery tests pass. The published release name/ID,
+environment and parent effect authorization must never be user supplied.
+
 ## Deployment ownership
 
 - `infra/native_workflows.tf` (existing Workflows Terraform state) owns the
