@@ -47,12 +47,23 @@ manifest_hash=$(jq -r '.source_sha256' "$crate/manifest.json")
   exit 2
 }
 trusted_globals_version=$(jq -r '.trusted_globals_version // 0' "$crate/manifest.json")
+parallel_version=$(jq -r '.parallel_version // 0' "$crate/manifest.json")
 operations=$(jq -c '[.effects[].operation] | unique' "$crate/manifest.json")
 jq -e 'all(.[]; . == "http.get" or . == "http.post" or
-  . == "http.patch" or . == "http.delete")' <<< "$operations" >/dev/null || {
+  . == "http.patch" or . == "http.delete" or . == "log.write" or
+  . == "native.parallel")' <<< "$operations" >/dev/null || {
   echo "Unapproved native effect operation" >&2
   exit 2
 }
+
+if [[ "$parallel_version" != 0 && "$parallel_version" != 1 ]] ||
+   { [[ "$parallel_version" == 1 ]] &&
+     ! jq -e 'index("native.parallel") != null' <<< "$operations" >/dev/null; } ||
+   { [[ "$parallel_version" == 0 ]] &&
+     jq -e 'index("native.parallel") != null' <<< "$operations" >/dev/null; }; then
+  echo "Native parallel operation requires matching parallel_version=1" >&2
+  exit 2
+fi
 
 # Build inside the same musl family as the Jobs Alpine image. The common
 # static-builder checks ELF architecture and forbids a dynamic interpreter.
@@ -78,10 +89,12 @@ jq -nc --arg name "$name" --arg digest "$digest" \
   --arg sourceSha "$source_hash" \
   --argjson operations "$operations" \
   --argjson trustedVersion "$trusted_globals_version" \
+  --argjson parallelVersion "$parallel_version" \
   '{schemaVersion:1,workflowName:$name,artifactSha256:$digest,
     runtimeAbi:3,protocolVersion:2,allowedOperations:$operations,
     sourceWorkflow:$source,sourceSha256:$sourceSha} +
-    (if $trustedVersion == 1 then {trustedGlobalsVersion:1} else {} end)' > "$target_dir/release.json"
+    (if $trustedVersion == 1 then {trustedGlobalsVersion:1} else {} end) +
+    (if $parallelVersion == 1 then {parallelVersion:1} else {} end)' > "$target_dir/release.json"
 
 # Publish by content digest FIRST, then switch the active alias last.
 # Existing running executions retain their pinned SHA and are unaffected.
