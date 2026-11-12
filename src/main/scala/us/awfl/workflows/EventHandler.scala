@@ -52,7 +52,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
     val model = inputVal.flatMap(_.env).get.model
     val userId = inputVal.flatMap(_.env).flatMap(_.userId)
 
-    given KalaVibhaga = SegKala(sessionId, Value("sys.now()"), Value(20 * 60))
+    given KalaVibhaga = SegKala(sessionId, Value(time.now()), Value(20 * 60))
 
     // Best-effort: if an input.task object is provided, create it for this session before completion logic
     val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", inputVal.flatMap(_.task.getOrElse(Value.nil)))
@@ -137,7 +137,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
                 role = responseMessage.flatMap(_.role),
                 content = responseMessage.flatMap(_.content),
                 tool_calls = ListValue(CelFunc("map.get", responseMessage, "tool_calls")),
-                create_time = Value("sys.now()")
+                create_time = Value(time.now())
               )),
               cost = completeStep.result.total_cost
             ).fn

@@ -49,7 +49,7 @@ object ToolDispatcher extends us.awfl.core.Workflow {
       }
 
       val saveResult = {
-        given KalaVibhaga = SegKala(Env.sessionId, Value("sys.now()"), Value(0))
+        given KalaVibhaga = SegKala(Env.sessionId, Value(time.now()), Value(0))
         Convo.addMessage(
           "saveResult",
           obj(ChatMessage(str("tool"), toolFold.result.encoded, tool_call_id = toolCall.flatMap(_.id)))
