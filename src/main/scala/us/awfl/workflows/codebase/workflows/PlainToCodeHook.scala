@@ -33,7 +33,7 @@ object PlainToCodeHook extends us.awfl.core.Workflow {
   )
 
   def apply(): Workflow[String] = {
-    val sessionId: Value[String] = Value("uuid.generate()")
+    val sessionId: Value[String] = Value(uuid.generate())
 
     val outPath: Value[String]   = inputVal.flatMap(_.filepath)
     val plainPath: Value[String] = str((("plain/": Cel) + outPath.cel))

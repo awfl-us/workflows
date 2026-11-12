@@ -45,11 +45,11 @@ object Tasks extends us.awfl.core.Workflow {
   // Stringify a task in a single line (made public for reuse by runners)
   def taskToLine(prefix: String, t: Value[Task]): Value[String] = {
     // Safely stringify possibly-null fields via CEL string() conversion; build with Cels only
-    val idCel: Cel      = CelFunc("string", t.flatMap(_.id).cel)
-    val titleCel: Cel   = CelFunc("string", t.flatMap(_.title).cel)
-    val descCel: Cel    = CelFunc("string", t.flatMap(_.description).cel)
-    val statusCel: Cel  = CelFunc("string", t.flatMap(_.status).cel)
-    val createdCel: Cel = CelFunc("string", t.flatMap(_.created).cel)
+    val idCel: Cel      = core.string( t.flatMap(_.id).cel)
+    val titleCel: Cel   = core.string( t.flatMap(_.title).cel)
+    val descCel: Cel    = core.string( t.flatMap(_.description).cel)
+    val statusCel: Cel  = core.string( t.flatMap(_.status).cel)
+    val createdCel: Cel = core.string( t.flatMap(_.created).cel)
     // Example: Current task: id=abc123 | Title — Description [status=In Progress, created=...]
     str((prefix: Cel) + (": id=": Cel) + idCel + (" | ": Cel) + titleCel + (" — ": Cel) + descCel + (" [status=": Cel) + statusCel + ("]": Cel))
   }
@@ -58,12 +58,12 @@ object Tasks extends us.awfl.core.Workflow {
     val body = getStep.resultValue.flatMap(_.body)
 
     // Defensive: detect non-object bodies before looking up fields.
-    val bodyTypeCel: Cel = CelFunc("get_type", body.cel)
-    val bodyStrCel: Cel  = CelFunc("string", body.cel)
+    val bodyTypeCel: Cel = core.get_type( body.cel)
+    val bodyStrCel: Cel  = core.string( body.cel)
 
     val contentSwitch = Switch[ChatMessage, BaseValue[ChatMessage]](s"${name}_content", List(
       // When body is an object (map) and we have at least one task
-      ((bodyTypeCel === ("map": Cel)) && (CelFunc("len", body.flatMap(_.tasks).cel) > 0)) -> {
+      ((bodyTypeCel === ("map": Cel)) && (core.len( body.flatMap(_.tasks).cel) > 0)) -> {
         val first = body.flatMap(_.tasks)(0)
         val line = taskToLine(label, first)
         List() -> obj(ChatMessage("system", line))
@@ -146,12 +146,12 @@ object Tasks extends us.awfl.core.Workflow {
   // Optional helper: create a task from EventHandler.input.task if provided
   // Expects `task` to be a map-like value with optional title/description/status
   def maybeSaveInputTask(name: String, task: Value[ToolTask]): Step[ChatMessage, BaseValue[ChatMessage]] = {
-    val isMap: Cel = CelFunc("get_type", task) === ("map": Cel)
+    val isMap: Cel = core.get_type( task) === ("map": Cel)
 
     val create = {
-      // val title       = Value[String](CelFunc("map.get", task, "title"))
-      // val description = Value[String](CelFunc("map.get", task, "description"))
-      // val status      = str(CelFunc("default", CelFunc("map.get", task, "status"), "In Progress"))
+      // val title       = Value[String](map.get( task, "title"))
+      // val description = Value[String](map.get( task, "description"))
+      // val status      = str(core.default( map.get( task, "status"), "In Progress"))
 
       val post = createTask(s"${name}_post", task.get.title, task.get.description, task.get.status)
       val body = post.resultValue.flatMap(_.body).flatMap(_.task)
@@ -171,7 +171,7 @@ object Tasks extends us.awfl.core.Workflow {
 
   def apply(name: String): Call[RunWorkflowArgs[Input], Result] = {
     val args = RunWorkflowArgs(str("helpers-Tasks${WORKFLOW_ENV}"), obj(Input()))
-    Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    Call(name, CallOperations.WorkflowRun, obj(args))
   }
 
   override def workflows = List({

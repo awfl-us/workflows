@@ -7,7 +7,7 @@ import us.awfl.workflows.tools.CliTools
 trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
   case class Args(arg1: Value[String], arg2: Value[String]) {
     val runId = arg1
-    val limit = Value[Int](CelFunc("int", arg2))
+    val limit = Value[Int](core.int( arg2))
   }
   override type Input = Args
   override type Result = String
@@ -22,7 +22,7 @@ trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
 
     val runExperiments = ParallelFor("runExperiments", buildParams.resultValue) { rawParams =>
       val params = Value[P](rawParams.cel)
-      val subDir = variables.keys.map[Cel] { k => CelFunc("map.get", params, k) }.reduce(_ + "_" + _)
+      val subDir = variables.keys.map[Cel] { k => map.get( params, k) }.reduce(_ + "_" + _)
       val run = experiment(
         name = "experiment",
         runId = input.runId,
@@ -31,7 +31,7 @@ trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
         params = params
       )
       List[Step[?,?]](
-        Log("logParams", str(("Running with params: ": Cel) + CelFunc("json.encode_to_string", params))),
+        Log("logParams", str(("Running with params: ": Cel) + json.encode_to_string( params))),
         run
       ) -> run.resultValue
     }
@@ -39,13 +39,13 @@ trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
     def toRow(row: ListValue[String]) =
       Fold("buildCsvRow", str(""), row) { (b, c) =>
         val joined = str(b.cel + "," + c)
-        List() -> str(CelFunc("text.substring", joined, 0, CelFunc("len", joined)))
+        List() -> str(text.substring( joined, 0, core.len( joined)))
       }
 
     val buildHeader = toRow(csvCols)
 
     val buildCsv = Fold("buildCsv", buildHeader.resultValue, runExperiments.resultValue) { (b, result) =>
-      val csvRow = For("csvRow", csvCols) { col => List() -> str(CelFunc("map.get", result, col)) }
+      val csvRow = For("csvRow", csvCols) { col => List() -> str(map.get( result, col)) }
       val buildRow = toRow(csvRow.resultValue)
       List(csvRow, buildRow) -> str(b.cel + CelStr("\n").safe + buildRow.resultValue)
     }
