@@ -51,6 +51,10 @@ jobs:
         run: |
           sbt clean compile
           sbt "run us.awfl.workflows.codebase.ProjectManager"
+          sbt "run us.awfl.workflows.tools.CliTools"
+
+      - name: Verify tool callback error contract
+        run: python3 -m unittest discover -s tests -v
 
       # Authenticate to Google Cloud using Workload Identity Federation
       # Prereqs (loaded from env if .github/actions-variables.json exists; otherwise from repo/org vars):
