@@ -10,6 +10,25 @@ through live Jobs/GCP effect traffic. For the canonical feature matrix and
 ordered acceptance gates, see
 [compiler-rust current state and roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
 
+## Trusted-global release capability (backwards-compatible)
+
+New compiler-rust crates include `trusted_globals_version: 1` in
+`manifest.json`. The IAM-authorized `scripts/publish-native.sh`
+checks this value and copies it to the active GCS release as the optional
+`trustedGlobalsVersion: 1` metadata field. Missing metadata indicates
+an old ABI-3 artifact: the server does not add `trusted_globals` to that
+binary's strict protocol-v2 request.
+
+For new releases, the authenticated Workflows service pins the capability
+in the Firestore execution alongside the artifact digest; Jobs passes a
+four-field trusted global envelope derived from persisted execution identity
+and server-owned GCP deployment settings. The capability is **not** inferred
+from request input or the caller's tenant project ID. Neither existing pinned
+executions nor the published `NativePilot` are implicitly migrated. Deploy
+the compatible server change before publishing or activating crates that
+require globals; keep the normal native enablement flag off until all
+production-readiness gates are passed.
+
 ## Deployment ownership
 
 - `infra/native_workflows.tf` (existing Workflows Terraform state) owns the
