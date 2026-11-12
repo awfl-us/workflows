@@ -27,7 +27,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     // The dispatcher must persist them as tool messages so agents can recover.
     val awaitCallback = Callback.toolResult[NoValueT] { callback =>
       val envelope = OperationEnvelope(
-        create_time = Value("sys.now()"),
+        create_time = Value(time.now()),
         callback_id = callback.id,
         content = Value("null"),
         tool_call = input.tool_call,
