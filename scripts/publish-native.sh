@@ -35,7 +35,8 @@ done
 # the version-2 suspend/resume protocol accepted by the native launcher.
 jq -e '.runtime_abi == 3 and (.workflow | type == "string") and
   (.source_sha256 | test("^[a-f0-9]{64}$")) and
-  (.effects | type == "array")' "$crate/manifest.json" >/dev/null || {
+  (.effects | type == "array") and
+  ((.trusted_globals_version // 0) == 0 or (.trusted_globals_version // 0) == 1)' "$crate/manifest.json" >/dev/null || {
   echo "Expected generated native ABI 3 compiler manifest" >&2
   exit 2
 }
@@ -45,6 +46,7 @@ manifest_hash=$(jq -r '.source_sha256' "$crate/manifest.json")
   echo "Compiler source hash mismatch" >&2
   exit 2
 }
+trusted_globals_version=$(jq -r '.trusted_globals_version // 0' "$crate/manifest.json")
 operations=$(jq -c '[.effects[].operation] | unique' "$crate/manifest.json")
 jq -e 'all(.[]; . == "http.get" or . == "http.post" or
   . == "http.patch" or . == "http.delete")' <<< "$operations" >/dev/null || {
@@ -75,9 +77,11 @@ jq -nc --arg name "$name" --arg digest "$digest" \
   --arg source "$source_workflow" \
   --arg sourceSha "$source_hash" \
   --argjson operations "$operations" \
+  --argjson trustedVersion "$trusted_globals_version" \
   '{schemaVersion:1,workflowName:$name,artifactSha256:$digest,
     runtimeAbi:3,protocolVersion:2,allowedOperations:$operations,
-    sourceWorkflow:$source,sourceSha256:$sourceSha}' > "$target_dir/release.json"
+    sourceWorkflow:$source,sourceSha256:$sourceSha} +
+    (if $trustedVersion == 1 then {trustedGlobalsVersion:1} else {} end)' > "$target_dir/release.json"
 
 # Publish by content digest FIRST, then switch the active alias last.
 # Existing running executions retain their pinned SHA and are unaffected.
