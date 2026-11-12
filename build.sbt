@@ -33,7 +33,7 @@ publishMavenStyle := true
 // Dependencies
 libraryDependencies ++= Seq(
   "us.awfl" %% "dsl" % "0.3.3",
-  "us.awfl" %% "workflow-utils" % "0.3.3",
+  "us.awfl" %% "workflow-utils" % "0.3.4",
   "us.awfl" %% "compiler" % "0.3.1"
 )
 

@@ -23,7 +23,9 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
 
   // Standalone workflow to handle tool calls: create callback, persist it with an ID, enqueue via relay ingest, and await callback
   override def workflows = List({
-    val awaitCallback = Callback[NoValueT] { callback =>
+    // CLI execution errors are tool results, not fatal workflow exceptions.
+    // The dispatcher must persist them as tool messages so agents can recover.
+    val awaitCallback = Callback.toolResult[NoValueT] { callback =>
       val envelope = OperationEnvelope(
         create_time = Value("sys.now()"),
         callback_id = callback.id,
