@@ -50,7 +50,7 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
     val cost     = input.cost
 
     val nameV: Value[String] = toolCall.flatMap(_.function).get.name
-    val nameStr: Cel = core.string( nameV)
+    val nameStr: Cel = nameV.cel
 
     // Build branches
     val (createSteps, createMsg) = TaskRunners.runCreate(toolCall = toolCall )

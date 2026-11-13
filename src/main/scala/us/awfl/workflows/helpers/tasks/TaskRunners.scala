@@ -29,7 +29,7 @@ object TaskRunners {
       val line = Tasks.taskToLine("Created task", body)
       List(create) -> line
     }, err => {
-      val msg = str((("Task create failed: ": Cel)) + core.string( err.cel))
+      val msg = str(("Task create failed: ": Cel) + err.get.message.cel)
       List() -> msg
     })
 
@@ -54,7 +54,7 @@ object TaskRunners {
       // Do not include `patch` here to avoid double execution
       List() -> line
     }, err => {
-      val msg = str((("Task update failed: ": Cel)) + core.string( err.cel))
+      val msg = str(("Task update failed: ": Cel) + err.get.message.cel)
       List() -> msg
     })
 
@@ -64,7 +64,7 @@ object TaskRunners {
     // - Do nothing if there is already an In Progress task for the session.
     // - Promote only the oldest Queued task (limit=1, order=asc).
     val updatedStatus = patch.resultValue.flatMap(_.body).flatMap(_.task).flatMap(_.status)
-    val isDoneCel: Cel = core.string( updatedStatus.cel) === ("Done": Cel)
+    val isDoneCel: Cel = updatedStatus.cel === ("Done": Cel)
 
     val maybePromoteInner: Step[String, Value[String]] = {
       val getInProgress = get[Tasks.TasksList](
