@@ -6,11 +6,19 @@ on:
       - '.github/workflows/test-native-publisher.yml'
       - '.github/workflows/publish-native.yml'
       - 'scripts/publish-native.sh'
+      - 'scripts/native-dev.py'
+      - 'scripts/native-dev-targets.json'
+      - 'scripts/verify-native-elf.py'
+      - 'tests/test_native_dev.py'
   pull_request:
     paths:
       - '.github/workflows/test-native-publisher.yml'
       - '.github/workflows/publish-native.yml'
       - 'scripts/publish-native.sh'
+      - 'scripts/native-dev.py'
+      - 'scripts/native-dev-targets.json'
+      - 'scripts/verify-native-elf.py'
+      - 'tests/test_native_dev.py'
 
 permissions:
   contents: read
@@ -20,6 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate one-command native publisher and closure checks
+        run: python3 -m unittest discover -s tests -p 'test_native_dev.py' -v
 
       - name: Checkout pinned Scala-generated Rust fixtures
         uses: actions/checkout@v4

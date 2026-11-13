@@ -24,7 +24,7 @@ bucket="$3"
   echo "Missing generated Scala-to-Rust crate files" >&2
   exit 2
 }
-for required in jq sha256sum gcloud python3 docker; do
+for required in jq sha256sum gcloud python3; do
   command -v "$required" >/dev/null || {
     echo "Missing required command: $required" >&2
     exit 2
@@ -36,7 +36,8 @@ done
 jq -e '.runtime_abi == 3 and (.workflow | type == "string") and
   (.source_sha256 | test("^[a-f0-9]{64}$")) and
   (.effects | type == "array") and
-  ((.trusted_globals_version // 0) == 0 or (.trusted_globals_version // 0) == 1)' "$crate/manifest.json" >/dev/null || {
+  ((.trusted_globals_version // 0) == 0 or (.trusted_globals_version // 0) == 1) and
+  ((.parallel_version // 0) == 0 or (.parallel_version // 0) == 1)' "$crate/manifest.json" >/dev/null || {
   echo "Expected generated native ABI 3 compiler manifest" >&2
   exit 2
 }
@@ -48,9 +49,16 @@ manifest_hash=$(jq -r '.source_sha256' "$crate/manifest.json")
 }
 trusted_globals_version=$(jq -r '.trusted_globals_version // 0' "$crate/manifest.json")
 operations=$(jq -c '[.effects[].operation] | unique' "$crate/manifest.json")
-jq -e 'all(.[]; . == "http.get" or . == "http.post" or
-  . == "http.patch" or . == "http.delete")' <<< "$operations" >/dev/null || {
-  echo "Unapproved native effect operation" >&2
+parallel_version=$(jq -r '.parallel_version // 0' "$crate/manifest.json")
+jq -en --argjson operations "$operations" --argjson parallel "$parallel_version" '
+  all($operations[]; . == "http.get" or . == "http.post" or
+    . == "http.patch" or . == "http.delete" or . == "log.write" or
+    . == "native.parallel" or . == "workflow.run" or
+  . == "storage.object_get" or . == "callback.create" or
+  . == "callback.await") and
+  (($parallel == 1) == ($operations | index("native.parallel") != null))
+' >/dev/null || {
+  echo "Unapproved or inconsistent native effect operations" >&2
   exit 2
 }
 
@@ -58,7 +66,10 @@ jq -e 'all(.[]; . == "http.get" or . == "http.post" or
 # static-builder checks ELF architecture and forbids a dynamic interpreter.
 target_dir=$(mktemp -d)
 trap 'rm -rf "$target_dir"' EXIT
-bash "$(dirname "$0")/build-native-static.sh" "$crate" "$target_dir"
+if [[ -z "${AWFL_NATIVE_PREBUILT_BINARY:-}" ]]; then
+  command -v docker >/dev/null || { echo "Missing docker for standalone build" >&2; exit 2; }
+  bash "$(dirname "$0")/build-native-static.sh" "$crate" "$target_dir"
+fi
 package=$(python3 - "$crate/Cargo.toml" <<'PY'
 import sys
 import tomllib
@@ -66,7 +77,8 @@ with open(sys.argv[1], "rb") as stream:
     print(tomllib.load(stream)["package"]["name"])
 PY
 )
-binary="$target_dir/target/x86_64-unknown-linux-musl/release/$package"
+binary="${AWFL_NATIVE_PREBUILT_BINARY:-$target_dir/target/x86_64-unknown-linux-musl/release/$package}"
+python3 "$(dirname "$0")/verify-native-elf.py" "$binary"
 digest=$(sha256sum "$binary" | cut -d' ' -f1)
 source_workflow=$(jq -r '.workflow' "$crate/manifest.json")
 prefix="native-workflows"
@@ -78,14 +90,24 @@ jq -nc --arg name "$name" --arg digest "$digest" \
   --arg sourceSha "$source_hash" \
   --argjson operations "$operations" \
   --argjson trustedVersion "$trusted_globals_version" \
+  --argjson parallelVersion "$parallel_version" \
   '{schemaVersion:1,workflowName:$name,artifactSha256:$digest,
     runtimeAbi:3,protocolVersion:2,allowedOperations:$operations,
     sourceWorkflow:$source,sourceSha256:$sourceSha} +
-    (if $trustedVersion == 1 then {trustedGlobalsVersion:1} else {} end)' > "$target_dir/release.json"
+    (if $trustedVersion == 1 then {trustedGlobalsVersion:1} else {} end) +
+    (if $parallelVersion == 1 then {parallelVersion:1} else {} end)' > "$target_dir/release.json"
 
 # Publish by content digest FIRST, then switch the active alias last.
 # Existing running executions retain their pinned SHA and are unaffected.
-gcloud storage cp "$binary" "$artifact_uri"
-gcloud storage cp "$target_dir/release.json" "$active_uri"
+# Skip unchanged binaries and mappings during repeated development iterations.
+if ! gcloud storage ls "$artifact_uri" >/dev/null 2>&1; then
+  gcloud storage cp "$binary" "$artifact_uri"
+fi
+if ! gcloud storage cat "$active_uri" > "$target_dir/previous.json" 2>/dev/null ||
+   ! diff -q <(jq -S . "$target_dir/previous.json")               <(jq -S . "$target_dir/release.json") >/dev/null; then
+  gcloud storage cp "$target_dir/release.json" "$active_uri"
+else
+  echo "Unchanged active release: $name"
+fi
 echo "Published native workflow $name: $digest"
 echo "Active mapping: $active_uri"
