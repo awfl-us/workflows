@@ -44,11 +44,11 @@ object Tasks extends us.awfl.core.Workflow {
 
   // Stringify a task in a single line (made public for reuse by runners)
   def taskToLine(prefix: String, t: Value[Task]): Value[String] = {
-    // Safely stringify possibly-null fields via CEL string() conversion; build with Cels only
-    val idCel: Cel      = core.string( t.flatMap(_.id).cel)
-    val titleCel: Cel   = core.string( t.flatMap(_.title).cel)
-    val descCel: Cel    = core.string( t.flatMap(_.description).cel)
-    val statusCel: Cel  = core.string( t.flatMap(_.status).cel)
+    // String fields already have the correct CEL type; default nullable labels before concatenation.
+    val idCel: Cel      = t.flatMap(_.id).cel
+    val titleCel: Cel   = core.default(t.flatMap(_.title).cel, "")
+    val descCel: Cel    = core.default(t.flatMap(_.description).cel, "")
+    val statusCel: Cel  = t.flatMap(_.status).cel
     val createdCel: Cel = core.string( t.flatMap(_.created).cel)
     // Example: Current task: id=abc123 | Title — Description [status=In Progress, created=...]
     str((prefix: Cel) + (": id=": Cel) + idCel + (" | ": Cel) + titleCel + (" — ": Cel) + descCel + (" [status=": Cel) + statusCel + ("]": Cel))
@@ -59,7 +59,7 @@ object Tasks extends us.awfl.core.Workflow {
 
     // Defensive: detect non-object bodies before looking up fields.
     val bodyTypeCel: Cel = core.get_type( body.cel)
-    val bodyStrCel: Cel  = core.string( body.cel)
+    val bodyStrCel: Cel  = json.encode_to_string(body.cel)
 
     val contentSwitch = Switch[ChatMessage, BaseValue[ChatMessage]](s"${name}_content", List(
       // When body is an object (map) and we have at least one task
