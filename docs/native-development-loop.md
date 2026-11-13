@@ -45,14 +45,18 @@ releases the parent execution lease without treating uncertain transport
 outcomes as confirmed failures. Local compiled-Rust and Node regression tests
 pass.
 
-**Current deployment gate:** merge the compatible server and compiler fixes;
-update the compiler commit pinned by
-`.github/workflows/publish-projectmanager-native.yml`; republish the 26
-workflow closure artifacts; then submit a production Project Manager session
-through the normal authenticated API, verifying an actual tool result and a
-terminal execution status. Do not infer success merely from a submitted
-execution ID or a successfully deployed worker. Detached/background
-workflow behavior remains outside this smoke-test milestone.
+**Production foreground smoke PASSED:** compiler-rust #37, server #110,
+and workflows #21 were merged. The server release
+[43526306771](https://github.com/awfl-us/server/actions/runs/43526306771)
+and Project Manager native dependency publication
+[43526560336](https://github.com/awfl-us/workflows/actions/runs/43526560336)
+succeeded. An authenticated Project Manager session launched with the
+real web/CLI-shaped optional environment, called `LIST_DIRECTORY` against
+the project workspace, persisted the tool's directory listing, and resumed
+to a final assistant response. The initial native execution completed with
+30 recorded effects, and the follow-up execution reached `Done` without
+error. This verifies a single foreground execution cycle; detached/background
+recovery and uncertain remote-effect replay remain separate work.
 
 
 One command builds the unchanged Scala ProjectManager and all registered

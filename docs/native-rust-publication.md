@@ -2,13 +2,16 @@
 
 **Updated November 13, 2026.** The production deployment now has native
 routing enabled on API and Jobs and the Terraform-managed GKE worker is ready.
-[ProjectManager's 26-workflow closure was published](https://github.com/awfl-us/workflows/actions/runs/43517486016).
-The first production native Project Manager session reached native execution,
-but was blocked by missing optional env field parity. The fixes in
-[compiler-rust #37](https://github.com/awfl-us/compiler-rust/pull/37)
-and [server #110](https://github.com/awfl-us/server/pull/110)
-must be released together and the closure republished before an end-to-end
-success can be claimed.
+[ProjectManager's 26-workflow closure was republished](https://github.com/awfl-us/workflows/actions/runs/43526560336)
+with the corrected native compiler. The first native session revealed optional
+environment lookup and deployment suffix issues; the merged fixes in
+[compiler-rust #37](https://github.com/awfl-us/compiler-rust/pull/37),
+[server #110](https://github.com/awfl-us/server/pull/110), and
+[workflows #21](https://github.com/awfl-us/workflows/pull/21)
+are deployed. A subsequent authenticated Project Manager session completed a
+real `LIST_DIRECTORY` tool cycle, persisted its reply, and ended `Done`
+without error. Foreground native tool execution is verified; detached
+execution and uncertain remote-effect reconciliation remain separate tasks.
 
 For the current actionable test and rollout steps, see
 [Native Rust development loop](native-development-loop.md) and
