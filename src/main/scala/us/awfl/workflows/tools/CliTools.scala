@@ -12,10 +12,9 @@ import us.awfl.utils.Events
 import us.awfl.utils.Events.OperationEnvelope
 import us.awfl.utils.post
 import us.awfl.workflows.helpers.ToolDefs._
-import us.awfl.services.Cloud
 
 object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
-  case class ProducerRequest(sessionId: Value[String] = Value.nil)
+  case class ProducerRequest(sessionId: Value[String], imageProfile: Value[String])
 
   val toolNames = CliToolDefs.toolNames
 
@@ -43,7 +42,13 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
         source = str("workflows.tools.CliTools")
       )
 
-      Block("awaitCallback", List[Step[?,?]](ingest, Cloud.start(Env.get, Value.nil)) -> noValue)
+      // GKE requires an explicit named consumer image profile. Passing
+      // image = null (the legacy Cloud.start call) now returns HTTP 400.
+      val start = post[ProducerRequest, Boolean](
+        "startProducer", "producer/start",
+        obj(ProducerRequest(Env.sessionId, str("lightweight"))), env = Env.get
+      )
+      Block("awaitCallback", List[Step[?,?]](ingest, start) -> noValue)
     }
 
     Workflow(buildSteps(
