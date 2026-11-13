@@ -1,5 +1,21 @@
 # AWFL Workflows (Scala)
 
+### Native ProjectManager development (November 13, 2026)
+
+The native compiler/publisher is available through
+[the one-command developer loop](docs/native-development-loop.md).
+From this repository (with a sibling compiler-rust checkout), run:
+
+    python3 scripts/native-dev.py codebase-ProjectManager --recursive
+    python3 scripts/native-dev.py codebase-ProjectManager --recursive --publish
+
+The first invocation only compiles and validates; the second activates
+content-addressed native GCS releases using existing IAM. All 26 static
+ProjectManager dependency binaries compile, but full live GCS publication
+and a completed real-native ProjectManager run are **still pending**.
+Normal native production routing is disabled.
+
+
 > Native Rust workflow releases: see [native publication and rollout notes](docs/native-rust-publication.md).
 > Native compilation and effectful workflow support remain experimental;
 > Google Workflows is the default production backend.

@@ -1,6 +1,12 @@
 > For rapid iteration, see [Native Rust development loop](native-development-loop.md)
 > for the one-command batch compilation and publication of ProjectManager.
 
+> November 13 checkpoint: batch compiler and publisher PRs are merged,
+> but ProjectManager's complete 26-artifact set has **not yet been
+> published to live GCS**. This publication path is IAM-authorized and
+> separate from normal native traffic routing. See the current
+> [integration action plan](https://github.com/awfl-us/compiler-rust/blob/main/docs/projectmanager-native-integration-plan-2026-11-13.md).
+
 # Native Rust workflow publication and canary status
 
 Status: **pure-workflow canary succeeded on 2026-11-11; broad rollout is disabled**.
