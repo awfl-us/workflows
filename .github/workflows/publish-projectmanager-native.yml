@@ -1,6 +1,13 @@
 name: Publish native Rust ProjectManager closure
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'scripts/native-dev.py'
+      - '.github/workflows/publish-projectmanager-native.yml'
   workflow_dispatch:
 
 permissions:
