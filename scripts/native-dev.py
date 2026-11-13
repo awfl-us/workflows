@@ -137,20 +137,64 @@ def restore_sources(output, snapshot):
     log(f"Preserved {count} unchanged Cargo source/manifest fingerprints")
 
 
+def source_fingerprint(compiler):
+    # Invalidates the cached JVM classpath on changes to either Scala module,
+    # dependency build definition, or source. No mtime-only cache guesses.
+    trees = [ROOT, compiler / "frontend"]
+    digest = hashlib.sha256()
+    for tree in trees:
+        sources = sorted((tree / "src").rglob("*.scala"))
+        build = [tree / "build.sbt", *sorted((tree / "project").glob("*.sbt")),
+                 tree / "project/build.properties"]
+        for file in sources + build:
+            if file.is_file():
+                digest.update(str(file.relative_to(tree)).encode())
+                digest.update(file.read_bytes())
+    return digest.hexdigest()
+
+
 def compile_all(args, output, modules):
     output.mkdir(parents=True, exist_ok=True)
     snapshot = snapshot_sources(output)
     classes_file = output / "classes.txt"
     classes_file.write_text("\n".join(modules) + "\n")
-    run(["sbt", "-batch", "compile"], cwd=ROOT)
-    classes = ROOT / "target/scala-3.4.2/classes"
-    if not classes.is_dir():
-        raise ValueError("Scala workflows classes not compiled: " + str(classes))
-    classpath = 'set Test / unmanagedClasspath += Attributed.blank(file("' + str(classes) + '"))'
-    run(["sbt", "-batch", classpath,
-         "Test / runMain us.awfl.compiler.rust.NativeBatchMain " +
-         " ".join(map(str, [classes_file, output, args.compiler / "runtime"]))],
-        cwd=args.compiler / "frontend")
+    cache_file = args.compiler / "target/native-dev-classpath.json"
+    fingerprint = source_fingerprint(args.compiler)
+    cache = {}
+    if cache_file.is_file():
+        try: cache = json.loads(cache_file.read_text())
+        except (ValueError, OSError): pass
+    paths = cache.get("paths", [])
+    valid = cache.get("fingerprint") == fingerprint and len(paths) >= 3 and (
+        all(Path(path).exists() for path in paths))
+    if valid:
+        log("Warm JVM classpath: skip sbt startup and unchanged Scala compilation")
+        run(["java", "-cp", os.pathsep.join(paths),
+             "us.awfl.compiler.rust.NativeBatchMain",
+             classes_file, output, args.compiler / "runtime"])
+    else:
+        log("Scala inputs changed or classpath cache missing; rebuilding")
+        run(["sbt", "-batch", "compile"], cwd=ROOT)
+        classes = ROOT / "target/scala-3.4.2/classes"
+        if not classes.is_dir():
+            raise ValueError("Compiled workflow classes missing: " + str(classes))
+        injection = 'set Test / unmanagedClasspath += Attributed.blank(file("' + str(classes) + '"))'
+        run(["sbt", "-batch", injection,
+             "Test / runMain us.awfl.compiler.rust.NativeBatchMain " +
+             " ".join(map(str, [classes_file, output, args.compiler / "runtime"]))],
+            cwd=args.compiler / "frontend")
+        cp_command = ["sbt", "-batch", injection, "show Test / fullClasspath"]
+        log("Capturing compiled JVM dependency classpath for fast next iteration")
+        result = subprocess.run(cp_command, cwd=args.compiler / "frontend",
+                                check=True, capture_output=True, text=True)
+        matched = re.findall(r"Attributed\((/[^)]+)\)", result.stdout)
+        if len(matched) < 3 or not all(Path(path).exists() for path in matched):
+            raise ValueError("Cannot validate native batch JVM classpath")
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
+        cache_file.write_text(json.dumps({
+            "fingerprint": fingerprint, "paths": matched,
+        }))
+        log(f"Cached JVM classpath with {len(matched)} entries")
     index = output / ".awfl-native-workflows"
     if not index.is_file():
         raise ValueError("Native batch did not produce an artifact index")

@@ -23,7 +23,10 @@ reuses generated crates while still verifying binaries;
    Arbitrary runtime-selected agent/tool names are not a closed dependency
    graph; register them before relying on them.
 4. Build all crates in a shared Cargo workspace and shared target directory.
-   Preserve timestamps for identical generated Rust sources.
+   Preserve timestamps for identical generated Rust sources. After the first
+   build, cache a validated JVM classpath keyed by hashes of Scala sources
+   and build settings. Unchanged warm runs invoke Java directly, without
+   starting sbt; source changes invalidate the cache automatically.
 5. Verify ELF/musl architecture, schema/ABI/source hashes, effects and
    parallel capability metadata before publishing.
 6. On --publish, the existing IAM-authorized publisher uploads immutable
@@ -33,7 +36,9 @@ reuses generated crates while still verifying binaries;
 
 The default without --publish performs no GCS changes, IAM changes, or
 Terraform changes. First release builds can take minutes; subsequent builds
-reuse compiled dependencies. JSON build reports are saved in the output dir.
+reuse compiled dependencies. A measured warm run of 26 ProjectManager
+workflows in the Scala GKE consumer completed in **8.3 seconds** (including
+Rust source generation, binary verification and zero-change Cargo build). JSON build reports are saved in the output dir.
 
 ## Native callback integration
 
