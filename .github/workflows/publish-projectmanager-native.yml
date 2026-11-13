@@ -1,0 +1,83 @@
+name: Publish native Rust ProjectManager closure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-publish-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CARGO_BUILD_JOBS: "2"
+      CARGO_INCREMENTAL: "0"
+      GCP_PROJECT_ID: awfl-us
+    steps:
+      - name: Checkout current Scala workflow definitions
+        uses: actions/checkout@v4
+
+      - name: Load Terraform-generated deployment variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -r 'to_entries[] | [.key, .value] | @tsv' .github/actions-variables.json |
+            while IFS=$'\t' read -r key value; do
+              printf '%s=%s\n' "$key" "$value" >> "$GITHUB_ENV"
+            done
+
+      - name: Checkout tested native compiler
+        uses: actions/checkout@v4
+        with:
+          repository: awfl-us/compiler-rust
+          ref: 365e99cdb90b69111999bafcd2bb4de27186dbbe
+          path: compiler-rust
+
+      - name: Install Java 21 for existing Scala DSL/compiler
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Install static Linux Rust target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+
+      - name: Install musl compiler/linker and verification utilities
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y musl-tools binutils file
+
+      - name: Authenticate with existing IAM-authorized Workflows publisher
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Install Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Compile, verify, and publish all ProjectManager dependency releases
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/native-dev.py codebase-ProjectManager \
+            --recursive \
+            --compiler "$GITHUB_WORKSPACE/compiler-rust" \
+            --bucket "$GCP_PROJECT_ID-native-workflows" \
+            --publish
+
+      - name: Inspect released ProjectManager capability
+        run: |
+          set -euo pipefail
+          gcloud storage cat "gs://$GCP_PROJECT_ID-native-workflows/native-workflows/active/codebase-ProjectManager.json" |
+            jq -e '.runtimeAbi == 3 and .protocolVersion == 2 and .parallelVersion == 1 and
+                   (.allowedOperations | index("native.parallel") != null)'
