@@ -38,17 +38,17 @@ object Tasks extends us.awfl.core.Workflow {
   def bySessionUrl(status: String, limit: Int, order: String): Value[String] = {
     // e.g., tasks/by-session/{sessionId}?status=In%20Progress&limit=1&order=desc
     val base: Cel = ("tasks/by-session/": Cel) + Env.sessionId.cel
-    val q: Cel = ("?status=": Cel) + status + ("&limit=": Cel) + limit + ("&order=": Cel) + order
+    val q: Cel = ("?status=": Cel) + status + ("&limit=": Cel) + limit.toString + ("&order=": Cel) + order
     str(base + q)
   }
 
   // Stringify a task in a single line (made public for reuse by runners)
   def taskToLine(prefix: String, t: Value[Task]): Value[String] = {
     // Safely stringify possibly-null fields via CEL string() conversion; build with Cels only
-    val idCel: Cel      = core.string( t.flatMap(_.id).cel)
-    val titleCel: Cel   = core.string( t.flatMap(_.title).cel)
-    val descCel: Cel    = core.string( t.flatMap(_.description).cel)
-    val statusCel: Cel  = core.string( t.flatMap(_.status).cel)
+    val idCel: Cel      = t.flatMap(_.id).cel
+    val titleCel: Cel   = t.flatMap(_.title).cel
+    val descCel: Cel    = t.flatMap(_.description).cel
+    val statusCel: Cel  = t.flatMap(_.status).cel
     val createdCel: Cel = core.string( t.flatMap(_.created).cel)
     // Example: Current task: id=abc123 | Title — Description [status=In Progress, created=...]
     str((prefix: Cel) + (": id=": Cel) + idCel + (" | ": Cel) + titleCel + (" — ": Cel) + descCel + (" [status=": Cel) + statusCel + ("]": Cel))
