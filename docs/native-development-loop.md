@@ -32,7 +32,10 @@ reuses generated crates while still verifying binaries;
 6. On --publish, the existing IAM-authorized publisher uploads immutable
    binaries to the Workflows-managed GCS bucket and activates manifests with
    parallelVersion, trusted globals, storage and callback capabilities.
-   Unchanged artifacts and active mappings are skipped.
+   Unchanged artifacts and active mappings are skipped. A single batched
+   GCS index download compares all active release manifests with the verified
+   local releases. Only changed workflows invoke the publisher; to bypass the
+   optimization use --force-publish.
 
 The default without --publish performs no GCS changes, IAM changes, or
 Terraform changes. First release builds can take minutes; subsequent builds

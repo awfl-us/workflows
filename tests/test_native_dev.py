@@ -82,6 +82,29 @@ class NativeDevTests(unittest.TestCase):
         second = module.source_fingerprint(compiler)
         self.assertNotEqual(first, second)
 
+    def test_remote_active_index_skips_only_exactly_matching_release_metadata(self):
+        crate = self.crate("codebase-ProjectManager",
+                           ops=("native.parallel", "workflow.run"))
+        mf_path = crate / "manifest.json"
+        manifest = json.loads(mf_path.read_text())
+        manifest["parallel_version"] = 1
+        manifest["trusted_globals_version"] = 1
+        mf_path.write_text(json.dumps(manifest))
+        crates = module.generated_crates(self.root, "codebase-ProjectManager", False, [])
+        binary = {"sha256": "a" * 64,
+                  "operations": ["native.parallel", "workflow.run"]}
+        built = {"codebase-ProjectManager": binary}
+        expected = module.expected_release("codebase-ProjectManager", manifest, binary)
+        self.assertEqual(expected["parallelVersion"], 1)
+        self.assertEqual(expected["trustedGlobalsVersion"], 1)
+        self.assertEqual(module.changed_releases(crates, built,
+            {"codebase-ProjectManager": expected}), [])
+        self.assertEqual(module.changed_releases(crates, built,
+            {"codebase-ProjectManager": {**expected, "artifactSha256": "b"*64}}),
+            ["codebase-ProjectManager"])
+        self.assertEqual(module.changed_releases(crates, built, {}),
+                         ["codebase-ProjectManager"])
+
     def test_unmodified_sources_keep_cargo_mtimes(self):
         p = self.crate("codebase-ProjectManager")
         previous = module.snapshot_sources(self.root)
