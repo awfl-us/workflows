@@ -1,5 +1,23 @@
 # Native Rust development loop
 
+## Local-first execution rule for new coding sessions
+
+The default iterative test environment is the existing **AWFL Scala GKE
+development consumer**. Run the **complete existing Jobs Express service**
+locally (`npm run start:jobs` from the server repository, with `PORT=5055`
+and `WORKFLOWS_BASE_URL=http://127.0.0.1:5055`) alongside compiled Rust
+workflows. Use a persistent interactive foreground terminal; verify
+`GET http://127.0.0.1:5055/health` in a separate command.
+
+See [server local-development instructions](https://github.com/awfl-us/server/blob/main/docs/native-local-development.md)
+for the full command, authentication boundaries, and test sequence. Do
+not redeploy Cloud Run, create Cloud Tasks, or republish 26 binaries just
+to test a native compiler or Node server fix. The separately available
+`npm run native:local` runs real Rust with **replayed recorded HTTP**;
+it is not a fresh network test. Use the isolated cloud integration canary
+only after local checks pass. Keep infrastructure/IAM Terraform-managed.
+
+
 
 ## Verified state and immediate next gate — November 13, 2026
 
