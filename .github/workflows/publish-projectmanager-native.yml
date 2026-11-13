@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: awfl-us/compiler-rust
-          ref: 365e99cdb90b69111999bafcd2bb4de27186dbbe
+          ref: bc913e1d1cba809db2ff2b84686b3bbb82a840b6
           path: compiler-rust
 
       - name: Install Java 21 for existing Scala DSL/compiler

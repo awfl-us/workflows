@@ -1,23 +1,22 @@
-> For rapid iteration, see [Native Rust development loop](native-development-loop.md)
-> for the one-command batch compilation and publication of ProjectManager.
+# Native Rust workflow publication and production state
 
-> November 13 checkpoint: batch compiler and publisher PRs are merged,
-> but ProjectManager's complete 26-artifact set has **not yet been
-> published to live GCS**. This publication path is IAM-authorized and
-> separate from normal native traffic routing. See the current
-> [integration action plan](https://github.com/awfl-us/compiler-rust/blob/main/docs/projectmanager-native-integration-plan-2026-11-13.md).
+**Updated November 13, 2026.** The production deployment now has native
+routing enabled on API and Jobs and the Terraform-managed GKE worker is ready.
+[ProjectManager's 26-workflow closure was published](https://github.com/awfl-us/workflows/actions/runs/43517486016).
+The first production native Project Manager session reached native execution,
+but was blocked by missing optional env field parity. The fixes in
+[compiler-rust #37](https://github.com/awfl-us/compiler-rust/pull/37)
+and [server #110](https://github.com/awfl-us/server/pull/110)
+must be released together and the closure republished before an end-to-end
+success can be claimed.
 
-# Native Rust workflow publication and canary status
+For the current actionable test and rollout steps, see
+[Native Rust development loop](native-development-loop.md) and
+[compiler-rust roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
 
-Status: **pure-workflow canary succeeded on 2026-11-11; broad rollout is disabled**.
-Compiler PRs #1–#7 and server native PRs #72/#78/#79 are merged, but this
-**does not** authorize non-pilot artifacts or change the runtime flag.
-The published `NativePilot` is explicitly **no-effect**; newly implemented
-`Try`/HTTP-error recovery and restricted `log.write` are verified in
-locally generated Rust plus Node transaction-compatible tests, **not**
-through live Jobs/GCP effect traffic. For the canonical feature matrix and
-ordered acceptance gates, see
-[compiler-rust current state and roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
+The historical November 11 canary details, isolated revision references, and
+original rollout gates below document the earlier disabled-flag pilot; they
+are **not current operational instructions** for the now-enabled deployment.
 
 ## Trusted-global release capability (backwards-compatible)
 
