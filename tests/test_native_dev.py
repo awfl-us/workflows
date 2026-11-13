@@ -72,6 +72,16 @@ class NativeDevTests(unittest.TestCase):
         self.assertNotIn("[workspace]", (self.root / "tools-CliTools/Cargo.toml").read_text())
         self.assertEqual(len(crates), 2)
 
+    def test_jvm_classpath_cache_invalidates_on_scala_source_change(self):
+        compiler = self.root / "compiler"
+        path = compiler / "frontend/src/main/scala/Fixture.scala"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("object Fixture { val x = 1 }")
+        first = module.source_fingerprint(compiler)
+        path.write_text("object Fixture { val x = 2 }")
+        second = module.source_fingerprint(compiler)
+        self.assertNotEqual(first, second)
+
     def test_unmodified_sources_keep_cargo_mtimes(self):
         p = self.crate("codebase-ProjectManager")
         previous = module.snapshot_sources(self.root)
