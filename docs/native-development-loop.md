@@ -19,41 +19,40 @@ only after local checks pass. Keep infrastructure/IAM Terraform-managed.
 
 
 
-## Verified state and immediate next gate — November 13, 2026
+## Verified production state and immediate next gate — November 13, 2026
 
-This command is **merged** in [workflows #13](https://github.com/awfl-us/workflows/pull/13).
-Its required single-JVM batch compiler is also **merged** in
-[compiler-rust #31](https://github.com/awfl-us/compiler-rust/pull/31).
-The unchanged ProjectManager target currently resolves to **12 Scala
-modules and 26 native workflows**.
+Project Manager and its dependency closure were published to native GCS from
+[the successful release workflow](https://github.com/awfl-us/workflows/actions/runs/43517486016).
+The normal authenticated API and Jobs services are now deployed with
+`AWFL_NATIVE_EXECUTION_ENABLED=1`; a Terraform-managed, ready GKE
+`native-jobs` worker handles detached native jobs. Terraform is applied
+**manually**, while normal server CI updates deployed container images using
+`gcloud`/`kubectl` without running Terraform.
 
-- Full first build in the GKE Scala consumer: **199.3 seconds**.
-  A fresh Scala checkout repeat: **107.4 seconds**.
-  Warm unchanged-source rerun: **52.5 seconds**, with **0.11 seconds**
-  spent by Cargo. Scala/sbt startup and project compilation now dominate
-  the warm iteration time; these are observations, not future guarantees.
-- **All 26** emitted x86-64 static-musl binaries passed validation and
-  the known static child references closed. Six runtime-selected calls
-  remain; only the explicitly registered known dynamic targets are included.
-  An arbitrary future runtime-chosen workflow requires inventory updates.
-- Three representative active manifests (root, Prompts, and CliTools)
-  passed **fake-GCS** publisher testing. The full 26-workflow release set
-  has **not yet been published to actual GCS**.
-- Native Jobs [server #97](https://github.com/awfl-us/server/pull/97)
-  is merged for durable parallel parents with local synchronous children.
-  [Server #98](https://github.com/awfl-us/server/pull/98) is **merged** (live Jobs revision verification pending)
-  for callback.create/await using the existing AWFL callback service.
-  Its 93-pass native regression suite includes a real compiled CliTools
-  callback continuation, but uses a simulated HTTP adapter.
-- The first live native ProjectManager reached six real effects before
-  an obsolete tagged Jobs revision rejected workflow.run at the parallel
-  fork; the execution was cancelled. No full native success claim.
+The first regular production native session reached the Project Manager
+dependency tree but failed on absent optional `env.workdir` and
+`env.callingWorkflowExec`. These fields are intentionally omitted by the web,
+CLI and agents session launchers, so the Rust compiler must match the Google
+`default(map.get(...), null)` behavior rather than strict field lookup.
+The same native compiler must bind `${WORKFLOW_ENV}` in the workflow-file
+bucket name rather than accessing a literal bucket with a dollar-sign suffix.
 
-**Next:** deploy callback-capable Jobs, publish and verify **all 26 real
-active GCS release mappings**, run isolated native ProjectManager through
-the existing authenticated API, then fix and repeat only observed failures.
-Normal production native routing stays off. See the
-[active ProjectManager integration plan](https://github.com/awfl-us/compiler-rust/blob/main/docs/projectmanager-native-integration-plan-2026-11-13.md).
+The follow-up change set is in
+[compiler-rust #37](https://github.com/awfl-us/compiler-rust/pull/37)
+and [server #110](https://github.com/awfl-us/server/pull/110).
+Server #110 journals confirmed child failures as catchable or terminal and
+releases the parent execution lease without treating uncertain transport
+outcomes as confirmed failures. Local compiled-Rust and Node regression tests
+pass.
+
+**Current deployment gate:** merge the compatible server and compiler fixes;
+update the compiler commit pinned by
+`.github/workflows/publish-projectmanager-native.yml`; republish the 26
+workflow closure artifacts; then submit a production Project Manager session
+through the normal authenticated API, verifying an actual tool result and a
+terminal execution status. Do not infer success merely from a submitted
+execution ID or a successfully deployed worker. Detached/background
+workflow behavior remains outside this smoke-test milestone.
 
 
 One command builds the unchanged Scala ProjectManager and all registered
