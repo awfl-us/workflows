@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import tomllib
 from pathlib import Path
@@ -231,15 +232,73 @@ def build_all(args, output, crates):
     return built
 
 
+def expected_release(name, source, build):
+    """Exactly the GCS alias schema written by publish-native.sh."""
+    release = {
+        "schemaVersion": 1,
+        "workflowName": name,
+        "artifactSha256": build["sha256"],
+        "runtimeAbi": 3,
+        "protocolVersion": 2,
+        "allowedOperations": build["operations"],
+        "sourceWorkflow": source["workflow"],
+        "sourceSha256": source["source_sha256"],
+    }
+    if source.get("trusted_globals_version", 0) == 1:
+        release["trustedGlobalsVersion"] = 1
+    if source.get("parallel_version", 0) == 1:
+        release["parallelVersion"] = 1
+    return release
+
+
+def changed_releases(crates, built, remote):
+    """Compare against IAM-published active mappings, not local receipts."""
+    return [
+        name for name in sorted(built)
+        if remote.get(name) != expected_release(name, crates[name][1], built[name])
+    ]
+
+
+def fetch_active_releases(bucket):
+    # One CLI call downloads all active metadata. Individually invoking gcloud
+    # 26 times was the remaining warm-publish bottleneck (minutes versus seconds).
+    # Failure is a cache miss: per-release publication still validates GCS.
+    with tempfile.TemporaryDirectory(prefix="awfl-native-active-") as dirname:
+        command = [
+            "gcloud", "storage", "cp",
+            f"gs://{bucket}/native-workflows/active/*.json",
+            dirname, "--quiet",
+        ]
+        log("Fetching remote active release manifests in one GCS call")
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode != 0:
+            log("Remote active-release listing unavailable; verifying each release individually")
+            return {}
+        active = {}
+        for path in Path(dirname).glob("*.json"):
+            try:
+                active[path.stem] = json.loads(path.read_text())
+            except (ValueError, OSError):
+                # Malformed remote manifest must never produce a false cache hit.
+                continue
+        log(f"Read {len(active)} remote active releases")
+        return active
+
+
 def publish_all(args, crates, built):
     if not re.fullmatch(r"[a-z0-9][a-z0-9._-]{2,220}", args.bucket):
         raise ValueError("Invalid native artifacts bucket")
-    for i, (name, meta) in enumerate(sorted(built.items()), start=1):
-        log(f"Publish {i}/{len(built)}: {name}")
+    remote = {} if args.force_publish else fetch_active_releases(args.bucket)
+    changed = changed_releases(crates, built, remote)
+    log(f"Releases changed={len(changed)} unchanged={len(built)-len(changed)}")
+    for index, name in enumerate(changed, start=1):
+        meta = built[name]
+        log(f"Publish {index}/{len(changed)}: {name}")
         env = dict(os.environ, AWFL_NATIVE_PREBUILT_BINARY=meta["binary"])
         run(["bash", ROOT / "scripts/publish-native.sh",
              name, crates[name][0], args.bucket], env=env)
-    log(f"Activated {len(built)} GCS native releases")
+    log(f"Activated {len(changed)} changed releases; "
+        f"{len(built)-len(changed)} already current")
 
 
 def main():
@@ -253,6 +312,8 @@ def main():
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--bucket", default=os.environ.get(
         "AWFL_NATIVE_ARTIFACT_BUCKET", "awfl-us-native-workflows"))
+    parser.add_argument("--force-publish", action="store_true",
+                        help="Check/re-publish all releases, bypassing the batched remote index")
     parser.add_argument("--skip-compile", action="store_true",
                         help="Reuse existing generated Rust source")
     parser.add_argument("--check", action="store_true",
