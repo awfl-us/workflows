@@ -267,3 +267,12 @@ Other notes:
 
 ## License
 MIT (see LICENSE)
+
+### Published native streaming capability
+
+`scripts/native-dev.py` and `scripts/publish-native.sh` propagate
+`stream_ipc_version:1` from compiled Rust manifests to IAM-published
+`streamIpcVersion:1` release metadata. Older manifest versions omit
+the field and retain the one-shot path in the server. This adds no
+resource or IAM change. See the compiler-rust and server persistent
+native IPC implementation plans dated November 13, 2026.

@@ -36,6 +36,7 @@ done
 jq -e '.runtime_abi == 3 and (.workflow | type == "string") and
   (.source_sha256 | test("^[a-f0-9]{64}$")) and
   (.effects | type == "array") and
+  ((.stream_ipc_version // 0) == 0 or (.stream_ipc_version // 0) == 1) and
   ((.trusted_globals_version // 0) == 0 or (.trusted_globals_version // 0) == 1) and
   ((.parallel_version // 0) == 0 or (.parallel_version // 0) == 1)' "$crate/manifest.json" >/dev/null || {
   echo "Expected generated native ABI 3 compiler manifest" >&2
@@ -47,6 +48,7 @@ manifest_hash=$(jq -r '.source_sha256' "$crate/manifest.json")
   echo "Compiler source hash mismatch" >&2
   exit 2
 }
+stream_ipc_version=$(jq -r '.stream_ipc_version // 0' "$crate/manifest.json")
 trusted_globals_version=$(jq -r '.trusted_globals_version // 0' "$crate/manifest.json")
 operations=$(jq -c '[.effects[].operation] | unique' "$crate/manifest.json")
 parallel_version=$(jq -r '.parallel_version // 0' "$crate/manifest.json")
@@ -89,11 +91,13 @@ jq -nc --arg name "$name" --arg digest "$digest" \
   --arg source "$source_workflow" \
   --arg sourceSha "$source_hash" \
   --argjson operations "$operations" \
+  --argjson streamVersion "$stream_ipc_version" \
   --argjson trustedVersion "$trusted_globals_version" \
   --argjson parallelVersion "$parallel_version" \
   '{schemaVersion:1,workflowName:$name,artifactSha256:$digest,
     runtimeAbi:3,protocolVersion:2,allowedOperations:$operations,
     sourceWorkflow:$source,sourceSha256:$sourceSha} +
+    (if $streamVersion == 1 then {streamIpcVersion:1} else {} end) +
     (if $trustedVersion == 1 then {trustedGlobalsVersion:1} else {} end) +
     (if $parallelVersion == 1 then {parallelVersion:1} else {} end)' > "$target_dir/release.json"
 
