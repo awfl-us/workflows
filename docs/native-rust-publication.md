@@ -1,3 +1,6 @@
+> For rapid iteration, see [Native Rust development loop](native-development-loop.md)
+> for the one-command batch compilation and publication of ProjectManager.
+
 # Native Rust workflow publication and canary status
 
 Status: **pure-workflow canary succeeded on 2026-11-11; broad rollout is disabled**.
