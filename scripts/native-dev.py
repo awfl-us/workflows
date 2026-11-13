@@ -244,6 +244,8 @@ def expected_release(name, source, build):
         "sourceWorkflow": source["workflow"],
         "sourceSha256": source["source_sha256"],
     }
+    if source.get("stream_ipc_version", 0) == 1:
+        release["streamIpcVersion"] = 1
     if source.get("trusted_globals_version", 0) == 1:
         release["trustedGlobalsVersion"] = 1
     if source.get("parallel_version", 0) == 1:
