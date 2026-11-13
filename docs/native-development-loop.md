@@ -23,7 +23,7 @@ modules and 26 native workflows**.
   has **not yet been published to actual GCS**.
 - Native Jobs [server #97](https://github.com/awfl-us/server/pull/97)
   is merged for durable parallel parents with local synchronous children.
-  [Server #98](https://github.com/awfl-us/server/pull/98) is **open**
+  [Server #98](https://github.com/awfl-us/server/pull/98) is **merged** (live Jobs revision verification pending)
   for callback.create/await using the existing AWFL callback service.
   Its 93-pass native regression suite includes a real compiled CliTools
   callback continuation, but uses a simulated HTTP adapter.
