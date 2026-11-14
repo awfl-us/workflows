@@ -73,6 +73,36 @@ and --bucket awfl-us-native-workflows override defaults. --skip-compile
 reuses generated crates while still verifying binaries;
 --skip-compile --check only validates generated manifests.
 
+## Follow-up: memory-first parallel performance experiment
+
+**Production status:** the normal published Rust Project Manager
+workflow is active, and the real `LIST_DIRECTORY`/final-response
+cycle passed. Today, parallel workflows use the durable native
+executor. The opt-in memory executor rejects the published
+`parallelVersion:1` capability; successful native publication
+does not imply memory mode is enabled.
+
+Next, test a bounded in-process fork/join implementation on the
+existing Rust ABI, without changing Scala workflow definitions.
+Run parallel lanes with independent captured slots, shared
+concurrency control and deterministic ordered joins while writing
+only root-level execution state. Preserve explicit DSL Cache
+semantics: if a worker crashes, uncached effects across any lane
+may replay. Durable native remains default and rollback.
+
+Verify generated Rust fork/ParallelFor fixtures and the real
+Firestore emulator, then the entire Project Manager locally
+against Jobs, then an isolated production-shaped GKE canary.
+Compare user-to-tool and user-to-final latency, correctness,
+OpenAI request time, and engine Firestore calls against durable
+native and Google Workflows; no global production flag change
+before acceptance.
+
+See the [server memory runtime plan](https://github.com/awfl-us/server/blob/main/workflows/native/MEMORY.md)
+and [compiler memory plan](https://github.com/awfl-us/compiler-rust/blob/main/docs/native-memory-execution-plan.md).
+No Terraform/IAM or compiler protocol changes are currently
+expected.
+
 ## Actual behavior
 
 1. Compile workflow Scala sources and load registered module classes.
