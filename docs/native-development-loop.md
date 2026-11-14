@@ -103,6 +103,31 @@ and [compiler memory plan](https://github.com/awfl-us/compiler-rust/blob/main/do
 No Terraform/IAM or compiler protocol changes are currently
 expected.
 
+## Production memory-parallel implementation and canary evidence
+
+[Server #112](https://github.com/awfl-us/server/pull/112) is
+merged and deployed to API, Jobs and the GKE worker by
+[run 43540051941](https://github.com/awfl-us/server/actions/runs/43540051941).
+The existing 26-artifact native Project Manager closure was
+reused unchanged.
+
+Two isolated authenticated, manually memory-pinned production
+Project Manager roots completed: a no-tool BENCH_OK in **13.22 s**
+client-observed with **zero engine effect journals**, and a
+LIST_DIRECTORY real-tool invocation in **19.87 s**, also with
+zero journals. The latter delivered real directory entries,
+launched an independent durable follow-up, and returned its
+final response, taking **37.57 s** from user message to final
+answer. Earlier durable sessions for the same task took
+49.43/51.66 s. This is functional evidence, not a statistically
+controlled benchmark.
+
+**The normal production API memory-mode flag remains unset.**
+Ordinary published Project Manager runs still use durable native;
+unpublished workflows fall back to Google. A scoped memory-mode
+opt-in, rollback and same-API A/B remain next rollout decisions.
+No workflow Scala change or Rust binary republish is required.
+
 ## Actual behavior
 
 1. Compile workflow Scala sources and load registered module classes.
