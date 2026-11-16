@@ -3,7 +3,7 @@ import asyncio
 import json
 from pathlib import Path
 
-from runner import Bridge, create_environment, evaluate, load_task, prepare
+from runner import Bridge, agent_dataset, create_environment, evaluate, load_task, prepare
 
 
 def test_public_dataset_prepare_does_not_disclose_assertions():
@@ -14,6 +14,20 @@ def test_public_dataset_prepare_does_not_disclose_assertions():
     assert len(public["business_tools"]) >= 3
     assert "assertions" not in public
     assert "initial_state" not in public
+
+
+def test_cloud_agent_dataset_rows_exclude_grader_and_world_state():
+    rows = agent_dataset("operations", "1219", 1)
+    assert len(rows) == 1
+    row = rows[0]
+    assert set(row) == {"domain", "task_id", "task_name", "task_spec"}
+    assert row["task_id"] == "1219"
+    task_spec = json.loads(row["task_spec"])
+    assert task_spec["business_tools"]
+    assert task_spec["task_name"] == "operations.monday_calendar_emergency_drill"
+    assert "assertions" not in task_spec
+    assert "initial_state" not in task_spec
+    assert "answer" not in task_spec
 
 
 def test_simulator_environments_have_distinct_worlds():

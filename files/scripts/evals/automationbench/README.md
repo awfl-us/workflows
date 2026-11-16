@@ -186,21 +186,63 @@ access, and preserve the artifact snapshot hash between build and evaluation.
 The `seed` is currently recorded for reproducibility but does **not** create
 new independent upstream scenarios. No invented robustness scores.
 
-The included Scala `AutomationBenchEval` / `experiments.AutomationBench`
-reuses `Eval` and `Experiment` for configuration expansion, input and
-answer persistence and aggregation. **That Scala experiment's build stage
-still stages the prebuilt Python reference artifact**; it has not yet been
-wired to the manual native AWFL build script or to an automated builder.
-The new native workflow was built separately and graded by the same
-independent simulator runner. Null builder usage/cost means unmeasured,
-not free.
+## Cloud-agent workflow construction (SWE-bench-style experiment)
+
+`AutomationBenchEval` and `experiments.AutomationBench` now use the same
+dataset/agent lifecycle as `SweBenchLite`, rather than staging a reference
+implementation:
+
+1. In the **parent evaluation environment**,
+   `bootstrap_parent.sh` installs `uv`, syncs Python 3.13 dependencies,
+   and verifies the pinned upstream source in a fresh Scala consumer.
+   `runner.py dataset --domain operations --task-id 1219 --limit 1
+   --format json` loads public dataset rows as a JSON array.
+   Rows contain the user prompt and permitted tool descriptions, **never**
+   `initial_state`, `answer`, or assertion details. The parent retains
+   the upstream simulator and grader.
+2. `ParallelFor` creates a **new temporary project** per row and starts a
+   **Scala GKE cloud consumer** with `producer/start` /
+   `imageProfile=scala`. The consumer's initial filesystem is empty;
+   the experiment clones `awfl-us/workflows` explicitly into
+   `/workspace/workflows` and sets that as the agent's working directory
+   before handing off the task. Do not assume attaching a project has already
+   cloned the repository.
+3. `ProjectManager` receives a real `Task` with the task-specific prompt,
+   a fixed `fund` budget, and instructions to write an independent Scala
+   workflow at
+   `src/main/scala/us/awfl/workflows/evals/automationbench/AgentSubmission.scala`.
+   The required output is a `AgentSubmission` object and one `submit`
+   variant, using the simulator `http.post` tool transport.
+4. The parent collects the generated source, agent wall time, and LLM usage.
+   It always attempts to stop the consumer and delete the temporary project.
+5. `grade_submission.py` freezes each source, **clones a local disposable
+   workflows checkout** (not a linked Git worktree; sbt-git/JGit does not
+   support those), invokes the shared `build_native.sh` → `native-dev.py
+   --class` compiler, and evaluates the frozen executable through the
+   independent simulator and official rubric.
+6. Per-task results are saved as JSONL and aggregated into the existing
+   `Eval` CSV. Builder time, compilation time, runtime latency, and LLM
+   cost are distinct fields. The public test row remains an iteratively
+   known task; this is not a held-out model leaderboard.
+
+Cloud `ProjectManager` usage is gated by the normal AWFL service
+authentication and per-run budget. **Do not run untrusted benchmark-builder
+submissions with credentials on the parent scoring host**: Scala object
+initialization during compilation is executable code. The initial prototype
+assumes trusted agent output and must move compilation into an isolated
+credential-free builder container before accepting adversarial submissions.
+
+The Python reference workflow and prebuilt n8n graph remain available as
+execution regression fixtures; they are no longer the Scala experiment's
+builder output.
 
 ## Next milestones
 
-1. Wire a configurable **workflow-building agent** with fixed token/time
-   budgets into the Scala `Experiment` build stage. Record actual builder
-   transcripts, costs, call counts and wall time; freeze compiled outputs
-   before independently grading them.
+1. **Implemented in the Scala experiment:** load public dataset rows and run
+   AWFL ProjectManager for each in a fresh project/Scala cloud consumer,
+   with a fixed fund, source collection, usage, and cleanup. Add a CI smoke
+   and verify a full launched execution before claiming an agent-produced
+   result. Builder tool-call counts and token breakdown remain unmeasured.
 2. Generalize the AWFL-to-simulator protocol adapter for other tasks, varied
    tool argument schemas, failures and more robust date/notice formats.
 3. **Done for task 1219:** the n8n platform adapter runs a real workflow
@@ -212,5 +254,9 @@ not free.
 5. Isolate evaluator credentials and grader files in a separate sandbox,
    track builder versus runtime token/cost usage, and compare repeated trials.
 
-No Terraform or production infrastructure changes are needed for this local
-integration.
+The initial concurrent cloud-agent smoke test required a **GKE namespace
+quota adjustment**: 17Gi already reserved plus a new 4Gi Scala consumer
+exceeded the previous 20Gi ephemeral-storage quota. The quota was raised
+to 24Gi through the separate `awfl-us/server`
+`infra/gke-guardrails` Terraform root (server PR #136), leaving pod,
+memory and CPU ceilings unchanged.

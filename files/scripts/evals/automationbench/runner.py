@@ -86,6 +86,26 @@ def prepare(row: dict) -> dict:
     }
 
 
+def agent_dataset(domain: str, task_id: str | None, limit: int) -> list[dict]:
+    """Return only task prompts and allowed tool contracts to cloud builders."""
+    if not 1 <= limit <= 100:
+        raise ValueError("Dataset limit must be between 1 and 100")
+    selected = [row for row in get_domain_dataset(domain)
+                if task_id is None or str(row["example_id"]) == task_id][:limit]
+    if not selected:
+        raise ValueError(f"No AutomationBench tasks: {domain}/{task_id}")
+    result = []
+    for row in selected:
+        spec = prepare(row)
+        result.append({
+            "domain": domain,
+            "task_id": spec["task_id"],
+            "task_name": spec["task_name"],
+            "task_spec": json.dumps(spec, ensure_ascii=False),
+        })
+    return result
+
+
 def json_write(path: Path, obj: Any):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2, default=str) + "\n", encoding="utf-8")
@@ -314,6 +334,11 @@ def main():
     p.add_argument("--domain", required=True)
     p.add_argument("--task-id", required=True)
     p.add_argument("--out")
+    ds = sub.add_parser("dataset", help="Agent task rows without scoring state or assertions")
+    ds.add_argument("--domain", required=True)
+    ds.add_argument("--task-id")
+    ds.add_argument("--limit", type=int, default=1)
+    ds.add_argument("--format", choices=["jsonl", "json"], default="jsonl")
     e = sub.add_parser("evaluate")
     e.add_argument("--domain", required=True)
     e.add_argument("--task-id", required=True)
@@ -333,6 +358,13 @@ def main():
         if args.out:
             json_write(Path(args.out), result)
         print(json.dumps(result))
+    elif args.command == "dataset":
+        tasks = agent_dataset(args.domain, args.task_id, args.limit)
+        if args.format == "json":
+            sys.stdout.write(json.dumps(tasks, ensure_ascii=False))
+        else:
+            sys.stdout.write("\n".join(
+                json.dumps(task, ensure_ascii=False) for task in tasks))
     elif args.command == "evaluate":
         if not (1 <= args.timeout_seconds <= 900 and 1 <= args.max_tool_calls <= 1000):
             parser.error("Timeout or tool call budget out of range")

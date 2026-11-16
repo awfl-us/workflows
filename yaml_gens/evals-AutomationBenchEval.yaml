@@ -1,0 +1,736 @@
+main:
+  params:
+  - "input"
+  steps:
+  - foldVars_5:
+      steps:
+      - foldVars_4:
+          steps:
+          - foldVars_3:
+              steps:
+              - foldVars_2:
+                  steps:
+                  - foldVars_1:
+                      steps:
+                      - foldVars:
+                          steps:
+                          - init:
+                              steps:
+                              - init_initResult:
+                                  assign:
+                                  - initResult_3660b88d: []
+                              - init_steps:
+                                  for:
+                                    value: "initIdx"
+                                    range: "${[0, (1 - 1)]}"
+                                    steps:
+                                    - init_switch:
+                                        steps:
+                                        - init_switch_initResult:
+                                            assign:
+                                            - init_switchResult_51b6f3fa: {}
+                                        - init_switch_steps:
+                                            switch:
+                                            - condition: "${(initIdx == 0)}"
+                                              steps:
+                                              - init_switch_updateResult_0:
+                                                  assign:
+                                                  - init_switchResult_51b6f3fa: {}
+                                    - init_updateResult:
+                                        assign:
+                                        - initResult_3660b88d: "${list.concat(initResult_3660b88d, init_switchResult_51b6f3fa)}"
+                          - forValues_model:
+                              steps:
+                              - forValues_model_initResult:
+                                  assign:
+                                  - forValues_modelResult_23926b5c:
+                                      list: "${[]}"
+                              - forValues_model_steps:
+                                  for:
+                                    value: "forValues_modelValue"
+                                    in: "${[\"gpt-5\"]}"
+                                    steps:
+                                    - buildV:
+                                        steps:
+                                        - buildV_initResult:
+                                            assign:
+                                            - buildVResult_5689a630: {}
+                                        - buildV_steps:
+                                            try:
+                                              steps:
+                                              - buildV_updateResult:
+                                                  assign:
+                                                  - buildVResult_5689a630:
+                                                      model: "${forValues_modelValue}"
+                                            except:
+                                              as: "buildVError"
+                                              steps:
+                                              - logError:
+                                                  try:
+                                                    steps:
+                                                    - logError_call:
+                                                        call: "sys.log"
+                                                        args:
+                                                          text: "${(\"[logError] \" + buildVError.message)}"
+                                                        result: "logErrorResult_711f59de"
+                                                  retry: "${http.default_retry}"
+                                              - reRaise:
+                                                  raise: "${buildVError}"
+                                              - buildV_updateResultError:
+                                                  assign:
+                                                  - buildVResult_5689a630: "${null}"
+                                    - forB:
+                                        steps:
+                                        - forB_initResult:
+                                            assign:
+                                            - forBResult_6792f40b: []
+                                        - forB_steps:
+                                            for:
+                                              value: "forBValue"
+                                              in: "${initResult_3660b88d}"
+                                              steps:
+                                              - forB_updateResult:
+                                                  assign:
+                                                  - forBResult_6792f40b: "${list.concat(forBResult_6792f40b, map.merge(forBValue, buildVResult_5689a630))}"
+                                    - joinParams:
+                                        steps:
+                                        - joinParams_initResult:
+                                            assign:
+                                            - joinParamsResult_6f3f700a: []
+                                        - joinParams_steps:
+                                            for:
+                                              value: "joinParamsIdx"
+                                              range: "${[0, (((0 + len(forValues_modelResult_23926b5c.list)) + len(forBResult_6792f40b)) - 1)]}"
+                                              steps:
+                                              - joinParams_switch:
+                                                  steps:
+                                                  - joinParams_switch_initResult:
+                                                      assign:
+                                                      - joinParams_switchResult_7c399388: {}
+                                                  - joinParams_switch_steps:
+                                                      switch:
+                                                      - condition: "${(joinParamsIdx >= (0 + len(forValues_modelResult_23926b5c.list)))}"
+                                                        steps:
+                                                        - joinParams_switch_updateResult_0:
+                                                            assign:
+                                                            - joinParams_switchResult_7c399388: "${forBResult_6792f40b[(joinParamsIdx - (0 + len(forValues_modelResult_23926b5c.list)))]}"
+                                                      - condition: "${(joinParamsIdx >= 0)}"
+                                                        steps:
+                                                        - joinParams_switch_updateResult_1:
+                                                            assign:
+                                                            - joinParams_switchResult_7c399388: "${forValues_modelResult_23926b5c.list[(joinParamsIdx - 0)]}"
+                                              - joinParams_updateResult:
+                                                  assign:
+                                                  - joinParamsResult_6f3f700a: "${list.concat(joinParamsResult_6f3f700a, joinParams_switchResult_7c399388)}"
+                                    - forValues_model_updateResult:
+                                        assign:
+                                        - forValues_modelResult_23926b5c:
+                                            list: "${joinParamsResult_6f3f700a}"
+                      - forValues_domain:
+                          steps:
+                          - forValues_domain_initResult:
+                              assign:
+                              - forValues_domainResult_30b3fa02:
+                                  list: "${[]}"
+                          - forValues_domain_steps:
+                              for:
+                                value: "forValues_domainValue"
+                                in: "${[\"operations\"]}"
+                                steps:
+                                - buildV_1:
+                                    steps:
+                                    - buildV_initResult_1:
+                                        assign:
+                                        - buildVResult_3a1ffae: {}
+                                    - buildV_steps_1:
+                                        try:
+                                          steps:
+                                          - buildV_updateResult_1:
+                                              assign:
+                                              - buildVResult_3a1ffae:
+                                                  domain: "${forValues_domainValue}"
+                                        except:
+                                          as: "buildVError"
+                                          steps:
+                                          - logError_1:
+                                              try:
+                                                steps:
+                                                - logError_call_1:
+                                                    call: "sys.log"
+                                                    args:
+                                                      text: "${(\"[logError] \" + buildVError.message)}"
+                                                    result: "logErrorResult_711f59de"
+                                              retry: "${http.default_retry}"
+                                          - reRaise_1:
+                                              raise: "${buildVError}"
+                                          - buildV_updateResultError_1:
+                                              assign:
+                                              - buildVResult_3a1ffae: "${null}"
+                                - forB_1:
+                                    steps:
+                                    - forB_initResult_1:
+                                        assign:
+                                        - forBResult_3c05a01f: []
+                                    - forB_steps_1:
+                                        for:
+                                          value: "forBValue"
+                                          in: "${forValues_modelResult_23926b5c.list}"
+                                          steps:
+                                          - forB_updateResult_1:
+                                              assign:
+                                              - forBResult_3c05a01f: "${list.concat(forBResult_3c05a01f, map.merge(forBValue, buildVResult_3a1ffae))}"
+                                - joinParams_1:
+                                    steps:
+                                    - joinParams_initResult_1:
+                                        assign:
+                                        - joinParamsResult_4233731f: []
+                                    - joinParams_steps_1:
+                                        for:
+                                          value: "joinParamsIdx"
+                                          range: "${[0, (((0 + len(forValues_domainResult_30b3fa02.list)) + len(forBResult_3c05a01f)) - 1)]}"
+                                          steps:
+                                          - joinParams_switch_1:
+                                              steps:
+                                              - joinParams_switch_initResult_1:
+                                                  assign:
+                                                  - joinParams_switchResult_47eff19: {}
+                                              - joinParams_switch_steps_1:
+                                                  switch:
+                                                  - condition: "${(joinParamsIdx >= (0 + len(forValues_domainResult_30b3fa02.list)))}"
+                                                    steps:
+                                                    - joinParams_switch_updateResult_0_1:
+                                                        assign:
+                                                        - joinParams_switchResult_47eff19: "${forBResult_3c05a01f[(joinParamsIdx - (0 + len(forValues_domainResult_30b3fa02.list)))]}"
+                                                  - condition: "${(joinParamsIdx >= 0)}"
+                                                    steps:
+                                                    - joinParams_switch_updateResult_1_1:
+                                                        assign:
+                                                        - joinParams_switchResult_47eff19: "${forValues_domainResult_30b3fa02.list[(joinParamsIdx - 0)]}"
+                                          - joinParams_updateResult_1:
+                                              assign:
+                                              - joinParamsResult_4233731f: "${list.concat(joinParamsResult_4233731f, joinParams_switchResult_47eff19)}"
+                                - forValues_domain_updateResult:
+                                    assign:
+                                    - forValues_domainResult_30b3fa02:
+                                        list: "${joinParamsResult_4233731f}"
+                  - forValues_agent:
+                      steps:
+                      - forValues_agent_initResult:
+                          assign:
+                          - forValues_agentResult_47ff2c98:
+                              list: "${[]}"
+                      - forValues_agent_steps:
+                          for:
+                            value: "forValues_agentValue"
+                            in: "${[\"AWFL\"]}"
+                            steps:
+                            - buildV_2:
+                                steps:
+                                - buildV_initResult_2:
+                                    assign:
+                                    - buildVResult_7f87572d: {}
+                                - buildV_steps_2:
+                                    try:
+                                      steps:
+                                      - buildV_updateResult_2:
+                                          assign:
+                                          - buildVResult_7f87572d:
+                                              agent: "${forValues_agentValue}"
+                                    except:
+                                      as: "buildVError"
+                                      steps:
+                                      - logError_2:
+                                          try:
+                                            steps:
+                                            - logError_call_2:
+                                                call: "sys.log"
+                                                args:
+                                                  text: "${(\"[logError] \" + buildVError.message)}"
+                                                result: "logErrorResult_711f59de"
+                                          retry: "${http.default_retry}"
+                                      - reRaise_2:
+                                          raise: "${buildVError}"
+                                      - buildV_updateResultError_2:
+                                          assign:
+                                          - buildVResult_7f87572d: "${null}"
+                            - forB_2:
+                                steps:
+                                - forB_initResult_2:
+                                    assign:
+                                    - forBResult_371afc91: []
+                                - forB_steps_2:
+                                    for:
+                                      value: "forBValue"
+                                      in: "${forValues_domainResult_30b3fa02.list}"
+                                      steps:
+                                      - forB_updateResult_2:
+                                          assign:
+                                          - forBResult_371afc91: "${list.concat(forBResult_371afc91, map.merge(forBValue, buildVResult_7f87572d))}"
+                            - joinParams_2:
+                                steps:
+                                - joinParams_initResult_2:
+                                    assign:
+                                    - joinParamsResult_3a96e60a: []
+                                - joinParams_steps_2:
+                                    for:
+                                      value: "joinParamsIdx"
+                                      range: "${[0, (((0 + len(forValues_agentResult_47ff2c98.list)) + len(forBResult_371afc91)) - 1)]}"
+                                      steps:
+                                      - joinParams_switch_2:
+                                          steps:
+                                          - joinParams_switch_initResult_2:
+                                              assign:
+                                              - joinParams_switchResult_62dbe7f5: {}
+                                          - joinParams_switch_steps_2:
+                                              switch:
+                                              - condition: "${(joinParamsIdx >= (0 + len(forValues_agentResult_47ff2c98.list)))}"
+                                                steps:
+                                                - joinParams_switch_updateResult_0_2:
+                                                    assign:
+                                                    - joinParams_switchResult_62dbe7f5: "${forBResult_371afc91[(joinParamsIdx - (0 + len(forValues_agentResult_47ff2c98.list)))]}"
+                                              - condition: "${(joinParamsIdx >= 0)}"
+                                                steps:
+                                                - joinParams_switch_updateResult_1_2:
+                                                    assign:
+                                                    - joinParams_switchResult_62dbe7f5: "${forValues_agentResult_47ff2c98.list[(joinParamsIdx - 0)]}"
+                                      - joinParams_updateResult_2:
+                                          assign:
+                                          - joinParamsResult_3a96e60a: "${list.concat(joinParamsResult_3a96e60a, joinParams_switchResult_62dbe7f5)}"
+                            - forValues_agent_updateResult:
+                                assign:
+                                - forValues_agentResult_47ff2c98:
+                                    list: "${joinParamsResult_3a96e60a}"
+              - forValues_fund:
+                  steps:
+                  - forValues_fund_initResult:
+                      assign:
+                      - forValues_fundResult_40ee2d17:
+                          list: "${[]}"
+                  - forValues_fund_steps:
+                      for:
+                        value: "forValues_fundValue"
+                        in: "${[\"1.0\"]}"
+                        steps:
+                        - buildV_3:
+                            steps:
+                            - buildV_initResult_3:
+                                assign:
+                                - buildVResult_12566229: {}
+                            - buildV_steps_3:
+                                try:
+                                  steps:
+                                  - buildV_updateResult_3:
+                                      assign:
+                                      - buildVResult_12566229:
+                                          fund: "${forValues_fundValue}"
+                                except:
+                                  as: "buildVError"
+                                  steps:
+                                  - logError_3:
+                                      try:
+                                        steps:
+                                        - logError_call_3:
+                                            call: "sys.log"
+                                            args:
+                                              text: "${(\"[logError] \" + buildVError.message)}"
+                                            result: "logErrorResult_711f59de"
+                                      retry: "${http.default_retry}"
+                                  - reRaise_3:
+                                      raise: "${buildVError}"
+                                  - buildV_updateResultError_3:
+                                      assign:
+                                      - buildVResult_12566229: "${null}"
+                        - forB_3:
+                            steps:
+                            - forB_initResult_3:
+                                assign:
+                                - forBResult_1fa05660: []
+                            - forB_steps_3:
+                                for:
+                                  value: "forBValue"
+                                  in: "${forValues_agentResult_47ff2c98.list}"
+                                  steps:
+                                  - forB_updateResult_3:
+                                      assign:
+                                      - forBResult_1fa05660: "${list.concat(forBResult_1fa05660, map.merge(forBValue, buildVResult_12566229))}"
+                        - joinParams_3:
+                            steps:
+                            - joinParams_initResult_3:
+                                assign:
+                                - joinParamsResult_6a1e674e: []
+                            - joinParams_steps_3:
+                                for:
+                                  value: "joinParamsIdx"
+                                  range: "${[0, (((0 + len(forValues_fundResult_40ee2d17.list)) + len(forBResult_1fa05660)) - 1)]}"
+                                  steps:
+                                  - joinParams_switch_3:
+                                      steps:
+                                      - joinParams_switch_initResult_3:
+                                          assign:
+                                          - joinParams_switchResult_6fbc6093: {}
+                                      - joinParams_switch_steps_3:
+                                          switch:
+                                          - condition: "${(joinParamsIdx >= (0 + len(forValues_fundResult_40ee2d17.list)))}"
+                                            steps:
+                                            - joinParams_switch_updateResult_0_3:
+                                                assign:
+                                                - joinParams_switchResult_6fbc6093: "${forBResult_1fa05660[(joinParamsIdx - (0 + len(forValues_fundResult_40ee2d17.list)))]}"
+                                          - condition: "${(joinParamsIdx >= 0)}"
+                                            steps:
+                                            - joinParams_switch_updateResult_1_3:
+                                                assign:
+                                                - joinParams_switchResult_6fbc6093: "${forValues_fundResult_40ee2d17.list[(joinParamsIdx - 0)]}"
+                                  - joinParams_updateResult_3:
+                                      assign:
+                                      - joinParamsResult_6a1e674e: "${list.concat(joinParamsResult_6a1e674e, joinParams_switchResult_6fbc6093)}"
+                        - forValues_fund_updateResult:
+                            assign:
+                            - forValues_fundResult_40ee2d17:
+                                list: "${joinParamsResult_6a1e674e}"
+          - forValues_task_id:
+              steps:
+              - forValues_task_id_initResult:
+                  assign:
+                  - forValues_task_idResult_555fcd4c:
+                      list: "${[]}"
+              - forValues_task_id_steps:
+                  for:
+                    value: "forValues_task_idValue"
+                    in: "${[\"1219\"]}"
+                    steps:
+                    - buildV_4:
+                        steps:
+                        - buildV_initResult_4:
+                            assign:
+                            - buildVResult_44695418: {}
+                        - buildV_steps_4:
+                            try:
+                              steps:
+                              - buildV_updateResult_4:
+                                  assign:
+                                  - buildVResult_44695418:
+                                      task_id: "${forValues_task_idValue}"
+                            except:
+                              as: "buildVError"
+                              steps:
+                              - logError_4:
+                                  try:
+                                    steps:
+                                    - logError_call_4:
+                                        call: "sys.log"
+                                        args:
+                                          text: "${(\"[logError] \" + buildVError.message)}"
+                                        result: "logErrorResult_711f59de"
+                                  retry: "${http.default_retry}"
+                              - reRaise_4:
+                                  raise: "${buildVError}"
+                              - buildV_updateResultError_4:
+                                  assign:
+                                  - buildVResult_44695418: "${null}"
+                    - forB_4:
+                        steps:
+                        - forB_initResult_4:
+                            assign:
+                            - forBResult_53c64e3a: []
+                        - forB_steps_4:
+                            for:
+                              value: "forBValue"
+                              in: "${forValues_fundResult_40ee2d17.list}"
+                              steps:
+                              - forB_updateResult_4:
+                                  assign:
+                                  - forBResult_53c64e3a: "${list.concat(forBResult_53c64e3a, map.merge(forBValue, buildVResult_44695418))}"
+                    - joinParams_4:
+                        steps:
+                        - joinParams_initResult_4:
+                            assign:
+                            - joinParamsResult_7e5461e: []
+                        - joinParams_steps_4:
+                            for:
+                              value: "joinParamsIdx"
+                              range: "${[0, (((0 + len(forValues_task_idResult_555fcd4c.list)) + len(forBResult_53c64e3a)) - 1)]}"
+                              steps:
+                              - joinParams_switch_4:
+                                  steps:
+                                  - joinParams_switch_initResult_4:
+                                      assign:
+                                      - joinParams_switchResult_4a63fe22: {}
+                                  - joinParams_switch_steps_4:
+                                      switch:
+                                      - condition: "${(joinParamsIdx >= (0 + len(forValues_task_idResult_555fcd4c.list)))}"
+                                        steps:
+                                        - joinParams_switch_updateResult_0_4:
+                                            assign:
+                                            - joinParams_switchResult_4a63fe22: "${forBResult_53c64e3a[(joinParamsIdx - (0 + len(forValues_task_idResult_555fcd4c.list)))]}"
+                                      - condition: "${(joinParamsIdx >= 0)}"
+                                        steps:
+                                        - joinParams_switch_updateResult_1_4:
+                                            assign:
+                                            - joinParams_switchResult_4a63fe22: "${forValues_task_idResult_555fcd4c.list[(joinParamsIdx - 0)]}"
+                              - joinParams_updateResult_4:
+                                  assign:
+                                  - joinParamsResult_7e5461e: "${list.concat(joinParamsResult_7e5461e, joinParams_switchResult_4a63fe22)}"
+                    - forValues_task_id_updateResult:
+                        assign:
+                        - forValues_task_idResult_555fcd4c:
+                            list: "${joinParamsResult_7e5461e}"
+      - forValues_platform:
+          steps:
+          - forValues_platform_initResult:
+              assign:
+              - forValues_platformResult_7c10224f:
+                  list: "${[]}"
+          - forValues_platform_steps:
+              for:
+                value: "forValues_platformValue"
+                in: "${[\"awfl-native-rust\"]}"
+                steps:
+                - buildV_5:
+                    steps:
+                    - buildV_initResult_5:
+                        assign:
+                        - buildVResult_5ef1b0: {}
+                    - buildV_steps_5:
+                        try:
+                          steps:
+                          - buildV_updateResult_5:
+                              assign:
+                              - buildVResult_5ef1b0:
+                                  platform: "${forValues_platformValue}"
+                        except:
+                          as: "buildVError"
+                          steps:
+                          - logError_5:
+                              try:
+                                steps:
+                                - logError_call_5:
+                                    call: "sys.log"
+                                    args:
+                                      text: "${(\"[logError] \" + buildVError.message)}"
+                                    result: "logErrorResult_711f59de"
+                              retry: "${http.default_retry}"
+                          - reRaise_5:
+                              raise: "${buildVError}"
+                          - buildV_updateResultError_5:
+                              assign:
+                              - buildVResult_5ef1b0: "${null}"
+                - forB_5:
+                    steps:
+                    - forB_initResult_5:
+                        assign:
+                        - forBResult_6d3809d7: []
+                    - forB_steps_5:
+                        for:
+                          value: "forBValue"
+                          in: "${forValues_task_idResult_555fcd4c.list}"
+                          steps:
+                          - forB_updateResult_5:
+                              assign:
+                              - forBResult_6d3809d7: "${list.concat(forBResult_6d3809d7, map.merge(forBValue, buildVResult_5ef1b0))}"
+                - joinParams_5:
+                    steps:
+                    - joinParams_initResult_5:
+                        assign:
+                        - joinParamsResult_12172475: []
+                    - joinParams_steps_5:
+                        for:
+                          value: "joinParamsIdx"
+                          range: "${[0, (((0 + len(forValues_platformResult_7c10224f.list)) + len(forBResult_6d3809d7)) - 1)]}"
+                          steps:
+                          - joinParams_switch_5:
+                              steps:
+                              - joinParams_switch_initResult_5:
+                                  assign:
+                                  - joinParams_switchResult_573287af: {}
+                              - joinParams_switch_steps_5:
+                                  switch:
+                                  - condition: "${(joinParamsIdx >= (0 + len(forValues_platformResult_7c10224f.list)))}"
+                                    steps:
+                                    - joinParams_switch_updateResult_0_5:
+                                        assign:
+                                        - joinParams_switchResult_573287af: "${forBResult_6d3809d7[(joinParamsIdx - (0 + len(forValues_platformResult_7c10224f.list)))]}"
+                                  - condition: "${(joinParamsIdx >= 0)}"
+                                    steps:
+                                    - joinParams_switch_updateResult_1_5:
+                                        assign:
+                                        - joinParams_switchResult_573287af: "${forValues_platformResult_7c10224f.list[(joinParamsIdx - 0)]}"
+                          - joinParams_updateResult_5:
+                              assign:
+                              - joinParamsResult_12172475: "${list.concat(joinParamsResult_12172475, joinParams_switchResult_573287af)}"
+                - forValues_platform_updateResult:
+                    assign:
+                    - forValues_platformResult_7c10224f:
+                        list: "${joinParamsResult_12172475}"
+  - runExperiments:
+      steps:
+      - runExperiments_initResult:
+          assign:
+          - runExperimentsResult_9230bb2: []
+      - runExperiments_steps:
+          parallel:
+            shared:
+            - "runExperimentsResult_9230bb2"
+            for:
+              value: "runExperimentsValue"
+              in: "${forValues_platformResult_7c10224f.list}"
+              steps:
+              - logParams:
+                  try:
+                    steps:
+                    - logParams_call:
+                        call: "sys.log"
+                        args:
+                          text: "${(\"[logParams] \" + (\"Running with params: \" + json.encode_to_string(runExperimentsValue)))}"
+                        result: "logParamsResult_24245"
+                  retry: "${http.default_retry}"
+              - evals_experiments_AutomationBench:
+                  try:
+                    steps:
+                    - evals_experiments_AutomationBench_call:
+                        call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                        args:
+                          workflow_id: "${\"evals-experiments-AutomationBench${WORKFLOW_ENV}\"}"
+                          argument:
+                            runId: "${input.arg1}"
+                            limit: "${int(input.arg2)}"
+                            directory: "${(((\"eval_runs/automationbench/\" + input.arg1) + \"/\") + ((((((((((map.get(runExperimentsValue, \"model\") + \"_\") + map.get(runExperimentsValue, \"fund\")) + \"_\") + map.get(runExperimentsValue, \"task_id\")) + \"_\") + map.get(runExperimentsValue, \"platform\")) + \"_\") + map.get(runExperimentsValue, \"domain\")) + \"_\") + map.get(runExperimentsValue, \"agent\")))}"
+                            params: "${runExperimentsValue}"
+                            env:
+                              userId: "${input.env.userId}"
+                              model: "${input.env.model}"
+                              callingWorkflowExec: "${default(map.get(input.env, \"callingWorkflowExec\"), null)}"
+                              BASE_URL: "${input.env.BASE_URL}"
+                              background: "${default(map.get(input.env, \"background\"), null)}"
+                              projectId: "${input.env.projectId}"
+                              sessionId: "${\"evals-experiments-AutomationBench\"}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                          location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                          project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                          connector_params:
+                            skip_polling: false
+                        result: "evals_experiments_AutomationBenchResult_4fb00323"
+                  retry: "${http.default_retry}"
+              - runExperiments_updateResult:
+                  assign:
+                  - runExperimentsResult_9230bb2: "${list.concat(runExperimentsResult_9230bb2, evals_experiments_AutomationBenchResult_4fb00323)}"
+  - buildCsvRow_1:
+      steps:
+      - buildCsvRow_initResult:
+          assign:
+          - buildCsvRowResult_6f0f864c: "${\"\"}"
+      - buildCsvRow_steps:
+          for:
+            value: "buildCsvRowValue"
+            in: "${[\"total_instances\", \"strict_passes\", \"partial_credit_sum\", \"builder_cost_usd\", \"total_agent_wall_time_seconds\", \"total_native_build_time_seconds\", \"workflow_runtime_seconds_sum\", \"results_jsonl\"]}"
+            steps:
+            - buildCsvRow_updateResult:
+                assign:
+                - buildCsvRowResult_6f0f864c: "${text.substring(((buildCsvRowResult_6f0f864c + \",\") + buildCsvRowValue), 0, len(((buildCsvRowResult_6f0f864c + \",\") + buildCsvRowValue)))}"
+  - buildCsv:
+      steps:
+      - buildCsv_initResult:
+          assign:
+          - buildCsvResult_484b6a50: "${buildCsvRowResult_6f0f864c}"
+      - buildCsv_steps:
+          for:
+            value: "buildCsvValue"
+            in: "${runExperimentsResult_9230bb2}"
+            steps:
+            - csvRow:
+                steps:
+                - csvRow_initResult:
+                    assign:
+                    - csvRowResult_491878aa: []
+                - csvRow_steps:
+                    for:
+                      value: "csvRowValue"
+                      in: "${[\"total_instances\", \"strict_passes\", \"partial_credit_sum\", \"builder_cost_usd\", \"total_agent_wall_time_seconds\", \"total_native_build_time_seconds\", \"workflow_runtime_seconds_sum\", \"results_jsonl\"]}"
+                      steps:
+                      - csvRow_updateResult:
+                          assign:
+                          - csvRowResult_491878aa: "${list.concat(csvRowResult_491878aa, map.get(buildCsvValue, csvRowValue))}"
+            - buildCsvRow:
+                steps:
+                - buildCsvRow_initResult_1:
+                    assign:
+                    - buildCsvRowResult_ff04dd2: "${\"\"}"
+                - buildCsvRow_steps_1:
+                    for:
+                      value: "buildCsvRowValue"
+                      in: "${csvRowResult_491878aa}"
+                      steps:
+                      - buildCsvRow_updateResult_1:
+                          assign:
+                          - buildCsvRowResult_ff04dd2: "${text.substring(((buildCsvRowResult_ff04dd2 + \",\") + buildCsvRowValue), 0, len(((buildCsvRowResult_ff04dd2 + \",\") + buildCsvRowValue)))}"
+            - buildCsv_updateResult:
+                assign:
+                - buildCsvResult_484b6a50: "${((buildCsvResult_484b6a50 + \"\\n\") + buildCsvRowResult_ff04dd2)}"
+  - writeFile_encoded:
+      steps:
+      - writeFile_call_block:
+          steps:
+          - buildParams:
+              steps:
+              - buildParams_initResult:
+                  assign:
+                  - buildParamsResult_4d888fcd: {}
+              - buildParams_steps:
+                  try:
+                    steps:
+                    - buildParams_updateResult:
+                        assign:
+                        - buildParamsResult_4d888fcd:
+                            filepath: "${((\"eval_runs/automationbench/\" + input.arg1) + \"/results.csv\")}"
+                            content: "${buildCsvResult_484b6a50}"
+                  except:
+                    as: "buildParamsError"
+                    steps:
+                    - logError_6:
+                        try:
+                          steps:
+                          - logError_call_6:
+                              call: "sys.log"
+                              args:
+                                text: "${(\"[logError] \" + buildParamsError.message)}"
+                              result: "logErrorResult_1671996f"
+                        retry: "${http.default_retry}"
+                    - reRaise_6:
+                        raise: "${buildParamsError}"
+                    - buildParams_updateResultError:
+                        assign:
+                        - buildParamsResult_4d888fcd: "${null}"
+          - writeFile_await_block:
+              steps:
+              - writeFile_run:
+                  try:
+                    steps:
+                    - writeFile_run_call:
+                        call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                        args:
+                          workflow_id: "${\"tools-CliTools${WORKFLOW_ENV}\"}"
+                          argument:
+                            tool_call:
+                              id: "${\"writeFile\"}"
+                              type: "${\"function\"}"
+                              function:
+                                name: "${\"UPDATE_FILE\"}"
+                                arguments: "${json.encode_to_string(buildParamsResult_4d888fcd)}"
+                            cost: 0.0
+                            timeoutSeconds: "${default(60, null)}"
+                            env:
+                              userId: "${input.env.userId}"
+                              model: "${input.env.model}"
+                              callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                              BASE_URL: "${input.env.BASE_URL}"
+                              background: "${default(map.get(input.env, \"background\"), null)}"
+                              projectId: "${input.env.projectId}"
+                              sessionId: "${input.env.sessionId}"
+                              workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                          location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                          project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                          connector_params:
+                            skip_polling: false
+                        result: "writeFile_runResult_5da971f5"
+                  retry: "${http.default_retry}"
+  - return:
+      return: "${runExperimentsResult_9230bb2}"
