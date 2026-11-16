@@ -1,0 +1,5 @@
+{
+  "platform": "python-smoke",
+  "command": ["{python}", "{artifact_dir}/smoke_workflow.py"],
+  "description": "Checks a separate process can discover task-scoped simulated tools. It is not an AWFL-generated workflow."
+}
