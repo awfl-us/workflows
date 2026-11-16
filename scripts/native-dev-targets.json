@@ -1,0 +1,22 @@
+{
+  "codebase-ProjectManager": {
+    "root_class": "us.awfl.workflows.codebase.ProjectManager",
+    "dependencies": [
+      "us.awfl.workflows.helpers.Tasks",
+      "us.awfl.workflows.tools.CliTools",
+      "us.awfl.workflows.helpers.ToolDefs",
+      "us.awfl.workflows.helpers.ToolDispatcher",
+      "us.awfl.workflows.Summaries",
+      "us.awfl.workflows.helpers.Chain",
+      "us.awfl.workflows.context.ContextCollapser",
+      "us.awfl.workflows.assistant.ExtractTopics",
+      "us.awfl.workflows.helpers.links.SaveReflection",
+      "us.awfl.workflows.tools.Tasks",
+      "us.awfl.workflows.tools.Agent"
+    ],
+    "dynamic_targets": [
+      "tools-CliTools", "tools-Tasks", "tools-Agent",
+      "assistant-ExtractTopics", "helpers-links-SaveReflection"
+    ]
+  }
+}

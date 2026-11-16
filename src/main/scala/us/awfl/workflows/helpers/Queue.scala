@@ -31,7 +31,7 @@ object Queue {
 
     // Map each JSON item to a PubSubMessage with base64-encoded data
     val buildMessages = For("buildMessages", input.items) { item =>
-      val dataField = Value[String](CelFunc("base64.encode", CelFunc("json.encode", item)))
+      val dataField = Value[String](base64.encode( json.encode( item)))
       List() -> obj(PubSubMessage(dataField, MessageAttributes(input.sessionId)))
     }
 
@@ -42,12 +42,12 @@ object Queue {
 
     val publish = Call[PublishArgs, NoValueT](
       "publish",
-      "googleapis.pubsub.v1.projects.topics.publish",
+      CallOperations.MessagingPublish,
       obj(publishArgs)
     )
 
     // Return the number of messages published (len of built messages)
-    val publishedCount = Value[Int](CelFunc("len", buildMessages.resultValue))
+    val publishedCount = Value[Int](core.len( buildMessages.resultValue))
 
     Workflow(List[Step[?, ?]](
       buildMessages,
@@ -58,14 +58,14 @@ object Queue {
   // Helper: run the Queue workflow with given items
   def apply(name: String, sessionId: Value[String], items: ListValue[OperationEnvelope], topic: BaseValue[String] = str("projects/topaigents/topics/CliOperations")): Call[RunWorkflowArgs[Input], Result] = {
     val args = RunWorkflowArgs(str("helpers-Queue${WORKFLOW_ENV}"), obj(Input(sessionId, items, topic)))
-    Call(name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    Call(name, CallOperations.WorkflowRun, obj(args))
   }
 
   // Helper: enqueue a single item by wrapping it into a one-element list
   def one(name: String, sessionId: Value[String], item: OperationEnvelope, topic: BaseValue[String] = str("projects/topaigents/topics/CliOperations")): Step[Result, BaseValue[Result]] = {
     val items = buildList("singleItem", List(item))
     val args = RunWorkflowArgs(str("helpers-Queue${WORKFLOW_ENV}"), obj(Input(sessionId, items.resultValue, topic)))
-    val call = Call[RunWorkflowArgs[Input], Result](name, "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+    val call = Call[RunWorkflowArgs[Input], Result](name, CallOperations.WorkflowRun, obj(args))
     Block(s"${name}_block", List[Step[?, ?]](items, call) -> call.resultValue)
   }
 }

@@ -12,61 +12,21 @@ import us.awfl.utils.Events
 import us.awfl.utils.Events.OperationEnvelope
 import us.awfl.utils.post
 import us.awfl.workflows.helpers.ToolDefs._
-import us.awfl.services.Cloud
 
 object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
-  case class ProducerRequest(sessionId: Value[String] = Value.nil)
+  case class ProducerRequest(sessionId: Value[String], imageProfile: Value[String])
 
-  val toolNames = List("READ_FILE", "UPDATE_FILE", "RUN_COMMAND")
- 
-  val buildTools = buildList("buildCliTools", List(
-    ToolWithWorkflow(
-      function = ToolDefFunc(
-        str("READ_FILE"),
-        "Read a file from disk.",
-        ToolDefObj(
-          properties = Map(
-            "filepath" -> ToolDefStr
-          ),
-          required = ListValue(List("filepath").cel)
-        )
-      ).toLlm,
-      workflowName = str(workflowName)
-    ),
-    ToolWithWorkflow(
-      function = ToolDefFunc(
-        str("RUN_COMMAND"),
-        "Execute a shell command.",
-        ToolDefObj(
-          properties = Map(
-            "command" -> ToolDefStr
-          ),
-          required = ListValue(List("command").cel)
-        )
-      ).toLlm,
-      workflowName = str(workflowName)
-    ),
-    ToolWithWorkflow(
-      function = ToolDefFunc(
-        str("UPDATE_FILE"),
-        "Update a file on disk with provided content",
-        ToolDefObj(
-          properties = Map(
-            "filepath" -> ToolDefStr,
-            "content" -> ToolDefStr
-          ),
-          required = ListValue(List("filepath", "content").cel)
-        )
-      ).toLlm,
-      workflowName = str(workflowName)
-    )
-  ))
+  val toolNames = CliToolDefs.toolNames
+
+  val buildTools = CliToolDefs.buildTools(str(workflowName))
 
   // Standalone workflow to handle tool calls: create callback, persist it with an ID, enqueue via relay ingest, and await callback
   override def workflows = List({
-    val awaitCallback = Callback[NoValueT] { callback =>
+    // CLI execution errors are tool results, not fatal workflow exceptions.
+    // The dispatcher must persist them as tool messages so agents can recover.
+    val awaitCallback = Callback.toolResult[NoValueT] { callback =>
       val envelope = OperationEnvelope(
-        create_time = Value("sys.now()"),
+        create_time = Value(time.now()),
         callback_id = callback.id,
         content = Value("null"),
         tool_call = input.tool_call,
@@ -82,12 +42,18 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
         source = str("workflows.tools.CliTools")
       )
 
-      Block("awaitCallback", List[Step[?,?]](ingest, Cloud.start(Env.get, Value.nil)) -> noValue)
+      // GKE requires an explicit named consumer image profile. Passing
+      // image = null (the legacy Cloud.start call) now returns HTTP 400.
+      val start = post[ProducerRequest, Boolean](
+        "startProducer", "producer/start",
+        obj(ProducerRequest(Env.sessionId, str("lightweight"))), env = Env.get
+      )
+      Block("awaitCallback", List[Step[?,?]](ingest, start) -> noValue)
     }
 
     Workflow(buildSteps(
       List[Step[?, ?]](awaitCallback) -> obj(ToolWorkflow.Result(
-        str(CelFunc("json.encode_to_string", awaitCallback.resultValue)),
+        str(json.encode_to_string( awaitCallback.resultValue)),
         Value(0)
       )),
       _ => List() -> Value.nil[Result]
@@ -105,7 +71,7 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     val args = RunWorkflowArgs(str("tools-CliTools${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, cost, env = obj(Env.get.copy(sessionId = sessionId, background = OptValue(background))))))
     val run = Call[RunWorkflowArgs[Input], Result](
       s"${opName}_run_tools_CliTools",
-      "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+      CallOperations.WorkflowRun,
       obj(args)
     )
 
@@ -114,6 +80,14 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
 
   // High-level helpers using ToolWorkflow generic methods
   private val targetCliToolsWorkflow = str("tools-CliTools${WORKFLOW_ENV}")
+
+  private def invokeTool(
+    opName: String,
+    functionName: String,
+    params: Seq[(String, BaseValue[?])],
+    cost: BaseValue[Double],
+    env: BaseValue[Env]
+  ) = callToolEncoded(opName, targetCliToolsWorkflow, functionName, params, cost, env = env)
 
   def readFile(
     filepath: BaseValue[String],
@@ -150,6 +124,87 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
     // Return the encoded callback body (not used by callers typically)
     Block(s"${opName}_encoded", List[Step[?, ?]](encoded) -> encoded.resultValue)
   }
+
+  /** Use a multi-file patch for precise edits instead of rewriting whole files.
+    * Returns the encoded result, including changed file paths and hashes.
+    */
+  def applyPatch(
+    patch: BaseValue[String],
+    opName: String = "applyPatch",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = invokeTool(opName, "APPLY_PATCH", List("patch" -> patch), cost, env)
+
+  /** Bounded repository search, with results returned as encoded JSON. */
+  def searchFiles(
+    pattern: BaseValue[String],
+    root: BaseValue[String] = str("."),
+    opName: String = "searchFiles",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = invokeTool(opName, "SEARCH_FILES", List("pattern" -> pattern, "root" -> root), cost, env)
+
+  /** Read directory entries without spawning a shell. */
+  def listDirectory(
+    path: BaseValue[String] = str("."),
+    opName: String = "listDirectory",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = invokeTool(opName, "LIST_DIRECTORY", List("path" -> path), cost, env)
+
+  def readFileRange(
+    filepath: BaseValue[String],
+    startLine: BaseValue[Int],
+    endLine: BaseValue[Int],
+    opName: String = "readFileRange",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = {
+    val encoded = invokeTool(opName, "READ_FILE", List(
+      "filepath" -> filepath, "start_line" -> startLine,
+      "end_line" -> endLine, "include_line_numbers" -> obj(true)
+    ), cost, env)
+    Block(s"${opName}_content", List[Step[?, ?]](encoded) ->
+      decodeField(encoded.resultValue, "content"))
+  }
+
+  def writeFileIfUnchanged(
+    filepath: BaseValue[String],
+    content: BaseValue[String],
+    expectedHash: BaseValue[String],
+    opName: String = "writeFileIfUnchanged",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = invokeTool(opName, "UPDATE_FILE", List(
+    "filepath" -> filepath, "content" -> content, "expected_hash" -> expectedHash
+  ), cost, env)
+
+  /** Start a durable process and immediately return its execution ID. */
+  def startCommand(
+    command: BaseValue[String],
+    opName: String = "startCommand",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = invokeTool(opName, "RUN_COMMAND", List(
+    "command" -> command, "yield_time_ms" -> obj(0)
+  ), cost, env)
+
+  def commandOutput(
+    executionId: BaseValue[String],
+    cursor: BaseValue[Int] = obj(0),
+    opName: String = "commandOutput",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = invokeTool(opName, "COMMAND_OUTPUT", List(
+    "execution_id" -> executionId, "cursor" -> cursor
+  ), cost, env)
+
+  def cancelCommand(
+    executionId: BaseValue[String],
+    opName: String = "cancelCommand",
+    cost: BaseValue[Double] = obj(0.0),
+    env: BaseValue[Env] = ENV
+  ) = invokeTool(opName, "COMMAND_CANCEL", List("execution_id" -> executionId), cost, env)
 
   def runCommand(
     command: BaseValue[String],

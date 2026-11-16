@@ -1,3 +1,10 @@
+Native Rust / ProjectManager local-first development (priority)
+- Run compiler, native Rust binaries, and the existing **complete Jobs Express server** inside the same Scala GKE environment for rapid test/fix/repeat.
+- Read `docs/native-development-loop.md` and `https://github.com/awfl-us/server/blob/main/docs/native-local-development.md` before proposing a Cloud Run deployment. Start Jobs on localhost:5055 in a persistent interactive terminal, verify health separately.
+- Compile with `python3 scripts/native-dev.py codebase-ProjectManager --recursive`; do not `--publish` per iteration when working locally.
+- Distinguish the server's recorded-HTTP replay runner from actual local Jobs HTTP requests and authenticated cloud effects. Do not claim replay is end-to-end.
+- Validate in a zero-traffic native cloud canary only after local tests. Any permanent infra and IAM changes go through Terraform.
+
 Scala Workflows Agent Guide
 
 Scope

@@ -32,9 +32,9 @@ publishMavenStyle := true
 
 // Dependencies
 libraryDependencies ++= Seq(
-  "us.awfl" %% "dsl" % "0.3.3",
-  "us.awfl" %% "workflow-utils" % "0.3.3",
-  "us.awfl" %% "compiler" % "0.3.1"
+  "us.awfl" %% "dsl" % "0.3.5",
+  "us.awfl" %% "workflow-utils" % "0.3.5",
+  "us.awfl" %% "compiler" % "0.3.2"
 )
 
 // Keep our org snapshot overrides

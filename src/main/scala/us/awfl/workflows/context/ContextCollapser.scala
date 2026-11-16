@@ -46,7 +46,7 @@ object CollapserMessages {
         // Serialize the list of ChatMessage objects into a JSON string
         val serialized = Try(
           s"collapser_serialize_topicContext_${Yoj.kalaName}",
-          List(call) -> str(CelFunc("json.encode_to_string", call.resultValue.flatMap(_.body).flatMap(_.yoj).cel))
+          List(call) -> str(json.encode_to_string( call.resultValue.flatMap(_.body).flatMap(_.yoj).cel))
         )
 
         // Wrap the serialized JSON into a single ChatMessage

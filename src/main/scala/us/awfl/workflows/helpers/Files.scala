@@ -5,7 +5,7 @@ import us.awfl.dsl.CelOps._
 import us.awfl.services.Storage
 
 object Files {
-  val filesBucket = str(PROJECT_ID.cel + CelFunc("text.to_lower", "-workflow-files${WORKFLOW_ENV}"))
+  val filesBucket = str(PROJECT_ID.cel + text.to_lower( "-workflow-files${WORKFLOW_ENV}"))
   
   def readFile(name: String): Step[String, Value[String]] = {
     val read = Storage.readFile("readFile", filesBucket, name)

@@ -33,7 +33,7 @@ object SaveReflection extends Linkable {
     )
     val call = Call[RunWorkflowArgs[EventHandler.Input], AnyValueT](
       "callAgent",
-      "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+      CallOperations.WorkflowRun,
       obj(args)
     )
     Switch("maybeSaveReflection", List(

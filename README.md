@@ -1,5 +1,25 @@
 # AWFL Workflows (Scala)
 
+### Native ProjectManager development (November 13, 2026)
+
+The native compiler/publisher is available through
+[the one-command developer loop](docs/native-development-loop.md).
+From this repository (with a sibling compiler-rust checkout), run:
+
+    python3 scripts/native-dev.py codebase-ProjectManager --recursive
+    python3 scripts/native-dev.py codebase-ProjectManager --recursive --publish
+
+The first invocation only compiles and validates; the second activates
+content-addressed native GCS releases using existing IAM. All 26 static
+ProjectManager dependency binaries compile, but full live GCS publication
+and a completed real-native ProjectManager run are **still pending**.
+Normal native production routing is disabled.
+
+
+> Native Rust workflow releases: see [native publication and rollout notes](docs/native-rust-publication.md).
+> Native compilation and effectful workflow support remain experimental;
+> Google Workflows is the default production backend.
+
 AWFL Workflows is a Scala 3 toolkit for building, generating, and deploying Google Cloud Workflows with the AWFL DSL. It includes a ready-to-deploy, tool-enabled chat EventHandler, common CLI/task tools, and reusable helpers to accelerate new workflow development.
 
 ## Features
@@ -82,6 +102,33 @@ Under the hood, EventHandler resolves the agent for the session, determines the 
   - traits/ – Agent, Tools, Tasks, Preloads, Prompts, Cli, ToolWorkflow
   - codebase/ – ProjectManager, AWFL CLI examples, builder workflows, domain samples
 - yaml_gens/ – generated workflow YAML
+
+## Native Rust backend: experimental, no workflow migration yet
+
+The current default deployment target is **Google Cloud Workflows YAML**.
+`awfl-us/compiler-rust` can also compile compatible constructed Scala DSL
+workflows to statically generated Rust ABI 3 / IPC protocol 2 executables.
+The published DSL's step/CEL constructors are unchanged; only optional
+`CelFunctions`/`CallOperations` name constants were added. **Do not rewrite
+or bulk-migrate application workflows to native** while coverage and
+rollback are being verified.
+
+As of November 11, 2026, native compiler PRs #1–#7 and server execution PRs
+#72/#78/#79 are merged. Real unchanged `LoadConversationHistory` and
+`evals/Product` Scala source compiled and ran through generated Rust fixtures.
+Only a *pure* `NativePilot` was exercised through tagged Cloud Run Jobs in
+GCP; the regular native routing flag remains **disabled**. The separate
+private GCS native-artifact publisher is described in the
+[native publication/canary runbook](docs/native-rust-publication.md).
+The canonical feature/compatibility inventory, remaining gates, and next
+steps are in
+[compiler-rust's verified roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
+
+Pending features include durable `Parallel`/`ParallelFor`, callbacks, child
+workflows, provider-specific adapters, full CEL/error/retry parity, OS
+sandboxing, public API end-to-end tests, and measured latency/throughput.
+Google Workflows remains the required fallback for unsupported workflows;
+production native routing must not be enabled based on pure-fixture tests.
 
 ## Prerequisites
 - Java 17+
@@ -220,3 +267,12 @@ Other notes:
 
 ## License
 MIT (see LICENSE)
+
+### Published native streaming capability
+
+`scripts/native-dev.py` and `scripts/publish-native.sh` propagate
+`stream_ipc_version:1` from compiled Rust manifests to IAM-published
+`streamIpcVersion:1` release metadata. Older manifest versions omit
+the field and retain the one-shot path in the server. This adds no
+resource or IAM change. See the compiler-rust and server persistent
+native IPC implementation plans dated November 13, 2026.

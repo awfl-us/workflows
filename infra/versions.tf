@@ -3,7 +3,9 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.0"
+      # Match the existing server provider major and avoid silently upgrading
+      # state to Google provider v8 when publishing the native-artifact bucket.
+      version = ">= 7.10.0, < 8.0.0"
     }
     local = {
       source  = "hashicorp/local"

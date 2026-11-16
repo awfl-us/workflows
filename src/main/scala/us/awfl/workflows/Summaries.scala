@@ -20,7 +20,7 @@ object Summaries extends us.awfl.utils.strider.Latest[ConvoContext, ConvoSummary
   override def onPostWrite(sessionId: Value[String], responseId: Value[String], response: Value[ConvoSummary], at: Value[Double]): List[Step[?, ?]] = {
     val title = response.flatMap(_.title)
     List(Switch("titleSwitch", List(
-      ((title.cel !== Cel.nil) && (CelFunc("len", title.cel) > 0)) ->
+      ((title.cel !== Cel.nil) && (core.len( title.cel) > 0)) ->
         Firebase.update(
           "saveTitle",
           str("convo.sessions"),

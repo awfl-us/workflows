@@ -14,7 +14,7 @@ object Product {
       val forValues = Fold(s"forValues_${name}", obj(ParamsList(ListValue.empty)), values) { (b2, v) =>
         val buildV = Try("buildV", List() -> obj(Map(name -> v)))
         val forB = For("forB", b.resultValue) { prev =>
-          List() -> Value[Map[String, Cel]](CelFunc("map.merge", prev, buildV.resultValue))
+          List() -> Value[Map[String, Cel]](map.merge( prev, buildV.resultValue))
         }
         val joined = join("joinParams", b2.get.list, forB.resultValue)
         List[Step[?, ?]](buildV, forB, joined) -> obj(ParamsList(joined.resultValue))

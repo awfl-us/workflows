@@ -24,14 +24,14 @@ object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
   val dataset = Datasets.sweBenchLite
   val runId = input.runId
 
-  val cache = Cache(str(CelFunc("text.url_encode", dataset.name + "." + runId)))
+  val cache = Cache(str(text.url_encode( dataset.name + "." + runId)))
   val limit = input.limit
 
   override def task: Step[Answer, Value[Answer]] = {
     val loadDataset = dataset.load(limit = limit)
 
     val runInstances = ParallelFor("runInstances", loadDataset.resultValue) { row =>
-      val taskSession = str(CelFunc("uuid.generate"))
+      val taskSession = str(uuid.generate())
       val initEnv = Try("initEnv", {
         val tmpProject = Projects.create(str(("tmp/": Cel) + taskSession), Value.nil)
         val env = Env.get.copy(
@@ -90,7 +90,7 @@ object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
         instance_id = row.get.instance_id,
         model_patch = getDiff.resultValue,
         model_name_or_path = params.agent,
-        wall_time_seconds = Value(CelFunc("int", getAgentEnd.resultValue) - CelFunc("int", getAgentStart.resultValue)),
+        wall_time_seconds = Value(core.int( getAgentEnd.resultValue) - core.int( getAgentStart.resultValue)),
         prompt_tokens = usage.get.prompt_tokens,
         completion_tokens = usage.get.completion_tokens,
         reasoning_tokens = usage.flatMap(_.completion_tokens_details).flatMap(_.reasoning_tokens),
@@ -115,7 +115,7 @@ object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
     }
 
     val buildPredictions = Fold("buildPredictions", str(""), runInstances.resultValue) { (b, row) =>
-      List() -> str(b.cel + CelFunc("json.encode_to_string", row) + CelStr("\n").safe)
+      List() -> str(b.cel + json.encode_to_string( row) + CelStr("\n").safe)
     }
     val predictionsFile = str(directory + "/predictions.jsonl")
     val savePredictions = CliTools.writeFile(predictionsFile, buildPredictions.resultValue)
@@ -143,7 +143,7 @@ object SweBenchLite extends Experiment[BenchmarkParams, BenchmarkRunSummary] {
     val runEval = CliTools.runCommand(evalCmd, raiseError = true, timeoutSeconds = Value(60 * 25))
     val resultsFile = CliTools.readFile(str(answer.get.model_name_or_path.cel + "." + runId + ".json"))
     Try("eval",
-      List(buildInstanceIds, runEval, resultsFile) -> Value[Result](CelFunc("json.decode", resultsFile.resultValue))
+      List(buildInstanceIds, runEval, resultsFile) -> Value[Result](json.decode( resultsFile.resultValue))
     )
   }
 }

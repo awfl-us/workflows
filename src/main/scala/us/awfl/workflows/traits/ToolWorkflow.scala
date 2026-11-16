@@ -21,7 +21,7 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
       `type` = str("function"),
       function = obj(ToolCallFunction(
         str(functionName),
-        str(CelFunc("json.encode_to_string", params))
+        str(json.encode_to_string( params))
       ))
     ))
 
@@ -45,7 +45,7 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
     )
     val run = Call[RunWorkflowArgs[Input], Result](
       s"${opName}_run",
-      "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
+      CallOperations.WorkflowRun,
       obj(args)
     )
     Block(s"${opName}_await_block", List[Step[?, ?]](run) -> run.resultValue.flatMap(_.encoded))
@@ -76,9 +76,8 @@ trait ToolWorkflow extends us.awfl.core.Workflow {
 
   // Decode a string field from the encoded callback JSON
   def decodeField(encoded: Resolved[String], field: String): Value[String] =
-    Value(CelFunc(
-      "map.get",
-      CelFunc("json.decode", encoded.cel),
+    Value(map.get(
+      json.decode( encoded.cel),
       field
     ))
 }
