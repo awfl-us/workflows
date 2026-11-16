@@ -127,6 +127,26 @@ simulator startup, and grading. This is an **iteratively developed, public-task
 result**, *not* a blind held-out evaluation or general benchmark score.
 Builder tool-call counts, tokens, costs and wall-time have not been metered.
 
+## n8n Community Edition: same task, same evaluator
+
+The independently authored [n8n workflow](n8n/emergency_drill.json) contains
+**10 real n8n nodes**: Manual Trigger, six HTTP Request nodes, two Code nodes
+and an after-hours If branch. The separate
+[local CLI adapter](n8n/run_n8n.py) binds the same authenticated simulator
+bridge, imports the JSON into ephemeral self-hosted n8n Community Edition
+and executes the actual graph using n8n itself. No n8n Cloud account or
+external SaaS credentials are required.
+
+The first **two n8n executions** also achieved **1.00 strict / 1.00 partial
+credit**, **8/8 positive/negative assertions** and **six business tool calls**,
+with **14.034 s and 13.387 s** measured artifact runtime. Those times
+include n8n CLI process startup, import, database initialization and
+execution; they **cannot** be divided by AWFL's standalone Rust execution
+time to claim a fair speedup. The n8n workflow was built after the AWFL
+task was solved, so neither result is a blind model-construction evaluation.
+
+See the [n8n setup, commands and timing notes](n8n/README.md).
+
 Per-run `results.json`, `assertions.json`, `tool_calls.json`,
 `initial_state.json`, `final_state.json`, `runtime.json`, and
 `metadata.json` are persisted under the chosen output directory.
@@ -167,8 +187,9 @@ not free.
    before independently grading them.
 2. Generalize the AWFL-to-simulator protocol adapter for other tasks, varied
    tool argument schemas, failures and more robust date/notice formats.
-3. Implement the n8n platform adapter using the same prompt, allowed operations,
-   model/harness and *independently reset* simulator.
+3. **Done for task 1219:** the n8n platform adapter runs a real workflow
+   against the same independently reset simulator. Extend it beyond this
+   single public task and compare **warm-engine** execution fairly.
 4. Add multiple independently seeded input/state variations per artifact. This
    extends AutomationBench and must be reported separately from the official
    one-scenario task score.
