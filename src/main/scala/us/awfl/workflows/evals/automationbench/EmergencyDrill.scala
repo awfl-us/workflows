@@ -88,7 +88,7 @@ object EmergencyDrill extends us.awfl.core.Workflow {
     val date = invoke("setHqDrillDate", "monday_change_date_column_value", Map(
       "board_id" -> str("brd_ops"),
       "item_id" -> itemId,
-      "column_id" -> str("date"),
+      "column_id" -> str("due"),
       "value_date" -> day,
       "value_time" -> start
     ))
@@ -103,7 +103,7 @@ object EmergencyDrill extends us.awfl.core.Workflow {
 
     val slack = invoke("notifyEmergencyTeam", "slack_send_channel_message", Map(
       "channel" -> str("CEMTEAM"),
-      "text" -> str(("HQ Emergency Drill scheduled: ": Cel) + day + " " +
+      "text" -> str(("After hours HQ emergency drill scheduled: ": Cel) + day + " " +
         start + "-" + end + " UTC. " + message)
     ))
     val notify = Switch("afterHours", List(

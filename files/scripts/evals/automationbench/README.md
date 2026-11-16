@@ -1,4 +1,4 @@
-# AutomationBench integration (first local vertical slice)
+# AutomationBench integration (native AWFL workflow vertical slice)
 
 The evaluator is registered alongside SWE-bench in `us.awfl.workflows.evals`.
 This directory contains a Python 3.13 integration that **imports** Zapier's
@@ -81,6 +81,52 @@ The initial evaluated reference workflow performed six allowed simulator calls
 and scored **0.50 partial credit / 0.00 strict completion** (task ID 1219).
 That is evidence of working execution, not a successful agent-created system.
 
+## Native AWFL workflow: task 1219
+
+`src/main/scala/us/awfl/workflows/evals/automationbench/EmergencyDrill.scala`
+is a **real AWFL Scala DSL** workflow manually authored by ChatGPT as the
+workflow-construction agent, compiled by `awfl-us/compiler-rust` into a native
+Rust executable (ABI 3 / IPC v2). The independent `native_driver.py`
+implements only the compiled effect/continuation protocol: it forwards
+`http.post` effects to the simulator bridge and injects their journaled
+responses into the resumed executable. **It does not implement the workflow's
+selection or business logic.**
+
+In an AWFL `scala` consumer, with the `compiler-rust` repository checked out
+beside `workflows`, run:
+
+```bash
+cd /workspace/workflows
+files/scripts/evals/automationbench/build_native.sh \
+  /workspace/workflows/eval_runs/automationbench-native-1219/artifact
+
+cd /workspace/automationbench-upstream
+~/.local/bin/uv run python /workspace/workflows/files/scripts/evals/automationbench/runner.py evaluate \
+  --domain operations --task-id 1219 \
+  --artifact /workspace/workflows/eval_runs/automationbench-native-1219/artifact/artifact.json \
+  --output-dir /workspace/workflows/eval_runs/automationbench-native-1219/score \
+  --platform awfl-native-rust --model gpt-6 --agent-harness chatgpt \
+  --authoring-method scala-dsl-compiled-rust \
+  --timeout-seconds 60 --max-tool-calls 20
+```
+
+The build script **freezes the executable and protocol host into an artifact
+directory**, rather than referring to a mutable Cargo target path. It
+produces `artifact.json` and `build_metadata.json` with source,
+compiler and binary hashes. Generated files, simulation states and grader
+outputs live under ignored `eval_runs/`, not in Git.
+
+**Observed after interactive debugging and reading assertion feedback:** on
+public operations task 1219 the native compiled workflow scored **1.00
+partial credit / 1.00 strict completion**, with **8/8 official assertions
+passing**, **6 business tool calls** and **0.205 s artifact runtime** in one
+local run. It updated the HQ Monday status and due date, created the HQ
+calendar event, notified the after-hours Slack channel, and made no
+prohibited updates. The runtime measurement excludes Scala/Rust compilation,
+simulator startup, and grading. This is an **iteratively developed, public-task
+result**, *not* a blind held-out evaluation or general benchmark score.
+Builder tool-call counts, tokens, costs and wall-time have not been metered.
+
 Per-run `results.json`, `assertions.json`, `tool_calls.json`,
 `initial_state.json`, `final_state.json`, `runtime.json`, and
 `metadata.json` are persisted under the chosen output directory.
@@ -105,20 +151,22 @@ The `seed` is currently recorded for reproducibility but does **not** create
 new independent upstream scenarios. No invented robustness scores.
 
 The included Scala `AutomationBenchEval` / `experiments.AutomationBench`
-reuses `Eval` and `Experiment` for configuration expansion, input and answer
-persistence and aggregation. It stages a prebuilt artifact for this first
-smoke slice. The build stage is **not** an AI agent yet, and null builder
-usage/cost means unmeasured, not free.
+reuses `Eval` and `Experiment` for configuration expansion, input and
+answer persistence and aggregation. **That Scala experiment's build stage
+still stages the prebuilt Python reference artifact**; it has not yet been
+wired to the manual native AWFL build script or to an automated builder.
+The new native workflow was built separately and graded by the same
+independent simulator runner. Null builder usage/cost means unmeasured,
+not free.
 
 ## Next milestones
 
-1. Connect a configured **AWFL agent builder** with a fixed token/time budget
-   to author and compile a genuine AWFL workflow. Capture the immutable
-   executable/deployment identifier and builder transcript/usage, then invoke
-   this independent runner. Do not label any prebuilt Python fixture an AWFL
-   result.
-2. Implement a reusable AWFL-to-simulator business tool transport and freeze
-   compiled artifacts; run a full strict pass attempt on task 1219.
+1. Wire a configurable **workflow-building agent** with fixed token/time
+   budgets into the Scala `Experiment` build stage. Record actual builder
+   transcripts, costs, call counts and wall time; freeze compiled outputs
+   before independently grading them.
+2. Generalize the AWFL-to-simulator protocol adapter for other tasks, varied
+   tool argument schemas, failures and more robust date/notice formats.
 3. Implement the n8n platform adapter using the same prompt, allowed operations,
    model/harness and *independently reset* simulator.
 4. Add multiple independently seeded input/state variations per artifact. This
