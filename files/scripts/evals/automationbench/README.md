@@ -206,7 +206,13 @@ implementation:
    the experiment clones `awfl-us/workflows` explicitly into
    `/workspace/workflows` and sets that as the agent's working directory
    before handing off the task. Do not assume attaching a project has already
-   cloned the repository.
+   cloned the repository. It **preserves the repository's original
+   `AGENT.md`** with its DSL and dependency guides, writes the separate
+   `AUTOMATIONBENCH_AGENT.md`, and updates the task-local
+   `.awfl/config.json` so the built-in `agent.sh` preload reads **both**
+   documents every turn. The sandbox config also replaces the repository's
+   unrelated hardcoded testbed command with `pwd`. A preflight verifies both
+   files and the secondary preload before ProjectManager starts.
 3. `ProjectManager` receives a real `Task` with the task-specific prompt,
    a fixed `fund` budget, and instructions to write an independent Scala
    workflow at

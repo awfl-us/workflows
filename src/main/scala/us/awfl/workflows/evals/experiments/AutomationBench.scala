@@ -65,11 +65,23 @@ object AutomationBench extends Experiment[AutomationBenchParams, AutomationBench
         str("test -d /workspace/workflows/.git || git clone --depth 1 https://github.com/awfl-us/workflows.git /workspace/workflows"),
         "checkoutBenchmarkRepo", raiseError = true,
         timeoutSeconds = Value(180), env = bootstrapEnv)
-      // SWE-bench uses an AGENT.md file rather than a huge CEL expression.
+      // Keep the repository's own AGENT.md intact: it documents the DSL,
+      // source layout and dependency repositories. Add benchmark instructions
+      // as a *second* preload through agent.sh's .awfl/config.json.
       // Google Workflows expressions are limited to 400 characters.
       val loadAgentMd = Files.readFile("agents/AUTOMATIONBENCH_AGENT.md")
-      val saveAgentMd = CliTools.writeFile(str("AGENT.md"),
+      val saveAgentMd = CliTools.writeFile(str("AUTOMATIONBENCH_AGENT.md"),
         loadAgentMd.resultValue, "writeBenchmarkAgentMd", env = init.resultValue)
+      // Quoting Python/JSON inside a generated CEL literal confuses the
+      // Google Workflows parser. The encoded script appends both preload
+      // filenames to .awfl/config.json, preserves any existing entries, and
+      // replaces the unrelated testbed command with pwd.
+      val configurePreloads = CliTools.runCommand(str(
+        "printf %s aW1wb3J0IGpzb24scGF0aGxpYgpwPXBhdGhsaWIuUGF0aCgnLmF3ZmwvY29uZmlnLmpzb24nKQpkPWpzb24ubG9hZHMocC5yZWFkX3RleHQoKSkKZFsnZmlsZXMnXT1saXN0KGRpY3QuZnJvbWtleXMoZC5nZXQoJ2ZpbGVzJyxbXSkrWydBR0VOVC5tZCcsJ0FVVE9NQVRJT05CRU5DSF9BR0VOVC5tZCddKSkKZFsnY29tbWFuZHMnXT1bJ3B3ZCddCnAud3JpdGVfdGV4dChqc29uLmR1bXBzKGQpKQo= | base64 -d | python3"
+      ), "configureBenchmarkPreloads", raiseError = true, env = init.resultValue)
+      val verifyPreloads = CliTools.runCommand(str(
+        """test -s AGENT.md && test -s AUTOMATIONBENCH_AGENT.md && sh files/scripts/agent.sh | grep -q 'Preload file: AUTOMATIONBENCH_AGENT.md'"""
+      ), "verifyBenchmarkPreloads", raiseError = true, env = init.resultValue)
       val query = str(CelStr("Build a new AWFL Scala workflow for this task: ").safe +
         row.get.task_spec)
       val todo = Task(str(("AutomationBench ": Cel) + row.get.task_id),
@@ -97,7 +109,8 @@ object AutomationBench extends Experiment[AutomationBenchParams, AutomationBench
       // Init must be outside the guarded region: otherwise the native
       // exception branch cannot resolve initCloudAgentResult for cleanup.
       val runAndCleanup = Try("runAndCleanup", List[Step[?, ?]](
-        checkout, loadAgentMd, saveAgentMd, startTime, run, endTime, source, usage, cleanup
+        checkout, loadAgentMd, saveAgentMd, configurePreloads, verifyPreloads,
+        startTime, run, endTime, source, usage, cleanup
       ) -> prediction, err =>
         List[Step[?, ?]](cleanup, Raise("reRaiseAfterCleanup", err)) ->
           Value.nil[AutomationBenchSubmission])
