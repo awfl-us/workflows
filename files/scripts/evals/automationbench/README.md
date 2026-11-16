@@ -110,6 +110,22 @@ cd /workspace/automationbench-upstream
   --timeout-seconds 60 --max-tool-calls 20
 ```
 
+The benchmark `build_native.sh` **delegates compilation and verified
+static-musl binary production to `workflows/scripts/native-dev.py`** using
+its local-only `--class` mode. It no longer invokes the Scala frontend
+or Cargo independently. An unregistered builder-produced Scala class can
+also be specified as argument 2, with the fully qualified emitted variant
+as argument 3. The generated workflow must be a `core.Workflow` on the
+`workflows` source classpath. No GCS publication or native routing changes
+occur during benchmark compilation.
+
+This path includes the production build script's Scala compilation, native
+code generation, shared Cargo release build, ABI/digest checks and
+static-musl ELF verification. The artifact wrapper freezes the verified
+executable and simulator adapter for independent grading. **Build time**
+must be recorded as builder cost in future automated agent experiments;
+the evaluator's `workflow_runtime_seconds` excludes compilation.
+
 The build script **freezes the executable and protocol host into an artifact
 directory**, rather than referring to a mutable Cargo target path. It
 produces `artifact.json` and `build_metadata.json` with source,

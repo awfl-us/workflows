@@ -68,6 +68,38 @@ dependencies using a single JVM compiler pass and a shared Cargo workspace.
     # Publish via the existing GCP deployer IAM identity:
     python3 scripts/native-dev.py codebase-ProjectManager --recursive --publish
 
+### Build an unregistered Scala workflow locally (e.g., AutomationBench)
+
+The same `native-dev.py` pipeline can compile an arbitrary Scala
+`core.Workflow` class from this repository without registering a production
+target:
+
+```bash
+python3 scripts/native-dev.py \
+  --class us.awfl.workflows.evals.automationbench.EmergencyDrill \
+  --only evals-automationbench-EmergencyDrill-emergency-drill \
+  --output eval_runs/native-emergency-drill/generated
+```
+
+`--class` defaults to the single variant emitted by the Scala class. For
+classes generating multiple workflow variants, supply `--only` to select
+the intended root; the class's emitted variants share one Cargo build.
+The resulting `build-report.json` contains the **verified static-musl
+executable path and digest**, while `manifest.json` records the native ABI
+and operation capabilities.
+
+**Safety boundary:** `--class` is build-only. It refuses `--publish`,
+`--force-publish` and `--recursive`, and rejects unregistered workflows
+using `workflow.run` without registered dependencies. Publication continues
+to require a named target and an explicitly registered recursive dependency
+closure. Benchmark builders should never touch the production GCS aliases.
+
+For AutomationBench, `files/scripts/evals/automationbench/build_native.sh`
+calls this same builder, copies the verified executable into a frozen artifact,
+and creates a simulator-specific manifest and local IPC driver. The benchmark
+runner independently executes and grades that frozen artifact. This replaces
+the previous ad-hoc sbt/Cargo compilation path.
+
 Paths: --compiler /path/to/compiler-rust, --output /path/to/rust-gens,
 and --bucket awfl-us-native-workflows override defaults. --skip-compile
 reuses generated crates while still verifying binaries;

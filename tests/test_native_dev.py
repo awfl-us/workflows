@@ -5,6 +5,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/native-dev.py"
 spec = importlib.util.spec_from_file_location("native_dev", SCRIPT)
@@ -53,6 +54,58 @@ class NativeDevTests(unittest.TestCase):
         found = module.generated_crates(self.root, "codebase-ProjectManager", True,
                                         ["tools-CliTools"])
         self.assertEqual(len(found), 2)
+
+    def test_unregistered_scala_classes_are_validated_without_target_registration(self):
+        module_name = "us.awfl.workflows.evals.automationbench.EmergencyDrill"
+        spec, modules = module.unregistered_class(module_name)
+        self.assertEqual(spec, {})
+        self.assertEqual(modules, [module_name])
+        for invalid in ("", "notqualified", "a.b;rm -rf /", "a.b c", "a..b"):
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(
+                    ValueError, "Invalid fully qualified"):
+                module.unregistered_class(invalid)
+
+    def test_unregistered_single_and_multi_variant_selection(self):
+        index = self.root / ".awfl-native-workflows"
+        first = "evals-automationbench-EmergencyDrill-emergency-drill"
+        index.write_text(first + "\n")
+        self.assertEqual(module.select_generated_root(self.root, None), first)
+        self.assertEqual(module.select_generated_root(self.root, first), first)
+        with self.assertRaisesRegex(ValueError, "not emitted"):
+            module.select_generated_root(self.root, "unknown")
+        index.write_text(first + "\n" + "evals-automationbench-EmergencyDrill-other\n")
+        with self.assertRaisesRegex(ValueError, "select one with --only"):
+            module.select_generated_root(self.root, None)
+        self.assertEqual(module.select_generated_root(self.root, first), first)
+        index.write_text("bad/path\n")
+        with self.assertRaisesRegex(ValueError, "Invalid native compiler artifact index"):
+            module.select_generated_root(self.root, None)
+
+    def test_unregistered_class_cannot_publish_or_claim_recursive_closure(self):
+        class_name = "us.awfl.workflows.evals.automationbench.EmergencyDrill"
+        for flags in ("--publish", "--recursive", "--force-publish"):
+            with self.subTest(flags=flags), patch(
+                    "sys.argv", ["native-dev.py", "--class", class_name, flags]), \
+                 self.assertRaises(SystemExit) as ctx:
+                module.main()
+            self.assertEqual(ctx.exception.code, 2)
+
+    def test_unregistered_skip_compile_rejects_other_class(self):
+        with patch("sys.argv", [
+                "native-dev.py", "--class",
+                "us.awfl.workflows.evals.automationbench.EmergencyDrill",
+                "--skip-compile", "--output", str(self.root)]):
+            with self.assertRaisesRegex(ValueError, "not for requested Scala class"):
+                module.main()
+
+    def test_benchmark_uses_same_native_builder_not_separate_compiler(self):
+        wrapper = (SCRIPT.parent.parent /
+                   "files/scripts/evals/automationbench/build_native.sh").read_text()
+        self.assertIn('scripts/native-dev.py', wrapper)
+        self.assertIn('--class "$CLASS"', wrapper)
+        self.assertIn('--only "$WORKFLOW"', wrapper)
+        self.assertNotIn("sbt -batch", wrapper)
+        self.assertNotIn("cargo build", wrapper)
 
     def test_unsupported_operations_and_bad_digests_fail_before_publishing(self):
         p = self.crate("codebase-ProjectManager", ops=("remote.unsafe",))
