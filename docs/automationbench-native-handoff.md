@@ -416,6 +416,37 @@ benchmark hidden initial state and scoring assertions remain excluded. See
 the concrete `prepare --out` command in the integration README. This is a
 harness fix, **not a new agent attempt or benchmark score**.
 
+### November 17 native evaluator release and end-to-end retry
+
+- The previously published `evals-AutomationBenchEval` ran as
+  `native_a08326fec2df49e18c13a7830af5cf00` and **failed after 33 effects**
+  with `missing continuation slot: s21` before creating a builder or score.
+- The compiler's native parallel fork snapshot incorrectly demanded
+  uninitialized error-handler slots. The fix to capture only initialized
+  slots was merged as
+  [compiler-rust PR #42](https://github.com/awfl-us/compiler-rust/pull/42),
+  commit `52e4f6a964af6e271a6d98bbfe57d46e8724501d`. The parallel
+  regression test and a full **28-binary native build** passed; the
+  compiled evaluator startup smoke test passed as well.
+- **Selective release:** only `evals-AutomationBenchEval` (artifact SHA
+  `e540f94925e555df4ef751dc0fbd608bed383d312eda3190fac8e0fe297a0c9f`)
+  and `evals-experiments-AutomationBench` (artifact SHA
+  `ea08604338dbaf1f0995c9292c59efe0dca22348d22d2ddc4d14ea3cd8ded7c9`)
+  were republished. Before/after comparison of **all 30 active native
+  aliases** confirmed that exactly those two changed. ProjectManager and
+  every helper alias stayed unchanged. Evidence remains in ignored local
+  `eval_runs/automationbench/selective-evaluator-publish/`.
+- The new evaluator root is
+  `native_9041dc38dbae4cb690cc7529baddae95`, using the corrected
+  public-only typed tool schemas. It progressed past the old error,
+  created temporary project `d99e7228fe464aa595d928036f9cb63d`,
+  and reached **179 effects**, waiting in
+  `evals-experiments-AutomationBench` at `callback.await` for
+  ProjectManager. At the last check it was **still running** without a
+  result or independent grade; do not claim a benchmark score. Check the
+  root execution and callback before starting any new paid run, and
+  verify that the temporary project is deleted on completion or error.
+
 1. **Check published runtime, no builds.** Attach the existing AWFL project,
    preserve unrelated dirty files, and inspect the published native
    `codebase-ProjectManager`, `tools-CliTools` and helper workflow
