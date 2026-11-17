@@ -2,6 +2,32 @@
 
 **Status verified November 16–17, 2026.** This is the authoritative task-specific handoff for [workflows PR #25](https://github.com/awfl-us/workflows/pull/25), branch `feat/automationbench-eval`. Read [AutomationBench runner README](../files/scripts/evals/automationbench/README.md), [native development loop](native-development-loop.md), and [native publication/runbook](native-rust-publication.md) alongside this document. The Scala DSL remains the authoring interface; **Rust is the intended evaluator/ProjectManager runtime. Do not deploy the generated Google Workflows YAML**.
 
+## Consumer access and checkout preservation (latest)
+
+The AWFL workflows project is `gNoQN9KUw5IbtsXLag0M`. Its previous
+Scala consumer `consumer-mwjyx9h8-2p1mnb29` failed four startup attempts
+(`BackoffLimitExceeded`) while reporting Firebase credential bootstrap
+`HTTPError` and refusal to run with stale credentials. Stopping the
+terminally failed consumer and attaching a new `scala` consumer **restored
+shell and git access**. Last verified workspace ID:
+`8474d9e8837d656d7b3ff317ead44911`; **reattach by project ID**
+rather than relying on that session-scoped workspace ID.
+
+The restored `/workspace/workflows` checkout is on
+`feat/automationbench-eval`, fast-forwarded to the latest pushed docs.
+The build report at
+`eval_runs/automationbench/native-coordinator-dev/build-report.json`
+survived the restart, **but its referenced Rust binaries did not** (the
+compiler-rust Cargo target directory was ephemeral). A rerun of
+`smoke_native_coordinator.py` failed immediately on the missing binary;
+**rebuild the 28 native executables** before the next smoke. This is not
+a new source compilation failure.
+
+Three unrelated local dirty paths **must be preserved, not staged or reset**:
+`functions/workflows/types/services-Llm-ChatToolResponse.json`,
+`infra/terraform.tfstate`, `infra/terraform.tfstate.backup`.
+All benchmark code and docs were committed separately to the branch.
+
 ## Actual verified state
 
 - The benchmark wraps Zapier's public [AutomationBench](https://github.com/zapier/AutomationBench) pinned to `4a8e1061254004d9dac807054eed33fad7d1ff14`. Task **operations/1219**, “HQ Emergency Drill”, is the initial one-row smoke. The parent loads the prompt and allowed-tool descriptions, not the initial world, answers or assertions. Python runner resets an independent simulator and applies upstream's official assertions.
