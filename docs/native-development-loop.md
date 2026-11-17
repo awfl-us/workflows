@@ -68,10 +68,82 @@ dependencies using a single JVM compiler pass and a shared Cargo workspace.
     # Publish via the existing GCP deployer IAM identity:
     python3 scripts/native-dev.py codebase-ProjectManager --recursive --publish
 
+### Build an unregistered Scala workflow locally (e.g., AutomationBench)
+
+The same `native-dev.py` pipeline can compile an arbitrary Scala
+`core.Workflow` class from this repository without registering a production
+target:
+
+```bash
+python3 scripts/native-dev.py \
+  --class us.awfl.workflows.evals.automationbench.EmergencyDrill \
+  --only evals-automationbench-EmergencyDrill-emergency-drill \
+  --output eval_runs/native-emergency-drill/generated
+```
+
+`--class` defaults to the single variant emitted by the Scala class. For
+classes generating multiple workflow variants, supply `--only` to select
+the intended root; the class's emitted variants share one Cargo build.
+The resulting `build-report.json` contains the **verified static-musl
+executable path and digest**, while `manifest.json` records the native ABI
+and operation capabilities.
+
+**Safety boundary:** `--class` is build-only. It refuses `--publish`,
+`--force-publish` and `--recursive`, and rejects unregistered workflows
+using `workflow.run` without registered dependencies. Publication continues
+to require a named target and an explicitly registered recursive dependency
+closure. Benchmark builders should never touch the production GCS aliases.
+
+For AutomationBench, `files/scripts/evals/automationbench/build_native.sh`
+calls this same builder, copies the verified executable into a frozen artifact,
+and creates a simulator-specific manifest and local IPC driver. The benchmark
+runner independently executes and grades that frozen artifact. This replaces
+the previous ad-hoc sbt/Cargo compilation path.
+
 Paths: --compiler /path/to/compiler-rust, --output /path/to/rust-gens,
 and --bucket awfl-us-native-workflows override defaults. --skip-compile
 reuses generated crates while still verifying binaries;
 --skip-compile --check only validates generated manifests.
+
+## AutomationBench native evaluator — verified and pending (November 17, 2026)
+
+**Source of truth:** [AutomationBench handoff and next-session plan](automationbench-native-handoff.md).
+The coordinator and ProjectManager are authored as Scala DSL but run through
+the Rust backend. The old `evals-experiments-AutomationBench` Google YAML
+source reached roughly 143 KB and was rejected by the Google Workflows
+128 KB limit. **Do not deploy YAML for this benchmark.**
+
+```bash
+cd /workspace/workflows
+python3 scripts/native-dev.py evals-AutomationBenchEval --recursive \
+  --output eval_runs/automationbench/native-coordinator-dev
+python3 files/scripts/evals/automationbench/smoke_native_coordinator.py \
+  --report eval_runs/automationbench/native-coordinator-dev/build-report.json
+```
+
+On November 17 the cold build reported `AWFL_NATIVE_DEV_PASS`: **28 verified
+static-musl executables, publish=false**, including the coordinator,
+experiment and ProjectManager dependencies. The compiled coordinator
+returned an IPC v2 `suspended` response with a `native.parallel` effect
+and continuation; **no effect was dispatched**. This is a native startup
+check, not a completed execution or benchmark grade.
+
+**Important GCS alias safety:** comparison with currently published
+`awfl-us-native-workflows` active mappings found only **two new benchmark
+aliases** but **26 existing aliases with different generated artifacts**.
+Do **not** add `--publish` to the above command against the shared
+bucket. Use a local release registry or isolated release set, and confirm
+`native_` execution identities when running through the actual API:
+unpublished workflows can fall back to Google.
+
+The next integration gate is local/native child + fork execution under the
+server's existing `scripts/nativeLocalRun.mjs` runner, then a bounded real
+task 1219 run using `gpt-6-sol` and its independent grader. The last
+attempt to install a fresh Node server checkout was interrupted by GKE
+consumer termination (`execution_lost`), so **that full test is still
+unverified**. The server repository has no `package-lock.json`; use
+a supported package installation rather than `npm ci` without a lockfile.
+Keep the model bill and model/provider acceptance separately measured.
 
 ## Follow-up: memory-first parallel performance experiment
 

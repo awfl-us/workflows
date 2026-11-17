@@ -1,0 +1,9 @@
+{
+  "platform": "n8n-community-self-hosted",
+  "description": "Native n8n 1.123.14 workflow graph executed by n8n Community Edition CLI, no SaaS credentials",
+  "command": [
+    "{python}",
+    "{artifact_dir}/run_n8n.py",
+    "{artifact_dir}/emergency_drill.json"
+  ]
+}

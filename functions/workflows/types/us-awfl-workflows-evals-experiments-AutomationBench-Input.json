@@ -1,0 +1,99 @@
+{
+  "name" : "us-awfl-workflows-evals-experiments-AutomationBench-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.evals.experiments.AutomationBench.Input.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "params" : {
+        "type" : "object",
+        "properties" : {
+          "model" : {
+            "type" : "string"
+          },
+          "domain" : {
+            "type" : "string"
+          },
+          "agent" : {
+            "type" : "string"
+          },
+          "fund" : {
+            "type" : "string"
+          },
+          "task_id" : {
+            "type" : "string"
+          },
+          "platform" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "domain",
+          "task_id",
+          "platform",
+          "model",
+          "agent",
+          "fund"
+        ],
+        "additionalProperties" : true
+      },
+      "limit" : {
+        "type" : "integer"
+      },
+      "runId" : {
+        "type" : "string"
+      },
+      "env" : {
+        "type" : "object",
+        "properties" : {
+          "callingWorkflowExec" : {
+            "type" : "string"
+          },
+          "model" : {
+            "type" : "string"
+          },
+          "background" : {
+            "type" : "boolean"
+          },
+          "workdir" : {
+            "type" : "string"
+          },
+          "projectId" : {
+            "type" : "string"
+          },
+          "sessionId" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "BASE_URL" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "userId",
+          "model",
+          "callingWorkflowExec",
+          "BASE_URL",
+          "background",
+          "projectId",
+          "sessionId",
+          "workdir"
+        ],
+        "additionalProperties" : true
+      },
+      "directory" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "runId",
+      "limit",
+      "directory",
+      "params",
+      "env"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-evals-experiments-AutomationBench-Input.json"
+  }
+}

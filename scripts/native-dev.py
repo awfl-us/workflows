@@ -3,6 +3,7 @@
 
 Example:
   python3 scripts/native-dev.py codebase-ProjectManager --recursive --publish
+  python3 scripts/native-dev.py --class us.awfl.workflows.evals.automationbench.EmergencyDrill --output /tmp/emergency-drill
 
 Default compiles/builds without publishing; --publish activates verified
 artifacts through the existing IAM-controlled GCS release workflow.
@@ -31,6 +32,7 @@ STATIC_REF = re.compile(
     r'\("workflow_id"\.to_owned\(\),\s*AwflValue::String\("([^"]+)"\.to_owned\(\)')
 ANY_REF = re.compile(r'\("workflow_id"\.to_owned\(\),\s*')
 NAME = re.compile(r"[A-Za-z][A-Za-z0-9_-]{0,99}\Z")
+SCALA_CLASS = re.compile(r"(?:[A-Za-z_]\w*\.)+[A-Za-z_]\w*\Z")
 
 
 def log(message):
@@ -54,6 +56,33 @@ def modules_for(workflow, recursive):
     ):
         raise ValueError("Invalid registered native Scala module")
     return spec, modules
+
+
+def unregistered_class(class_name):
+    """Allow local builds from a Scala workflow class without publishing it."""
+    if not SCALA_CLASS.fullmatch(class_name):
+        raise ValueError("Invalid fully qualified Scala workflow class: " + class_name)
+    return {}, [class_name]
+
+
+def select_generated_root(output, requested):
+    """Resolve the native workflow variant emitted by an arbitrary DSL class."""
+    index = output / ".awfl-native-workflows"
+    if not index.is_file():
+        raise ValueError("Native batch artifact index missing: " + str(index))
+    names = index.read_text().splitlines()
+    if not names or any(not NAME.fullmatch(name) for name in names):
+        raise ValueError("Invalid native compiler artifact index")
+    if requested:
+        if requested not in names:
+            raise ValueError(
+                f"Native root {requested!r} not emitted; available variants: {', '.join(names)}")
+        return requested
+    if len(names) != 1:
+        raise ValueError(
+            f"Scala class emitted {len(names)} workflows; select one with --only: "
+            + ", ".join(names))
+    return names[0]
 
 
 def generated_crates(output, workflow, recursive, dynamic):
@@ -305,7 +334,10 @@ def publish_all(args, crates, built):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("workflow", help="Root deployed name")
+    parser.add_argument("workflow", nargs="?", help="Registered root deployed name (or optional --class variant)")
+    parser.add_argument("--class", dest="class_name",
+                        help="Build a Scala DSL class locally without registering a release target")
+    parser.add_argument("--only", help="Select one emitted workflow variant with --class")
     parser.add_argument("--recursive", action="store_true",
                         help="Build registered dependency closure")
     parser.add_argument("--publish", action="store_true",
@@ -321,22 +353,46 @@ def main():
     parser.add_argument("--check", action="store_true",
                         help="Only validate generated crate closure; no Cargo build")
     args = parser.parse_args()
+    if args.class_name:
+        if args.recursive or args.publish or args.force_publish:
+            parser.error("--class is local-only: --recursive and publish flags require a registered target")
+        if args.workflow and args.only and args.workflow != args.only:
+            parser.error("Positional workflow and --only must match")
+        spec, modules = unregistered_class(args.class_name)
+        requested = args.only or args.workflow
+    else:
+        if not args.workflow:
+            parser.error("Provide a registered workflow name or --class Scala.Workflow")
+        if args.only:
+            parser.error("--only requires --class")
+        spec, modules = modules_for(args.workflow, args.recursive)
+        requested = args.workflow
     if args.publish and (not args.recursive or args.check):
         parser.error("--publish requires --recursive and cannot use --check")
     args.compiler = args.compiler.resolve()
     output = (args.output or (args.compiler / "target/native-dev-generated" /
-                              args.workflow)).resolve()
-    spec, modules = modules_for(args.workflow, args.recursive)
+                              (requested or args.class_name))).resolve()
     started = time.monotonic()
     if not args.skip_compile:
         compile_all(args, output, modules)
-    crates = generated_crates(output, args.workflow, args.recursive,
+    elif args.class_name:
+        # Never silently reuse a different class's generated output.
+        classes_file = output / "classes.txt"
+        if not classes_file.is_file() or classes_file.read_text().splitlines() != modules:
+            raise ValueError("Generated artifacts are not for requested Scala class; remove --skip-compile")
+    root = select_generated_root(output, requested) if args.class_name else requested
+    crates = generated_crates(output, root, args.recursive,
                               spec.get("dynamic_targets", []))
+    if args.class_name and any("workflow.run" in
+            {effect["operation"] for effect in manifest["effects"]}
+            for _, manifest in crates.values()):
+        raise ValueError("Unregistered --class build has workflow.run dependencies; "
+                         "register the dependency closure before execution")
     if not args.check:
         built = build_all(args, output, crates)
         if args.publish:
             publish_all(args, crates, built)
-    log(f"AWFL_NATIVE_DEV_PASS root={args.workflow} workflows={len(crates)} "
+    log(f"AWFL_NATIVE_DEV_PASS root={root} workflows={len(crates)} "
         f"publish={str(args.publish).lower()} elapsed={time.monotonic()-started:.1f}s")
 
 

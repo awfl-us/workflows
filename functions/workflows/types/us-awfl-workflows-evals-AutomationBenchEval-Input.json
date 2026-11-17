@@ -1,0 +1,21 @@
+{
+  "name" : "us-awfl-workflows-evals-AutomationBenchEval-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.evals.AutomationBenchEval.Input.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "arg1" : {
+        "type" : "string"
+      },
+      "arg2" : {
+        "type" : "string"
+      }
+    },
+    "required" : [
+      "arg1",
+      "arg2"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-evals-AutomationBenchEval-Input.json"
+  }
+}

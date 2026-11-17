@@ -1,0 +1,8 @@
+{
+  "platform": "python-reference",
+  "command": [
+    "{python}",
+    "{artifact_dir}/example_workflow.py"
+  ],
+  "description": "Deterministic workflow artifact for simulator bridge smoke test; not an AWFL or AI-generated score."
+}
