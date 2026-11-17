@@ -235,6 +235,57 @@ Gmail, Monday.com, Google Calendar and Slack operations. **Record the
 final runtime, cost, file hash, grader score and cleanup when this
 session completes.** No published agent workflows were modified.
 
+## Second full-context attempt: budget enforcement failure (November 17, 2026)
+
+A fresh `codebase-ProjectManager` session was started with the exact
+public `operations/1219` specification and **all eight permitted
+business-tool definitions** in its *first* 9,717-character user
+message, so the prior missing-task-context explanation does **not**
+apply to this run. The first message was read back from session
+history and verified to contain the full tool list. The old
+`AgentSubmission.scala` was archived outside the builder's active
+source path. Three preloads (`AGENT.md`,
+`AUTOMATIONBENCH_AGENT.md`, `AUTOMATIONBENCH_TASK_1219.md`)
+were present, and the deployed agent's first task explicitly
+recognized the Gmail, Monday.com, Calendar and Slack operations.
+
+- Project: `AxrE6ElSkfvBGe37bPKN`
+- Session: `e2b8529c-7f96-4c8b-8f20-7ba72ea1ce55`
+- Backend: deployed native `codebase-ProjectManager`; model
+  `gpt-6-sol`, requested per-execution `fund=1`
+- Observed: **30 assistant/model rounds** with many shell/DSL
+  investigations, **$1.03422 cumulative estimated model cost**.
+- At the stop point, the agent had **not written any**
+  `AgentSubmission.scala`, despite repeated task updates saying it
+  would do so. No compiled candidate or independent score exists.
+- The `fund=1` parameter did **not** enforce a $1 **cumulative
+  session-level** spend cap across the ProjectManager's recursive
+  executions. Once cumulative recorded usage exceeded $1, the
+  session's latest native execution was cancelled using the normal
+  AWFL stop mechanism (confirmed cancellation of
+  `native_b4f91ce3eee42f51043d4eba4cccf69f`). Session indexing
+  may update asynchronously after cancellation; verify status before
+  any subsequent action.
+
+**Interpretation:** the full public context was available; the
+agent consumed the budget researching DSL internals and never
+produced a submission. This is an **incomplete/unscored attempt**,
+not official 0/8 benchmark performance and not a compilation
+failure. It should not be compared numerically to independently
+graded submissions.
+
+**Before retrying paid runs:** enforce a single **aggregate
+builder-session budget** in the coordinator (sum model costs from
+the complete session, not the `fund` supplied to each recursive
+execution) and stop the whole execution tree when exceeded.
+Create a bounded *source-production checkpoint* early in the
+run; minimize broad repo/DSL archaeology by supplying a short
+task-appropriate DSL + bridge example in the PUBLIC agent guidance.
+Do not give the agent the hidden simulator world or official
+assertions. Only after these safeguards, run a new $1 blind trial,
+compile the agent-authored source and apply the official reset-world
+grader. Do not rebuild already published ProjectManager workflows.
+
 ## Next session: ordered execution plan — deployed agents first
 
 1. **Check published runtime, no builds.** Attach the existing AWFL project,
