@@ -1,24 +1,38 @@
 # AWFL Workflows (Scala)
 
-### Native ProjectManager development (November 13, 2026)
+### Native Rust workflows and evaluation (November 2026)
 
-The native compiler/publisher is available through
-[the one-command developer loop](docs/native-development-loop.md).
-From this repository (with a sibling compiler-rust checkout), run:
+The Scala DSL remains the source of truth. The **published ProjectManager
+dependency closure is executing through the native Rust backend** on the
+normal authenticated AWFL services (previous real tool/final-response
+smokes passed). Native routing is enabled for supported published workflows;
+Google Workflows remains a fallback for unregistered releases or unsupported
+paths. See [native development](docs/native-development-loop.md) and
+[native publication](docs/native-rust-publication.md) guidance for the
+current boundaries; older pilot notes below are historical.
 
-    python3 scripts/native-dev.py codebase-ProjectManager --recursive
-    python3 scripts/native-dev.py codebase-ProjectManager --recursive --publish
+The AutomationBench evaluation coordinator now targets **native Rust**, not
+Google Workflows YAML, which exceeded the 128 KB source limit. Its
+28-workflow Scala-to-Rust dependency closure and first IPC startup passed;
+a complete agent-built and independently graded task has **not** passed yet.
+The model is configured to `gpt-6-sol`, but the first live model request
+remains unverified. Continue with the [AutomationBench native session
+handoff and plan](docs/automationbench-native-handoff.md) and
+[AutomationBench runner details](files/scripts/evals/automationbench/README.md).
 
-The first invocation only compiles and validates; the second activates
-content-addressed native GCS releases using existing IAM. All 26 static
-ProjectManager dependency binaries compile, but full live GCS publication
-and a completed real-native ProjectManager run are **still pending**.
-Normal native production routing is disabled.
+Native development without production publication:
 
+```bash
+python3 scripts/native-dev.py codebase-ProjectManager --recursive
+python3 scripts/native-dev.py evals-AutomationBenchEval --recursive \
+  --output eval_runs/automationbench/native-coordinator-dev
+python3 files/scripts/evals/automationbench/smoke_native_coordinator.py \
+  --report eval_runs/automationbench/native-coordinator-dev/build-report.json
+```
 
-> Native Rust workflow releases: see [native publication and rollout notes](docs/native-rust-publication.md).
-> Native compilation and effectful workflow support remain experimental;
-> Google Workflows is the default production backend.
+**Do not broadly publish the AutomationBench dependency closure:** the
+local binaries differ from 26 currently active production aliases; use an
+isolated native release set or carefully scoped benchmark-only release.
 
 AWFL Workflows is a Scala 3 toolkit for building, generating, and deploying Google Cloud Workflows with the AWFL DSL. It includes a ready-to-deploy, tool-enabled chat EventHandler, common CLI/task tools, and reusable helpers to accelerate new workflow development.
 
@@ -103,32 +117,26 @@ Under the hood, EventHandler resolves the agent for the session, determines the 
   - codebase/ – ProjectManager, AWFL CLI examples, builder workflows, domain samples
 - yaml_gens/ – generated workflow YAML
 
-## Native Rust backend: experimental, no workflow migration yet
+## Native Rust backend and Google fallback
 
-The current default deployment target is **Google Cloud Workflows YAML**.
-`awfl-us/compiler-rust` can also compile compatible constructed Scala DSL
-workflows to statically generated Rust ABI 3 / IPC protocol 2 executables.
-The published DSL's step/CEL constructors are unchanged; only optional
-`CelFunctions`/`CallOperations` name constants were added. **Do not rewrite
-or bulk-migrate application workflows to native** while coverage and
-rollback are being verified.
+`awfl-us/compiler-rust` emits static Rust ABI 3 / IPC 2 executables from
+the same Scala DSL used by the Google YAML compiler. Native ProjectManager,
+its tool calls, and background continuation support exist in the deployed
+server. Native routing is enabled **for supported published native releases**;
+unpublished or incompatible workflows can fall back to Google Workflows.
+Use the [native publication guide](docs/native-rust-publication.md) to
+check active artifacts and runtime flags before claiming native execution.
 
-As of November 11, 2026, native compiler PRs #1–#7 and server execution PRs
-#72/#78/#79 are merged. Real unchanged `LoadConversationHistory` and
-`evals/Product` Scala source compiled and ran through generated Rust fixtures.
-Only a *pure* `NativePilot` was exercised through tagged Cloud Run Jobs in
-GCP; the regular native routing flag remains **disabled**. The separate
-private GCS native-artifact publisher is described in the
-[native publication/canary runbook](docs/native-rust-publication.md).
-The canonical feature/compatibility inventory, remaining gates, and next
-steps are in
-[compiler-rust's verified roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
+AutomationBench's evaluator and experiment are an explicit native-migration
+task. The generated Google Workflows experiment YAML exceeded 128 KB, so
+the benchmark should **not** deploy YAML. See the
+[task-specific handoff](docs/automationbench-native-handoff.md) for verified
+build/IPC status, safety boundaries and integration steps. Production alias
+mutation is not an acceptable shortcut to a benchmark smoke.
 
-Pending features include durable `Parallel`/`ParallelFor`, callbacks, child
-workflows, provider-specific adapters, full CEL/error/retry parity, OS
-sandboxing, public API end-to-end tests, and measured latency/throughput.
-Google Workflows remains the required fallback for unsupported workflows;
-production native routing must not be enabled based on pure-fixture tests.
+The overall compiler capability inventory, remaining parity gaps and
+planned improvements are tracked in the
+[compiler-rust roadmap](https://github.com/awfl-us/compiler-rust/blob/main/docs/current-state-and-roadmap.md).
 
 ## Prerequisites
 - Java 17+
