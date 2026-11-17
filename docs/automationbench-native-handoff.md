@@ -128,6 +128,113 @@ November 17 run **did** confirm two real Jobs writes against a local
 Firestore emulator, as documented above.
 - Existing AWFL native ProjectManager has previously completed authenticated tool/final-response smoke tests, but this is **not** evidence the new benchmark coordinator works end to end. Native production routing is already enabled for published supported workflows; unpublished names may silently fall back to Google unless the execution backend is verified.
 
+## Hosted deployed-agent smoke: public operations/1219 (November 17, 2026)
+
+**Release publication and isolation are verified.** The two prebuilt native
+benchmark artifacts were activated individually through
+`scripts/publish-native.sh` with the verified `AWFL_NATIVE_PREBUILT_BINARY`;
+neither the compiler nor the 26 existing deployed ProjectManager/agent
+dependencies were rebuilt or published. A before/after download of active
+GCS release mappings found **28 -> 30** releases: exactly two new aliases
+and **0 changed or deleted preexisting aliases**:
+
+- `evals-AutomationBenchEval`, SHA
+  `98d9cf1368483c5412e13f0a0c68b7f9317a12aaa65aec8cea0a5d57ae4696ff`.
+- `evals-experiments-AutomationBench`, SHA
+  `7f68bbca160130c8ff9b5af2e4702f0454afd23997632fe5f73adfe45aa2bbff`.
+
+The normal hosted native `codebase-ProjectManager` launcher was then tested
+against public `operations/1219` in an isolated temporary project
+(`AxrE6ElSkfvBGe37bPKN`). The Scala workspace contained the
+workflows/dsl/workflow-utils repositories and both AGENT preloads.
+
+**Two production Jobs bugs were discovered and fixed without touching agent
+workflow releases:**
+
+1. The initial GPT-6 Sol function call failed with HTTP 400 because Chat
+   Completions does not accept function tools with reasoning enabled. Server
+   [PR #140](https://github.com/awfl-us/server/pull/140) sent
+   `reasoning_effort: none` for Sol function-tool calls (preserving the
+   original tool-call protocol) and omitted the unsupported temperature
+   override. Production deployment succeeded.
+2. The $1 budget meter had no `gpt-6-sol` rate and fell back to expensive
+   legacy GPT-4 pricing, also adding cached input twice. Server
+   [PR #141](https://github.com/awfl-us/server/pull/141) added Sol's
+   $2/M input, $0.20/M cached input, $10/M output rates, with correct
+   cached-token subtraction and unit tests. Cloud Run Jobs revision
+   `jobs-00191-n5n` was verified serving 100% traffic.
+
+**Actual builder outcome:** native workflow executed GPT-6 Sol tool calls,
+created a task, inspected DSL code, wrote
+`src/main/scala/us/awfl/workflows/evals/automationbench/AgentSubmission.scala`,
+and successfully ran `sbt compile` on 53 Scala sources. It ended
+`Done` after **25 model rounds**, with **$0.810136 recorded API-cost
+estimate** (not a billed/invoiced amount) inside the $1 cap.
+Frozen final source SHA:
+`ce7ef16e58ffcf5c52c66bdaef91e753dbd5b8967d1579988111026e746b7b66`;
+size **1,175 bytes**. Stored under ignored
+`eval_runs/automationbench/direct-builder-1219-20261117/`.
+
+**Important benchmark-validity problem:** the first `create_session` included
+the full 7,673-character public `task_spec`, but its model request failed
+before tool use. The subsequent `send_message` resumed with a short
+instruction rather than retransmitting the full task specification.
+Although the prior user message was visible in session history, the model
+repeatedly reported it lacked the task-specific public prompt and allowed
+tool list. An identical **public-only** task-spec file was added to the
+ephemeral builder workspace and local preload mid-run, but the agent still
+left a generic `operations.list` placeholder and explicitly stated the
+real business operations were not implemented. This is **not a valid blind
+task-success claim**, even if the Scala code compiles. The developer
+harness must ensure the public prompt and allowed tools reach the actual
+builder model context on the first successful execution, not just sit in
+prior session history. No grader assertions or initial simulated state
+were disclosed to the agent.
+
+**Next run preflight:** create a *fresh* full-spec task invocation (or run
+the published benchmark coordinator with its typed `arg1`/`arg2` inputs)
+rather than relying on a resumed short follow-up. Verify the first
+model-visible user prompt includes the actual public allowed tool names
+and test that the agent can reference one of them before running an entire
+$1 attempt. Existing `mcp__AWFL_Agent_Sessions__create_session` accepts a
+chat query, not the typed evaluator root inputs; do not treat it as an
+equivalent root invocation. Do not pre-seed business answers.
+
+## Scoring adapter repair and fresh full-context attempt (November 17, 2026)
+
+The first frozen agent-generated file
+(`ce7ef16e58ffcf5c52c66bdaef91e753dbd5b8967d1579988111026e746b7b66`)
+compiled independently to native Rust in **279.064 seconds**. The first
+grading attempt exited before any simulator call with
+`Error: MissingField("env")`, originating from the AWFL
+`PostRequest` helper's automatic OIDC audience expression. This was a
+**grader input-adapter bug**, separate from the agent's placeholder logic;
+its initial strict/partial 0/0 should not be attributed to business
+performance.
+
+Fixed `files/scripts/evals/automationbench/native_driver.py` to add
+`input.env.BASE_URL` set to the **local simulator bridge URL**. This
+grants no cloud credentials, secrets or trusted native globals. The
+regression suite reports **10 passed**. Re-evaluating the **same
+immutable compiled artifact without rebuilding it** now succeeds at
+native runtime in **0.194 seconds**, with **no runtime error, 0 business
+calls, strict 0/partial 0**: the agent's `operations.list` placeholder
+is not a permitted business operation and does not fulfill task 1219.
+The latter is a genuine zero-credit submission, not a runner crash.
+
+**Fresh reattempt:** `codebase-ProjectManager` was launched under a
+**new session** `e2b8529c-7f96-4c8b-8f20-7ba72ea1ce55` with model
+`gpt-6-sol`, $1 cap, and all **7,673 characters** of the public task
+spec plus eight allowed tool definitions in the **first, 9,717-character
+user message**, not a follow-up or history reference. The first session
+message was re-read and verified to contain the public task name and
+last allowed tool. Before launch the prior generated Scala file was
+archived outside the active source path; this session creates its own
+submission. The agent's initial task creation correctly described
+Gmail, Monday.com, Google Calendar and Slack operations. **Record the
+final runtime, cost, file hash, grader score and cleanup when this
+session completes.** No published agent workflows were modified.
+
 ## Next session: ordered execution plan — deployed agents first
 
 1. **Check published runtime, no builds.** Attach the existing AWFL project,

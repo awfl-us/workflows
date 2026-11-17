@@ -105,3 +105,36 @@ def test_timeout_terminates_artifact_and_scores_fresh_state(tmp_path: Path):
     result = evaluate("operations", "1219", manifest, tmp_path / "out", 1, 2)
     assert result["error_category"] == "execution_timeout"
     assert result["task_completed_correctly"] == 0
+
+
+def test_native_driver_supplies_local_only_postrequest_env():
+    # A builder may use AWFL utils.PostRequest rather than a raw HttpPost
+    # effect, which requires input.env.BASE_URL during native effect setup.
+    import os
+    from unittest.mock import patch
+
+    import native_driver
+
+    seen = []
+    def fake_native(binary, payload):
+        seen.append(payload)
+        return {
+            "protocol_version": 2,
+            "status": "completed",
+            "result": {},
+        }
+
+    with patch.dict(os.environ, {
+        "AUTOMATIONBENCH_BRIDGE_URL": "http://127.0.0.1:15901",
+        "AUTOMATIONBENCH_BRIDGE_TOKEN": "test-only-token",
+    }), patch.object(native_driver, "invoke_native", fake_native):
+        result = native_driver.run("/unused/test-binary")
+
+    assert result["status"] == "completed"
+    assert len(seen) == 1
+    assert seen[0]["input"] == {
+        "bridge_url": "http://127.0.0.1:15901",
+        "bridge_token": "test-only-token",
+        "env": {"BASE_URL": "http://127.0.0.1:15901"},
+    }
+    assert "trusted_globals" not in seen[0]

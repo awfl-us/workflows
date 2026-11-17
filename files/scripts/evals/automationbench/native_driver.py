@@ -72,9 +72,18 @@ def dispatch_http(effect: dict, bridge_url: str, bridge_token: str) -> dict:
 def run(binary: str) -> dict:
     bridge_url = os.environ["AUTOMATIONBENCH_BRIDGE_URL"]
     token = os.environ["AUTOMATIONBENCH_BRIDGE_TOKEN"]
+    # The shared AWFL PostRequest DSL builds an optional OIDC audience from
+    # input.env.BASE_URL, even though the local, allowlisted AutomationBench
+    # simulator is authenticated using X-AutomationBench-Token instead.
+    # Supply only the local simulator origin here; no cloud credentials,
+    # trusted globals, or real server identity are granted to the artifact.
     payload = {
         "protocol_version": 2,
-        "input": {"bridge_url": bridge_url, "bridge_token": token},
+        "input": {
+            "bridge_url": bridge_url,
+            "bridge_token": token,
+            "env": {"BASE_URL": bridge_url},
+        },
     }
     max_steps = int(os.environ.get("AUTOMATIONBENCH_NATIVE_MAX_STEPS", "80"))
     events = []
