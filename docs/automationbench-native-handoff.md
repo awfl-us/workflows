@@ -363,6 +363,44 @@ through **both Scala and Rust**, not Scala alone. Then launch one fresh,
 fully blind task and report its independent score. No need to rebuild or
 republish deployed agent workflows.
 
+## November 17 follow-up: recovered execution and independent regrade
+
+- Native replacement execution `native_c89a119d1a1b4a5fbd6d6bf160a514c7`
+  in project `pmbench-152f82a5e40c4048ba38946a22ad094f` reached
+  `completed` in Firestore with **98 effects**, `workflowName` =
+  `codebase-ProjectManager`, and no stored error. The original execution
+  `native_88e45cd532c7ee884a68caaca47d7b7f` remained `cancelled` after
+  19 effects. This confirms recovery progress, **not benchmark correctness**.
+- The recovered benchmark workspace's `AgentSubmission.scala` contains
+  **6,938 bytes**, SHA-256
+  `1b5ddd68acd5f20db3de243106ce0807c55e73af9c9fbb5d8da229b8688590a4`.
+  This **exactly matches** the previously built and graded direct-builder
+  retry; the recovered execution did not provide a new frozen candidate.
+  Do not count it as a fresh blind attempt or another model score.
+- Reused that **unchanged native Rust artifact** and ran the independent,
+  pinned official `operations/1219` simulator/grader on a reset state,
+  without launching a builder or compiling new submission code. Artifacts
+  are under `eval_runs/automationbench/pmbench-independent-regrade-20261117/`
+  (ignored local outputs). Result: **strict 0.0, partial 0.0**,
+  **1 business call**, `runtime_failure`, **0.254 s** workflow runtime.
+  First `gmail_find_email` used `max_results: "50"` as a **string**, causing
+  the simulator to report a Python slice-index type error; the native
+  workflow then failed with `json.decode requires text or bytes` when it
+  tried to treat the error as a successful result. No Monday, calendar,
+  or Slack business call occurred.
+- Temporary evaluator consumer startup also encountered a **stale project
+  lock** and repeated HTTP **403** at `/consumer-credentials/storage`,
+  resulting in delayed/unclaimed shell commands. A fresh Scala consumer
+  was able to inspect the saved workspace, but this infrastructure issue
+  is distinct from the independently reproduced submission failure.
+- **Next valid attempt:** start with an answer-free agent workspace,
+  correctly typed public-only tool schemas, a fresh source and hash,
+  aggregate budget enforcement, and a separate isolated grader. Do not
+  repair the already frozen submission and claim the repaired artifact as
+  the original agent result. No additional GPT-6 Sol builder attempt was
+  launched for this regrade, so this operation incurred **no new model
+  budget** (existing historical usage is documented above).
+
 ## Next session: ordered execution plan — deployed agents first
 
 1. **Check published runtime, no builds.** Attach the existing AWFL project,
