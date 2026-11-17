@@ -318,7 +318,9 @@ user message**, and the agent independently read the identical
   with leading/trailing/adjacent empty segments and rejection of empty
   separators and non-string arguments in
   [compiler-rust PR #41](https://github.com/awfl-us/compiler-rust/pull/41),
-  commit `9bd72f4`. Local Rust unit suite **26 passed, 0 failed**; Scala
+  feature commit `9bd72f4` (**merged** into main as `5850a5a` after CI
+  Rust, Scala-to-native and workflow compatibility checks passed). Local
+  Rust unit suite **26 passed, 0 failed**; Scala
   `TextSplitSmoke` passed. Rebuilt and independently graded the **same
   frozen source**, without an additional model request or updating any
   deployed workflow aliases. The compiler fix remains in a separate PR
@@ -334,8 +336,12 @@ user message**, and the agent independently read the identical
   `Type("json.decode requires text or bytes")`.
   **Official strict score 0.0 / partial credit 0.0**, category
   `runtime_failure`; no Monday/Calendar/Slack mutations.
-  Grader output: `grade-native-split/score/score_summary.json` equivalent
-  main summary at `grade-native-split/score_summary.json`. Grader's
+  The temporary builder Scala GKE consumer was stopped after frozen
+  source/score outputs were copied to the parent, with no active commands
+  remaining. The compiler change was merged but **not** deployed to any
+  published ProjectManager workflow or release alias.
+  Grader output: `grade-native-split/score_summary.json`, with traces
+  under `grade-native-split/score/`. Grader's
   `builder_cost_usd` is null because the direct builder path is outside
   its coordinator; cost recorded separately above.
 

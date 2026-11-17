@@ -234,8 +234,8 @@ ProjectManager/helper workflow was rebuilt or republished.
 
 Independent Scala compilation passed. Rust native compilation initially
 blocked on missing `text.split` semantics; see
-[compiler-rust PR #41](https://github.com/awfl-us/compiler-rust/pull/41).
-With that native fix applied locally, the **unchanged frozen agent source**
+[compiler-rust PR #41](https://github.com/awfl-us/compiler-rust/pull/41)
+(merged after all CI checks passed). With that native fix applied locally, the **unchanged frozen agent source**
 compiled in 113.779 seconds and executed its first simulated Gmail tool
 call in 0.171 seconds. It passed `max_results` as a string instead of an
 integer, then tried decoding the simulator's error response as success.
