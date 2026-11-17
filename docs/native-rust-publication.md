@@ -21,6 +21,32 @@ The historical November 11 canary details, isolated revision references, and
 original rollout gates below document the earlier disabled-flag pilot; they
 are **not current operational instructions** for the now-enabled deployment.
 
+## AutomationBench release isolation — November 17, 2026
+
+[Workflows PR #25](https://github.com/awfl-us/workflows/pull/25)
+registers a native Rust evaluation coordinator and experiment. The
+local recursive build of `evals-AutomationBenchEval` produced and verified
+28 static-musl binaries. It did **not** publish them.
+
+A comparison against the shared active GCS release index found **two new
+benchmark aliases** (`evals-AutomationBenchEval` and
+`evals-experiments-AutomationBench`), and **26 existing aliases whose
+generated binary hashes or release metadata differ**, including the active
+`codebase-ProjectManager`. This does not prove a bug in production; it
+proves the benchmark build would replace currently active release mappings
+if someone ran the all-recursive `--publish` command.
+
+**Do not publish the whole benchmark closure into the shared production
+artifact namespace.** Prefer the server's local native execution registry
+containing all 28 verified binaries. If a real cloud test requires native
+release publication, isolate it to an explicitly owned benchmark release
+set (or prove compatibility and publish *only* the two new benchmark
+names), preserve pinned artifact hashes, and verify existing active aliases
+remain identical. Required new buckets/IAM must be Terraform-managed.
+Verify native routing (the launcher can use Google fallback for unknown
+names) and check execution identity/engine logs, not merely response
+success. See the [next-session integration checklist](automationbench-native-handoff.md).
+
 ## Trusted-global release capability (backwards-compatible)
 
 New compiler-rust crates include `trusted_globals_version: 1` in
