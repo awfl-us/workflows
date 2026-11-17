@@ -33,6 +33,16 @@ public task specification, not to perform the business changes immediately.
   Include `X-AutomationBench-Token` as a header, and send JSON bodies with
   `{"tool": "<allowed-tool-name>", "args": {...}}`. These are **simulated**
   SaaS calls, never real Gmail, Monday, Calendar, Slack or other live accounts.
+- The public `business_tools[].parameters[].schema` defines the **JSON value
+  types**, not just argument names. Preserve numbers as JSON numbers, booleans
+  as booleans, and arrays as arrays; never stringify every argument. For mixed
+  types, use a heterogeneous AWFL JSON map (for example, `Map[String, Cel]`)
+  or a typed request record, **not** `Map[String, Value[String]]`. Match each
+  tool's documented required and optional fields.
+- The simulator bridge wraps tools with `{"ok": true, "result": ...}` or
+  `{"ok": false, "error": ...}`. Handle a false `ok` explicitly rather than
+  decoding an absent `result`. A successful tool result may itself be JSON
+  text or a structured JSON value; decode only when appropriate.
 - Select actions and values from the task and simulator responses at runtime.
   Don't hardcode state-specific dates, identifiers or answers.
 - Don't change other tracked project files, commit or push code.
