@@ -1,5 +1,11 @@
 # AWFL Workflows (Scala)
 
+### Native ProjectManager/PostgreSQL checkpoint (November 16, 2026)
+
+The unchanged Scala ProjectManager and its published compiled Rust release now run to completion in both a normal **production Firestore** session (59 effects, 56.82 s) and local real-database tests using a local AWFL Jobs server (**three PostgreSQL and three Firestore** main executions, 59 effects each). The local tests used a test-only CLI callback bridge and must **not** be treated as a matched production speed comparison. Median cumulative **native execution-store only** latency was ~314 ms on PostgreSQL versus ~2,811 ms on Firestore; individual Jobs Storage calls were **not** measured. Three detached Rust maintenance children still fail with a previously observed subtraction error.
+
+**Next:** finish the server's [PostgreSQL production cutover and end-to-end latency investigation](https://github.com/awfl-us/server/blob/feat/jobs-document-storage-provider/docs/postgres-production-cutover-latency-handoff-2026-11-16.md), preserving Firebase Auth and validating ordinary session/event/callback paths. Production still uses Firestore; full PostgreSQL deployment, data backfill, and final latency attribution remain pending. The November 13 section below is retained as historical developer-loop guidance.
+
 ### Native ProjectManager development (November 13, 2026)
 
 The native compiler/publisher is available through
@@ -10,10 +16,11 @@ From this repository (with a sibling compiler-rust checkout), run:
     python3 scripts/native-dev.py codebase-ProjectManager --recursive --publish
 
 The first invocation only compiles and validates; the second activates
-content-addressed native GCS releases using existing IAM. All 26 static
-ProjectManager dependency binaries compile, but full live GCS publication
-and a completed real-native ProjectManager run are **still pending**.
-Normal native production routing is disabled.
+content-addressed native GCS releases using existing IAM. All 26 static ProjectManager dependency binaries compile. The published root and its
+resolved dependencies have since run in local Jobs tests, and a normal production
+Firestore ProjectManager session completed; end-to-end PostgreSQL **production**
+execution and full release validation remain outstanding. The PostgreSQL production
+storage provider is not switched on.
 
 
 > Native Rust workflow releases: see [native publication and rollout notes](docs/native-rust-publication.md).
