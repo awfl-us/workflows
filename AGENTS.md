@@ -10,7 +10,9 @@ Run or publish every workflow after each code fix. See
 and the authoritative
 [server local-development instructions](https://github.com/awfl-us/server/blob/main/docs/native-local-development.md).
 
-Compile native workflow dependencies locally with:
+**Only when actively developing/changing ProjectManager itself**, compile
+native workflow dependencies locally with (not needed for AutomationBench
+against the deployed agent):
 
     python3 scripts/native-dev.py codebase-ProjectManager --recursive
 
@@ -28,21 +30,24 @@ with Terraform.
 ## Ongoing AutomationBench evaluation (Rust)
 
 Read [the task-specific status and handoff](docs/automationbench-native-handoff.md)
-before editing or running the benchmark. The evaluator and ProjectManager
-dependency closure compile as **28 native Rust workflows**; a full
-`gpt-6-sol` agent-generated and independently graded run is still pending.
-Do **not** use the oversized Google Workflows YAML experiment or
-`--recursive --publish` against the shared GCS aliases; 26 existing
-production aliases differ from the local closure. Run locally with the
-isolated native release registry. Real Rust fork/child dispatch into
-`tools-CliTools` passed; the next integration gate is native callback
-delivery with a reachable authenticated HTTPS endpoint, followed by
-one paid task 1219 run and independent grading.
+before editing or running the benchmark. **ProjectManager and its
+agent/helper workflows are already deployed. Reuse them; do not rebuild
+or republish the existing 26 workflow releases for this benchmark.**
+The earlier full 28-workflow native rebuild was historical verification,
+not a next step. Only the two benchmark-specific coordinator/experiment
+names may need isolated builds if they are not already runnable. The
+current `native-dev.py --publish` requires `--recursive`, so add a
+selective path before publishing these two names; do not change the
+existing aliases or deploy Google Workflows YAML. Use the deployed
+agent execution and callback path. For grading, compile only the
+freshly agent-authored `AgentSubmission.scala` in isolation. A full
+`gpt-6-sol` agent-generated, independently graded benchmark run
+is still pending.
 
 The workflows Scala consumer was restarted after Firebase credential bootstrap
 failed; it is reachable by attaching project `gNoQN9KUw5IbtsXLag0M`.
 The missing 28 Cargo binaries were rebuilt and verified on November 17.
 The reusable native dispatch smoke is
 `files/scripts/evals/automationbench/smoke_native_dispatch.mjs`.
-Recompile if these artifacts are lost on a consumer restart. Preserve unrelated local dirty
-paths; stage only files relevant to the change.
+Do not rebuild the full closure again just because a consumer restarts.
+Preserve unrelated local dirty paths; stage only relevant changes.

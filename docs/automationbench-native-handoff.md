@@ -2,6 +2,35 @@
 
 **Status verified November 16–17, 2026.** This is the authoritative task-specific handoff for [workflows PR #25](https://github.com/awfl-us/workflows/pull/25), branch `feat/automationbench-eval`. Read [AutomationBench runner README](../files/scripts/evals/automationbench/README.md), [native development loop](native-development-loop.md), and [native publication/runbook](native-rust-publication.md) alongside this document. The Scala DSL remains the authoring interface; **Rust is the intended evaluator/ProjectManager runtime. Do not deploy the generated Google Workflows YAML**.
 
+## Updated execution strategy: reuse deployed agent workflows
+
+**The existing ProjectManager and its agent/helper workflows are deployed.
+Do not rebuild or republish them for AutomationBench.** The previous
+28-binary closure build remains valid historical compiler and local-dispatch
+evidence, but is not a prerequisite or the target deployment architecture.
+
+Separate these pieces:
+
+- **Agent runtime:** invoke the already-published `codebase-ProjectManager`
+  and child workflows (including `tools-CliTools`) through the regular
+  authenticated AWFL execution API. Verify the deployed release IDs/ABI and
+  actual native selection; use existing Jobs/callback handling. The ad-hoc
+  loopback driver's `callback.create` limitation is not evidence of a
+  problem with deployed agent callbacks.
+- **Benchmark coordinator:** only `evals-AutomationBenchEval` and
+  `evals-experiments-AutomationBench` are new orchestration artifacts.
+  If not already runnable, build and activate only these two, resolving
+  their `workflow.run` references to the published agent versions.
+  `scripts/native-dev.py --publish` presently requires `--recursive`;
+  the experiment isn't a standalone registered root. Selective publication
+  therefore needs a small explicit tooling change or an isolated evaluator
+  execution path. **Never use broad `--recursive --publish`: 26 existing
+  production aliases differ from the local builds.** Compare active alias
+  sets before/after and require no existing alias mutations.
+- **New candidate:** compilation is still required for the agent's *new*
+  `AgentSubmission.scala`, frozen and independently scored by the grader.
+  This is not rebuilding the agent itself.
+
 ## Follow-up verification: native dispatch and local Jobs (November 17, 2026)
 
 - Reattached the workflows Scala consumer and **rebuilt all 28 static Rust/musl binaries**, after the earlier ephemeral Cargo artifacts disappeared. Exact result:
@@ -34,8 +63,10 @@
   `fund=1` and `model=gpt-6-sol` appeared in the evaluator's native
   startup log, but it did not reach the model provider.
 
-**Reproduce the verified local gate** (from `/workspace/workflows`, with
-`/workspace/automationbench-server` an isolated checkout of server main):
+**Historical diagnostic only — NOT a prerequisite for future benchmark runs.**
+The earlier development session used this full-closure command solely to
+prove compiler/IPC behavior (from `/workspace/workflows`, with an isolated
+server checkout). Do not run it just to invoke the already deployed agent:
 
 ```bash
 python3 scripts/native-dev.py evals-AutomationBenchEval --recursive \
@@ -46,17 +77,12 @@ AWFL_NATIVE_SERVER=/workspace/automationbench-server node \
   files/scripts/evals/automationbench/smoke_native_dispatch.mjs
 ```
 
-**Next gate:** wire `callback.create`/`callback.await` through the
-production-supported native callback implementation with the *same*
-data-plane store and a **reachable, authenticated HTTPS callback endpoint**.
-An isolated loopback Firestore emulator alone cannot receive callbacks
-from a separate GKE agent; never fake callback delivery and call it a
-successful evaluation. Choose an isolated release registry/canary or
-verify benchmark-only publication that does not modify the 26 live
-aliases. Then run exactly one `gpt-6-sol` task 1219 with the $1 limit,
-freeze the agent's actual `AgentSubmission.scala`, compile and
-independently score it. Record provider acceptance, cost, grade and
-cleanup. Do not switch the shared production release registry.
+**Next gate:** resolve the existing deployed ProjectManager/child releases
+and run through the normal authenticated native Jobs/callback path. Only
+prepare the two new benchmark coordinator releases if missing; do not build
+existing agents or substitute local callbacks. Then run one task 1219 with
+`gpt-6-sol` and $1 fund, freeze the new Scala submission, compile that
+candidate and independently grade it. Record true model spend and cleanup.
 
 ## Consumer access and checkout preservation (latest)
 
@@ -76,8 +102,9 @@ The build report at
 survived the restart, **but its referenced Rust binaries did not** (the
 compiler-rust Cargo target directory was ephemeral). A rerun of
 `smoke_native_coordinator.py` failed immediately on the missing binary;
-**rebuild the 28 native executables** before the next smoke. This is not
-a new source compilation failure.
+the 28 binaries were subsequently rebuilt and tested; the previous
+full-closure build is complete. **Do not repeat it as a requirement for
+running the deployed agent.** This was not a source compilation failure.
 
 Three unrelated local dirty paths **must be preserved, not staged or reset**:
 `functions/workflows/types/services-Llm-ChatToolResponse.json`,
@@ -96,29 +123,61 @@ All benchmark code and docs were committed separately to the branch.
 - Existing reference fixtures: manually authored native Rust-compiled Task 1219 workflow scored 8/8 assertions with strict and partial score 1.0 **after public-task debugging**; a separately built n8n graph also scored 8/8. **Neither is a blind agent-generated benchmark result.** The Python harness and n8n graph had 13 passing adapter/graph regressions in the prior development session.
 - The old Google Workflows YAML experiment was about **143 KB**, above the 128 KB source limit; its deployment was rejected. **Do not resume that path.**
 - The local 28-binary manifest was compared against published aliases: **two new benchmark names** (`evals-AutomationBenchEval`, `evals-experiments-AutomationBench`), **26 changed existing aliases** (including `codebase-ProjectManager`), zero unchanged. Do **not** run `python3 scripts/native-dev.py evals-AutomationBenchEval --recursive --publish` against the shared production bucket; it would update production workflow aliases.
-- A later local host test was **not completed**. An independent `awfl-us/server` main checkout had no `package-lock.json`; `npm ci` failed immediately, then `npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund` was interrupted when the GKE consumer ended (`execution_lost`). No local child-workflow integration result can be claimed from that attempt. The original compilation and IPC startup checks did pass before the consumer ended.
+- An earlier local host test was **not completed**. An independent `awfl-us/server` main checkout had no `package-lock.json`; `npm ci` failed immediately, then `npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund` was interrupted when the GKE consumer ended (`execution_lost`). That particular attempt produced no child-workflow result; the subsequent
+November 17 run **did** confirm two real Jobs writes against a local
+Firestore emulator, as documented above.
 - Existing AWFL native ProjectManager has previously completed authenticated tool/final-response smoke tests, but this is **not** evidence the new benchmark coordinator works end to end. Native production routing is already enabled for published supported workflows; unpublished names may silently fall back to Google unless the execution backend is verified.
 
-## Next session: ordered execution plan
+## Next session: ordered execution plan — deployed agents first
 
-1. **Inspect current repo and environment.** Attach to project `gNoQN9KUw5IbtsXLag0M` with Scala image. Check consumer health, files, git branch, active executions and GKE pod lifecycle before restarting expensive work. Preserve unrelated dirty files (`functions/workflows/types/services-Llm-ChatToolResponse.json`, deleted `infra/terraform.tfstate*`) — do not stage/reset them. Source branch is `feat/automationbench-eval`, PR #25. If the consumer is missing, bootstrap a new one and reuse clone/build caches where possible. Investigate recurrent GKE `execution_lost`/node failure via logs rather than asserting it is an npm problem.
-2. **Confirm/restore repeatable compile and test.** From `/workspace/workflows` with sibling `/workspace/compiler-rust`:
-   ```bash
-   python3 scripts/native-dev.py evals-AutomationBenchEval --recursive \
-     --output eval_runs/automationbench/native-coordinator-dev
-   python3 files/scripts/evals/automationbench/smoke_native_coordinator.py \
-     --report eval_runs/automationbench/native-coordinator-dev/build-report.json
-   ```
-   Expect 28 verified binaries and a first `native.parallel` suspension. Keep the `--output` and `--report` paths identical. No `--publish` for this step.
-3. **Test actual child/fork execution locally.** Use `awfl-us/server` `scripts/nativeLocalRun.mjs` and the 28-binary build report as a local release registry, or the equivalent isolated native executor. Use an in-memory store and bounded replay/loopback Jobs effects. If preparing a new server checkout, note `npm ci` needs a lockfile (the repo lacked one); avoid relying on a nonexistent lockfile. Only treat a call as live if it reached the actual local Jobs service; replay fixtures are not live. Follow [server native local-dev guide](https://github.com/awfl-us/server/blob/main/docs/native-local-development.md). Verify that the evaluator's `ParallelFor`, child `workflow.run`, and cleanup route correctly. Exercise an intentionally absent submission to assert the missing-file guard, not a grader parse failure.
-4. **Isolate release publication and backend routing.** The production GCS alias set is shared. Prefer a local native release registry or a **dedicated, explicitly isolated release namespace/bucket and authorized canary** with IAM/Terraform ownership where needed. Alternatively, publish only the two new benchmark aliases *after* verifying compatibility with the already-published 26 dependencies and proving no unrelated production aliases change. Verify native selection by observing an execution ID starting `native_` and native runtime logs; merely requesting the benchmark name is insufficient because the launcher can fall back to Google if an artifact is missing.
-5. **Validate the requested model and one real task.** Run **one** operations/1219 agent-building attempt with `gpt-6-sol`, the current $1 cap, clean task-local Scala consumer, three repos, both preloads, and explicit output path. Check the first model invocation/provider acceptance and early tool steps before letting it run on. Inspect why it writes/does not write the first draft; do not increase the fund without evidence. Keep builder source/credentials separate from the grader.
-6. **Compile, execute, score and account.** Freeze the **actual agent-generated** `AgentSubmission.scala` (not a read error), compile it via `grade_submission.py` → `build_native.sh` → `native-dev.py --class`; independently run the frozen binary against reset AutomationBench state and capture official strict/partial assertions, tool calls, run ID, builder model, token/API spend, wall time and build/runtime timing. Explicitly label build failures and partial completion; no substitution of the known handcrafted 8/8 workflow.
-7. **Close only after genuine evidence.** Add regressions for missing-source handling, Rust root + child/ParallelFor preflight, provider-error path and cleanup. Confirm transient consumer/job cleanup, no accidental production alias mutations, and repeat the one-row run. Then move to additional public rows, independent trials and hidden-scenario isolation.
+1. **Check published runtime, no builds.** Attach the existing AWFL project,
+   preserve unrelated dirty files, and inspect the published native
+   `codebase-ProjectManager`, `tools-CliTools` and helper workflow
+   releases/identities. Verify backend selection, ABI, Jobs and callback
+   contracts through the existing hosted service. No compilation or
+   publication of deployed agents.
+
+2. **Use deployed children.** Invoke `ProjectManager` and its helper
+   workflows through the normal authenticated workflow execution path,
+   rather than loading 28 locally generated binaries into a temporary
+   runner. Prove one real child execution/callback through the hosted
+   runtime. Only investigate callback code if that deployed path fails.
+
+3. **Prepare just the benchmark coordinator if needed.** Check availability
+   of `evals-AutomationBenchEval` and
+   `evals-experiments-AutomationBench`. If absent, build **only these
+   benchmark-specific artifacts** and use existing deployed releases for
+   their `workflow.run` dependencies. Implement a selective publisher
+   or isolated orchestrator: the current `native-dev.py --publish`
+   requires `--recursive` and the experiment is not an independent
+   registered target. Require the before/after alias diff to contain
+   **no** ProjectManager/helper names. No YAML, no 28-binary rebuild.
+
+4. **One paid task 1219.** In the parent evaluator, initialize the
+   pinned public simulator; create one fresh Scala agent consumer, clone
+   workflows/dsl/workflow-utils, preload both instruction files and
+   execute the **deployed** ProjectManager with `gpt-6-sol`, $1 fund.
+   Verify model acceptance, tool progress, and a genuine nonempty
+   `AgentSubmission.scala`; record builder run ID/tokens/cost and
+   terminate the temporary resources.
+
+5. **Compile ONLY the agent-authored submission for grading.** Freeze
+   `AgentSubmission.scala`, then run the existing
+   `grade_submission.py` -> `build_native.sh` ->
+   `native-dev.py --class` path. Execute the result against a reset
+   upstream simulator and record official strict/partial scores, traces,
+   compile errors and timings. Do not use the hand-authored 8/8 fixture.
+
+6. **Verify cleanup and isolation.** Confirm the temporary cloud project,
+   consumer, callback state and benchmark resources were cleaned up,
+   capture real spend, and verify all 26 existing production aliases
+   remain unchanged. Then expand to additional public tasks.
 
 ## Risk and scope boundaries
 
-- **Do not deploy YAML or broad-publish the 28-binary closure.** The entire point is to test the native backend without touching the existing 26 production workflow aliases.
+- **Do not rebuild existing deployed agents, deploy YAML, or broad-publish
+  the 28-binary closure.** Use the already deployed native runtime; preserve
+  all 26 existing production workflow aliases.
 - Scala object initialization during native compilation is executable code. The current grader compiles agent-created files on a credential-bearing host: fine only for trusted development output; **isolate grading credentials and filesystem before adversarial/hidden evaluations**.
 - A successful Rust binary build or startup response is not a successful child execution, agent run, or official benchmark score.
 - GKE namespace limits in `awfl-us/server` Terraform were raised separately to 100 pods, 100 jobs, 100 vCPU, 256Gi memory and 512Gi ephemeral storage. These quotas are ceilings, not resource reservations; they do not prevent consumer node failure.
@@ -126,7 +185,7 @@ All benchmark code and docs were committed separately to the branch.
 
 ## Acceptance criteria for a completed next-phase smoke
 
-A new `gpt-6-sol` agent session **actually** runs through the native executor, reads the correct guidance, writes a nonempty Scala submission, and produces either an explicit compile error or a frozen native artifact whose independent AutomationBench score is recorded. Native root/child identities and effects are captured, costs are measured, and **the 26 existing production GCS aliases are unchanged**. A scored outcome, even zero, is valid if the grader independently evaluated an agent-generated artifact; missing input or infrastructure error is not.
+A new `gpt-6-sol` agent session **actually** runs through the deployed native ProjectManager/agent workflows, reads the correct guidance, writes a nonempty Scala submission, and produces either an explicit compile error or a frozen native artifact whose independent AutomationBench score is recorded. Native root/child identities and effects are captured, costs are measured, and **the 26 existing production GCS aliases are unchanged**. A scored outcome, even zero, is valid if the grader independently evaluated an agent-generated artifact; missing input or infrastructure error is not.
 
 ## Useful links
 

@@ -7,8 +7,13 @@ binaries. Nested local Rust fork/child dispatch also passed, reaching the
 first Jobs HTTP effect. Two actual local Jobs writes passed against the
 Firestore emulator, before the driver hit its unimplemented native callback
 effect. The full agent-produced benchmark is not yet complete.
-Do not deploy the generated Google Workflows YAML or publish the 28-binary
-closure over existing production aliases.
+**Deployment reuse:** the agent/ProjectManager workflows are already
+deployed. Run them through the normal hosted AWFL executor, not via a
+newly compiled 28-artifact registry. Build only the two *new benchmark
+orchestrator* artifacts if needed; compile the newly authored
+`AgentSubmission.scala` separately for grading.
+Do not deploy Google Workflows YAML or publish the 28-binary closure
+over existing production aliases.
 
 The evaluator is registered alongside SWE-bench in `us.awfl.workflows.evals`.
 This directory contains a Python 3.13 integration that **imports** Zapier's
@@ -198,19 +203,22 @@ new independent upstream scenarios. No invented robustness scores.
 
 ## Native Rust benchmark orchestration
 
-The benchmark coordinator, experiment, and ProjectManager dependency closure
-are Scala DSL definitions compiled to Rust using the registered
-evals-AutomationBenchEval target. Do not deploy their generated Google
-Workflows YAML (the experiment exceeded the 128 KB source limit).
+The existing `codebase-ProjectManager` and helper workflows are already
+deployed and should be used as-is. **Do not rebuild the 28-workflow
+dependency tree** to execute this benchmark. The only potentially
+unpublished new workflow names are `evals-AutomationBenchEval` and
+`evals-experiments-AutomationBench`; resolve their child calls to
+the existing published agent workflow releases.
 
-    cd /workspace/workflows
-    python3 scripts/native-dev.py evals-AutomationBenchEval --recursive --output eval_runs/automationbench/native-coordinator-dev
-    python3 files/scripts/evals/automationbench/smoke_native_coordinator.py --report eval_runs/automationbench/native-coordinator-dev/build-report.json
+`scripts/native-dev.py --publish` presently requires `--recursive`
+and the experiment is not a standalone registered target, so it cannot
+currently publish only these two through its normal flags. Add a
+benchmark-only selective build/publish mode or run the orchestration
+via an isolated path, without changing any of the 26 production aliases.
+The past compiled local root/child IPC smoke is useful evidence, but
+no longer a prerequisite. The generated Google Workflows YAML is still
+too large to deploy and should not be used.
 
-This build is local-only unless explicitly published to the AWFL native
-artifact service. Use the existing native execution API for real runs.
-The smoke checks actual Rust IPC startup and its initial native.parallel
-effect without dispatching it, so it cannot generate a benchmark score.
 The current builder model is gpt-6-sol. For the single-dollar budget,
 core.int replaces the unsupported double CEL conversion. The experiment
 checks that an agent wrote real Scala source before independent grading.
@@ -282,22 +290,20 @@ A separate run against the actual local Jobs service completed two
 unimplemented `callback.create` in its temporary driver. No live model
 request or independently graded agent submission is verified.
 
-1. Native child/fork preflight is passed; next connect the native
-   `callback.create` and `callback.await` implementation to a reachable
-   authenticated HTTPS callback route and provider-consistent storage.
-   The local Firestore emulator is not reachable by remote GKE consumers.
-   Test callback delivery and cleanup, never fabricate callback responses.
-2. Keep the 26 currently active native production aliases unchanged. The
-   full build's 26 dependency artifacts differ from the published versions;
-   use an isolated release registry or explicitly verified two-name
-   benchmark-only publication.
-3. Verify `gpt-6-sol` is accepted by the jobs/model provider. Run **one**
-   operations/1219 agent session with the current $1 cap, separate DSL
-   and workflow-utils repos, both AGENT.md preloads, and an early Scala draft.
-4. Confirm `AgentSubmission.scala` exists and is genuine source, compile
-   it to Rust and independently grade the frozen executable against the
-   reset upstream simulator. Capture compile result, model cost/tokens,
-   runtime tool trace, strict/partial assertions, and lifecycle cleanup.
+1. Check the deployed `ProjectManager` and agent/helper native
+   releases; use the platform's normal hosted execution, Jobs and
+   callback path. The temporary local driver's `callback.create`
+   limitation does not imply deployed callbacks are broken.
+2. If necessary, selectively build/publish **only** the two new
+   AutomationBench coordinator names. No full closure rebuild or
+   change to existing 26 aliases.
+3. Run one operations/1219 agent attempt with `gpt-6-sol`, $1
+   fund, the required repositories and instruction preloads. Verify
+   actual provider acceptance and a written Scala draft.
+4. Freeze that newly generated `AgentSubmission.scala`, compile only
+   that candidate, then independently score it on reset simulator
+   state. Capture provider spend, build time, runtime trace, official
+   assertions and cleanup.
 5. Add regression/CI coverage for missing source, native root/child launch,
    provider failures and terminated consumer cleanup, then expand public
    tasks and sandbox hidden tests/credentials.
