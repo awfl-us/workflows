@@ -1,5 +1,12 @@
 # AutomationBench integration (native AWFL workflow vertical slice)
 
+**Current handoff and next steps (November 17, 2026):**
+[AutomationBench native Rust execution plan](../../../../docs/automationbench-native-handoff.md).
+The compiler and native coordinator IPC startup passed for all 28 workflow
+binaries, but the full agent-produced benchmark is not yet complete.
+Do not deploy the generated Google Workflows YAML or publish the 28-binary
+closure over existing production aliases.
+
 The evaluator is registered alongside SWE-bench in `us.awfl.workflows.evals`.
 This directory contains a Python 3.13 integration that **imports** Zapier's
 public AutomationBench simulator and official assertion grader rather than
@@ -194,7 +201,7 @@ evals-AutomationBenchEval target. Do not deploy their generated Google
 Workflows YAML (the experiment exceeded the 128 KB source limit).
 
     cd /workspace/workflows
-    python3 scripts/native-dev.py evals-AutomationBenchEval --recursive
+    python3 scripts/native-dev.py evals-AutomationBenchEval --recursive --output eval_runs/automationbench/native-coordinator-dev
     python3 files/scripts/evals/automationbench/smoke_native_coordinator.py --report eval_runs/automationbench/native-coordinator-dev/build-report.json
 
 This build is local-only unless explicitly published to the AWFL native
@@ -224,8 +231,7 @@ implementation:
    `imageProfile=scala`. The consumer's initial filesystem is empty;
    the experiment clones the workflows, dsl, and workflow-utils repositories
    into separate directories under /workspace and uses workflows as its
-   agent working directory
-   before handing off the task. Do not assume attaching a project has already
+   agent working directory before handing off the task. Do not assume attaching a project has already
    cloned the repository. It **preserves the repository's original
    `AGENT.md`** with its DSL and dependency guides, writes the separate
    `AUTOMATIONBENCH_AGENT.md`, and updates the task-local
@@ -262,23 +268,36 @@ The Python reference workflow and prebuilt n8n graph remain available as
 execution regression fixtures; they are no longer the Scala experiment's
 builder output.
 
-## Next milestones
+## Next milestones (native Rust path)
 
-1. **Implemented in the Scala experiment:** load public dataset rows and run
-   AWFL ProjectManager for each in a fresh project/Scala cloud consumer,
-   with a fixed fund, source collection, usage, and cleanup. Add a CI smoke
-   and verify a full launched execution before claiming an agent-produced
-   result. Builder tool-call counts and token breakdown remain unmeasured.
-2. Generalize the AWFL-to-simulator protocol adapter for other tasks, varied
-   tool argument schemas, failures and more robust date/notice formats.
-3. **Done for task 1219:** the n8n platform adapter runs a real workflow
-   against the same independently reset simulator. Extend it beyond this
-   single public task and compare **warm-engine** execution fairly.
-4. Add multiple independently seeded input/state variations per artifact. This
-   extends AutomationBench and must be reported separately from the official
-   one-scenario task score.
-5. Isolate evaluator credentials and grader files in a separate sandbox,
-   track builder versus runtime token/cost usage, and compare repeated trials.
+**Current stage: compiled / native IPC preflight only.** The coordinator
+and ProjectManager workflow definitions compile to 28 verified native Rust
+binaries; the coordinator returned an initial `native.parallel` suspension
+but no task effect was dispatched, and no current agent submission was
+independently graded. The last fresh server setup attempt was interrupted
+by a terminated cloud consumer (`execution_lost`), not a benchmark grade.
+
+1. Run the compiled root and child/fork workflow through the local Node
+   native executor (or an isolated native canary), with a bounded Jobs
+   response fixture and correct owner scope. Verify the first actual child
+   effect and cleanup paths. Never mistake replay for a live Jobs call.
+2. Keep the 26 currently active native production aliases unchanged. The
+   full build's 26 dependency artifacts differ from the published versions;
+   use an isolated release registry or explicitly verified two-name
+   benchmark-only publication.
+3. Verify `gpt-6-sol` is accepted by the jobs/model provider. Run **one**
+   operations/1219 agent session with the current $1 cap, separate DSL
+   and workflow-utils repos, both AGENT.md preloads, and an early Scala draft.
+4. Confirm `AgentSubmission.scala` exists and is genuine source, compile
+   it to Rust and independently grade the frozen executable against the
+   reset upstream simulator. Capture compile result, model cost/tokens,
+   runtime tool trace, strict/partial assertions, and lifecycle cleanup.
+5. Add regression/CI coverage for missing source, native root/child launch,
+   provider failures and terminated consumer cleanup, then expand public
+   tasks and sandbox hidden tests/credentials.
+
+For commands, release safety, the exact prior failures, and acceptance
+criteria, see the [session handoff](../../../../docs/automationbench-native-handoff.md).
 
 The initial concurrent cloud-agent smoke test required a GKE namespace
 quota adjustment. The separate awfl-us/server Terraform root now defines
