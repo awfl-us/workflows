@@ -223,6 +223,33 @@ The current builder model is gpt-6-sol. For the single-dollar budget,
 core.int replaces the unsupported double CEL conversion. The experiment
 checks that an agent wrote real Scala source before independent grading.
 
+### Latest deployed-agent integration smoke (November 17, 2026)
+
+A fresh GPT-6 Sol native ProjectManager session received public task 1219
+and all eight permitted tool descriptions in its first message. It authored
+a 6,938-byte source (SHA `1b5ddd68acd5f20db3de243106ce0807c55e73af9c9fbb5d8da229b8688590a4`)
+in 32 model rounds, estimated **$1.006506** usage. The agent was manually
+cancelled after exceeding the intended aggregate $1 fund. No deployed
+ProjectManager/helper workflow was rebuilt or republished.
+
+Independent Scala compilation passed. Rust native compilation initially
+blocked on missing `text.split` semantics; see
+[compiler-rust PR #41](https://github.com/awfl-us/compiler-rust/pull/41).
+With that native fix applied locally, the **unchanged frozen agent source**
+compiled in 113.779 seconds and executed its first simulated Gmail tool
+call in 0.171 seconds. It passed `max_results` as a string instead of an
+integer, then tried decoding the simulator's error response as success.
+Result: **strict 0, partial 0, 1 business tool call, runtime_failure**.
+
+**Not a valid blind leaderboard score:** the agent read the repository's
+previous hand-authored `EmergencyDrill.scala` task solution before that
+file was removed. Future blind runs must exclude all reference solutions
+before first agent access, supply only public task/tools, enforce a true
+cross-execution aggregate budget, and require native compilation and
+official isolated grading. Full evidence and next steps are in
+`docs/automationbench-native-handoff.md`. Do not copy the reference
+solution into the builder's repository.
+
 ## Cloud-agent workflow construction (SWE-bench-style experiment)
 
 `AutomationBenchEval` and `experiments.AutomationBench` now use the same

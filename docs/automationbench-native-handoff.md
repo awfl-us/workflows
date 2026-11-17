@@ -286,6 +286,77 @@ assertions. Only after these safeguards, run a new $1 blind trial,
 compile the agent-authored source and apply the official reset-world
 grader. Do not rebuild already published ProjectManager workflows.
 
+## Third fresh attempt: produced source, native compiler gap, scored failure (November 17, 2026)
+
+The full public task/tool schema was provided in the **initial 9,809-character
+user message**, and the agent independently read the identical
+`AUTOMATIONBENCH_TASK_1219.md` public-only preload. The deployed native
+`codebase-ProjectManager` was reused with no agent workflow recompilation.
+
+- **Project/session:** `pmbench-152f82a5e40c4048ba38946a22ad094f` /
+  `0939f630-848c-4be2-aca8-8055442789c0`.
+- **Model/fund:** `gpt-6-sol`, `fund=1`, **32 model rounds**, sum of session
+  cost records **$1.006506** (estimated, not invoice data). The coordinator's
+  per-execution fund did **not** stop recursive ProjectManager's aggregate
+  usage at exactly $1; the session was explicitly cancelled on exceeding
+  $1, and no further model calls were made.
+- **Frozen agent-authored file:** 6,938 bytes, SHA-256
+  `1b5ddd68acd5f20db3de243106ce0807c55e73af9c9fbb5d8da229b8688590a4`;
+  saved under ignored
+  `eval_runs/automationbench/direct-builder-1219-retry-20261117/`. The
+  agent constructed real `gmail_find_email`, Monday.com date/status,
+  Google Calendar and conditional Slack effects and source-derived date
+  processing, not a generic placeholder.
+- **Scala compilation:** First `sbt` run timed out; second surfaced four
+  Scala DSL errors (`CelIndex`, `=!=`, and two incorrect `Fold` list
+  types). The agent patched them just before the budget stop. The **frozen
+  final source subsequently passed Scala compilation** in the independent
+  grader.
+- **Rust compilation gap found and fixed locally:** The compiler knew
+  `FunctionId.TextSplit` but lacked an expression emitter and runtime
+  `text.split` implementation. Added literal Unicode-safe split semantics
+  with leading/trailing/adjacent empty segments and rejection of empty
+  separators and non-string arguments in
+  [compiler-rust PR #41](https://github.com/awfl-us/compiler-rust/pull/41),
+  commit `9bd72f4`. Local Rust unit suite **26 passed, 0 failed**; Scala
+  `TextSplitSmoke` passed. Rebuilt and independently graded the **same
+  frozen source**, without an additional model request or updating any
+  deployed workflow aliases. The compiler fix remains in a separate PR
+  unless explicitly merged/deployed.
+- **After compiler fix, native build:** **success**, **113.779 seconds**;
+  execution reached the simulator and made **one business tool call** in
+  **0.171 seconds**, then failed at runtime:
+  `gmail_find_email` passed `max_results: "50"` as a **string** where
+  the simulator expected an integer, causing
+  `TypeError: slice indices must be integers or None or have an __index__ method`.
+  The compiled workflow then called `json.decode` on the resulting
+  error response, failing with
+  `Type("json.decode requires text or bytes")`.
+  **Official strict score 0.0 / partial credit 0.0**, category
+  `runtime_failure`; no Monday/Calendar/Slack mutations.
+  Grader output: `grade-native-split/score/score_summary.json` equivalent
+  main summary at `grade-native-split/score_summary.json`. Grader's
+  `builder_cost_usd` is null because the direct builder path is outside
+  its coordinator; cost recorded separately above.
+
+**Benchmark validity caveat:** The new agent read the existing hand-authored
+`EmergencyDrill.scala` reference implementation in its checkout *before*
+it was removed. This means the run is a useful **end-to-end integration
+smoke**, **not a clean blind benchmark result**, despite the official
+grader producing a score. The user-facing score must be labelled accordingly.
+
+**Before any further scored paid attempt:** (1) exclude task-answer reference
+files such as `EmergencyDrill.scala` **before the agent launches**, not
+after; (2) enforce the **aggregate** $1 session budget and a bounded
+source/compile checkpoint; (3) provide a small public-only
+native-compatible CEL/DSL and typed JSON arguments example (the existing
+`Map[String, Value[String]]` design forced numeric `max_results` into
+a string); (4) handle simulator tool errors without attempting to decode
+them as successful results; (5) verify the final frozen source compiles
+through **both Scala and Rust**, not Scala alone. Then launch one fresh,
+fully blind task and report its independent score. No need to rebuild or
+republish deployed agent workflows.
+
 ## Next session: ordered execution plan — deployed agents first
 
 1. **Check published runtime, no builds.** Attach the existing AWFL project,
