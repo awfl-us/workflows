@@ -3,7 +3,10 @@
 **Current handoff and next steps (November 17, 2026):**
 [AutomationBench native Rust execution plan](../../../../docs/automationbench-native-handoff.md).
 The compiler and native coordinator IPC startup passed for all 28 workflow
-binaries, but the full agent-produced benchmark is not yet complete.
+binaries. Nested local Rust fork/child dispatch also passed, reaching the
+first Jobs HTTP effect. Two actual local Jobs writes passed against the
+Firestore emulator, before the driver hit its unimplemented native callback
+effect. The full agent-produced benchmark is not yet complete.
 Do not deploy the generated Google Workflows YAML or publish the 28-binary
 closure over existing production aliases.
 
@@ -270,17 +273,20 @@ builder output.
 
 ## Next milestones (native Rust path)
 
-**Current stage: compiled / native IPC preflight only.** The coordinator
-and ProjectManager workflow definitions compile to 28 verified native Rust
-binaries; the coordinator returned an initial `native.parallel` suspension
-but no task effect was dispatched, and no current agent submission was
-independently graded. The last fresh server setup attempt was interrupted
-by a terminated cloud consumer (`execution_lost`), not a benchmark grade.
+**Current stage: native root/fork/child dispatch verified; callback bridge pending.**
+The 28 Rust binaries were rebuilt and verified on November 17. The new
+`smoke_native_dispatch.mjs` proved the compiled `native.parallel` lane,
+two child `workflow.run` calls and the first HTTP effect without sending it.
+A separate run against the actual local Jobs service completed two
+`/firebase/create` calls with a Firestore emulator and then stopped at
+unimplemented `callback.create` in its temporary driver. No live model
+request or independently graded agent submission is verified.
 
-1. Run the compiled root and child/fork workflow through the local Node
-   native executor (or an isolated native canary), with a bounded Jobs
-   response fixture and correct owner scope. Verify the first actual child
-   effect and cleanup paths. Never mistake replay for a live Jobs call.
+1. Native child/fork preflight is passed; next connect the native
+   `callback.create` and `callback.await` implementation to a reachable
+   authenticated HTTPS callback route and provider-consistent storage.
+   The local Firestore emulator is not reachable by remote GKE consumers.
+   Test callback delivery and cleanup, never fabricate callback responses.
 2. Keep the 26 currently active native production aliases unchanged. The
    full build's 26 dependency artifacts differ from the published versions;
    use an isolated release registry or explicitly verified two-name

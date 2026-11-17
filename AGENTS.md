@@ -34,11 +34,15 @@ dependency closure compile as **28 native Rust workflows**; a full
 Do **not** use the oversized Google Workflows YAML experiment or
 `--recursive --publish` against the shared GCS aliases; 26 existing
 production aliases differ from the local closure. Run locally with the
-isolated native release registry, then prove native child/fork dispatch and
-only afterward attempt one paid task 1219 run.
+isolated native release registry. Real Rust fork/child dispatch into
+`tools-CliTools` passed; the next integration gate is native callback
+delivery with a reachable authenticated HTTPS endpoint, followed by
+one paid task 1219 run and independent grading.
 
 The workflows Scala consumer was restarted after Firebase credential bootstrap
 failed; it is reachable by attaching project `gNoQN9KUw5IbtsXLag0M`.
-The previously generated build report survived but Cargo binaries did not;
-recompile before the native startup smoke. Preserve unrelated local dirty
+The missing 28 Cargo binaries were rebuilt and verified on November 17.
+The reusable native dispatch smoke is
+`files/scripts/evals/automationbench/smoke_native_dispatch.mjs`.
+Recompile if these artifacts are lost on a consumer restart. Preserve unrelated local dirty
 paths; stage only files relevant to the change.

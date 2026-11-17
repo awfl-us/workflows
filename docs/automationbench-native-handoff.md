@@ -2,6 +2,62 @@
 
 **Status verified November 16–17, 2026.** This is the authoritative task-specific handoff for [workflows PR #25](https://github.com/awfl-us/workflows/pull/25), branch `feat/automationbench-eval`. Read [AutomationBench runner README](../files/scripts/evals/automationbench/README.md), [native development loop](native-development-loop.md), and [native publication/runbook](native-rust-publication.md) alongside this document. The Scala DSL remains the authoring interface; **Rust is the intended evaluator/ProjectManager runtime. Do not deploy the generated Google Workflows YAML**.
 
+## Follow-up verification: native dispatch and local Jobs (November 17, 2026)
+
+- Reattached the workflows Scala consumer and **rebuilt all 28 static Rust/musl binaries**, after the earlier ephemeral Cargo artifacts disappeared. Exact result:
+  `AWFL_NATIVE_DEV_PASS root=evals-AutomationBenchEval workflows=28 publish=false elapsed=762.0s`.
+  The existing root IPC startup smoke passed again with first effect `native.parallel`. No GCS release alias was published.
+- Added a reproducible **real-binary nested-dispatch preflight** at
+  `files/scripts/evals/automationbench/smoke_native_dispatch.mjs`. With a
+  clean sibling server checkout it executes the compiled evaluator and records
+  **one native.parallel lane**, **two nested workflow.run calls**
+  (`evals-experiments-AutomationBench` then `tools-CliTools`),
+  and the first `http.post /firebase/create` effect. It deliberately
+  throws *before* the first HTTP call; the controlled error is expected and no
+  external writes are made. All binaries are SHA-256 checked against the
+  local build report. Server `localWorkflows.test.js`: 7 passed, 2 optional
+  integration tests skipped, 0 failed.
+- A clean checkout of server `main` ran the **actual Jobs Express service**
+  on `127.0.0.1:5055`: `/health` and `/jobs/events/health` returned 200.
+  Its initial Firestore write to the real database failed
+  `7 PERMISSION_DENIED` under this development consumer's credentials.
+  Restarting Jobs with local `FIRESTORE_EMULATOR_HOST=127.0.0.1:8085`
+  allowed **two real Jobs HTTP `/firebase/create` calls to succeed**,
+  then the workflow reached `callback.create`. The temporary local effect
+  driver intentionally does not implement native callbacks. **This is a local
+  driver/integration boundary, not a confirmed compiler bug.**
+- Pinned Zapier upstream simulator setup succeeded:
+  `AUTOMATIONBENCH_PARENT_READY pin=4a8e1061254004d9dac807054eed33fad7d1ff14`.
+  The public `operations/1219` row loads.
+- **No `gpt-6-sol` model invocation, agent-produced Scala submission,
+  independent official grade, or benchmark spend is established.** The
+  `fund=1` and `model=gpt-6-sol` appeared in the evaluator's native
+  startup log, but it did not reach the model provider.
+
+**Reproduce the verified local gate** (from `/workspace/workflows`, with
+`/workspace/automationbench-server` an isolated checkout of server main):
+
+```bash
+python3 scripts/native-dev.py evals-AutomationBenchEval --recursive \
+  --output eval_runs/automationbench/native-coordinator-dev
+python3 files/scripts/evals/automationbench/smoke_native_coordinator.py \
+  --report eval_runs/automationbench/native-coordinator-dev/build-report.json
+AWFL_NATIVE_SERVER=/workspace/automationbench-server node \
+  files/scripts/evals/automationbench/smoke_native_dispatch.mjs
+```
+
+**Next gate:** wire `callback.create`/`callback.await` through the
+production-supported native callback implementation with the *same*
+data-plane store and a **reachable, authenticated HTTPS callback endpoint**.
+An isolated loopback Firestore emulator alone cannot receive callbacks
+from a separate GKE agent; never fake callback delivery and call it a
+successful evaluation. Choose an isolated release registry/canary or
+verify benchmark-only publication that does not modify the 26 live
+aliases. Then run exactly one `gpt-6-sol` task 1219 with the $1 limit,
+freeze the agent's actual `AgentSubmission.scala`, compile and
+independently score it. Record provider acceptance, cost, grade and
+cleanup. Do not switch the shared production release registry.
+
 ## Consumer access and checkout preservation (latest)
 
 The AWFL workflows project is `gNoQN9KUw5IbtsXLag0M`. Its previous
