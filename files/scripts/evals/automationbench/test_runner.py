@@ -16,6 +16,41 @@ def test_public_dataset_prepare_does_not_disclose_assertions():
     assert "initial_state" not in public
 
 
+def test_public_tool_contracts_include_upstream_types_defaults_and_enums():
+    tools = {tool["name"]: tool for tool in prepare(load_task("operations", "1219"))["business_tools"]}
+    assert len(tools) == 8
+    gmail = {arg["name"]: arg for arg in tools["gmail_find_email"]["parameters"]}
+    assert gmail["query"] == {"name": "query", "required": False, "schema": {"type": "string"}, "default": ""}
+    assert gmail["max_results"] == {
+        "name": "max_results", "required": False,
+        "schema": {"anyOf": [{"type": "integer"}, {"type": "null"}]},
+        "default": 10,
+    }
+    assert gmail["include_spam_trash"]["schema"] == {"anyOf": [{"type": "boolean"}, {"type": "null"}]}
+    calendar = {arg["name"]: arg for arg in tools["google_calendar_create_detailed_event"]["parameters"]}
+    assert calendar["attendees"]["schema"] == {
+        "anyOf": [{"items": {"type": "string"}, "type": "array"}, {"type": "null"}]
+    }
+    assert calendar["recurrence_frequency"]["schema"] == {
+        "anyOf": [{"enum": ["daily", "weekly", "monthly", "yearly"], "type": "string"}, {"type": "null"}]
+    }
+    assert calendar["visibility"]["default"] == "default"
+    assert calendar["visibility"]["schema"]["enum"] == ["default", "public", "private"]
+    monday = {arg["name"]: arg for arg in tools["monday_change_status_column_value"]["parameters"]}
+    assert monday["board_id"]["required"] is True
+    assert monday["board_id"]["schema"] == {"anyOf": [{"type": "integer"}, {"type": "string"}]}
+    assert "world" not in gmail
+
+
+def test_cloud_agent_dataset_contains_typed_contracts():
+    row = agent_dataset("operations", "1219", 1)[0]
+    parsed = json.loads(row["task_spec"])
+    tool = next(t for t in parsed["business_tools"] if t["name"] == "gmail_find_email")
+    max_results = next(arg for arg in tool["parameters"] if arg["name"] == "max_results")
+    assert max_results["schema"]["anyOf"][0]["type"] == "integer"
+    assert max_results["default"] == 10
+
+
 def test_cloud_agent_dataset_rows_exclude_grader_and_world_state():
     rows = agent_dataset("operations", "1219", 1)
     assert len(rows) == 1
@@ -48,6 +83,14 @@ def test_tool_allowlist_rejects_unrelated_operations():
     result = bridge.invoke("zendesk_delete_ticket", {})
     assert result["ok"] is False
     assert len(bridge.calls) == 0
+
+
+def test_simulator_tool_inventory_uses_same_typed_public_contract():
+    state = asyncio.run(create_environment(load_task("operations", "1219")))
+    bridge = Bridge(state, "token")
+    public = prepare(load_task("operations", "1219"))
+    assert bridge.inventory() == public["business_tools"]
+    assert not any(tool["name"] == "zendesk_delete_ticket" for tool in bridge.inventory())
 
 
 def test_official_scoring_of_independent_smoke_artifact(tmp_path: Path):

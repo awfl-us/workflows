@@ -18,7 +18,9 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from typing import Any
+from typing import Any, get_type_hints
+
+from pydantic import TypeAdapter
 
 from datasets import Dataset
 from automationbench.domains import get_domain_dataset
@@ -60,21 +62,41 @@ async def create_environment(row: dict):
     return state
 
 
+def tool_contract(fn) -> dict:
+    """Public request contract for one upstream tool; never include world state."""
+    # The dataset names permitted tools but doesn't store argument types.
+    # Resolve upstream annotations (including forward refs) and render JSON
+    # Schema, so builders don't have to guess JSON types, unions, or enums.
+    sig = inspect.signature(fn)
+    hints = get_type_hints(fn)
+    parameters = []
+    for name, param in sig.parameters.items():
+        if name == "world":
+            continue
+        definition = {
+            "name": name,
+            "required": param.default is inspect.Parameter.empty,
+            "schema": TypeAdapter(hints.get(name, Any)).json_schema(),
+        }
+        if param.default is not inspect.Parameter.empty:
+            # Only serialize genuine JSON-compatible defaults; never stringify
+            # an arbitrary Python object as if it were a request default.
+            try:
+                definition["default"] = json.loads(json.dumps(param.default, allow_nan=False))
+            except (TypeError, ValueError):
+                pass
+        parameters.append(definition)
+    return {
+        "name": fn.__name__,
+        "description": inspect.getdoc(fn) or "",
+        "parameters": parameters,
+    }
+
+
 def prepare(row: dict) -> dict:
     info = plain(row["info"])
     allowed = set(info.get("zapier_tools", []))
-    tool_schemas = []
-    for fn in ALL_TOOLS:
-        if fn.__name__ in allowed:
-            sig = inspect.signature(fn)
-            tool_schemas.append({
-                "name": fn.__name__,
-                "description": inspect.getdoc(fn) or "",
-                "parameters": [
-                    {"name": name, "required": p.default is inspect.Parameter.empty}
-                    for name, p in sig.parameters.items() if name != "world"
-                ],
-            })
+    tool_schemas = [tool_contract(fn) for fn in ALL_TOOLS if fn.__name__ in allowed]
     return {
         "benchmark": "automationbench-public",
         "task_id": str(row["example_id"]),
@@ -128,8 +150,7 @@ class Bridge:
         self.calls: list[dict] = []
 
     def inventory(self) -> list[dict]:
-        return [{"name": d.name, "description": d.description, "parameters": d.parameters}
-                for d in self.state["tool_defs"]]
+        return [tool_contract(fn) for fn in self.functions.values()]
 
     def invoke(self, name: str, args: dict) -> dict:
         with self.lock:

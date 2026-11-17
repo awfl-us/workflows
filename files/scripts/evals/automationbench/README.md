@@ -261,9 +261,30 @@ implementation:
    and verifies the pinned upstream source in a fresh Scala consumer.
    `runner.py dataset --domain operations --task-id 1219 --limit 1
    --format json` loads public dataset rows as a JSON array.
-   Rows contain the user prompt and permitted tool descriptions, **never**
-   `initial_state`, `answer`, or assertion details. The parent retains
-   the upstream simulator and grader.
+   Rows contain the user prompt and permitted tool descriptions **plus
+   typed JSON request schemas** generated from the actual upstream Python
+   signatures: each argument has a JSON Schema (`schema`), `required`, and
+   a JSON-compatible `default` when defined. This preserves nullable
+   fields, arrays, unions, enum choices, and booleans; for example,
+   `gmail_find_email.max_results` is `integer | null`, default `10`, **not**
+   a string. No `initial_state`, `answer`, or assertion details are sent.
+   The simulator's public `/tools` inventory uses the same request schemas.
+   The parent retains the upstream simulator and grader.
+
+   For a standalone builder, generate the public-only file **with this
+   runner**, rather than copying an old untyped task prompt:
+
+   ```bash
+   uv run --project /workspace/automationbench-upstream python \
+     /workspace/workflows/files/scripts/evals/automationbench/runner.py prepare \
+     --domain operations --task-id 1219 \
+     --out /workspace/workflows/AUTOMATIONBENCH_TASK_1219.json >/dev/null
+   ```
+
+   Ensure the first successful builder request/preload actually contains or
+   points to that generated typed spec; a stale `AUTOMATIONBENCH_TASK_1219.md`
+   from prior runs is not a substitute. The separate simulator/grader state
+   must remain inaccessible to the builder.
 2. `ParallelFor` creates a **new temporary project** per row and starts a
    **Scala GKE cloud consumer** with `producer/start` /
    `imageProfile=scala`. The consumer's initial filesystem is empty;

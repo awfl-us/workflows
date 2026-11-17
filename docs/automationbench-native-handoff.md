@@ -403,6 +403,19 @@ republish deployed agent workflows.
 
 ## Next session: ordered execution plan — deployed agents first
 
+**Typed tool-contract fix (November 17):** `files/scripts/evals/automationbench/runner.py`
+now uses the pinned upstream tool function signatures and Pydantic JSON Schema
+generation to include each permitted argument's `schema`, `required`, and
+JSON-serializable `default` in `prepare()` / `agent_dataset()`. This fixes
+the previously omitted `max_results: integer | null` typing that contributed
+to the one-call failure above. Schema generation covers `Literal` enums,
+array element types, booleans, nullable fields and mixed-type Monday IDs.
+Regenerate any saved `AUTOMATIONBENCH_TASK_1219.md` or `.json` before starting
+a new builder: previous copies contain only names and required flags. The
+benchmark hidden initial state and scoring assertions remain excluded. See
+the concrete `prepare --out` command in the integration README. This is a
+harness fix, **not a new agent attempt or benchmark score**.
+
 1. **Check published runtime, no builds.** Attach the existing AWFL project,
    preserve unrelated dirty files, and inspect the published native
    `codebase-ProjectManager`, `tools-CliTools` and helper workflow
