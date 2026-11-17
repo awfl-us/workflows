@@ -7,8 +7,21 @@ public task specification, not to perform the business changes immediately.
 - Read the task's public prompt and list of permitted business tools carefully.
   Don't access or copy AutomationBench grading assertions, hidden initial state,
   answer files, reference solution, or previous evaluation results.
-- Inspect the AWFL Scala DSL in the repository and work with its existing
-  workflow conventions. The native compiler is in awfl-us/compiler-rust.
+- The AWFL components are **separate cloned repositories**, prepared before
+  the agent starts:
+  - `/workspace/workflows` — working repository, existing workflow examples.
+  - `/workspace/dsl` — DSL definition (including HTTP effects and typed values).
+  - `/workspace/workflow-utils` — shared workflow utilities.
+  Inspect the correct source tree instead of repeatedly searching
+  `/workspace/workflows/src` for DSL implementations.
+  The native compiler is in `awfl-us/compiler-rust`.
+- **Make an early deliverable.** Within your first few tool calls, inspect a
+  relevant source example, then create a first draft of the required Scala
+  file. Fix it incrementally. Do not spend the whole budget on research
+  without writing the submission. Compilation is secondary to delivering
+  the source.
+- This is a task-construction benchmark: do not run a local Jobs server,
+  deploy infrastructure, or alter the DSL or workflow-utils repositories.
 - **Required output file**:
   `src/main/scala/us/awfl/workflows/evals/automationbench/AgentSubmission.scala`
   (create the parent directories if needed).

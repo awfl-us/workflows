@@ -21,9 +21,9 @@ object AutomationBenchEval extends Eval[AutomationBenchParams, AutomationBenchRe
     "domain" -> ListValue(List("operations").cel),
     "task_id" -> ListValue(List("1219").cel),
     "platform" -> ListValue(List("awfl-native-rust").cel),
-    "model" -> ListValue(List("gpt-5").cel),
+    "model" -> ListValue(List("gpt-6-sol").cel),
     "agent" -> ListValue(List("AWFL").cel),
-    "fund" -> ListValue(List("1.0").cel)
+    "fund" -> ListValue(List("1").cel)
   )
 
   override def csvCols: ListValue[String] = ListValue(List(

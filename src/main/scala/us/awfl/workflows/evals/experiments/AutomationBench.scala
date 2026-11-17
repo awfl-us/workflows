@@ -65,6 +65,17 @@ object AutomationBench extends Experiment[AutomationBenchParams, AutomationBench
         str("test -d /workspace/workflows/.git || git clone --depth 1 https://github.com/awfl-us/workflows.git /workspace/workflows"),
         "checkoutBenchmarkRepo", raiseError = true,
         timeoutSeconds = Value(180), env = bootstrapEnv)
+      // These are separate repositories, not directories under workflows.
+      // Make their *source* inspectable so the agent can find the native
+      // DSL and HTTP effects rather than spending its budget guessing APIs.
+      val checkoutDsl = CliTools.runCommand(
+        str("test -d /workspace/dsl/.git || git clone --depth 1 https://github.com/awfl-us/dsl.git /workspace/dsl"),
+        "checkoutDslRepo", raiseError = true,
+        timeoutSeconds = Value(180), env = bootstrapEnv)
+      val checkoutUtils = CliTools.runCommand(
+        str("test -d /workspace/workflow-utils/.git || git clone --depth 1 https://github.com/awfl-us/workflow-utils.git /workspace/workflow-utils"),
+        "checkoutWorkflowUtilsRepo", raiseError = true,
+        timeoutSeconds = Value(180), env = bootstrapEnv)
       // Keep the repository's own AGENT.md intact: it documents the DSL,
       // source layout and dependency repositories. Add benchmark instructions
       // as a *second* preload through agent.sh's .awfl/config.json.
@@ -89,10 +100,18 @@ object AutomationBench extends Experiment[AutomationBenchParams, AutomationBench
       val startTime = CliTools.runCommand(str("date +%s"),
         "agentStartTime", env = init.resultValue)
       val run = ProjectManager("constructWorkflow", query,
-        fund = Value[Double](CelFunc("double", params.fund)),
+        fund = Value[Double](core.int(params.fund)),
         task = OptValue(obj(todo)), env = init.resultValue)
       val endTime = CliTools.runCommand(str("date +%s"),
         "agentEndTime", env = init.resultValue)
+      // READ_FILE returns an error string when a file is absent, rather
+      // than failing its callback. Validate it before collecting the
+      // frozen artifact, so a missing source is never graded as Scala.
+      val validateSubmission = CliTools.runCommand(
+        str("test -s " + outputSource + " && test $(wc -c < " +
+          outputSource + ") -gt 200"),
+        "validateAgentSubmission", raiseError = true,
+        timeoutSeconds = Value(30), env = init.resultValue)
       val source = CliTools.readFile(str(outputSource),
         "readAgentSubmission", env = init.resultValue)
       val usage = Llm.usage("agentUsage", env = init.result)
@@ -109,8 +128,9 @@ object AutomationBench extends Experiment[AutomationBenchParams, AutomationBench
       // Init must be outside the guarded region: otherwise the native
       // exception branch cannot resolve initCloudAgentResult for cleanup.
       val runAndCleanup = Try("runAndCleanup", List[Step[?, ?]](
-        checkout, loadAgentMd, saveAgentMd, configurePreloads, verifyPreloads,
-        startTime, run, endTime, source, usage, cleanup
+        checkout, checkoutDsl, checkoutUtils, loadAgentMd, saveAgentMd,
+        configurePreloads, verifyPreloads, startTime, run, endTime,
+        validateSubmission, source, usage, cleanup
       ) -> prediction, err =>
         List[Step[?, ?]](cleanup, Raise("reRaiseAfterCleanup", err)) ->
           Value.nil[AutomationBenchSubmission])

@@ -186,6 +186,25 @@ access, and preserve the artifact snapshot hash between build and evaluation.
 The `seed` is currently recorded for reproducibility but does **not** create
 new independent upstream scenarios. No invented robustness scores.
 
+## Native Rust benchmark orchestration
+
+The benchmark coordinator, experiment, and ProjectManager dependency closure
+are Scala DSL definitions compiled to Rust using the registered
+evals-AutomationBenchEval target. Do not deploy their generated Google
+Workflows YAML (the experiment exceeded the 128 KB source limit).
+
+    cd /workspace/workflows
+    python3 scripts/native-dev.py evals-AutomationBenchEval --recursive
+    python3 files/scripts/evals/automationbench/smoke_native_coordinator.py --report eval_runs/automationbench/native-coordinator-dev/build-report.json
+
+This build is local-only unless explicitly published to the AWFL native
+artifact service. Use the existing native execution API for real runs.
+The smoke checks actual Rust IPC startup and its initial native.parallel
+effect without dispatching it, so it cannot generate a benchmark score.
+The current builder model is gpt-6-sol. For the single-dollar budget,
+core.int replaces the unsupported double CEL conversion. The experiment
+checks that an agent wrote real Scala source before independent grading.
+
 ## Cloud-agent workflow construction (SWE-bench-style experiment)
 
 `AutomationBenchEval` and `experiments.AutomationBench` now use the same
@@ -203,8 +222,9 @@ implementation:
 2. `ParallelFor` creates a **new temporary project** per row and starts a
    **Scala GKE cloud consumer** with `producer/start` /
    `imageProfile=scala`. The consumer's initial filesystem is empty;
-   the experiment clones `awfl-us/workflows` explicitly into
-   `/workspace/workflows` and sets that as the agent's working directory
+   the experiment clones the workflows, dsl, and workflow-utils repositories
+   into separate directories under /workspace and uses workflows as its
+   agent working directory
    before handing off the task. Do not assume attaching a project has already
    cloned the repository. It **preserves the repository's original
    `AGENT.md`** with its DSL and dependency guides, writes the separate
@@ -260,9 +280,7 @@ builder output.
 5. Isolate evaluator credentials and grader files in a separate sandbox,
    track builder versus runtime token/cost usage, and compare repeated trials.
 
-The initial concurrent cloud-agent smoke test required a **GKE namespace
-quota adjustment**: 17Gi already reserved plus a new 4Gi Scala consumer
-exceeded the previous 20Gi ephemeral-storage quota. The quota was raised
-to 24Gi through the separate `awfl-us/server`
-`infra/gke-guardrails` Terraform root (server PR #136), leaving pod,
-memory and CPU ceilings unchanged.
+The initial concurrent cloud-agent smoke test required a GKE namespace
+quota adjustment. The separate awfl-us/server Terraform root now defines
+100 pods, 100 jobs, 100 vCPU, 256Gi memory, and 512Gi ephemeral storage
+(server PR #136). These are admission limits, not resource reservations.
