@@ -79,10 +79,6 @@ jobs:
             --compiler "$GITHUB_WORKSPACE/compiler-rust" \
             --bucket "$GCP_PROJECT_ID-native-workflows" \
             --publish
-          python3 scripts/native-dev.py evals-OpenAiCacheProbe \
-            --compiler "$GITHUB_WORKSPACE/compiler-rust" \
-            --bucket "$GCP_PROJECT_ID-native-workflows" \
-            --publish
 
       - name: Inspect released ProjectManager capability
         run: |
