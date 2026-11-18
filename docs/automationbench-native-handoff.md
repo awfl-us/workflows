@@ -490,6 +490,36 @@ harness fix, **not a new agent attempt or benchmark score**.
    capture real spend, and verify all 26 existing production aliases
    remain unchanged. Then expand to additional public tasks.
 
+## Typed evaluator model selection (Nov 18, 2026)
+
+The base `Eval[P, R, Input]` uses an explicit input type. The legacy
+`Eval.Args(arg1, arg2)` remains the input for SWE-bench, while AutomationBench
+uses `Eval.ModelArgs(arg1, arg2, models: ListValue[String])`.
+
+When calling the published `evals-AutomationBenchEval` through
+`execute_workflow`, use **typed** parameters:
+
+```json
+{
+  "project_id": "gNoQN9KUw5IbtsXLag0M",
+  "workflow_name": "evals-AutomationBenchEval",
+  "params": {
+    "arg1": "automationbench-terra-1219",
+    "arg2": "1",
+    "models": ["gpt-6.1-terra"]
+  }
+}
+```
+
+Multiple entries in `models` expand the existing `Product(variables)`
+matrix and produce separate model-specific rows; there is no baked-in model
+ID. Do not add a top-level `model` string or use `create_session`, which does
+not pass typed evaluator input. The run ID must be unique.
+
+The new input type changes the root workflow artifact. Publish **only the
+evaluator root** after checking the selective release diff; deployed
+ProjectManager and its helper workflow aliases must remain unchanged.
+
 ## Risk and scope boundaries
 
 - **Do not rebuild existing deployed agents, deploy YAML, or broad-publish

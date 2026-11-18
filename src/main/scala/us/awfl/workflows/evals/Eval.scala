@@ -4,14 +4,20 @@ import us.awfl.dsl._
 import us.awfl.dsl.CelOps._
 import us.awfl.workflows.tools.CliTools
 
-trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
-  case class Args(arg1: Value[String], arg2: Value[String]) {
-    val runId = arg1
-    val limit = Value[Int](core.int( arg2))
-  }
-  override type Input = Args
+object Eval {
+  // Keep SWE-bench's original two-argument contract intact.
+  case class Args(arg1: Value[String], arg2: Value[String])
+  // A typed model list lets the same evaluation compare several models.
+  case class ModelArgs(arg1: Value[String], arg2: Value[String],
+    models: ListValue[String])
+}
+
+trait Eval[P: Spec, R: Spec, A: Spec] extends us.awfl.core.Workflow {
+  override type Input = A
   override type Result = String
 
+  def runId: Value[String]
+  def limit: Value[Int]
   def directory: Value[String]
   def variables: Map[String, ListValue[String]]
   def experiment: Experiment[P, R]
@@ -25,8 +31,8 @@ trait Eval[P: Spec, R: Spec] extends us.awfl.core.Workflow {
       val subDir = variables.keys.map[Cel] { k => map.get( params, k) }.reduce(_ + "_" + _)
       val run = experiment(
         name = "experiment",
-        runId = input.runId,
-        limit = input.limit,
+        runId = runId,
+        limit = limit,
         directory = str(directory.cel + "/" + subDir),
         params = params
       )
