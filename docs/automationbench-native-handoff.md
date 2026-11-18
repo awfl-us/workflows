@@ -492,6 +492,13 @@ harness fix, **not a new agent attempt or benchmark score**.
 
 ## Typed evaluator model selection (Nov 18, 2026)
 
+When a model matrix is supplied, the root's `input.env.model` is deliberately
+not used: no single model represents the evaluator. The parent `Eval` now
+exposes `modelForExperiment` for selecting a model per matrix row.
+AutomationBench passes `params.model` to each child and uses a neutral model
+for its CSV-writing tools. This fixes a native failure after `logParams`:
+`missing field or element: model` in the parent's inherited env.
+
 The base `Eval[P, R, Input]` uses an explicit input type. The legacy
 `Eval.Args(arg1, arg2)` remains the input for SWE-bench, while AutomationBench
 uses `Eval.ModelArgs(arg1, arg2, models: ListValue[String])`.

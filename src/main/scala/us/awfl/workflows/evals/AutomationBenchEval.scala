@@ -4,6 +4,7 @@ import us.awfl.dsl._
 import us.awfl.dsl.CelOps._
 import us.awfl.dsl.auto.given
 import us.awfl.workflows.evals.experiments.{AutomationBench, AutomationBenchParams, AutomationBenchResult}
+import us.awfl.utils.Env
 
 /** Public AutomationBench workflow-building evaluation using the same per-row
   * temporary project / cloud consumer / AWFL agent lifecycle as SWE-bench.
@@ -17,6 +18,12 @@ object AutomationBenchEval extends Eval[AutomationBenchParams, AutomationBenchRe
 
   override def runId: Value[String] = inputVal.get.arg1
   override def limit: Value[Int] = Value[Int](core.int(inputVal.get.arg2))
+
+  override def modelForExperiment(params: Value[AutomationBenchParams]): Value[String] =
+    params.get.model
+
+  // The evaluator itself never calls an LLM, only its child agents do.
+  override def modelForEvaluator: Value[String] = str("evaluation")
 
   override def directory: Value[String] =
     str(("eval_runs/automationbench/": Cel) + runId)

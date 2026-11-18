@@ -3,6 +3,7 @@ package us.awfl.workflows.evals
 import us.awfl.dsl._
 import us.awfl.dsl.CelOps._
 import us.awfl.workflows.tools.CliTools
+import us.awfl.utils.Env
 
 object Eval {
   // Keep SWE-bench's original two-argument contract intact.
@@ -23,6 +24,12 @@ trait Eval[P: Spec, R: Spec, A: Spec] extends us.awfl.core.Workflow {
   def experiment: Experiment[P, R]
   def csvCols: ListValue[String]
 
+  // Legacy evals can keep the model injected by the launcher. Matrix evals
+  // override these to use each row's selected model, and a neutral model
+  // for evaluator-only file operations.
+  def modelForExperiment(params: Value[P]): Value[String] = Env.model
+  def modelForEvaluator: Value[String] = Env.model
+
   override def workflows: List[Workflow[?]] = List({
     val buildParams = Product(variables)
 
@@ -34,7 +41,11 @@ trait Eval[P: Spec, R: Spec, A: Spec] extends us.awfl.core.Workflow {
         runId = runId,
         limit = limit,
         directory = str(directory.cel + "/" + subDir),
-        params = params
+        params = params,
+        env = obj(Env.get.copy(
+          model = modelForExperiment(params),
+          sessionId = str(experiment.workflowName)
+        ))
       )
       List[Step[?,?]](
         Log("logParams", str(("Running with params: ": Cel) + json.encode_to_string( params))),
@@ -55,7 +66,11 @@ trait Eval[P: Spec, R: Spec, A: Spec] extends us.awfl.core.Workflow {
       val buildRow = toRow(csvRow.resultValue)
       List(csvRow, buildRow) -> str(b.cel + CelStr("\n").safe + buildRow.resultValue)
     }
-    val saveCsv = CliTools.writeFile(str(directory.cel + "/results.csv"), buildCsv.resultValue)
+    val saveCsv = CliTools.writeFile(
+      str(directory.cel + "/results.csv"),
+      buildCsv.resultValue,
+      env = obj(Env.get.copy(model = modelForEvaluator))
+    )
     Workflow(List[Step[?, ?]](buildParams, runExperiments, buildHeader, buildCsv, saveCsv) -> runExperiments.resultValue)
   })
 }
