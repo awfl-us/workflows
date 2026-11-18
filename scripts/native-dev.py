@@ -171,6 +171,23 @@ def source_fingerprint(compiler):
     return digest.hexdigest()
 
 
+def workflow_utils_override():
+    # The native compiler frontend carries its own workflow-utils Test
+    # dependency. Keep it aligned with the compiled workflow bytecode, or
+    # sbt can load an older YojComposer and fail with NoSuchMethodError.
+    build = (ROOT / "build.sbt").read_text()
+    match = re.search(
+        r'"us\.awfl"\s*%%\s*"workflow-utils"\s*%\s*"([^"]+)"',
+        build,
+    )
+    if not match:
+        raise ValueError("Cannot determine workflow-utils version from build.sbt")
+    version = match.group(1)
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", version):
+        raise ValueError("Invalid workflow-utils version in build.sbt")
+    return 'set dependencyOverrides += "us.awfl" %% "workflow-utils" % "' + version + '"', version
+
+
 def compile_all(args, output, modules):
     output.mkdir(parents=True, exist_ok=True)
     snapshot = snapshot_sources(output)
@@ -197,17 +214,23 @@ def compile_all(args, output, modules):
         if not classes.is_dir():
             raise ValueError("Compiled workflow classes missing: " + str(classes))
         injection = 'set Test / unmanagedClasspath += Attributed.blank(file("' + str(classes) + '"))'
-        run(["sbt", "-batch", injection,
+        utils_override, utils_version = workflow_utils_override()
+        run(["sbt", "-batch", utils_override, injection,
              "Test / runMain us.awfl.compiler.rust.NativeBatchMain " +
              " ".join(map(str, [classes_file, output, args.compiler / "runtime"]))],
             cwd=args.compiler / "frontend")
-        cp_command = ["sbt", "-batch", injection, "show Test / fullClasspath"]
+        cp_command = ["sbt", "-batch", utils_override, injection, "show Test / fullClasspath"]
         log("Capturing compiled JVM dependency classpath for fast next iteration")
         result = subprocess.run(cp_command, cwd=args.compiler / "frontend",
                                 check=True, capture_output=True, text=True)
         matched = re.findall(r"Attributed\((/[^)]+)\)", result.stdout)
         if len(matched) < 3 or not all(Path(path).exists() for path in matched):
             raise ValueError("Cannot validate native batch JVM classpath")
+        utils_jars = [p for p in matched if "workflow-utils_3" in p and p.endswith(".jar")]
+        if len(utils_jars) != 1 or utils_version not in utils_jars[0]:
+            raise ValueError(
+                "Native compiler classpath does not use workflow-utils " + utils_version
+            )
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         cache_file.write_text(json.dumps({
             "fingerprint": fingerprint, "paths": matched,

@@ -1,8 +1,8 @@
 name: Deploy Workflows
 
 on:
-  push:
-    branches: [ main ]
+  # Legacy Google Workflows publishing is manual only.
+  # AWFL's production agent workflows execute as native Rust binaries.
   workflow_dispatch:
     inputs:
       gcp_region:
@@ -46,9 +46,6 @@ jobs:
 
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
-
-      - name: Install tested model-aware workflow-utils dependency
-        run: bash scripts/install-model-aware-workflow-utils.sh
 
       - name: Generate workflow YAML
         run: |
