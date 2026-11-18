@@ -15,8 +15,16 @@
       "us.awfl.workflows.tools.Agent"
     ],
     "dynamic_targets": [
-      "tools-CliTools", "tools-Tasks", "tools-Agent",
-      "assistant-ExtractTopics", "helpers-links-SaveReflection"
+      "tools-CliTools",
+      "tools-Tasks",
+      "tools-Agent",
+      "assistant-ExtractTopics",
+      "helpers-links-SaveReflection"
     ]
+  },
+  "evals-OpenAiCacheProbe": {
+    "root_class": "us.awfl.workflows.evals.OpenAiCacheProbe",
+    "dependencies": [],
+    "dynamic_targets": []
   }
 }
