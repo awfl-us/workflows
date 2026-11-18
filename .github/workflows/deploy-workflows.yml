@@ -47,6 +47,9 @@ jobs:
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
 
+      - name: Install tested model-aware workflow-utils dependency
+        run: bash scripts/install-model-aware-workflow-utils.sh
+
       - name: Generate workflow YAML
         run: |
           sbt clean compile

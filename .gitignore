@@ -9,3 +9,4 @@ project/target
 target
 .terraform.lock.hcl
 infra/.terraform
+.workflow-utils-model-aware/
