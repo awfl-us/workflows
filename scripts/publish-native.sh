@@ -52,6 +52,18 @@ stream_ipc_version=$(jq -r '.stream_ipc_version // 0' "$crate/manifest.json")
 trusted_globals_version=$(jq -r '.trusted_globals_version // 0' "$crate/manifest.json")
 operations=$(jq -c '[.effects[].operation] | unique' "$crate/manifest.json")
 parallel_version=$(jq -r '.parallel_version // 0' "$crate/manifest.json")
+
+# Fail closed on the exact native.parallel regression that previously
+# escaped when an older compiler checkout republished AutomationBench.
+# Validate emitted Rust, not the workspace branch name: prebuilt artifacts
+# can be published independently of the compiler checkout.
+if [[ "$parallel_version" == 1 ]]; then
+  if ! grep -Fq '"slots": __awfl_lane_slots' "$crate/src/main.rs" ||
+     grep -Fq '"slots": std::collections::BTreeMap::<String, AwflValue>::from([' "$crate/src/main.rs"; then
+    echo "Unsafe native.parallel fork captures: rebuild with compiler-rust 52e4f6a or newer" >&2
+    exit 2
+  fi
+fi
 jq -en --argjson operations "$operations" --argjson parallel "$parallel_version" '
   all($operations[]; . == "http.get" or . == "http.post" or
     . == "http.patch" or . == "http.delete" or . == "log.write" or

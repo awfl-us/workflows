@@ -27,6 +27,8 @@ class NativeDevTests(unittest.TestCase):
             '("workflow_id".to_owned(), AwflValue::String("%s".to_owned()));\n' % ref
             for ref in refs
         ) or "fn main() {}\n"
+        if "native.parallel" in ops:
+            content += 'let mut __awfl_captured = Map::new(); "slots": __awfl_lane_slots\n'
         src.write_text(content)
         (root / "Cargo.toml").write_text(
             '[package]\nname = "test_%s"\nversion = "0.1.0"\nedition = "2024"\n\n[workspace]\n'
@@ -104,6 +106,18 @@ class NativeDevTests(unittest.TestCase):
             ["codebase-ProjectManager"])
         self.assertEqual(module.changed_releases(crates, built, {}),
                          ["codebase-ProjectManager"])
+
+    def test_parallel_fork_snapshot_rejects_old_compiler(self):
+        # The broken compiler tried to capture uninitialized catch variables.
+        unsafe = ('"slots": std::collections::BTreeMap::<String, AwflValue>::from(['
+                  '("s21".to_owned(), slots.get("s21").cloned())])')
+        with self.assertRaisesRegex(ValueError, "Unsafe native.parallel fork captures"):
+            module.validate_parallel_fork_source(unsafe, "benchmark")
+        with self.assertRaisesRegex(ValueError, "Unsafe native.parallel fork captures"):
+            module.validate_parallel_fork_source("fn main() {}", "benchmark")
+        module.validate_parallel_fork_source(
+            'let mut __awfl_captured = Map::new(); "slots": __awfl_lane_slots',
+            "benchmark")
 
     def test_unmodified_sources_keep_cargo_mtimes(self):
         p = self.crate("codebase-ProjectManager")

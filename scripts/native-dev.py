@@ -32,6 +32,21 @@ STATIC_REF = re.compile(
 ANY_REF = re.compile(r'\("workflow_id"\.to_owned\(\),\s*')
 NAME = re.compile(r"[A-Za-z][A-Za-z0-9_-]{0,99}\Z")
 
+# The pre-52e4f6a compiler unconditionally read maybe-uninitialized
+# exception slots when forking parallel lanes. Reject that emitter at build
+# time, including when a caller selects a stale compiler checkout.
+SAFE_PARALLEL_CAPTURE = '"slots": __awfl_lane_slots'
+UNSAFE_PARALLEL_CAPTURE = (
+    '"slots": std::collections::BTreeMap::<String, AwflValue>::from([')
+
+
+def validate_parallel_fork_source(source, workflow):
+    if SAFE_PARALLEL_CAPTURE not in source or UNSAFE_PARALLEL_CAPTURE in source:
+        raise ValueError(
+            f"Unsafe native.parallel fork captures in {workflow}; "
+            "rebuild with compiler-rust 52e4f6a or newer")
+
+
 
 def log(message):
     print("[native-dev] " + message, flush=True)
@@ -74,6 +89,8 @@ def generated_crates(output, workflow, recursive, dynamic):
             raise ValueError(f"Unsupported effects in {name}: {sorted(ops-VALID_OPS)}")
         if (manifest.get("parallel_version", 0) == 1) != ("native.parallel" in ops):
             raise ValueError("Parallel ABI mismatch: " + name)
+        if manifest.get("parallel_version", 0) == 1:
+            validate_parallel_fork_source(src.read_text(), name)
         crates[name] = (directory, manifest)
     if workflow not in crates:
         raise ValueError("Native root missing: " + workflow)

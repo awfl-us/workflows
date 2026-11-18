@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: awfl-us/compiler-rust
-          ref: f0029f45caa8a0d0d7c0b1b87da8d6d2ae5f4274
+          ref: 52e4f6a964af6e271a6d98bbfe57d46e8724501d
           path: compiler-rust
 
       - name: Build statically linked ABI 3 executable
