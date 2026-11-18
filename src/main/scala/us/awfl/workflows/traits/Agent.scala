@@ -39,7 +39,7 @@ trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with T
   ): Step[ChatToolResponse, Value[ChatToolResponse]] = Callback[ChatToolResponse]{ callback =>
     execute[Input, ChatToolResponse](
       workflowName,
-      obj(EventHandler.Input(query, fund, OptValue(spent), task = task, toolChoice = toolChoice, callback = OptValue(obj(callback)), env = env))
+      obj(EventHandler.Input(OptValue(query), fund, OptValue(spent), task = task, toolChoice = toolChoice, callback = OptValue(obj(callback)), env = env))
     )
   }
 
