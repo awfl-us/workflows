@@ -46,7 +46,7 @@ import us.awfl.workflows.tools.Tasks.Task
 trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools {
   // Single entry point: tool-enabled chat that surfaces tool_calls
   def eventHandler(
-    message: ChatMessage = ChatMessage("user", input.query.getOrElse(Value(""))),
+    message: ChatMessage = ChatMessage("user", input.query.getOrElse(str(""))),
     tools: List[String] = List()
   ): Workflow[ChatToolResponse] = {
     val model = inputVal.flatMap(_.env).get.model
