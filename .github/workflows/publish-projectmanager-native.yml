@@ -6,8 +6,6 @@ on:
       - main
     paths:
       - 'src/**'
-      - 'scripts/native-dev.py'
-      - '.github/workflows/publish-projectmanager-native.yml'
   workflow_dispatch:
 
 permissions:
