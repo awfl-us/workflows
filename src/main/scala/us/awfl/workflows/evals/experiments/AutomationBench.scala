@@ -24,7 +24,11 @@ object AutomationBench extends Experiment[AutomationBenchParams, AutomationBench
   private val bootstrap = "/workspace/workflows/files/scripts/evals/automationbench/bootstrap_parent.sh"
   private val uv = "/home/awfl/.local/bin/uv"
   private val upstream = "/workspace/automationbench-upstream"
-  private val rootDir = str(("/workspace/workflows/": Cel) + directory)
+  // Parent Eval/Experiment input and results files use relative directory
+  // paths. On the shared consumer, CLI tools resolve those against /workspace,
+  // not /workspace/workflows. Keep the grader and source paths under the same
+  // root or the grader will miss input.json and the evaluator's result files.
+  private val rootDir = str(("/workspace/": Cel) + directory)
   private val outputSource = "src/main/scala/us/awfl/workflows/evals/automationbench/AgentSubmission.scala"
 
   case class StartProfile(sessionId: Value[String], imageProfile: Value[String])

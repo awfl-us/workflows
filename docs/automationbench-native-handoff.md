@@ -523,6 +523,14 @@ matrix and produce separate model-specific rows; there is no baked-in model
 ID. Do not add a top-level `model` string or use `create_session`, which does
 not pass typed evaluator input. The run ID must be unique.
 
+The parent consumer runs CLI file tools under `/workspace`. In particular,
+`Experiment.inputFile`, `Experiment.answerFile`, `Experiment.resultsFile`,
+and `Eval.saveCsv` use `eval_runs/...` relative to that workdir.
+`AutomationBench.rootDir` must therefore resolve to
+`/workspace/eval_runs/...`, not `/workspace/workflows/eval_runs/...`.
+This ensures the grader reads the same per-model directory where the input
+and result files are persisted.
+
 The new input type changes the root workflow artifact. Publish **only the
 evaluator root** after checking the selective release diff; deployed
 ProjectManager and its helper workflow aliases must remain unchanged.
