@@ -44,7 +44,7 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
       str(nameStr + "${WORKFLOW_ENV}"),
       obj(
         EventHandler.Input(
-          query = query,
+          query = OptValue(query),
           fund = fund,
           spent = OptValue.nil[Double],
           task = OptValue(task),

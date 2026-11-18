@@ -46,7 +46,7 @@ import us.awfl.workflows.tools.Tasks.Task
 trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools {
   // Single entry point: tool-enabled chat that surfaces tool_calls
   def eventHandler(
-    message: ChatMessage = ChatMessage("user", input.query),
+    message: ChatMessage = ChatMessage("user", input.query.getOrElse(Value(""))),
     tools: List[String] = List()
   ): Workflow[ChatToolResponse] = {
     val model = inputVal.flatMap(_.env).get.model
@@ -104,9 +104,12 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           List[Step[?, ?]](statusRunning, enqueueRunning) -> Value.nil[NoValueT]
         )
 
+        // Tool-call continuations have no query: resume from the stored tool
+        // results without synthesizing a new user message.
         val addMessage = Switch("maybeAddMessage", List(
-          skipAddMessages.cel -> (List() -> Value.nil[PostResult[Nothing]]),
-          (true: Cel) -> Convo.addMessage("addMessage", obj(message)).fn
+          ((input.query.getOrElse(Value.nil[String]) !== Cel.nil) && !skipAddMessages) ->
+            Convo.addMessage("addMessage", obj(message)).fn,
+          (true: Cel) -> (List() -> Value.nil[PostResult[Nothing]])
         ))
 
         // In-session operations: write the query message first; then try to acquire a lock for response generation.
@@ -186,9 +189,9 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             val toolFeedbackArgs = RunWorkflowArgs(
               WORKFLOW_ID,
               obj(EventHandler.Input(
-                str("Tool calls completed"),
-                input.fund,
-                OptValue(newSpent),
+                query = OptValue.nil[String],
+                fund = input.fund,
+                spent = OptValue(newSpent),
                 callback = input.callback
               )),
               connector_params = ConnectorParams(skip_polling = true)
@@ -300,7 +303,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
 }
 object EventHandler {
   case class Input(
-    query: Value[String],
+    query: OptValue[String] = OptValue.nil[String],
     fund: Value[Double],
     spent: OptValue[Double] = OptValue(0),
     usage: OptValue[Usage] = OptValue.nil,
