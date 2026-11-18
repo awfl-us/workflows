@@ -7,12 +7,19 @@ import us.awfl.workflows.evals.experiments.{AutomationBench, AutomationBenchPara
 
 /** Public AutomationBench workflow-building evaluation using the same per-row
   * temporary project / cloud consumer / AWFL agent lifecycle as SWE-bench.
+  *
+  * Input: { arg1: runId, arg2: instanceLimit, models: [modelId, ...] }.
+  * The model list expands through Eval's parameter product so each model
+  * gets a separate evaluation row and its own temporary project.
   */
-object AutomationBenchEval extends Eval[AutomationBenchParams, AutomationBenchResult] {
+object AutomationBenchEval extends Eval[AutomationBenchParams, AutomationBenchResult, Eval.ModelArgs] {
   override val inputVal = init("input")
 
+  override def runId: Value[String] = inputVal.get.arg1
+  override def limit: Value[Int] = Value[Int](core.int(inputVal.get.arg2))
+
   override def directory: Value[String] =
-    str(("eval_runs/automationbench/": Cel) + input.runId)
+    str(("eval_runs/automationbench/": Cel) + runId)
 
   override def experiment: Experiment[AutomationBenchParams, AutomationBenchResult] =
     AutomationBench
@@ -21,7 +28,7 @@ object AutomationBenchEval extends Eval[AutomationBenchParams, AutomationBenchRe
     "domain" -> ListValue(List("operations").cel),
     "task_id" -> ListValue(List("1219").cel),
     "platform" -> ListValue(List("awfl-native-rust").cel),
-    "model" -> ListValue(List("gpt-6-sol").cel),
+    "model" -> inputVal.get.models,
     "agent" -> ListValue(List("AWFL").cel),
     "fund" -> ListValue(List("1").cel)
   )

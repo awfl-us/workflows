@@ -12,10 +12,13 @@ import us.awfl.dsl.ListValue
  * Run this workflow from inside a SWE-bench venv,
  * this way it can use the python utils to load datasets and run the eval
 **/
-object SweBenchLiteEval extends Eval[BenchmarkParams, BenchmarkRunSummary] {
+object SweBenchLiteEval extends Eval[BenchmarkParams, BenchmarkRunSummary, Eval.Args] {
   override val inputVal = init("input")
 
-  override def directory: Value[String] = str(("eval_runs/": Cel) + input.runId)
+  override def runId: Value[String] = inputVal.get.arg1
+  override def limit: Value[Int] = Value[Int](core.int(inputVal.get.arg2))
+
+  override def directory: Value[String] = str(("eval_runs/": Cel) + runId)
   override def experiment: Experiment[BenchmarkParams, BenchmarkRunSummary] = SweBenchLite
   override def variables: Map[String, ListValue[String]] = Map(
     "agent" -> ListValue(List("AWFL").cel)
