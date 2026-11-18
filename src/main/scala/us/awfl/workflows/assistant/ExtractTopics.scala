@@ -31,7 +31,8 @@ object TopicContext:
           childComponents = List(prevTopics.component, convoContext.component),
           intro = Some("These are the previously extracted topic information, as well as the conversation context: "),
           promoteUpstream = true,
-          filters = ListValue.nil
+          filters = ListValue.nil,
+          llmModel = Env.model
         )
       },
       // componentYoj: parent spec must include nested children
