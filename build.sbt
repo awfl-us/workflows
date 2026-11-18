@@ -33,7 +33,7 @@ publishMavenStyle := true
 // Dependencies
 libraryDependencies ++= Seq(
   "us.awfl" %% "dsl" % "0.3.5",
-  "us.awfl" %% "workflow-utils" % "0.3.5",
+  "us.awfl" %% "workflow-utils" % "0.3.6-SNAPSHOT",
   "us.awfl" %% "compiler" % "0.3.2"
 )
 
@@ -41,7 +41,8 @@ libraryDependencies ++= Seq(
 // dependencyOverrides += "us.awfl" %% "dsl" % "0.1.0-SNAPSHOT"
 // dependencyOverrides += "us.awfl" %% "compiler" % "0.1.0-SNAPSHOT"
 // dependencyOverrides += "us.awfl" %% "compiler-yaml" % "0.1.0-SNAPSHOT"
-// dependencyOverrides += "us.awfl" %% "workflow-utils" % "0.1.0-SNAPSHOT"
+// Temporary local dependency until the model-aware wrapper is released to Maven Central.
+dependencyOverrides += "us.awfl" %% "workflow-utils" % "0.3.6-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-language:implicitConversions")
 

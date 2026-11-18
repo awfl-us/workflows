@@ -49,6 +49,9 @@ jobs:
       - name: Install sbt
         uses: sbt/setup-sbt@v1
 
+      - name: Install tested model-aware workflow-utils dependency
+        run: bash scripts/install-model-aware-workflow-utils.sh
+
       - name: Install static Linux Rust target
         uses: dtolnay/rust-toolchain@stable
         with:
