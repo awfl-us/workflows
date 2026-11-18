@@ -49,7 +49,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: awfl-us/compiler-rust
-          ref: 52e4f6a964af6e271a6d98bbfe57d46e8724501d
+          ref: 7b21701b36cec9afacc3c674d632aef87d1f2b00
           path: compiler-rust
 
       # A Dockerized Alpine Rust compiler creates static Linux executables
