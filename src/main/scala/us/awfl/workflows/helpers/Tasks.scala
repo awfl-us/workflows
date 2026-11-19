@@ -14,9 +14,9 @@ object Tasks extends us.awfl.core.Workflow {
   // Agent guidance: include this in prompts so agents know when to create/update tasks.
   // Keep concise; system-level instruction.
   val managementGuidanceText: List[String] = List(
-    "Tasks guidance: When a query will require more than a handful of file reads/writes, create task(s) to track the work. Use CREATE_TASK to open an In Progress task before starting substantial edits.",
+    "Tasks guidance: When a query requires substantial investigation or edits, first use CHECK_TASKS to see existing work and avoid duplicates; use CREATE_TASK to open an In Progress task when needed.",
     "Don't create a duplicate task if it already exists; optionally queue additional tasks if you will batch work. Keep titles concise and descriptions scoped. Update status as you proceed (Queued -> In Progress -> Done/Stuck) and mark Done when complete.",
-    "For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, make sure to read and update incrementally instead of reading all files initially. (You can only view seven files at a time)",
+    "For tasks that will require several steps/edits, add a TODO list in the task description and update it as you go through. If updating many files (>5) is required, read and update incrementally instead of reading everything up front.",
     "RULE OF THUMB: Update the task after every six tools calls, at most. At the very least, add a note under an in-progress item about what information the investigation has revealed so far, or even which dead ends to avoid during further investigation."
   )
   val managementGuidance: List[ChatMessage] = managementGuidanceText.map(msg => ChatMessage("system", str(msg)))
