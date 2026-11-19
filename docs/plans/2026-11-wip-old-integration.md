@@ -264,3 +264,45 @@ These are mock-backed local fixture results, not a claim of production
 callback durability, a live provider response, or real GCP Jobs success.
 The next acceptance tasks remain real Jobs callback idempotency/restart,
 concurrent session isolation, and persisted native PostgreSQL crash replay.
+
+### Phase 1.8 — real Jobs callback/PG HTTP gate (2026-11-19)
+
+The `awfl-us/server` reconciliation branch `feat/reconcile-typed-llm-http`
+now includes `test/storage/nativeCallbackRoutes.integration.test.mjs`,
+which boots the **existing Jobs Express callback registration and delivery
+routes** against a PostgreSQL document store in an isolated loopback
+`/awfl_reconcile` database. The integration test exercised twelve
+concurrent deliveries: exactly one transaction recorded the result, identical
+retries remained idempotent, conflicting retries returned 409, and wrong
+project/user scopes were rejected. A subscribed native callback observed
+delivery from an independent PG connection, and a newly created callback
+client/database pool read the committed result after simulated process
+replacement. The generated native `tools-CliTools` callback integration
+test also passed with its actual compiled Rust binary.
+
+**Actual bug discovered and fixed:** A native callback ID absent from the
+Postgres document store triggered the generic legacy MCP Firestore fallback
+and could turn an ordinary 404 into a Firestore permission error / 500.
+`workflows/callbacks/index.js` now skips that legacy lookup for
+`n<32 hex>` native IDs. The HTTP callback test passes and the combined
+callback/typed route regressions passed 13/14 (one separately run optional
+native-binary test was skipped in the combined invocation; it subsequently
+passed explicitly). Server commit: `bc7ed5e`.
+
+**Crash/lease checks run:** The existing isolated Postgres/native Rust
+memory-mode regression suite passed 4/4, including real SIGKILL of a leased
+worker, lease-epoch fencing, replay of completed results and reuse of the
+effect idempotency key after an HTTP-response crash. Those tests **do not**
+prove durable *per-effect journal* resume: `NativeExecutionStore` still
+uses Firestore-style transactional references, and `NativeMemoryExecutionPilotStore`
+intentionally has no per-effect journal. We must not count that separate
+durability gate as complete.
+
+**Next priority:** verify session-level locking and ordering with concurrent
+typed tool callbacks, including delayed/failing results. Then choose and
+test the intended native durability model for a crash between dispatch,
+remote effect commitment, and persistence: either a real provider-neutral
+Postgres-backed journal or documented reconciliation using stable effect
+keys. Finally exercise invalid typed argument 422 propagation through a
+real native EventHandler and controlled model canary. This is not a
+production deployment or a merge to the default branches.
