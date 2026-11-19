@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""Local-first AWFL reconciliation runner. No production deployment or LLM calls.
+
+Fast: unit + schema/native harness checks. Integration: real generated Rust
+with deterministic Jobs/LLM/callback/storage fixtures supplied by server.
+"""
+from __future__ import annotations
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+ROOT=Path(__file__).resolve().parent.parent
+DEFAULT_REPORT=ROOT/'.awfl-reconcile'/'build-report.json'
+
+
+def run(args:list[str], cwd:Path, concise:bool=False) -> None:
+    print('+', ' '.join(args), '(cwd '+str(cwd)+')',flush=True)
+    if not concise:
+        subprocess.run(args,cwd=cwd,check=True,env=os.environ.copy());return
+    proc=subprocess.run(args,cwd=cwd,env=os.environ.copy(),text=True,
+                        stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    lines=proc.stdout.splitlines()
+    summary=[ln for ln in lines if ln.startswith('AWFL_RECONCILE_PASS') or ln.startswith('AWFL_RECONCILE_FAIL')]
+    for line in summary: print(line[:1600])
+    if proc.returncode:
+        print('\n'.join(lines[-24:])[-6000:],file=sys.stderr)
+        raise subprocess.CalledProcessError(proc.returncode,args)
+
+
+
+def existing(path:Path, description:str) -> Path:
+    if not path.exists():
+        raise SystemExit(f'Missing {description}: {path}. Pass an explicit --{description} path.')
+    return path
+
+
+def main(argv:list[str]|None=None) -> int:
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','all'])
+    p.add_argument('--server', type=Path,default=Path(os.getenv('AWFL_RECONCILE_SERVER',ROOT.parent/'server')))
+    p.add_argument('--compiler',type=Path,default=Path(os.getenv('AWFL_RECONCILE_COMPILER',ROOT.parent/'compiler-rust')))
+    p.add_argument('--report',type=Path,default=Path(os.getenv('AWFL_RECONCILE_BUILD_REPORT',DEFAULT_REPORT)))
+    p.add_argument('--strict-background',action='store_true',help='Fail on detached child errors (currently a known fixture gap)')
+    p.add_argument('--check',action='store_true',help='Only check generated crate closure in compile mode')
+    opts=p.parse_args(argv)
+    server=opts.server.resolve();compiler=opts.compiler.resolve();report=opts.report.resolve()
+    if opts.command=='doctor':
+        checks={'workflows source':ROOT/'src/main/scala',
+            'server scenario runner':server/'scripts/reconcileScenario.mjs',
+            'server native runtime':server/'workflows/native/worker.js',
+            'compiler-rust':compiler/'Cargo.toml'}
+        for label,path in checks.items():
+            print(('OK' if path.exists() else 'MISSING').ljust(8),label,path)
+        for program in ['java','sbt','cargo','node','python3']:
+            print(('OK' if shutil.which(program) else 'MISSING').ljust(8),program,shutil.which(program) or '')
+        print(('OK' if report.exists() else 'NOT BUILT').ljust(8),'native report',report)
+        return 0 if all(x.exists() for x in checks.values()) and all(shutil.which(x) for x in ['java','sbt','cargo','node']) else 1
+    if opts.command in ('unit','all'):
+        existing(server/'scripts/reconcileScenario.test.mjs','server')
+        run(['python3','-m','unittest','discover','-s','tests','-p','test_native_dev.py','-q'],ROOT)
+        run(['node','--test','scripts/nativeLocalDev.test.mjs','scripts/reconcileScenario.test.mjs'],server)
+    if opts.command in ('compile','all'):
+        existing(compiler/'Cargo.toml','compiler')
+        report.parent.mkdir(parents=True,exist_ok=True)
+        cmd=['python3','scripts/native-dev.py','codebase-ProjectManager','--recursive',
+            '--compiler',str(compiler),'--output',str(report.parent)]
+        if opts.check: cmd.append('--check')
+        run(cmd,ROOT)
+    if opts.command in ('basic','no-query','all'):
+        existing(server/'scripts/reconcileScenario.mjs','server')
+        if not report.exists():
+            raise SystemExit(f'Native build report absent: {report}. Run ./scripts/reconcile-test compile first.')
+        targets=['basic','no-query'] if opts.command=='all' else [opts.command]
+        for name in targets:
+            cmd=['node','scripts/reconcileScenario.mjs','--report',str(report),'--scenario',name]
+            if opts.strict_background: cmd.append('--strict-background')
+            run(cmd,server,concise=True)
+    return 0
+
+if __name__=='__main__':
+    try: sys.exit(main())
+    except subprocess.CalledProcessError as e:
+        print(f'AWFL_RECONCILE_FAIL {e}',file=sys.stderr)
+        sys.exit(e.returncode or 1)

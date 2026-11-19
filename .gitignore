@@ -10,3 +10,6 @@ target
 .terraform.lock.hcl
 infra/.terraform
 .workflow-utils-model-aware/
+
+# Local reconciliation/native build artifacts
+.awfl-reconcile/
