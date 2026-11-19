@@ -1,6 +1,7 @@
 import importlib.machinery
 import importlib.util
 from pathlib import Path
+from unittest.mock import patch
 import unittest
 
 FILE=Path(__file__).resolve().parent.parent/'scripts/reconcile-test'
@@ -15,6 +16,23 @@ class ReconcileLauncherTest(unittest.TestCase):
     def test_argument_validation_rejects_unknown(self):
         with self.assertRaises(SystemExit):
             mod.main(['bad-command'])
+    def test_postgres_requires_explicit_isolated_url(self):
+        with patch.dict('os.environ', {'PGTEST_URL':''}):
+            with self.assertRaises(SystemExit) as raised:
+                mod.main(['postgres'])
+        self.assertIn('PGTEST_URL is required',str(raised.exception))
+
+    def test_postgres_rejects_remote_databases_before_any_sql(self):
+        with patch.dict('os.environ', {'PGTEST_URL':'postgres://admin@production-db.example:5432/awfl_prod'}):
+            with self.assertRaises(SystemExit) as raised:
+                mod.main(['postgres'])
+        self.assertIn('Refusing PostgreSQL tests outside loopback',str(raised.exception))
+
+    def test_durable_requires_compiled_report(self):
+        with self.assertRaises(SystemExit) as raised:
+            mod.main(['durable','--report','/tmp/missing-reconcile-report.json'])
+        self.assertIn('Native build report absent',str(raised.exception))
+
     def test_missing_report_is_actionable(self):
         with self.assertRaises(SystemExit) as raised:
             mod.main(['basic','--server','/tmp/no-reconcile-server'])
