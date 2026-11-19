@@ -54,3 +54,9 @@ Reviewed `workflows` `wip-old` f60dbab vs current `main` cacac48, `dsl` 38b3c11 
 
 - **WF-01/WF-08 new passing deterministic reproducer:** `tool-roundtrip` invokes a real native `READ_FILE` tool workflow with mocked callback, persists an assistant tool call and a `tool` message with identical `tool_call_id`, and runs detached continuation without adding a synthetic user turn. The subsequent LLM context contains that exact pair and returns one final assistant response. **Not yet** tested under crash/replay or real Postgres/Jobs; those gates remain open.
 - **WF-19 detail:** The same fixture creates six failed background native children across its two turns (foreground and tool continuation pass). Strict-background still fails, by design. Investigate the mock segment windows and `StriderInput` / nested `SegKala` type propagation.
+
+## Phase 0 harness finding — 2026-11-19
+
+- Current native Project Manager *foreground* workflow passes deterministic local fixtures for basic response, missing-query continuation, and READ_FILE tool roundtrip (actual 26-workflow Rust build). This supports baseline checks for **WF-01 / WF-08** but does **not** resolve their risks for the future wip `Convo` port.
+- Current native *detached* summarization/topic tasks fail inside the fixture with `unsupported subtraction operand types` in `workflow.run` (3 children in basic/no-query, 6 in roundtrip). Treat as a confirmed **harness/runtime integration failure**, not yet confirmed as a production workflow bug. Add an input/type logging regression and require strict background success before adopting lifecycle traits (WF-05, WF-09, WF-14).
+- Fixture currently mocks `TopicContextYoj` results and HTTP effects; isolated PostgreSQL/Jobs and crash restart have not yet been exercised. Keep these as separate mandatory gates.
