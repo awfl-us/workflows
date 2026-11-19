@@ -12,18 +12,20 @@ Use the existing **Scala-capable AWFL GKE development consumer** or a developer 
 ./scripts/reconcile-test compile
 ./scripts/reconcile-test basic
 ./scripts/reconcile-test no-query
+./scripts/reconcile-test tool-roundtrip
 ./scripts/reconcile-test all
 ```
 
 In a non-sibling workspace, append `--server /path/to/server --compiler /path/to/compiler-rust --report /path/to/build-report.json`. `compile --check` only verifies generated Rust closure/manifests. A full `compile` regenerates/builds the 26-workflow ProjectManager closure with warm sbt/Cargo caching. The default report lives under `.awfl-reconcile/`, which **must remain untracked**. No `--publish` is ever passed.
 
-`unit` runs the existing Python native-development tests and server Node native-local tests together with the new isolated scenario-handler tests. `basic`/`no-query` invoke real compiled native Project Manager via `server/scripts/reconcileScenario.mjs`. There are no hidden cloud calls or billable LLM requests. The deterministic mock records documents, tool/LLM requests, and message roles; unrecognized Jobs HTTP endpoints fail closed. Existing replay identity and origin checks still apply.
+`unit` runs the existing Python native-development tests and server Node native-local tests together with the new isolated scenario-handler tests. `basic`/`no-query`/`tool-roundtrip` invoke real compiled native Project Manager via `server/scripts/reconcileScenario.mjs`. There are no hidden cloud calls or billable LLM requests. The deterministic mock records documents, tool/LLM requests, and message roles; unrecognized Jobs HTTP endpoints fail closed. Existing replay identity and origin checks still apply.
 
 ### Test scenarios and expected outputs
 
 - `basic`: fresh query, one mocked assistant response, exactly one new user message and one assistant message; zero missing HTTP fixtures. Verified with 32 native root effects and one fake LLM call.
 - `no-query`: existing user history but no new user input (tool-follow-up shape); must **not insert a synthetic user message**. Verified with 30 root effects and one fake LLM call.
-- `--strict-background` (with either scenario): additionally waits for all detached child native executions to settle and fails if any ends in `failed`. **Currently red**: 3 detached background executions fail with `unsupported subtraction operand types` during the simulated SegKala summarization/topic chain. The root passes. This is a specific reproducible testing gap / possible workflow bug; do not declare full agent parity until it is resolved and proven with accurate fixtures. Without strict flag, the output includes `failedBackgroundExecutions` and tests only foreground parity.
+- `tool-roundtrip`: the mocked LLM requests `READ_FILE` and receives its result through the native CLI callback path. A detached workflow continues without adding a synthetic user message; the second LLM request contains exactly the matching assistant `tool_calls` and `tool_call_id` result in order. Verified **four persisted messages** (user, assistant tool call, tool result, assistant final) and exactly two LLM requests, all with fake tools/LLM.
+- `--strict-background` (with any scenario): additionally waits for all detached child native executions to settle and fails if any ends in `failed`. **Currently red**: 3 detached background executions fail for single-turn runs and 6 for the tool-roundtrip (two turns) with `unsupported subtraction operand types` during the simulated SegKala summarization/topic chain. The root passes. This is a specific reproducible testing gap / possible workflow bug; do not declare full agent parity until it is resolved and proven with accurate fixtures. Without strict flag, the output includes `failedBackgroundExecutions` and tests only foreground parity.
 
 Both deterministic scenarios use `drainDetached` before inspecting local execution state. To investigate native failures, set `AWFL_NATIVE_LOCAL_TRACE=1` on the test command, or run `node server/scripts/reconcileScenario.mjs --report ... --scenario basic` directly. Do not suppress detached failures in integration acceptance gates.
 
@@ -44,11 +46,11 @@ Do not infer Postgres correctness, real Jobs API shape, callback delivery, LLM s
 ## Next steps / gates
 
 1. **Fix or accurately fixture the background SegKala chain:** inspect the `StriderInput.segmentEnd`, `Segments.forSession`, `TopicContextYoj` values and native child inputs, then make `--strict-background` green. Keep the regression fixture once fixed.
-2. Add a deterministic **READ_FILE tool-call roundtrip** scenario (mock LLM tool call → native tools-CliTools → callback result → no-query continuation → final), enforcing exact IDs, roles and at-most-once effects. The current `no-query` test covers only the absence of a *new* user turn, not the entire tool continuation. Add failures for malformed tool calls, missing callback, budget exhaustion, and duplicate results.
+2. **Completed basic READ_FILE roundtrip**, including exact tool IDs, role order, callback and no-query continuation. Extend it with malformed tool calls, missing callback delivery, budget exhaustion, duplicate results and native crash/replay assertions.
 3. Add local isolated **Postgres-backed Jobs integration** on port 5055 with test-specific credentials/storage, not production `awfl_prod`. This is the next fidelity tier; do not mistake it for the fixture mode. Retain a separate mock LLM adapter to make it deterministic.
 4. Once the native fixture + local Jobs tiers pass, canary one opted-in native execution against an isolated project and real provider, inspecting Postgres persisted messages, usage/cost, and GCS cache captures. No broad Cloud Run deployment for each edit.
 5. Gate every `wip-old` implementation slice on existing main behavior, unit schema tests, native fixture parity, strict detached success, and eventual isolated Postgres/live canary. The existing `docs/plans/2026-11-wip-old-workflows-bugs.md` is the tracking matrix.
 
 ### Initial verified developer run
 
-On 2026-11-19 a full native rebuild of current main completed with **26 static musl binaries** and `publish=false` (146.8 seconds cold); `basic` and `no-query` finished in approximately 0.4–0.5 seconds each in the warm local native runner. Tests passed for the foreground messages/LLM calls; both expose 3 failed detached children with strict mode. Do **not** count them as fully passing workflow integration until fixed.
+On 2026-11-19 a full native rebuild of current main completed with **26 static musl binaries** and `publish=false` (146.8 seconds cold); `basic` and `no-query` finished in approximately 0.4–0.5 seconds each; `tool-roundtrip` finished in approximately 0.9 seconds in the warm local native runner. Foreground/root assertions pass; strict-background reports 3 failed detached children in each single-turn case and 6 in the two-turn tool-roundtrip. Do **not** count them as fully passing workflow integration until fixed.

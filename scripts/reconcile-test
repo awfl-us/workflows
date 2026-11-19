@@ -39,7 +39,7 @@ def existing(path:Path, description:str) -> Path:
 
 def main(argv:list[str]|None=None) -> int:
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','all'])
+    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','all'])
     p.add_argument('--server', type=Path,default=Path(os.getenv('AWFL_RECONCILE_SERVER',ROOT.parent/'server')))
     p.add_argument('--compiler',type=Path,default=Path(os.getenv('AWFL_RECONCILE_COMPILER',ROOT.parent/'compiler-rust')))
     p.add_argument('--report',type=Path,default=Path(os.getenv('AWFL_RECONCILE_BUILD_REPORT',DEFAULT_REPORT)))
@@ -69,11 +69,11 @@ def main(argv:list[str]|None=None) -> int:
             '--compiler',str(compiler),'--output',str(report.parent)]
         if opts.check: cmd.append('--check')
         run(cmd,ROOT)
-    if opts.command in ('basic','no-query','all'):
+    if opts.command in ('basic','no-query','tool-roundtrip','all'):
         existing(server/'scripts/reconcileScenario.mjs','server')
         if not report.exists():
             raise SystemExit(f'Native build report absent: {report}. Run ./scripts/reconcile-test compile first.')
-        targets=['basic','no-query'] if opts.command=='all' else [opts.command]
+        targets=['basic','no-query','tool-roundtrip'] if opts.command=='all' else [opts.command]
         for name in targets:
             cmd=['node','scripts/reconcileScenario.mjs','--report',str(report),'--scenario',name]
             if opts.strict_background: cmd.append('--strict-background')
