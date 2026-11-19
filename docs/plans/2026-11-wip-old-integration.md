@@ -2,6 +2,10 @@
 
 **2026-11-19 — plan only, no production change.** Authoritative integration plan in `awfl-us/workflows`. Full defect/test matrix: [2026-11-wip-old-workflows-bugs.md](./2026-11-wip-old-workflows-bugs.md). Do **not** merge the `wip-old` branches directly. All work targets latest `main` and **compiled native Rust workflows**, never Google Workflows execution.
 
+
+> **ACTIVE EXECUTION POLICY — MEMORY MODE (2026-11-19)**
+> **Native Rust memory mode is the supported, latency-optimized path for current AWFL work.** All `wip-old` reconciliation, Project Manager testing, typed tools, callbacks, and PostgreSQL checks must target **memory mode**. **Durable mode and migration of its Firestore-specific per-effect journal to PostgreSQL are deferred / on the back burner**, **not a release gate or blocker** for this project. Preserve existing durable behavior as legacy compatibility only; do not spend implementation time porting or expanding durable mode unless explicitly reprioritized. Test PostgreSQL memory-mode leases, callback idempotency, stable effect keys, worker restart/replay, and avoid claiming per-effect exactly-once semantics that memory mode does not provide.
+
 ## Review baseline (exact refs reviewed)
 
 | Repo | `main` reviewed | `wip-old` | Reconciliation disposition |
@@ -21,7 +25,7 @@ Each of the seven repos with historical branches has `docs/plans/2026-11-wip-old
 
 Goals: (1) derive useful LLM function/tool schemas from typed Scala values, with contextual `Ista[T]` descriptions; (2) support typed, validated agent completions through the **current native Rust** workflow and callback system; (3) selectively extract reusable agent lifecycle and `Convo` logic while retaining current behavior; (4) optionally improve project onboarding and model UX only where value is clear.
 
-Non-goals: restore compiler API/schema file generation; port historical GKE Terraform/RBAC; replace today's Postgres/native-effect-journal/session persistence; reintroduce Google WorkflowExecutions; reintroduce artificial `Tool calls completed` user messages; roll back context cache fixes; replace current CLI SSE supervisor or change model-pricing/effort without tests. Do not mix unrelated Scala-version changes, generated YAML noise, or mass style updates into feature patches.
+Non-goals: restore compiler API/schema file generation; port historical GKE Terraform/RBAC; replace today's PostgreSQL memory-mode/session persistence; reintroduce Google WorkflowExecutions; reintroduce artificial `Tool calls completed` user messages; roll back context cache fixes; replace current CLI SSE supervisor or change model-pricing/effort without tests. Do not mix unrelated Scala-version changes, generated YAML noise, or mass style updates into feature patches.
 
 ## Phase 0 — inventory and baselines (blocker before edits)
 
@@ -40,7 +44,7 @@ Non-goals: restore compiler API/schema file generation; port historical GKE Terr
 
 ## Phase 2 — typed agent completion (native Rust)
 
-- Build a native `Sadhaka`-like adapter that reuses existing `execute`, callbacks, session/project identity, and effect journal. No hardcoded fund, unbounded recursive continuation, `googleapis.workflowexecutions` calls or assumptions that the first tool call is always the structured response.
+- Build a native `Sadhaka`-like adapter that reuses existing `execute`, callbacks, session/project identity, and memory-mode execution semantics. No hardcoded fund, unbounded recursive continuation, `googleapis.workflowexecutions` calls or assumptions that the first tool call is always the structured response.
 - Constrain/validate a typed output tool schema; parse response arguments with explicit missing/multiple/malformed-tool-call errors. Keep API-level tool-choice semantics separate from the server-side tool-routing metadata.
 - Test first-run native completion, async callback, retries/replay, cancellation, budget exhaustion, auth and project scope, structured parse failure, idempotency. Do not publish a library version until current Project Manager still passes.
 
@@ -263,7 +267,7 @@ in a normal checkout after rebuilding the 26 static Rust ELF artifacts:
 These are mock-backed local fixture results, not a claim of production
 callback durability, a live provider response, or real GCP Jobs success.
 The next acceptance tasks remain real Jobs callback idempotency/restart,
-concurrent session isolation, and persisted native PostgreSQL crash replay.
+concurrent session isolation, and PostgreSQL memory-mode crash/restart replay.
 
 ### Phase 1.8 — real Jobs callback/PG HTTP gate (2026-11-19)
 
@@ -306,3 +310,7 @@ Postgres-backed journal or documented reconciliation using stable effect
 keys. Finally exercise invalid typed argument 422 propagation through a
 real native EventHandler and controlled model canary. This is not a
 production deployment or a merge to the default branches.
+
+### Execution-priority correction (2026-11-19)
+
+**Decision: memory mode only for active development, for latency.** Prior checkpoints mentioning a missing Postgres durable effect journal or a 'durable journal crash gate' describe historical technical gaps, **not current blockers**. Do not port `NativeExecutionStore` per-effect Firestore journaling to PostgreSQL as part of this reconciliation. Concentrate on memory-mode callback/session correctness, stable effect idempotency, Postgres lease fencing and process-restart behavior, and typed tool errors. Preserve the legacy durable mode without expanding it. Revisit only on explicit direction.
