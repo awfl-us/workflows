@@ -104,7 +104,7 @@ If PostgreSQL is already running locally, set `PGTEST_URL` to its isolated
 `--report` pointing at a previously compiled native closure. `all` includes
 these tests when `PGTEST_URL` is provided; absent `PGTEST_URL`, it remains
 an offline native/in-memory suite. The PostgreSQL test executes 11 storage
-integration cases plus three native cases:
+integration cases plus four native/Jobs route cases:
 
 - A compiled `helpers-ToolDefs` workflow makes an authenticated, loopback-only
   HTTP GET, persists its terminal state in PostgreSQL, then a new PostgreSQL
@@ -119,6 +119,11 @@ integration cases plus three native cases:
   two physical requests but only one logical effect for that key. This is
   evidence of stable keys plus endpoint deduplication, **not** a native
   per-effect journal.
+- The **actual production Jobs `createFirebaseDbRouter` and user/project
+  middleware** run through Express against `PostgresStorage`. Verify scoped
+  create/read, duplicate 409, and two concurrent lock acquisition attempts
+  with exactly one winner, followed by release. This mounts a real route in a
+  test-only app, not the entire Jobs process.
 
 **Guarantee boundary:** This validates PostgreSQL-backed *memory-mode* native
 execution claim, completion, fencing and completed-result replay, and a
@@ -127,8 +132,9 @@ if the process is killed *after* an external effect but *before* completion:
 that mode intentionally lacks per-effect journaling and requires explicit
 idempotency of tools. The current native durable effect journal is a separate
 Firestore-backed store; test its crash/recovery separately with existing
-recovery fixtures. The loopback responder is test-only, not the full
-authenticated production Jobs Express application. Neither Postgres tests nor
+recovery fixtures. The loopback responder is test-only; the `firebaseDbApi` test uses the real
+Jobs route and middleware with isolated PostgreSQL but does not launch the
+full Jobs Express application or production IAM. Neither Postgres tests nor
 this environment access production databases or real LLM services.
 
 ## Durable journal regression (separate from PostgreSQL memory mode)
