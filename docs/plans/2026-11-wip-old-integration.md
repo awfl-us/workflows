@@ -191,3 +191,76 @@ contract test passed 1/1.
 callback result idempotency, missing/duplicate dispatch behavior, concurrent
 session ordering, process-crash replay, or a real LLM provider. Keep all of
 those as explicit acceptance gates. No production deployment.
+
+### Phase 1.7 — typed tool dispatch and callback continuation (2026-11-19)
+
+**Local native gate passed.** The read-only `helpers-TypedIstaSchemaFixture`
+now derives a strict `READ_FILE(filepath: String)` function from `Ista` and
+pairs it with `tools-CliTools` using the existing `ToolWithWorkflow`
+adapter. The strict schema is model-facing; `workflowName` remains outside
+the LLM tool payload. The isolated Jobs/native integration fixture passes
+that *compiled Scala-generated* definition through Project Manager's actual
+native Rust workflow closure: service tool retrieval, `EventHandler`,
+`helpers-ToolDispatcher`, `tools-CliTools`, callback event/await, persisted
+assistant/tool/assistant messages, and an ordered follow-up LLM request.
+Assertions confirm a single callback event for the typed tool call ID,
+exactly one matching result in the follow-up context, and no duplicate
+function names in the model's tool list.
+
+**Issue discovered and fixed:** Project Manager concatenated service-defined
+tools with built-in CLI/task definitions, advertising duplicate `READ_FILE`
+functions when a typed service definition overrode a built-in tool. The
+final `Tools` trait's `ToolsResult` now retains the first definition by
+function name. Service tools take precedence, while unrelated `RUN_COMMAND`
+and `CHECK_TASKS` remain available. The 26-workflow static Rust closure
+recompiled and passed the typed native test. The combined typed schema,
+Jobs HTTP, OpenAI-adapter and native-dispatch tests passed **12/12**.
+The three strict-background Project Manager baseline scenarios all passed:
+`basic` (32 effects), `no-query` (30), legacy `tool-roundtrip` (31);
+no failed background executions.
+
+**Repeatable gate:** `scripts/reconcile-test typed-dispatch` compiles the
+typed fixture and Project Manager native closure and executes the typed
+native/Jobs contract plus all three strict legacy scenarios, requiring
+loopback `PGTEST_URL` scoped to `/awfl_reconcile`. Use a normal Git checkout:
+the existing sbt-git plugin does not understand linked worktree `.git` files.
+No public package publication or production deployment was performed.
+
+**Next unresolved acceptance work:** real Jobs callback persistence and
+idempotency under duplicate delivery, concurrent session locks, durable
+PostgreSQL effect journaling across process crash/recovery, HTTP 422
+propagation from a real native EventHandler request (not just its direct
+Jobs route test), and a controlled provider API canary. The current callback
+and model are intentionally mocked; the Project Manager's native durable
+fixture uses in-memory Firestore records, while the typed-Ista artifact
+uses a loopback-only Postgres execution store. Do not claim production
+callback exactly-once execution from this gate.
+
+### Phase 1.7 extended strict-background gate — 2026-11-19
+
+Rebuilding the full closure exposed an older numeric boundary failure in
+`KalaVibhaga.week` / `.term`: these operated `//` on fractional Unix seconds
+(and on a fractional quarter duration). The fix in `workflow-utils` uses
+integer seconds for weeks and scaled integer microseconds for fractional
+quarters, preserving the intended positive-epoch bucket calculation. That
+unblocked additional weekly/quarterly native summary lanes and exposed a
+second Rust runtime bug: `ops::multiply` did not promote mixed integer and
+floating-point operands as the existing add/subtract operations do. A
+compiler-rust review branch adds that promotion with a dedicated unit test.
+
+The isolated Jobs fixture now mocks only the newly reachable named
+weekly/quarterly summary and indexer endpoints. Unknown endpoints still fail.
+The strict-background test counts are allowed to grow above the earlier
+minimum because exercising additional period lanes is desirable; each lane
+must still complete without error. The `typed-dispatch` command passed fully
+in a normal checkout after rebuilding the 26 static Rust ELF artifacts:
+- Typed schema + native Project Manager tool dispatch and callback: **1/1 pass**
+- `basic`: 32 effects, 1 foreground / 9 background model calls, 0 failed lanes
+- `no-query`: 30 effects, 1 foreground / 9 background model calls, 0 failed lanes
+- `tool-roundtrip`: 31 effects, 2 foreground / 16 background model calls, 0 failed lanes
+- Runtime mixed multiply regression unit: **1/1 pass**
+
+These are mock-backed local fixture results, not a claim of production
+callback durability, a live provider response, or real GCP Jobs success.
+The next acceptance tasks remain real Jobs callback idempotency/restart,
+concurrent session isolation, and persisted native PostgreSQL crash replay.
