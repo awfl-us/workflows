@@ -15,8 +15,16 @@
       "us.awfl.workflows.tools.Agent"
     ],
     "dynamic_targets": [
-      "tools-CliTools", "tools-Tasks", "tools-Agent",
-      "assistant-ExtractTopics", "helpers-links-SaveReflection"
+      "tools-CliTools",
+      "tools-Tasks",
+      "tools-Agent",
+      "assistant-ExtractTopics",
+      "helpers-links-SaveReflection"
     ]
+  },
+  "helpers-TypedIstaSchemaFixture": {
+    "root_class": "us.awfl.workflows.helpers.TypedIstaSchemaFixture",
+    "dependencies": [],
+    "dynamic_targets": []
   }
 }
