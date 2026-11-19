@@ -349,3 +349,36 @@ actual Jobs LLM 422 propagation through EventHandler under memory mode, and
 UI/Jobs consumption of the retriable 409 status. The caller must explicitly
 resubmit rejected turns; do not claim transparent queuing or exactly-once
 across a long-expired lease. Durable mode remains deferred.
+
+### Phase 1.10 — delayed callbacks, typed validation, and public retry boundary (2026-11-19)
+
+**Verified against the rebuilt 26/26 native closure and isolated PostgreSQL memory mode:**
+
+- Delayed tool callback: hold `callback.await` while another native Project
+  Manager root in the same session attempts a completion. The competing root
+  ends `failed` with code 409 and saves no user turn. After callback delivery,
+  assistant tool call, tool result and assistant continuation remain ordered;
+  a subsequent explicit retry adds exactly one user and assistant reply.
+  Three foreground calls total (tool call, continuation, retried prompt).
+  Regression: `server/scripts/reconcileMemoryCallbackConcurrency.test.mjs`.
+- Strict typed-tool arguments: `Llm.chatWithTools` now sets
+  `validate_tool_arguments=true` in its Jobs request, leaving non-tool
+  completions unchanged. With the real Jobs `/llm/chat` router and a fake
+  provider response containing `READ_FILE(filepath=42)`, Jobs issues 422,
+  counts provider usage exactly once, and the compiled native EventHandler
+  finishes `failed` with code 422, releases its session lock, and does not
+  save the invalid assistant/tool response. Regression:
+  `server/scripts/reconcileMemoryTyped422.test.mjs`.
+- Public execution endpoint: native `failed` code 409 maps to HTTP 409 with
+  a readable `Session is busy; retry after the active turn completes` message
+  and `retryable:true`; other failures retain the generic server-error status.
+  The current web caller `useWorkflowExec.start` awaits the endpoint response
+  (its `sync=false` mode polls), and `PromptComposer` preserves draft text on
+  a rejected HTTP request. A conflict is **not** an automatically queued turn.
+  Regression: `server/workflows/services/executionFailureResponse.test.js`.
+
+`scripts/reconcile-test typed-dispatch` now includes the three native
+memory-mode regressions and the HTTP-error mapping regression. All 3 memory
+tests and both error-mapping tests passed locally. No durable journal work,
+production deployment, or live LLM calls were involved. Production release
+and a real-browser acceptance check remain separate work.
