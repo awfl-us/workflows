@@ -152,3 +152,24 @@ existing Firestore-compatible in-memory adapter, not PostgreSQL. In the
 local Scala consumer it passed 22 tests with one unrelated optional binary
 fixture skipped. It is a complementary recovery gate, not a claim that
 Postgres now backs the durable effect journal.
+
+## Native typed-Ista schema contract (selective `wip-old` integration)
+
+Build/publish a **local** `workflow-utils` snapshot from the reconciliation
+feature branch matching the workflows checkout's `0.3.6-SNAPSHOT` dependency.
+This is not a Maven release. Then run:
+
+```sh
+cd ../workflow-utils
+sbt -batch 'set ThisBuild / version := "0.3.6-SNAPSHOT"' publishLocal
+cd ../workflows
+export PGTEST_URL='postgres://awfl:reconcile-test-only@127.0.0.1:55439/awfl_reconcile'
+./scripts/reconcile-test typed-ista --server ../server --compiler ../compiler-rust
+```
+
+This automatically builds the registered `helpers-TypedIstaSchemaFixture`
+read-only workflow into its own native artifact directory and runs the isolated
+PostgreSQL test in server. It verifies the actual compiled `Ista.tool(kala)`
+result (nullable union, strict objects, typed maps, required fields), the
+existing OpenAI payload builder, validated returned arguments, and completed
+execution replay. No production integration or live LLM calls.
