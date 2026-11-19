@@ -45,3 +45,32 @@ Reviewed `workflows` `wip-old` f60dbab vs current `main` cacac48, `dsl` 38b3c11 
 - Keep existing `EventHandler.Input.query: OptValue[String]`, correct tool response pairing, missing-tool error surface, and current Task tool behavior intact.
 - Preserve native Rust recovery invariants and Postgres usage accounting. Test on sandbox/read-only environment before publishing production workflow.
 - Record concrete outcome (cost, cached token ratio, latency, duplicate writes, statuses) for comparable baseline/new executions. If the refactor costs more or destabilizes context without functional gain, omit it.
+
+## Confirmed Phase 0 harness observations (2026-11-19)
+
+- **WF-08 partially covered:** two real native deterministic scenarios: fresh user query and omitted query with seeded earlier user turn; no synthetic new user message, exactly one model completion and one assistant persistence per scenario. **Not yet** an actual tool-result continuation, so WF-01/WF-08 remain open for full roundtrip.
+- **WF-19 — NEW: detached background chain after successful foreground response:** the isolated local native baseline completes while 3 detached summarization/topic/chain executions end `failed`, with `unsupported subtraction operand types` (an earlier inaccurate empty-segments fixture also yielded `list index must be a nonnegative integer`). Reproduce with `./scripts/reconcile-test basic --strict-background` after compiling the current native closure. Investigate whether mock `segmentsForSession` shape or `StriderInput.segmentEnd`/nested workflow arguments are wrong before attributing to production. Passing foreground completion must **not** count as passing full lifecycle. Exit: strict-background passes with accurate fixtures; background states all terminal success or deliberate skip, no hidden errors, no extra LLM calls.
+- No attempt was made to merge or deploy historical workflow changes. These observations are current-main native fixture behavior, **not** proof that a `wip-old` regression exists.
+
+- **WF-01/WF-08 new passing deterministic reproducer:** `tool-roundtrip` invokes a real native `READ_FILE` tool workflow with mocked callback, persists an assistant tool call and a `tool` message with identical `tool_call_id`, and runs detached continuation without adding a synthetic user turn. The subsequent LLM context contains that exact pair and returns one final assistant response. **Not yet** tested under crash/replay or real Postgres/Jobs; those gates remain open.
+- **WF-19 detail:** The same fixture creates six failed background native children across its two turns (foreground and tool continuation pass). Strict-background still fails, by design. Investigate the mock segment windows and `StriderInput` / nested `SegKala` type propagation.
+
+## Phase 0 harness finding — 2026-11-19
+
+- Current native Project Manager *foreground* workflow passes deterministic local fixtures for basic response, missing-query continuation, and READ_FILE tool roundtrip (actual 26-workflow Rust build). This supports baseline checks for **WF-01 / WF-08** but does **not** resolve their risks for the future wip `Convo` port.
+- Current native *detached* summarization/topic tasks fail inside the fixture with `unsupported subtraction operand types` in `workflow.run` (3 children in basic/no-query, 6 in roundtrip). Treat as a confirmed **harness/runtime integration failure**, not yet confirmed as a production workflow bug. Add an input/type logging regression and require strict background success before adopting lifecycle traits (WF-05, WF-09, WF-14).
+- Fixture currently mocks `TopicContextYoj` results and HTTP effects; isolated PostgreSQL/Jobs and crash restart have not yet been exercised. Keep these as separate mandatory gates.
+
+### Follow-up: detached fixture errors classified/resolved locally (2026-11-19)
+
+- `unsupported subtraction operand types`: native `ops::subtract` was missing Float/Integer numeric promotion for segment timestamp minus windowSeconds. Focused compiler-rust regression and all 27 runtime tests pass. A rebuilt 26-workflow native closure now executes the detached operations successfully. Not yet a production deployment.
+- `invalid JSON: expected value`: fixture responded with plain English to background workflows requesting `json_object`; fixed by typed per-workflow JSON fixtures. Assertion previously confused interleaved background requests for foreground continuation; now filtered by `workflow_name`.
+- **Strict local baseline confirmed green:** basic and no-query: 5 background model calls each; READ_FILE roundtrip: 10 background calls. All have 0 failed detached/native children. This closes only the *baseline harness failure*; WF-05/WF-09/WF-14 must still be reproduced and verified after any `wip-old` behavior port.
+
+### Phase 0 integration follow-up: local PostgreSQL, lease recovery, HTTP idempotency
+
+- `reconcile-test postgres` passed 14 real PostgreSQL integration cases (11 existing SQL/doc tests, 3 actual compiled Rust helper tests). One test terminates a leased worker with SIGKILL and checks reclaim + stale-owner fencing; another kills it **after HTTP returns** to prove the request retries with the *same* idempotency key. The loopback endpoint deduplicates the logical effect. No per-effect durable journal in Postgres memory-mode.
+- `reconcile-test durable` passed 22/23 test cases (one optional binary fixture skipped) for the existing in-memory durable Firestore-compatible journal, including one actual compiled Rust ToolDefs effect.
+- These gates do not close WF-03, WF-04, WF-05, WF-09, WF-14, or WF-16 for the **historical workflows refactor**: native tool-call forwarding, real Jobs server, persistent durable journal crash recovery and concurrent ProjectManager sessions remain untested with the new architecture.
+
+- 2026-11-19: added real production scoped `/firebase` Jobs Express router test using local PostgreSQL and concurrent lock acquisition; 15/15 combined SQL/native/route tests pass. This establishes real route-to-storage behavior but not the complete Jobs process, actual callbacks/LLM, or ProjectManager lock-scheduling parity.

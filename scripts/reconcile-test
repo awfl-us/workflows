@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Local-first AWFL reconciliation runner. No production deployment or LLM calls.
+
+Fast: unit + schema/native harness checks. Integration: real generated Rust
+with deterministic Jobs/LLM/callback/storage fixtures supplied by server.
+"""
+from __future__ import annotations
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+from urllib.parse import urlparse
+
+ROOT=Path(__file__).resolve().parent.parent
+DEFAULT_REPORT=ROOT/'.awfl-reconcile'/'build-report.json'
+
+
+def run(args:list[str], cwd:Path, concise:bool=False) -> None:
+    print('+', ' '.join(args), '(cwd '+str(cwd)+')',flush=True)
+    if not concise:
+        subprocess.run(args,cwd=cwd,check=True,env=os.environ.copy());return
+    proc=subprocess.run(args,cwd=cwd,env=os.environ.copy(),text=True,
+                        stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    lines=proc.stdout.splitlines()
+    summary=[ln for ln in lines if ln.startswith('AWFL_RECONCILE_PASS') or ln.startswith('AWFL_RECONCILE_FAIL')]
+    for line in summary: print(line[:1600])
+    if proc.returncode:
+        print('\n'.join(lines[-24:])[-6000:],file=sys.stderr)
+        raise subprocess.CalledProcessError(proc.returncode,args)
+
+
+
+def existing(path:Path, description:str) -> Path:
+    if not path.exists():
+        raise SystemExit(f'Missing {description}: {path}. Pass an explicit --{description} path.')
+    return path
+
+
+def main(argv:list[str]|None=None) -> int:
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','typed-ista','all'])
+    p.add_argument('--server', type=Path,default=Path(os.getenv('AWFL_RECONCILE_SERVER',ROOT.parent/'server')))
+    p.add_argument('--compiler',type=Path,default=Path(os.getenv('AWFL_RECONCILE_COMPILER',ROOT.parent/'compiler-rust')))
+    p.add_argument('--report',type=Path,default=Path(os.getenv('AWFL_RECONCILE_BUILD_REPORT',DEFAULT_REPORT)))
+    p.add_argument('--typed-report',type=Path,default=Path(os.getenv('AWFL_TYPED_ISTA_REPORT',ROOT/'.awfl-reconcile-typed'/'build-report.json')))
+    p.add_argument('--strict-background',action='store_true',help='Fail on detached child errors (currently a known fixture gap)')
+    p.add_argument('--check',action='store_true',help='Only check generated crate closure in compile mode')
+    opts=p.parse_args(argv)
+    server=opts.server.resolve();compiler=opts.compiler.resolve();report=opts.report.resolve()
+    if opts.command=='doctor':
+        checks={'workflows source':ROOT/'src/main/scala',
+            'server scenario runner':server/'scripts/reconcileScenario.mjs',
+            'server native runtime':server/'workflows/native/worker.js',
+            'compiler-rust':compiler/'Cargo.toml'}
+        for label,path in checks.items():
+            print(('OK' if path.exists() else 'MISSING').ljust(8),label,path)
+        for program in ['java','sbt','cargo','node','python3']:
+            print(('OK' if shutil.which(program) else 'MISSING').ljust(8),program,shutil.which(program) or '')
+        print(('OK' if report.exists() else 'NOT BUILT').ljust(8),'native report',report)
+        return 0 if all(x.exists() for x in checks.values()) and all(shutil.which(x) for x in ['java','sbt','cargo','node']) else 1
+    if opts.command in ('unit','all'):
+        existing(server/'scripts/reconcileScenario.test.mjs','server')
+        run(['python3','-m','unittest','discover','-s','tests','-p','test_*.py','-q'],ROOT)
+        run(['node','--test','scripts/nativeLocalDev.test.mjs','scripts/reconcileScenario.test.mjs'],server)
+    if opts.command in ('compile','all'):
+        existing(compiler/'Cargo.toml','compiler')
+        report.parent.mkdir(parents=True,exist_ok=True)
+        cmd=['python3','scripts/native-dev.py','codebase-ProjectManager','--recursive',
+            '--compiler',str(compiler),'--output',str(report.parent)]
+        if opts.check: cmd.append('--check')
+        run(cmd,ROOT)
+    if opts.command in ('durable','all'):
+        if not report.exists():
+            raise SystemExit(f'Native build report absent: {report}. Run ./scripts/reconcile-test compile first.')
+        artifacts=json.loads(report.read_text())
+        tool_def=artifacts.get('helpers-ToolDefs',{}).get('binary')
+        if not tool_def or not Path(tool_def).is_file():
+            raise SystemExit('Missing helpers-ToolDefs ELF binary in native build report')
+        env=dict(os.environ,AWFL_NATIVE_TOOLDEFS_BINARY=str(Path(tool_def).resolve()))
+        print('+ node --test workflows/native/executionStore.test.js workflows/native/worker.test.js',flush=True)
+        subprocess.run(['node','--test','workflows/native/executionStore.test.js',
+                        'workflows/native/worker.test.js'],cwd=server,env=env,check=True)
+    if opts.command == 'postgres' or (opts.command == 'all' and os.getenv('PGTEST_URL')):
+        if not os.getenv('PGTEST_URL'):
+            raise SystemExit('PGTEST_URL is required for PostgreSQL tests. See docs/reconciliation-local-testing.md.')
+        database=urlparse(os.environ['PGTEST_URL'])
+        if (database.scheme not in ('postgres','postgresql') or
+                database.hostname not in ('127.0.0.1','localhost','::1') or
+                database.path != '/awfl_reconcile'):
+            raise SystemExit('Refusing PostgreSQL tests outside loopback /awfl_reconcile')
+        if not report.exists():
+            raise SystemExit(f'Native build report absent: {report}. Run ./scripts/reconcile-test compile first.')
+        env = dict(os.environ, AWFL_NATIVE_LOCAL_BUILD_REPORT=str(report))
+        pgtests=['test/storage/postgresIntegration.test.mjs',
+                 'test/storage/postgresDocuments.integration.test.mjs',
+                 'test/storage/postgresRelaySubscription.integration.test.mjs',
+                 'scripts/reconcilePostgresNative.test.mjs']
+        print('+ node --test ' + ' '.join(pgtests) + ' (cwd ' + str(server) + ')',flush=True)
+        subprocess.run(['node','--test',*pgtests],cwd=server,env=env,check=True)
+    if opts.command == 'typed-ista':
+        url=os.getenv('PGTEST_URL')
+        if not url:
+            raise SystemExit('PGTEST_URL is required for typed-ista tests (isolated loopback /awfl_reconcile)')
+        database=urlparse(url)
+        if (database.scheme not in ('postgres','postgresql') or
+                database.hostname not in ('127.0.0.1','localhost','::1') or
+                database.path != '/awfl_reconcile'):
+            raise SystemExit('Refusing typed-ista test outside loopback /awfl_reconcile')
+        typed_report=opts.typed_report.resolve()
+        typed_report.parent.mkdir(parents=True,exist_ok=True)
+        run(['python3','scripts/native-dev.py','helpers-TypedIstaSchemaFixture',
+             '--compiler',str(compiler),'--output',str(typed_report.parent)],ROOT)
+        if not typed_report.is_file():
+            raise SystemExit('Native typed-Ista build report absent after compile: '+str(typed_report))
+        env=dict(os.environ,AWFL_TYPED_ISTA_REPORT=str(typed_report))
+        subprocess.run(['node','--test','scripts/reconcileTypedIstaNative.test.mjs'],
+                       cwd=server,env=env,check=True)
+    if opts.command in ('basic','no-query','tool-roundtrip','all'):
+        existing(server/'scripts/reconcileScenario.mjs','server')
+        if not report.exists():
+            raise SystemExit(f'Native build report absent: {report}. Run ./scripts/reconcile-test compile first.')
+        targets=['basic','no-query','tool-roundtrip'] if opts.command=='all' else [opts.command]
+        for name in targets:
+            cmd=['node','scripts/reconcileScenario.mjs','--report',str(report),'--scenario',name]
+            if opts.strict_background: cmd.append('--strict-background')
+            run(cmd,server,concise=True)
+    return 0
+
+if __name__=='__main__':
+    try: sys.exit(main())
+    except subprocess.CalledProcessError as e:
+        print(f'AWFL_RECONCILE_FAIL {e}',file=sys.stderr)
+        sys.exit(e.returncode or 1)
