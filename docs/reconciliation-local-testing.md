@@ -54,3 +54,23 @@ Do not infer Postgres correctness, real Jobs API shape, callback delivery, LLM s
 ### Initial verified developer run
 
 On 2026-11-19 a full native rebuild of current main completed with **26 static musl binaries** and `publish=false` (146.8 seconds cold); `basic` and `no-query` finished in approximately 0.4–0.5 seconds each; `tool-roundtrip` finished in approximately 0.9 seconds in the warm local native runner. Foreground/root assertions pass; strict-background reports 3 failed detached children in each single-turn case and 6 in the two-turn tool-roundtrip. Do **not** count them as fully passing workflow integration until fixed.
+
+## Strict background baseline (patched runtime)
+
+The full background fixture requires compiler-rust with mixed Float/Integer
+subtraction (`fix/native-mixed-numeric-subtract` until merged). The prior
+compiler produces `unsupported subtraction operand types` when the native
+summary workflow subtracts integer window seconds from floating-point epoch
+seconds. Build your native closure against that checkout, then run:
+
+```bash
+./scripts/reconcile-test basic --strict-background --server ../server --compiler ../compiler-rust
+./scripts/reconcile-test no-query --strict-background --server ../server --compiler ../compiler-rust
+./scripts/reconcile-test tool-roundtrip --strict-background --server ../server --compiler ../compiler-rust
+```
+
+All three pass on the patched runtime with schema-shaped mocked JSON for
+background summarization, topic extraction and collapse. Foreground calls are
+counted separately from interleaved background model calls. This uses the
+**real native Rust binaries and in-memory storage**, not production services.
+Postgres, real local Jobs and crash/restart testing remain separate gates.
