@@ -137,3 +137,39 @@ The full existing native Project Manager baseline is still green (26 workflow cl
 Revisited the `wip-old` use-site design and implemented `Ista[T].tool(kala)` without `json.decode`: a compile-time typed `JsonSchema.Schema` is lowered into the existing DSL tool envelope as structured map data. To preserve backwards compatibility, `Llm.ToolFunctionDef.parameters` accepts `BaseValue[?]`; tighter Scala union types fail current DSL Spec derivation, so the weak typing is confined to the JSON transport boundary rather than schema construction. The existing old `ToolDefProperty` call sites still compile. **Real compiled native Rust** executed a new read-only `helpers-TypedIstaSchemaFixture` and returned exactly the expected strict schema (nullable union, typed map, array items, required fields, Kala description), persisted in isolated PostgreSQL. OpenAI payload-builder preservation and returned-argument validation also passed. The workflows `scripts/reconcile-test typed-ista` command recompiles and runs this dedicated fixture. No new compiler or DSL feature was necessary.
 
 Current Project Manager (all existing 52 Scala workflow sources, 26 native artifacts) continues to pass the full deterministic/strict-background/Postgres/durable baseline (3 + 15 + 22 passes, one optional durable skip); 19 runner Python tests pass. **Open:** full Jobs LLM endpoint, typed routing/callback and crash-recovery E2E; do not overstate fixture success as a live tool execution or provider API validation. Code remains on review branches, no deployment.
+
+### Phase 1.5 — native schema through Jobs LLM HTTP (2026-11-19)
+
+**Completed, isolated test lane.** The fresh Scala `workflow-utils_3:0.3.6-SNAPSHOT`
+was republished **only to local sbt/Ivy**, then all 53 workflows Scala sources
+compiled. `helpers-TypedIstaSchemaFixture` built as one real static Rust ELF
+(`publish=false`), ran with PostgreSQL test-only `awfl_reconcile` and
+replayed the completed native result. The resulting `Ista.tool(kala)` JSON
+was passed *unchanged* through the actual `jobs/llm.js` Express route, with
+an injected fake OpenAI adapter and usage recorder. Valid call -> HTTP 200;
+invalid nested map value -> HTTP 422 after usage accounting. No real provider
+or production credentials used.
+
+The server implementation/test review slice is on
+`awfl-us/server:feat/reconcile-typed-llm-http`, commit `bd8c2c9`, based on
+the current remote `fix/reconcile-background-fixtures` branch (not a forced
+update to the divergent historical branch). HTTP/provider/schema/native tests
+passed **12/12** on that review branch; the wider LLM suite passed **13/13**.
+Explicit tool call ID validation now rejects missing and duplicated IDs for
+opted-in typed callers. Existing unvalidated flows are unchanged.
+
+**Next phase (do not mark complete):** wire typed `Ista` tool dispatch into
+existing native agent callback routing, confirm workflow identity stays outside
+model-visible tool JSON, reject nonexistent/duplicate callback results, and
+replay a callback continuation without duplicating messages/effects. Add
+concurrent-session lock/order and crash-after-dispatch recovery cases.
+Only after those gates pass, consider selective `Convo` refactoring and
+provider canary. Production Jobs end-to-end, real provider API acceptance
+and Postgres-backed durable effect journaling remain unproven.
+
+**Environment note:** The Scala GKE consumer was restarted with refreshed
+credentials. Source and Git refs restored from GCS, but local node_modules,
+sbt/Cargo outputs and some PostgreSQL empty directories did not. A fresh
+loopback-only PostgreSQL instance was initialized for this suite. Do not
+treat a recovered old build-report.json as proof that its referenced ELF
+survived workspace restore.
