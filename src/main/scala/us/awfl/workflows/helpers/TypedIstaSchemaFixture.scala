@@ -18,7 +18,7 @@ object TypedIstaSchemaFixture extends us.awfl.core.Workflow {
     history: ListValue[Boolean],
     counts: Value[Map[String, Int]]
   )
-  case class Output(tool: Llm.Tool)
+  case class Output(tool: Llm.Tool, routed: ToolDefs.ToolWithWorkflow)
   override val inputVal = init[Input]("input")
   private val ista = Ista[Args](
     name = "READ_TYPED",
@@ -32,6 +32,9 @@ object TypedIstaSchemaFixture extends us.awfl.core.Workflow {
     Value[String](CelStr("test-session")), Value[Double](0), Value[Double](1200))
 
   override def workflows = List(
-    Workflow(List.empty[Step[?, ?]] -> obj(Output(ista.tool(kala))))
+    Workflow(List.empty[Step[?, ?]] -> obj(Output(
+      ista.tool(kala),
+      ToolDefs.ToolWithWorkflow.fromIsta(ista, kala, str("tools-ReadTyped"))
+    )))
   )
 }

@@ -64,6 +64,21 @@ object ToolDefs extends us.awfl.core.Workflow {
     function: BaseValue[Llm.ToolFunctionDef],
     workflowName: Value[String]
   )
+
+  object ToolWithWorkflow {
+    /** Keep Ista's complete model-facing schema while retaining native routing
+      * metadata exclusively in the service-side tool definition envelope.
+      * EventHandler already projects this envelope to Llm.Tool before chat.
+      */
+    inline def fromIsta[T: Spec](
+      ista: Ista[T],
+      kala: KalaVibhaga,
+      workflowName: Value[String]
+    ): ToolWithWorkflow = {
+      val tool = ista.tool(kala)
+      ToolWithWorkflow(function = tool.function, workflowName = workflowName)
+    }
+  }
   
   case class Result(defs: ListValue[ToolWithWorkflow])
 
