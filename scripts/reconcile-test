@@ -129,6 +129,8 @@ def main(argv:list[str]|None=None) -> int:
             for scenario in ('basic','no-query','tool-roundtrip'):
                 run(['node','scripts/reconcileScenario.mjs','--report',str(report),
                      '--scenario',scenario,'--strict-background'],server,concise=True)
+            run(['node','--test','scripts/reconcileMemoryConcurrency.test.mjs'],
+                server,concise=True)
     if opts.command in ('basic','no-query','tool-roundtrip','all'):
         existing(server/'scripts/reconcileScenario.mjs','server')
         if not report.exists():

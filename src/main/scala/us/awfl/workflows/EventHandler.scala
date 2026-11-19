@@ -112,7 +112,8 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           (true: Cel) -> (List() -> Value.nil[PostResult[Nothing]])
         ))
 
-        // In-session operations: write the query message first; then try to acquire a lock for response generation.
+        // Persist the user turn only after acquiring the session lock. An
+        // already-busy request must not leave an unanswerable queued message.
         val complete = Convo.inSession[ChatToolResponse]("inSession", sessionId) {
           val buildYojStep = summon[Yoj[TopicContext]].build
           val messages = Switch.list("messages", List(
@@ -231,9 +232,12 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         val collapse = ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60)
 
         val whenAcquired = Switch("maybeRespond", List(
-          // If lock acquired: build context, get response, save it, then release the lock.
+          // If lock acquired: persist the turn, build context, save the
+          // response and tool results, then release the lock.
           acquiredTry.resultValue.cel -> {
             List[Step[?, ?]](
+              maybeSaveTask,
+              addMessage,
               Parallel("loadContext", List(
                 promptsWorkflow,
                 toolsWorkflow,
@@ -253,14 +257,17 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               total_cost = Value[Double](totalCost)
             ))
           },
-          // If busy: exit without fetching a response (query message is already saved).
-          (true: Cel) -> (List() -> Value.nil[ChatToolResponse])
+          // Contention is a retriable failure, never a successful empty turn.
+          // The original request was not persisted and can be retried once
+          // the current completion/tool callback has released the lock.
+          (true: Cel) -> (List(Raise("sessionBusy", obj(Error(
+            str("Session is busy; retry after the active turn completes"),
+            OptValue[Int](409)
+          )))) -> Value.nil[ChatToolResponse])
         ))
 
         List[Step[?, ?]](
           tryInitStatus,
-          maybeSaveTask,
-          addMessage,
           acquiredTry,
           whenAcquired,
         ) -> whenAcquired.resultValue
@@ -292,7 +299,9 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           (input.callback.getOrElse(Value.nil) !== Cel.nil) -> input.callback.getOrElse(Value.nil).get.failure(err).fn,
           (true: Cel) -> (List() -> Value.nil)
         ))
-        List[Step[?, ?]](release, statusFailed, enqueueFailed, callbackFailure) -> Value.nil[ChatToolResponse]
+        // Do not report the native root as Completed after a failed turn.
+        List[Step[?, ?]](release, statusFailed, enqueueFailed, callbackFailure,
+          Raise("propagateEventHandlerError", err)) -> Value.nil[ChatToolResponse]
       }
     )
 

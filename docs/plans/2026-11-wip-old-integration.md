@@ -314,3 +314,38 @@ production deployment or a merge to the default branches.
 ### Execution-priority correction (2026-11-19)
 
 **Decision: memory mode only for active development, for latency.** Prior checkpoints mentioning a missing Postgres durable effect journal or a 'durable journal crash gate' describe historical technical gaps, **not current blockers**. Do not port `NativeExecutionStore` per-effect Firestore journaling to PostgreSQL as part of this reconciliation. Concentrate on memory-mode callback/session correctness, stable effect idempotency, Postgres lease fencing and process-restart behavior, and typed tool errors. Preserve the legacy durable mode without expanding it. Revisit only on explicit direction.
+
+### Phase 1.9 — contended native session correction (2026-11-19)
+
+**Real PostgreSQL memory-mode Project Manager failure reproduced and fixed.**
+Two independent compiled native roots sharing a session, while the first
+LLM response was held, previously both reported `completed`, even though the
+persisted conversation contained `user, user, assistant` and the model ran
+only once. `EventHandler` had persisted the losing user turn **before** trying
+the session lock; `Locks.acquireBool` mapped HTTP 409 to false and the busy
+branch returned a successful empty result. This was a silent unanswered turn.
+
+The updated `EventHandler` stores task/user messages only **after** the
+session lock is acquired, and a busy execution raises an explicit 409 with
+`Session is busy; retry after the active turn completes`. The error handler
+updates Failed status, invokes failure callback when present, then re-raises
+the original error so the native root becomes terminal `failed`, not an
+apparently completed job. No implicit queue or automatic retry was added.
+
+The same two-root native test now verifies: first request completes, second
+fails with code 409 and saves no user turn, and **a new execution retry after
+the lock is released succeeds**; final roles are
+`user, assistant, user, assistant` and exactly two foreground model calls.
+The test uses the real Jobs lock Express routes and isolated PostgreSQL
+Storage, the actual Project Manager Rust binary, and memory-mode native
+execution roots (not the legacy durable harness). `server` test file:
+`scripts/reconcileMemoryConcurrency.test.mjs`. The `typed-dispatch` runner
+now includes this check. Current native closure recompiles all **26/26**
+binaries, the strict `basic`, `no-query`, `tool-roundtrip` scenarios pass,
+and the compiled typed-Ista/native-dispatch regression passes 1/1.
+
+Still to verify: end-to-end delayed/failing **tool callback** contention,
+actual Jobs LLM 422 propagation through EventHandler under memory mode, and
+UI/Jobs consumption of the retriable 409 status. The caller must explicitly
+resubmit rejected turns; do not claim transparent queuing or exactly-once
+across a long-expired lease. Durable mode remains deferred.
