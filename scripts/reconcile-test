@@ -6,11 +6,13 @@ with deterministic Jobs/LLM/callback/storage fixtures supplied by server.
 """
 from __future__ import annotations
 import argparse
+import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+from urllib.parse import urlparse
 
 ROOT=Path(__file__).resolve().parent.parent
 DEFAULT_REPORT=ROOT/'.awfl-reconcile'/'build-report.json'
@@ -39,7 +41,7 @@ def existing(path:Path, description:str) -> Path:
 
 def main(argv:list[str]|None=None) -> int:
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','all'])
+    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','all'])
     p.add_argument('--server', type=Path,default=Path(os.getenv('AWFL_RECONCILE_SERVER',ROOT.parent/'server')))
     p.add_argument('--compiler',type=Path,default=Path(os.getenv('AWFL_RECONCILE_COMPILER',ROOT.parent/'compiler-rust')))
     p.add_argument('--report',type=Path,default=Path(os.getenv('AWFL_RECONCILE_BUILD_REPORT',DEFAULT_REPORT)))
@@ -69,6 +71,34 @@ def main(argv:list[str]|None=None) -> int:
             '--compiler',str(compiler),'--output',str(report.parent)]
         if opts.check: cmd.append('--check')
         run(cmd,ROOT)
+    if opts.command in ('durable','all'):
+        if not report.exists():
+            raise SystemExit(f'Native build report absent: {report}. Run ./scripts/reconcile-test compile first.')
+        artifacts=json.loads(report.read_text())
+        tool_def=artifacts.get('helpers-ToolDefs',{}).get('binary')
+        if not tool_def or not Path(tool_def).is_file():
+            raise SystemExit('Missing helpers-ToolDefs ELF binary in native build report')
+        env=dict(os.environ,AWFL_NATIVE_TOOLDEFS_BINARY=str(Path(tool_def).resolve()))
+        print('+ node --test workflows/native/executionStore.test.js workflows/native/worker.test.js',flush=True)
+        subprocess.run(['node','--test','workflows/native/executionStore.test.js',
+                        'workflows/native/worker.test.js'],cwd=server,env=env,check=True)
+    if opts.command == 'postgres' or (opts.command == 'all' and os.getenv('PGTEST_URL')):
+        if not os.getenv('PGTEST_URL'):
+            raise SystemExit('PGTEST_URL is required for PostgreSQL tests. See docs/reconciliation-local-testing.md.')
+        database=urlparse(os.environ['PGTEST_URL'])
+        if (database.scheme not in ('postgres','postgresql') or
+                database.hostname not in ('127.0.0.1','localhost','::1') or
+                database.path != '/awfl_reconcile'):
+            raise SystemExit('Refusing PostgreSQL tests outside loopback /awfl_reconcile')
+        if not report.exists():
+            raise SystemExit(f'Native build report absent: {report}. Run ./scripts/reconcile-test compile first.')
+        env = dict(os.environ, AWFL_NATIVE_LOCAL_BUILD_REPORT=str(report))
+        pgtests=['test/storage/postgresIntegration.test.mjs',
+                 'test/storage/postgresDocuments.integration.test.mjs',
+                 'test/storage/postgresRelaySubscription.integration.test.mjs',
+                 'scripts/reconcilePostgresNative.test.mjs']
+        print('+ node --test ' + ' '.join(pgtests) + ' (cwd ' + str(server) + ')',flush=True)
+        subprocess.run(['node','--test',*pgtests],cwd=server,env=env,check=True)
     if opts.command in ('basic','no-query','tool-roundtrip','all'):
         existing(server/'scripts/reconcileScenario.mjs','server')
         if not report.exists():
