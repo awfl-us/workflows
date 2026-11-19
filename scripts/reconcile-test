@@ -41,10 +41,11 @@ def existing(path:Path, description:str) -> Path:
 
 def main(argv:list[str]|None=None) -> int:
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','all'])
+    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','typed-ista','all'])
     p.add_argument('--server', type=Path,default=Path(os.getenv('AWFL_RECONCILE_SERVER',ROOT.parent/'server')))
     p.add_argument('--compiler',type=Path,default=Path(os.getenv('AWFL_RECONCILE_COMPILER',ROOT.parent/'compiler-rust')))
     p.add_argument('--report',type=Path,default=Path(os.getenv('AWFL_RECONCILE_BUILD_REPORT',DEFAULT_REPORT)))
+    p.add_argument('--typed-report',type=Path,default=Path(os.getenv('AWFL_TYPED_ISTA_REPORT',ROOT/'.awfl-reconcile-typed'/'build-report.json')))
     p.add_argument('--strict-background',action='store_true',help='Fail on detached child errors (currently a known fixture gap)')
     p.add_argument('--check',action='store_true',help='Only check generated crate closure in compile mode')
     opts=p.parse_args(argv)
@@ -99,6 +100,24 @@ def main(argv:list[str]|None=None) -> int:
                  'scripts/reconcilePostgresNative.test.mjs']
         print('+ node --test ' + ' '.join(pgtests) + ' (cwd ' + str(server) + ')',flush=True)
         subprocess.run(['node','--test',*pgtests],cwd=server,env=env,check=True)
+    if opts.command == 'typed-ista':
+        url=os.getenv('PGTEST_URL')
+        if not url:
+            raise SystemExit('PGTEST_URL is required for typed-ista tests (isolated loopback /awfl_reconcile)')
+        database=urlparse(url)
+        if (database.scheme not in ('postgres','postgresql') or
+                database.hostname not in ('127.0.0.1','localhost','::1') or
+                database.path != '/awfl_reconcile'):
+            raise SystemExit('Refusing typed-ista test outside loopback /awfl_reconcile')
+        typed_report=opts.typed_report.resolve()
+        typed_report.parent.mkdir(parents=True,exist_ok=True)
+        run(['python3','scripts/native-dev.py','helpers-TypedIstaSchemaFixture',
+             '--compiler',str(compiler),'--output',str(typed_report.parent)],ROOT)
+        if not typed_report.is_file():
+            raise SystemExit('Native typed-Ista build report absent after compile: '+str(typed_report))
+        env=dict(os.environ,AWFL_TYPED_ISTA_REPORT=str(typed_report))
+        subprocess.run(['node','--test','scripts/reconcileTypedIstaNative.test.mjs'],
+                       cwd=server,env=env,check=True)
     if opts.command in ('basic','no-query','tool-roundtrip','all'):
         existing(server/'scripts/reconcileScenario.mjs','server')
         if not report.exists():
