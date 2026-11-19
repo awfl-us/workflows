@@ -173,3 +173,21 @@ sbt/Cargo outputs and some PostgreSQL empty directories did not. A fresh
 loopback-only PostgreSQL instance was initialized for this suite. Do not
 treat a recovered old build-report.json as proof that its referenced ELF
 survived workspace restore.
+
+### Phase 1.6 — typed Ista routing adapter (2026-11-19)
+
+Added `ToolDefs.ToolWithWorkflow.fromIsta[T](ista, kala, workflowName)` on
+`feat/reconcile-ista-routing-bridge`, reusing the existing native
+`ToolDispatcher` contract instead of introducing another dispatcher.
+The model-facing `ista.tool(kala).function` is retained unchanged, and
+`workflowName` is service-side metadata only. The read-only
+`helpers-TypedIstaSchemaFixture` returns both forms so the server's
+native/Postgres + Jobs-HTTP contract test checks strict schema equivalence,
+correct workflow identity, and absence of route metadata in the model payload.
+The Scala build and static native Rust fixture passed; isolated native
+contract test passed 1/1.
+
+**Not yet verified:** executing a typed callback through `ToolDispatcher`,
+callback result idempotency, missing/duplicate dispatch behavior, concurrent
+session ordering, process-crash replay, or a real LLM provider. Keep all of
+those as explicit acceptance gates. No production deployment.
