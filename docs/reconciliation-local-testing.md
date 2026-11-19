@@ -74,3 +74,75 @@ background summarization, topic extraction and collapse. Foreground calls are
 counted separately from interleaved background model calls. This uses the
 **real native Rust binaries and in-memory storage**, not production services.
 Postgres, real local Jobs and crash/restart testing remain separate gates.
+
+## Isolated PostgreSQL + native Rust + loopback Jobs effect tests
+
+The separate `postgres` mode exercises an **actual PostgreSQL 17** instance and
+compiled Rust `helpers-ToolDefs` via `NativeMemoryExecutionPilotStore`, plus the
+HTTP redirection boundary used by local Jobs-mode tests. It does not need GCP,
+Firebase credentials, or an OpenAI API key. The DB URL **must** point to
+`127.0.0.1`/`localhost` and the database **must** be `/awfl_reconcile`;
+otherwise the native integration tests refuse to run.
+
+Start a disposable, locally bound PostgreSQL server using the companion server
+repository (requires Docker Compose on your machine):
+
+```sh
+cd ../server
+docker compose -f scripts/compose.reconcile-postgres.yml up -d --wait
+export PGTEST_URL='postgres://awfl:reconcile-test-only@127.0.0.1:55439/awfl_reconcile'
+cd ../workflows
+./scripts/reconcile-test postgres --server ../server --compiler ../compiler-rust \
+  --report .awfl-reconcile/build-report.json
+# When finished:
+cd ../server
+docker compose -f scripts/compose.reconcile-postgres.yml down --volumes
+```
+
+If PostgreSQL is already running locally, set `PGTEST_URL` to its isolated
+`awfl_reconcile` database instead; no Docker daemon is necessary. Use the
+`--report` pointing at a previously compiled native closure. `all` includes
+these tests when `PGTEST_URL` is provided; absent `PGTEST_URL`, it remains
+an offline native/in-memory suite. The PostgreSQL test executes 11 storage
+integration cases plus three native cases:
+
+- A compiled `helpers-ToolDefs` workflow makes an authenticated, loopback-only
+  HTTP GET, persists its terminal state in PostgreSQL, then a new PostgreSQL
+  connection replays the result with **zero additional HTTP effects**.
+- A separate worker process claims the same PostgreSQL execution, is **killed
+  with SIGKILL**, and a new worker reclaims after lease expiration. Verify
+  epoch increment, persisted completion and rejection of the stale owner's
+  terminal write.
+- Another worker is **killed after the loopback HTTP effect returns but before
+  terminal state commits**. Recovery from a new PostgreSQL connection repeats
+  the HTTP request with the same idempotency key. The fixture endpoint records
+  two physical requests but only one logical effect for that key. This is
+  evidence of stable keys plus endpoint deduplication, **not** a native
+  per-effect journal.
+
+**Guarantee boundary:** This validates PostgreSQL-backed *memory-mode* native
+execution claim, completion, fencing and completed-result replay, and a
+loopback HTTP fixture service. It does **not** prove exactly-once side effects
+if the process is killed *after* an external effect but *before* completion:
+that mode intentionally lacks per-effect journaling and requires explicit
+idempotency of tools. The current native durable effect journal is a separate
+Firestore-backed store; test its crash/recovery separately with existing
+recovery fixtures. The loopback responder is test-only, not the full
+authenticated production Jobs Express application. Neither Postgres tests nor
+this environment access production databases or real LLM services.
+
+## Durable journal regression (separate from PostgreSQL memory mode)
+
+Run with a compiled native closure:
+
+```sh
+./scripts/reconcile-test durable --server ../server --report .awfl-reconcile/build-report.json
+```
+
+This runs `workflows/native/{executionStore,worker}.test.js`, selecting the
+actual compiled `helpers-ToolDefs` native binary from the build report.
+The suite tests the production-style **durable effect journal** in the
+existing Firestore-compatible in-memory adapter, not PostgreSQL. In the
+local Scala consumer it passed 22 tests with one unrelated optional binary
+fixture skipped. It is a complementary recovery gate, not a claim that
+Postgres now backs the durable effect journal.
