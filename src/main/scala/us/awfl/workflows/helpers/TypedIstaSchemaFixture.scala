@@ -18,7 +18,12 @@ object TypedIstaSchemaFixture extends us.awfl.core.Workflow {
     history: ListValue[Boolean],
     counts: Value[Map[String, Int]]
   )
-  case class Output(tool: Llm.Tool, routed: ToolDefs.ToolWithWorkflow)
+  case class ReadFileArgs(filepath: Value[String])
+  case class Output(
+    tool: Llm.Tool,
+    routed: ToolDefs.ToolWithWorkflow,
+    routedReadFile: ToolDefs.ToolWithWorkflow
+  )
   override val inputVal = init[Input]("input")
   private val ista = Ista[Args](
     name = "READ_TYPED",
@@ -30,11 +35,17 @@ object TypedIstaSchemaFixture extends us.awfl.core.Workflow {
   )
   private val kala: KalaVibhaga = SegKala(
     Value[String](CelStr("test-session")), Value[Double](0), Value[Double](1200))
+  private val readFile = Ista[ReadFileArgs](
+    name = "READ_FILE",
+    build = _ => buildList[ChatMessage]("unusedReadFileMessages", List.empty),
+    description = _ => "Read a file from the project workspace"
+  )
 
   override def workflows = List(
     Workflow(List.empty[Step[?, ?]] -> obj(Output(
       ista.tool(kala),
-      ToolDefs.ToolWithWorkflow.fromIsta(ista, kala, str("tools-ReadTyped"))
+      ToolDefs.ToolWithWorkflow.fromIsta(ista, kala, str("tools-ReadTyped")),
+      ToolDefs.ToolWithWorkflow.fromIsta(readFile, kala, str("tools-CliTools"))
     )))
   )
 }
