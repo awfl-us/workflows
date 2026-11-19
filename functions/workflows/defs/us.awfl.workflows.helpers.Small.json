@@ -4,7 +4,7 @@
   "name" : "us.awfl.workflows.helpers.Small",
   "description" : "Auto-generated workflow definition.",
   "inputSchema" : "us-awfl-workflows-helpers-Small-Input",
-  "outputSchema" : "services-Llm-ChatToolResponse",
+  "outputSchema" : "services-Llm-ChatResponse[ChatMessage]",
   "inputType" : "us.awfl.workflows.helpers.Small.Input",
-  "outputType" : "services.Llm.ChatToolResponse"
+  "outputType" : "services.Llm.ChatResponse[ChatMessage]"
 }

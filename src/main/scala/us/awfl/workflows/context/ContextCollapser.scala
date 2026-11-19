@@ -14,6 +14,7 @@ import us.awfl.utils.SegKala
 import us.awfl.utils.Convo.StepName
 import us.awfl.utils.post
 import us.awfl.utils.TopicContextYoj
+import us.awfl.workflows.EventHandler
 
 trait CollapserMessages
 object CollapserMessages {
@@ -22,26 +23,24 @@ object CollapserMessages {
   given Yoj[CollapserMessages] =
     Yoj(
       name = "collapserMessages",
-      buildYoj = { kala =>
-        given KalaVibhaga = kala
-
+      build = { kala =>
         // Fetch the full topic context messages from the server and include docIds for downstream grouping
-        val call = TopicContextYoj.run(includeDocId = true)
+        val call = TopicContextYoj.run(obj(kala), includeDocId = true)
 
         // Serialize the list of ChatMessage objects into a JSON string
         val serialized = Try(
-          s"collapser_serialize_topicContext_${Yoj.kalaName}",
+          s"collapser_serialize_topicContext",
           List(call) -> str(CelFunc("json.encode_to_string", call.resultValue.flatMap(_.body).flatMap(_.yoj).cel))
         )
 
         // Wrap the serialized JSON into a single ChatMessage
         val single = buildList[ChatMessage](
-          s"collapser_single_msg_${Yoj.kalaName}",
+          s"collapser_single_msg",
           List(ChatMessage("system", serialized.resultValue))
         )
 
         Block(
-          s"collapserYojBlock_${Yoj.kalaName}",
+          s"collapserYojBlock",
           List[Step[?, ?]](call, serialized, single) -> single.resultValue
         )
       },
@@ -51,12 +50,12 @@ object CollapserMessages {
     )
 }
 
-trait ContextCollapser extends us.awfl.core.Workflow {
+trait ContextCollapser extends us.awfl.core.Workflow with EventHandler {
   override def buildSteps(
     main: (List[Step[?, ?]], BaseValue[Result]),
     except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
   )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
-    (main._1 :+ ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60)) -> main._2,
+    (main._1 :+ ContextCollapser("collapseMessages", id, windowSeconds = 60 * 20, overlapSeconds = 60 * 14)) -> main._2,
     except
   )
 }
@@ -64,7 +63,7 @@ trait ContextCollapser extends us.awfl.core.Workflow {
 // Rework ContextCollapser to use the Strider pattern (Latest wrapper) similar to ExtractTopics.
 // - Input Yoj: us.awfl.utils.Convo.ConvoContext (already provided by us.awfl.utils.Convo)
 // - Output Ista: ista.CollapseResponse (defined under ista/, handles read/write semantics)
-object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMessages, CollapseResponse] {
+object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMessages, EventHandler.Input, CollapseResponse] {
 
   override def name: String = "context-ContextCollapser"
 

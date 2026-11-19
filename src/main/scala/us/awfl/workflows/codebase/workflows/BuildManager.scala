@@ -7,13 +7,13 @@ import us.awfl.workflows.EventHandler
 import us.awfl.workflows.helpers.Context
 import us.awfl.ista.ChatMessage
 import us.awfl.workflows.codebase.jobs.ContextAgent
-import us.awfl.services.Llm.ChatToolResponse
+import us.awfl.services.Llm.ChatResponse
 
 object BuildManager extends us.awfl.workflows.traits.Agent {
 
   override def preloads = super.preloads ++ List(
-    PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md"),
-    // PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/BuildManager.scala"),
+    PreloadFile("src/main/scala/us/awfl/workflows/AGENT.md"),
+    // PreloadFile("src/main/scala/us/awfl/workflows/codebase/workflows/BuildManager.scala"),
     PreloadFile("/Users/paul/github/TopAigents/workflows/build.sbt"),
     // val cornerstoneBuildSbt = Context.preloadFile("CornerstoneBuildSbt", "/Users/paul/github/TopAigents/cornerstone/build.sbt")
     PreloadCommand(

@@ -10,6 +10,7 @@ import us.awfl.services.Llm.ToolFunctionDef
 import us.awfl.workflows.tools.Tasks
 import us.awfl.utils.Env
 import us.awfl.workflows.tools.Tasks.Task
+import us.awfl.services.Llm.ToolWithWorkflow
 
 object SpawnCrawlers extends ToolWorkflow {
   case class Args(
@@ -57,7 +58,7 @@ object SpawnCrawlers extends ToolWorkflow {
           required = ListValue(List("items", "instructions", "perCrawlerBudget").cel)
         )
       ).toLlm,
-      workflowName = str(workflowName)
+      workflowName = OptValue(str(workflowName))
     )
   ))
 

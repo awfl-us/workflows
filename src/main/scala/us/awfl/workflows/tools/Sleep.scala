@@ -4,13 +4,14 @@ import us.awfl.dsl.*
 import us.awfl.dsl.auto.given
 import us.awfl.workflows.helpers.ToolDefs.*
 import us.awfl.workflows.traits.ToolWorkflow
+import us.awfl.services.Llm
 
 /** A deliberately no-op tool workflow used to validate Small-agent tool wiring. */
 object Sleep extends ToolWorkflow {
   val supported = List("SLEEP")
 
   val buildTools = buildList("buildSleepTools", List(
-    ToolWithWorkflow(
+    Llm.ToolWithWorkflow(
       function = ToolDefFunc(
         str("SLEEP"),
         "No-op workflow. Use it when the Small agent should deliberately pause/defer without side effects.",
@@ -19,7 +20,7 @@ object Sleep extends ToolWorkflow {
           required = ListValue.nil
         )
       ).toLlm,
-      workflowName = str(workflowName)
+      workflowName = OptValue(str(workflowName))
     )
   ))
 

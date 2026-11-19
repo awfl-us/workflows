@@ -9,10 +9,13 @@ import us.awfl.utils.Linkable
 import us.awfl.workflows.EventHandler
 import us.awfl.core
 import us.awfl.ista.TopicInfo
+import us.awfl.services.Llm.ChatResponse
+import us.awfl.ista.ChatMessage
+import us.awfl.workflows.tools.CliTools
 
 
 object SaveReflection extends Linkable {
-  override case class Params(agentWorkflow: BaseValue[String])
+  override case class Params(agentId: BaseValue[core.WorkflowId[EventHandler.Input, ChatResponse[ChatMessage]]])
   override type Input = ChainableInput[TopicInfo, Params]
   override type Result = NoValueT
 
@@ -28,8 +31,13 @@ object SaveReflection extends Linkable {
       """.stripMargin
     )
     val args = RunWorkflowArgs(
-      inputVal.flatMap(_.params).get.agentWorkflow,
-      obj(EventHandler.Input(query = OptValue(query), fund = Value[Double](0), toolChoice = OptObj(obj(ToolChoice.Function("UPDATE_FILE"))), sideCall = OptValue(Value[Boolean](true))))
+      inputVal.flatMap(_.params).flatMap(_.agentId).get.workflowName,
+      obj(EventHandler.Input(
+        query = OptValue(query),
+        fund = Value[Double](0),
+        toolChoice = OptObj(obj(CliTools.updateFileTool)),
+        sideCall = OptValue(Value[Boolean](true))
+      ))
     )
     val call = Call[RunWorkflowArgs[EventHandler.Input], AnyValueT](
       "callAgent",
@@ -37,7 +45,7 @@ object SaveReflection extends Linkable {
       obj(args)
     )
     Switch("maybeSaveReflection", List(
-      (("input" in inputVal.cel) && inputVal.flatMap(_.input).get.shouldSaveReflection) -> call.fn,
+      inputVal.flatMap(_.input.map(_.get.shouldSaveReflection).getOrElse(Value(false))).cel -> call.fn,
       (true: Cel) -> (List() -> Value.nil)
     )).fn
   })

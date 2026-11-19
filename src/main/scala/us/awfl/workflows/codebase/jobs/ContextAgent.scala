@@ -1,6 +1,7 @@
 package us.awfl.workflows.codebase.jobs
 
 import us.awfl.dsl._
+import us.awfl.services.Llm
 import us.awfl.workflows.traits.Agent
 import us.awfl.workflows.helpers.ToolDefs._
 
@@ -24,12 +25,12 @@ object ContextAgent extends Agent {
        |Default filter order: sizeLimiter then toolCallBackfill; keep docs and defaults in sync.
        |""".stripMargin
 
-  def tool = ToolWithWorkflow(
+  def tool = Llm.ToolWithWorkflow(
     function = ToolDefFunc(
       str("ContextAgent"),
       "Expert for the context service (functions/jobs/context)",
       toolParams
     ).toLlm,
-    workflowName = str(workflowName)
+    workflowName = OptValue(str(workflowName))
   )
 }

@@ -1,0 +1,304 @@
+{
+  "name" : "us-awfl-workflows-helpers-Convo-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.helpers.Convo.Input.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "prompts" : {
+        "type" : "object",
+        "properties" : {
+          "role" : {
+            "type" : "string"
+          },
+          "tool_calls" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "string"
+              },
+              "type" : {
+                "type" : "string"
+              },
+              "function" : {
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string"
+                  },
+                  "arguments" : {
+                    "type" : "string"
+                  }
+                },
+                "required" : [
+                  "name",
+                  "arguments"
+                ],
+                "additionalProperties" : true
+              }
+            },
+            "required" : [
+              "id",
+              "type",
+              "function"
+            ],
+            "additionalProperties" : true
+          },
+          "tool_call_id" : {
+            "type" : "string"
+          },
+          "create_time" : {
+            "type" : "integer"
+          },
+          "content" : {
+            "type" : "string"
+          },
+          "docId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "role",
+          "content",
+          "tool_calls",
+          "tool_call_id",
+          "create_time",
+          "docId"
+        ],
+        "additionalProperties" : true
+      },
+      "toolChoice" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "function" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string"
+              },
+              "description" : {
+                "type" : "string"
+              },
+              "parameters" : {
+                "type" : "object",
+                "properties" : {
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      
+                    },
+                    "required" : [
+                    ],
+                    "additionalProperties" : true
+                  },
+                  "properties" : {
+                    "type" : "object",
+                    "properties" : {
+                      
+                    },
+                    "required" : [
+                    ],
+                    "additionalProperties" : true
+                  },
+                  "enum" : {
+                    "type" : "string"
+                  },
+                  "type" : {
+                    "type" : "string"
+                  },
+                  "required" : {
+                    "type" : "string"
+                  }
+                },
+                "required" : [
+                  "type",
+                  "properties",
+                  "enum",
+                  "required",
+                  "items"
+                ],
+                "additionalProperties" : true
+              }
+            },
+            "required" : [
+              "name",
+              "description",
+              "parameters"
+            ],
+            "additionalProperties" : true
+          }
+        },
+        "required" : [
+          "type",
+          "function"
+        ],
+        "additionalProperties" : true
+      },
+      "env" : {
+        "type" : "object",
+        "properties" : {
+          "callingWorkflowExec" : {
+            "type" : "string"
+          },
+          "model" : {
+            "type" : "string"
+          },
+          "background" : {
+            "type" : "boolean"
+          },
+          "workdir" : {
+            "type" : "string"
+          },
+          "projectId" : {
+            "type" : "string"
+          },
+          "sessionId" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "BASE_URL" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "userId",
+          "model",
+          "callingWorkflowExec",
+          "BASE_URL",
+          "background",
+          "projectId",
+          "sessionId",
+          "workdir"
+        ],
+        "additionalProperties" : true
+      },
+      "kala" : {
+        "type" : "object",
+        "properties" : {
+          "begin" : {
+            "type" : "integer"
+          },
+          "windowSeconds" : {
+            "type" : "integer"
+          },
+          "sessionEnd" : {
+            "type" : "integer"
+          },
+          "end" : {
+            "type" : "integer"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "sessionId" : {
+            "type" : "string"
+          },
+          "weekEnd" : {
+            "type" : "integer"
+          }
+        },
+        "required" : [
+          "kind",
+          "sessionId",
+          "end",
+          "windowSeconds",
+          "sessionEnd",
+          "weekEnd",
+          "begin"
+        ],
+        "additionalProperties" : true
+      },
+      "skipAddMessages" : {
+        "type" : "boolean"
+      },
+      "query" : {
+        "type" : "string"
+      },
+      "tools" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "function" : {
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string"
+              },
+              "description" : {
+                "type" : "string"
+              },
+              "parameters" : {
+                "type" : "object",
+                "properties" : {
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      
+                    },
+                    "required" : [
+                    ],
+                    "additionalProperties" : true
+                  },
+                  "properties" : {
+                    "type" : "object",
+                    "properties" : {
+                      
+                    },
+                    "required" : [
+                    ],
+                    "additionalProperties" : true
+                  },
+                  "enum" : {
+                    "type" : "string"
+                  },
+                  "type" : {
+                    "type" : "string"
+                  },
+                  "required" : {
+                    "type" : "string"
+                  }
+                },
+                "required" : [
+                  "type",
+                  "properties",
+                  "enum",
+                  "required",
+                  "items"
+                ],
+                "additionalProperties" : true
+              }
+            },
+            "required" : [
+              "name",
+              "description",
+              "parameters"
+            ],
+            "additionalProperties" : true
+          }
+        },
+        "required" : [
+          "type",
+          "function"
+        ],
+        "additionalProperties" : true
+      }
+    },
+    "required" : [
+      "query",
+      "prompts",
+      "tools",
+      "toolChoice",
+      "skipAddMessages",
+      "kala",
+      "env"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-helpers-Convo-Input.json"
+  }
+}

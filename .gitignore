@@ -9,3 +9,5 @@ project/target
 target
 .terraform.lock.hcl
 infra/.terraform
+.idea
+.bsp

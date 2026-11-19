@@ -4,18 +4,19 @@ import us.awfl.dsl.*
 import us.awfl.dsl.CelOps.*
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ToolCall
-import us.awfl.services.Llm.ChatToolResponse
+import us.awfl.services.Llm.ChatResponse
 import us.awfl.workflows.EventHandler
 import us.awfl.workflows.traits.ToolWorkflow
 import us.awfl.utils.Exec
 import us.awfl.utils.Env
 import us.awfl.workflows.tools.Tasks.Task
+import us.awfl.ista.ChatMessage
 
 /**
  * tools/Agent
  * - Accepts CliTools.ToolWorkflowInput and invokes another workflow whose name matches the tool_call.function.name.
  * - Passes a EventHandler.Input built from the tool arguments: { query, task, (optional) model }.
- * - Returns CliTools.ToolWorkflowResult with the invoked workflow's ChatToolResponse encoded as JSON.
+ * - Returns CliTools.ToolWorkflowResult with the invoked workflow's ChatResponse[ChatMessage] encoded as JSON.
  *
  * Usage (tool args expected):
  * - name: <workflowName> (provided by tool_call.function.name)
@@ -53,7 +54,7 @@ object Agent extends us.awfl.workflows.traits.ToolWorkflow {
       )
     )
 
-    val run = Call[RunWorkflowArgs[EventHandler.Input], ChatToolResponse](
+    val run = Call[RunWorkflowArgs[EventHandler.Input], ChatResponse[ChatMessage]](
       "run_agent_workflow",
       "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run",
       obj(args)

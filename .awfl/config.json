@@ -1,9 +1,9 @@
 {
   "files": [
     "AGENT.md",
-    "Cel.scala",
-    "Steps.scala",
-    "Value.scala"
+    "../dsl/src/main/scala/us/awfl/dsl/Cel.scala",
+    "../dsl/src/main/scala/us/awfl/dsl/Steps.scala",
+    "../dsl/src/main/scala/us/awfl/dsl/Value.scala"
   ],
   "commands": [
     "pwd"

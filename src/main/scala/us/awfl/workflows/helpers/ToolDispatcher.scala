@@ -7,7 +7,7 @@ import us.awfl.ista.ToolCall
 import us.awfl.ista.ChatMessage
 import us.awfl.utils.{Convo, KalaVibhaga, SegKala}
 import us.awfl.workflows.EventHandler
-import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
+import us.awfl.services.Llm.ToolWithWorkflow
 import us.awfl.utils.Env
 import us.awfl.workflows.traits.ToolWorkflow
 
@@ -38,25 +38,24 @@ object ToolDispatcher extends us.awfl.core.Workflow {
       val function = toolCall.flatMap(_.function).get
       val functionName = function.name
 
-      val toolFold = Fold("fold", Value.nil[ToolWorkflow.Result], input.toolDefs) { case (b, d) =>
+      Fold("fold", Value.nil[ToolWorkflow.Result], input.toolDefs) { case (b, d) =>
         Switch("matchFunction", List(
-          (functionName === d.flatMap(_.function).flatMap(_.name)) -> {
-            val args = RunWorkflowArgs(str(d.get.workflowName + "${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, input.totalCost)))
-            Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result]("callToolWorkflow", "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args)).fn
+          ((functionName === d.flatMap(_.function).flatMap(_.name)) && d.get.workflowName.present) -> {
+            given KalaVibhaga = SegKala(Env.sessionId, Value("sys.now()"), Value(0))
+
+            val args = RunWorkflowArgs(str(d.get.workflowName.getOrElse(Value.nil) + "${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, input.totalCost)))
+            val runWorkflow = Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result]("callToolWorkflow", "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run", obj(args))
+
+            val saveResult = Convo.addMessage(
+              "saveResult",
+              inputVal.flatMap(_.env).get.sessionId,
+              obj(ChatMessage(str("tool"), runWorkflow.result.encoded, tool_call_id = toolCall.flatMap(_.id)))
+            )
+            List[Step[_, _]](runWorkflow, saveResult) -> runWorkflow.resultValue
           },
           (true: Cel) -> (List() -> b)
         )).fn
-      }
-
-      val saveResult = {
-        given KalaVibhaga = SegKala(Env.sessionId, Value("sys.now()"), Value(0))
-        Convo.addMessage(
-          "saveResult",
-          obj(ChatMessage(str("tool"), toolFold.result.encoded, tool_call_id = toolCall.flatMap(_.id)))
-        )
-      }
-
-      List[Step[?, ?]](toolFold, saveResult) -> toolFold.resultValue
+      }.fn
     }
 
     Workflow(buildSteps(List(dispatch) -> obj(Result(dispatch.resultValue)), _ => List() -> Value.nil))

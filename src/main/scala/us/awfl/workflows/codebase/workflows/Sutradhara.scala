@@ -2,14 +2,14 @@ package us.awfl.workflows.codebase.workflows
 
 import us.awfl.dsl.*
 import us.awfl.dsl.auto.given
-import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
+import us.awfl.services.Llm.ToolWithWorkflow
 import us.awfl.workflows.helpers.ToolDefs.ToolDefFunc
 import us.awfl.workflows.codebase.jobs.ContextAgent
 
 object Sutradhara extends us.awfl.workflows.traits.Agent {
   override def preloads = super.preloads ++ List(
-    PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md"),
-    PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/Sutradhara.scala"),
+    PreloadFile("src/main/scala/us/awfl/workflows/AGENT.md"),
+    PreloadFile("src/main/scala/us/awfl/workflows/codebase/workflows/Sutradhara.scala"),
     PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/utils/Prakriya.scala"),
     PreloadCommand(
       """bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo "# workflows/yaml_gens (sorted by mtime)"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo "No workflows/yaml_gens directory"; fi'"""
@@ -31,7 +31,7 @@ object Sutradhara extends us.awfl.workflows.traits.Agent {
       "For all inquiries time based context: Yoj, Ista, Prakriya, Kala, etc.",
       toolParams
     ).toLlm,
-    workflowName = str(workflowName)
+    workflowName = OptValue(str(workflowName))
   )
 
   override def buildTools = joinSteps("tools", super.buildTools, buildList("buildTools", List(

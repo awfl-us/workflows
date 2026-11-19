@@ -1,0 +1,546 @@
+main:
+  params:
+  - "input"
+  steps:
+  - maybeAddMessage:
+      steps:
+      - maybeAddMessage_initResult:
+          assign:
+          - maybeAddMessageResult_5be24abe: {}
+      - maybeAddMessage_steps:
+          switch:
+          - condition: "${(input.skipAddMessages or (not  default((map.get(input, \"query\") != null), false)))}"
+            steps:
+            - maybeAddMessage_updateResult_0:
+                assign:
+                - maybeAddMessageResult_5be24abe: "${null}"
+          - condition: "${true}"
+            steps:
+            - addMessage_seg_write_with_session_update:
+                steps:
+                - addMessage_newId:
+                    steps:
+                    - addMessage_newId_initResult:
+                        assign:
+                        - addMessage_newIdResult_dd64d33: {}
+                    - addMessage_newId_steps:
+                        try:
+                          steps:
+                          - addMessage_newId_updateResult:
+                              assign:
+                              - addMessage_newIdResult_dd64d33: "${uuid.generate()}"
+                        except:
+                          as: "addMessage_newIdError"
+                          steps:
+                          - logError:
+                              try:
+                                steps:
+                                - logError_call:
+                                    call: "sys.log"
+                                    args:
+                                      text: "${(\"[logError] \" + addMessage_newIdError.message)}"
+                                    result: "logErrorResult_23ca3a34"
+                              retry: "${http.default_retry}"
+                          - reRaise:
+                              raise: "${addMessage_newIdError}"
+                          - addMessage_newId_updateResultError:
+                              assign:
+                              - addMessage_newIdResult_dd64d33: "${null}"
+                - addMessage_write_messagesIsta_SegKala:
+                    try:
+                      steps:
+                      - addMessage_write_messagesIsta_SegKala_call:
+                          call: "http.post"
+                          args:
+                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/create\")}"
+                            body:
+                              collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
+                              id: "${addMessage_newIdResult_dd64d33}"
+                              contents:
+                                value:
+                                  role: "${\"user\"}"
+                                  content: "${default(map.get(input, \"query\"), null)}"
+                                  tool_calls: "${[]}"
+                                  tool_call_id: "${null}"
+                                  create_time: "${sys.now()}"
+                                  docId: "${null}"
+                                create_time: "${sys.now()}"
+                                cost: "${null}"
+                                execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                              userId: "${input.env.userId}"
+                            auth:
+                              type: "${\"OIDC\"}"
+                              audience: "${input.env.BASE_URL}"
+                            headers:
+                              x-user-id: "${input.env.userId}"
+                              x-project-id: "${input.env.projectId}"
+                          result: "addMessage_write_messagesIsta_SegKalaResult_4c6b2d3e"
+                    retry: "${http.default_retry}"
+                - addMessage_update_session_update_time:
+                    try:
+                      steps:
+                      - addMessage_update_session_update_time_call:
+                          call: "http.post"
+                          args:
+                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                            body:
+                              collection: "${\"convo.sessions\"}"
+                              id: "${input.env.sessionId}"
+                              contents:
+                                update_time: "${sys.now()}"
+                              userId: "${input.env.userId}"
+                            auth:
+                              type: "${\"OIDC\"}"
+                              audience: "${input.env.BASE_URL}"
+                            headers:
+                              x-user-id: "${input.env.userId}"
+                              x-project-id: "${input.env.projectId}"
+                          result: "addMessage_update_session_update_timeResult_a98acec"
+                    retry: "${http.default_retry}"
+            - maybeAddMessage_updateResult_1:
+                assign:
+                - maybeAddMessageResult_5be24abe: "${addMessage_write_messagesIsta_SegKalaResult_4c6b2d3e}"
+  - topicContextYojBlock:
+      steps:
+      - topicContext_components_1:
+          steps:
+          - topicContext_components_initResult:
+              assign:
+              - topicContext_componentsResult_2a548bc2: []
+          - topicContext_components_steps:
+              for:
+                value: "topicContext_componentsIdx"
+                range: "${[0, (1 - 1)]}"
+                steps:
+                - topicContext_components_switch:
+                    steps:
+                    - topicContext_components_switch_initResult:
+                        assign:
+                        - topicContext_components_switchResult_7ef8b77f: {}
+                    - topicContext_components_switch_steps:
+                        switch:
+                        - condition: "${(topicContext_componentsIdx == 0)}"
+                          steps:
+                          - topicContext_components_switch_updateResult_0:
+                              assign:
+                              - topicContext_components_switchResult_7ef8b77f:
+                                  kind: "yoj"
+                                  name: "topicContext"
+                                  framing: "${null}"
+                                  value: "${null}"
+                                  children:
+                                  - kind: "yoj"
+                                    name: "topicInfos"
+                                    framing: "Previously extracted topic info:\r"
+                                    value: "${null}"
+                                    children: []
+                                  - kind: "yoj"
+                                    name: "convoContext"
+                                    framing: "${null}"
+                                    value: "${null}"
+                                    children:
+                                    - kind: "yoj"
+                                      name: "summaries"
+                                      framing: "Summary of older conversation messages:\r"
+                                      value: "${null}"
+                                      children: []
+                                    - kind: "yoj"
+                                      name: "messages"
+                                      framing: ""
+                                      value: "${null}"
+                                      children: []
+                - topicContext_components_updateResult:
+                    assign:
+                    - topicContext_componentsResult_2a548bc2: "${list.concat(topicContext_componentsResult_2a548bc2, topicContext_components_switchResult_7ef8b77f)}"
+      - topicContext_model:
+          steps:
+          - topicContext_model_initResult:
+              assign:
+              - topicContext_modelResult_3374009b: {}
+          - topicContext_model_steps:
+              try:
+                steps:
+                - topicContext_components:
+                    steps:
+                    - topicContext_components_initResult_1:
+                        assign:
+                        - topicContext_componentsResult_2a548bc2: []
+                    - topicContext_components_steps_1:
+                        for:
+                          value: "topicContext_componentsIdx"
+                          range: "${[0, (1 - 1)]}"
+                          steps:
+                          - topicContext_components_switch_1:
+                              steps:
+                              - topicContext_components_switch_initResult_1:
+                                  assign:
+                                  - topicContext_components_switchResult_7ef8b77f: {}
+                              - topicContext_components_switch_steps_1:
+                                  switch:
+                                  - condition: "${(topicContext_componentsIdx == 0)}"
+                                    steps:
+                                    - topicContext_components_switch_updateResult_0_1:
+                                        assign:
+                                        - topicContext_components_switchResult_7ef8b77f:
+                                            kind: "yoj"
+                                            name: "topicContext"
+                                            framing: "${null}"
+                                            value: "${null}"
+                                            children:
+                                            - kind: "yoj"
+                                              name: "topicInfos"
+                                              framing: "Previously extracted topic info:\r"
+                                              value: "${null}"
+                                              children: []
+                                            - kind: "yoj"
+                                              name: "convoContext"
+                                              framing: "${null}"
+                                              value: "${null}"
+                                              children:
+                                              - kind: "yoj"
+                                                name: "summaries"
+                                                framing: "Summary of older conversation messages:\r"
+                                                value: "${null}"
+                                                children: []
+                                              - kind: "yoj"
+                                                name: "messages"
+                                                framing: ""
+                                                value: "${null}"
+                                                children: []
+                          - topicContext_components_updateResult_1:
+                              assign:
+                              - topicContext_componentsResult_2a548bc2: "${list.concat(topicContext_componentsResult_2a548bc2, topicContext_components_switchResult_7ef8b77f)}"
+                - topicContext_model_updateResult:
+                    assign:
+                    - topicContext_modelResult_3374009b:
+                        intro:
+                          system: "These are the previously extracted topic information, as well as the conversation context: "
+                        promoteUpstream: true
+                        components: "${topicContext_componentsResult_2a548bc2}"
+                        filters: "${null}"
+              except:
+                as: "topicContext_modelError"
+                steps:
+                - logError_1:
+                    try:
+                      steps:
+                      - logError_call_1:
+                          call: "sys.log"
+                          args:
+                            text: "${(\"[logError] \" + topicContext_modelError.message)}"
+                          result: "logErrorResult_67117457"
+                    retry: "${http.default_retry}"
+                - reRaise_1:
+                    raise: "${topicContext_modelError}"
+                - topicContext_model_updateResultError:
+                    assign:
+                    - topicContext_modelResult_3374009b: "${null}"
+      - TopicContextYoj_run_with_model:
+          try:
+            steps:
+            - TopicContextYoj_run_with_model_call:
+                call: "http.post"
+                args:
+                  url: "${((input.env.BASE_URL + \"/\") + \"context/topicContextYoj/run\")}"
+                  body:
+                    kala:
+                      kind: "${input.kala.kind}"
+                      sessionId: "${input.kala.sessionId}"
+                      end: "${input.kala.end}"
+                      windowSeconds: "${input.kala.windowSeconds}"
+                      sessionEnd: "${input.kala.sessionEnd}"
+                      weekEnd: "${input.kala.weekEnd}"
+                      begin: "${input.kala.begin}"
+                    presetId: "${null}"
+                    includeDocId: "${true}"
+                    model: "${topicContext_modelResult_3374009b}"
+                  auth:
+                    type: "${\"OIDC\"}"
+                    audience: "${input.env.BASE_URL}"
+                  headers:
+                    x-user-id: "${input.env.userId}"
+                    x-project-id: "${input.env.projectId}"
+                result: "TopicContextYoj_run_with_modelResult_7d5fa07d"
+          retry: "${http.default_retry}"
+      - for_topicContext_items:
+          steps:
+          - for_topicContext_items_initResult:
+              assign:
+              - for_topicContext_itemsResult_6e15b3ce: []
+          - for_topicContext_items_steps:
+              for:
+                value: "for_topicContext_itemsValue"
+                in: "${TopicContextYoj_run_with_modelResult_7d5fa07d.body.yoj}"
+                steps:
+                - for_topicContext_items_updateResult:
+                    assign:
+                    - for_topicContext_itemsResult_6e15b3ce: "${list.concat(for_topicContext_itemsResult_6e15b3ce, for_topicContext_itemsValue)}"
+  - messages:
+      steps:
+      - messages_initResult:
+          assign:
+          - messagesResult_584fa63b: {}
+      - messages_steps:
+          switch:
+          - condition: "${((not  input.skipAddMessages) and default((map.get(input, \"query\") != null), false))}"
+            steps:
+            - buildMessage:
+                steps:
+                - buildMessage_initResult:
+                    assign:
+                    - buildMessageResult_3ba4872a: {}
+                - buildMessage_steps:
+                    try:
+                      steps:
+                      - buildMessage_updateResult:
+                          assign:
+                          - buildMessageResult_3ba4872a:
+                              role: "${\"user\"}"
+                              content: "${default(map.get(input, \"query\"), null)}"
+                              tool_calls: "${[]}"
+                              tool_call_id: "${null}"
+                              create_time: "${sys.now()}"
+                              docId: "${null}"
+                    except:
+                      as: "buildMessageError"
+                      steps:
+                      - logError_2:
+                          try:
+                            steps:
+                            - logError_call_2:
+                                call: "sys.log"
+                                args:
+                                  text: "${(\"[logError] \" + buildMessageError.message)}"
+                                result: "logErrorResult_3a852903"
+                          retry: "${http.default_retry}"
+                      - reRaise_2:
+                          raise: "${buildMessageError}"
+                      - buildMessage_updateResultError:
+                          assign:
+                          - buildMessageResult_3ba4872a: "${null}"
+            - messages_updateResult_0:
+                assign:
+                - messagesResult_584fa63b: "${list.concat(for_topicContext_itemsResult_6e15b3ce, buildMessageResult_3ba4872a)}"
+          - condition: "${true}"
+            steps:
+            - messages_updateResult_1:
+                assign:
+                - messagesResult_584fa63b: "${for_topicContext_itemsResult_6e15b3ce}"
+  - buildToolChoice:
+      steps:
+      - buildToolChoice_initResult:
+          assign:
+          - buildToolChoiceResult_6c024a11: {}
+      - buildToolChoice_steps:
+          switch:
+          - condition: "${default((map.get(input, \"toolChoice\") != null), false)}"
+            steps:
+            - buildToolChoice_updateResult_0:
+                assign:
+                - buildToolChoiceResult_6c024a11:
+                    function:
+                      name: "${default(map.get(input, \"toolChoice\"), null).function.name}"
+                    type: "function"
+          - condition: "${true}"
+            steps:
+            - buildToolChoice_updateResult_1:
+                assign:
+                - buildToolChoiceResult_6c024a11: "${\"auto\"}"
+  - complete_block:
+      steps:
+      - complete_switch:
+          steps:
+          - complete_switch_initResult:
+              assign:
+              - complete_switchResult_5f44d335: {}
+          - complete_switch_steps:
+              switch:
+              - condition: "${(len(messagesResult_584fa63b) > 0)}"
+                steps:
+                - complete_joinMessages:
+                    steps:
+                    - complete_joinMessages_initResult:
+                        assign:
+                        - complete_joinMessagesResult_bcce285: []
+                    - complete_joinMessages_steps:
+                        for:
+                          value: "complete_joinMessagesIdx"
+                          range: "${[0, (((0 + len(input.prompts)) + len(messagesResult_584fa63b)) - 1)]}"
+                          steps:
+                          - complete_joinMessages_switch:
+                              steps:
+                              - complete_joinMessages_switch_initResult:
+                                  assign:
+                                  - complete_joinMessages_switchResult_5542a82f: {}
+                              - complete_joinMessages_switch_steps:
+                                  switch:
+                                  - condition: "${(complete_joinMessagesIdx >= (0 + len(input.prompts)))}"
+                                    steps:
+                                    - complete_joinMessages_switch_updateResult_0:
+                                        assign:
+                                        - complete_joinMessages_switchResult_5542a82f: "${messagesResult_584fa63b[(complete_joinMessagesIdx - (0 + len(input.prompts)))]}"
+                                  - condition: "${(complete_joinMessagesIdx >= 0)}"
+                                    steps:
+                                    - complete_joinMessages_switch_updateResult_1:
+                                        assign:
+                                        - complete_joinMessages_switchResult_5542a82f: "${input.prompts[(complete_joinMessagesIdx - 0)]}"
+                          - complete_joinMessages_updateResult:
+                              assign:
+                              - complete_joinMessagesResult_bcce285: "${list.concat(complete_joinMessagesResult_bcce285, complete_joinMessages_switchResult_5542a82f)}"
+                - chatBlock:
+                    steps:
+                    - toolChoice:
+                        steps:
+                        - toolChoice_initResult:
+                            assign:
+                            - toolChoiceResult_27e5918d: {}
+                        - toolChoice_steps:
+                            switch:
+                            - condition: "${((input.tools != null) and (len(input.tools) > 0))}"
+                              steps:
+                              - toolChoice_updateResult_0:
+                                  assign:
+                                  - toolChoiceResult_27e5918d: "${buildToolChoiceResult_6c024a11}"
+                            - condition: "${true}"
+                              steps:
+                              - toolChoice_updateResult_1:
+                                  assign:
+                                  - toolChoiceResult_27e5918d: "${null}"
+                    - complete_chat:
+                        try:
+                          steps:
+                          - complete_chat_call:
+                              call: "http.post"
+                              args:
+                                url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
+                                body:
+                                  messages: "${complete_joinMessagesResult_bcce285}"
+                                  model: "${input.env.model}"
+                                  temperature: 0.8
+                                  max_completion_tokens: "${null}"
+                                  response_format:
+                                    type: "text"
+                                  sessionId: "${input.env.sessionId}"
+                                  workflow_name: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
+                                  tools: "${input.tools}"
+                                  tool_choice: "${toolChoiceResult_27e5918d}"
+                                auth:
+                                  type: "${\"OIDC\"}"
+                                  audience: "${input.env.BASE_URL}"
+                                headers:
+                                  x-user-id: "${input.env.userId}"
+                                  x-project-id: "${input.env.projectId}"
+                              result: "complete_chatResult_64b7db68"
+                        retry: "${http.default_retry}"
+                - complete_switch_updateResult_0:
+                    assign:
+                    - complete_switchResult_5f44d335: "${complete_chatResult_64b7db68.body}"
+              - condition: "${true}"
+                steps:
+                - emptyYoj:
+                    raise:
+                      message: "${\"Empty Yoj returned\"}"
+                      code: "${default(400, null)}"
+                - complete_switch_updateResult_1:
+                    assign:
+                    - complete_switchResult_5f44d335: "${null}"
+  - maybeAddResponse:
+      steps:
+      - maybeAddResponse_initResult:
+          assign:
+          - maybeAddResponseResult_444c8c62: {}
+      - maybeAddResponse_steps:
+          switch:
+          - condition: "${input.skipAddMessages}"
+            steps:
+            - maybeAddResponse_updateResult_0:
+                assign:
+                - maybeAddResponseResult_444c8c62: "${null}"
+          - condition: "${true}"
+            steps:
+            - addResponse_seg_write_with_session_update:
+                steps:
+                - addResponse_newId:
+                    steps:
+                    - addResponse_newId_initResult:
+                        assign:
+                        - addResponse_newIdResult_54c689dc: {}
+                    - addResponse_newId_steps:
+                        try:
+                          steps:
+                          - addResponse_newId_updateResult:
+                              assign:
+                              - addResponse_newIdResult_54c689dc: "${uuid.generate()}"
+                        except:
+                          as: "addResponse_newIdError"
+                          steps:
+                          - logError_3:
+                              try:
+                                steps:
+                                - logError_call_3:
+                                    call: "sys.log"
+                                    args:
+                                      text: "${(\"[logError] \" + addResponse_newIdError.message)}"
+                                    result: "logErrorResult_4b664d8e"
+                              retry: "${http.default_retry}"
+                          - reRaise_3:
+                              raise: "${addResponse_newIdError}"
+                          - addResponse_newId_updateResultError:
+                              assign:
+                              - addResponse_newIdResult_54c689dc: "${null}"
+                - addResponse_write_messagesIsta_SegKala:
+                    try:
+                      steps:
+                      - addResponse_write_messagesIsta_SegKala_call:
+                          call: "http.post"
+                          args:
+                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/create\")}"
+                            body:
+                              collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
+                              id: "${addResponse_newIdResult_54c689dc}"
+                              contents:
+                                value:
+                                  role: "${complete_switchResult_5f44d335.message.role}"
+                                  content: "${complete_switchResult_5f44d335.message.content}"
+                                  tool_calls: "${map.get(complete_switchResult_5f44d335.message, \"tool_calls\")}"
+                                  tool_call_id: "${null}"
+                                  create_time: "${sys.now()}"
+                                  docId: "${null}"
+                                create_time: "${sys.now()}"
+                                cost: "${complete_switchResult_5f44d335.total_cost}"
+                                execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
+                              userId: "${input.env.userId}"
+                            auth:
+                              type: "${\"OIDC\"}"
+                              audience: "${input.env.BASE_URL}"
+                            headers:
+                              x-user-id: "${input.env.userId}"
+                              x-project-id: "${input.env.projectId}"
+                          result: "addResponse_write_messagesIsta_SegKalaResult_784e107e"
+                    retry: "${http.default_retry}"
+                - addResponse_update_session_update_time:
+                    try:
+                      steps:
+                      - addResponse_update_session_update_time_call:
+                          call: "http.post"
+                          args:
+                            url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
+                            body:
+                              collection: "${\"convo.sessions\"}"
+                              id: "${input.env.sessionId}"
+                              contents:
+                                update_time: "${sys.now()}"
+                              userId: "${input.env.userId}"
+                            auth:
+                              type: "${\"OIDC\"}"
+                              audience: "${input.env.BASE_URL}"
+                            headers:
+                              x-user-id: "${input.env.userId}"
+                              x-project-id: "${input.env.projectId}"
+                          result: "addResponse_update_session_update_timeResult_4c62bcde"
+                    retry: "${http.default_retry}"
+            - maybeAddResponse_updateResult_1:
+                assign:
+                - maybeAddResponseResult_444c8c62: "${addResponse_write_messagesIsta_SegKalaResult_784e107e}"
+  - return:
+      return: "${complete_switchResult_5f44d335}"

@@ -6,8 +6,8 @@ import us.awfl.workflows.codebase.jobs.ContextAgent
 
 object ToolBuilder extends us.awfl.workflows.traits.Agent {
   override def preloads = super.preloads ++ List(
-    PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/AGENT.md"),
-    PreloadFile("/Users/paul/github/TopAigents/workflows/src/main/scala/workflows/codebase/workflows/ToolBuilder.scala"),
+    PreloadFile("src/main/scala/us/awfl/workflows/AGENT.md"),
+    PreloadFile("src/main/scala/us/awfl/workflows/codebase/workflows/ToolBuilder.scala"),
     PreloadCommand(
       """bash -lc 'if [ -d /Users/paul/github/TopAigents/workflows/yaml_gens ]; then echo "# workflows/yaml_gens (sorted by mtime)"; ls -lt /Users/paul/github/TopAigents/workflows/yaml_gens; else echo "No workflows/yaml_gens directory"; fi'"""
     ),

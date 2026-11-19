@@ -4,7 +4,8 @@ import us.awfl.dsl.*
 import us.awfl.dsl.auto.given
 import us.awfl.dsl.CelOps._
 import us.awfl.workflows.EventHandler
-import us.awfl.services.Llm.ChatToolResponse
+import us.awfl.services.Llm
+import us.awfl.services.Llm.ChatResponse
 import us.awfl.utils.Env
 import us.awfl.utils.Callback
 import us.awfl.ista.ChatMessage
@@ -12,6 +13,7 @@ import us.awfl.workflows.Summaries
 import us.awfl.workflows.assistant.ExtractTopics
 import us.awfl.workflows.context.ContextCollapser
 import us.awfl.workflows.helpers.ToolDefs._
+import us.awfl.workflows.helpers.SmallStrider
 import us.awfl.services.Llm.ToolChoice
 import us.awfl.workflows.tools.Tasks.Task
 import us.awfl.workflows.event.Status
@@ -24,6 +26,7 @@ trait Agent
   with Funds
   with Status
   with Summaries
+  with SmallStrider
   with ExtractTopics
   with ContextCollapser {
     
@@ -46,12 +49,20 @@ trait Agent
     fund: Value[Double],
     spent: Value[Double] = Value(0),
     task: OptBase[Task] = OptValue.nil,
-    toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
+    toolChoice: OptBase[Llm.Tool] = OptValue.nil,
     env: BaseValue[Env] = obj(Env.get.copy(sessionId = str(workflowName)))
-  ): Step[ChatToolResponse, Value[ChatToolResponse]] = Callback[ChatToolResponse]{ callback =>
-    execute[Input, ChatToolResponse](
+  ): Step[ChatResponse[ChatMessage], Value[ChatResponse[ChatMessage]]] = Callback[ChatResponse[ChatMessage]]{ callback =>
+    execute[Input, ChatResponse[ChatMessage]](
       workflowName,
-      obj(EventHandler.Input(query = OptValue(query), fund = fund, spent = OptValue(spent), task = task, toolChoice = toolChoice, callback = OptValue(obj(callback)), env = env))
+      obj(EventHandler.Input(
+        query = OptValue(query),
+        fund = fund,
+        spent = OptValue(spent),
+        task = task,
+        toolChoice = toolChoice,
+        callback = OptValue(obj(callback)),
+        env = env
+      ))
     )
   }
 

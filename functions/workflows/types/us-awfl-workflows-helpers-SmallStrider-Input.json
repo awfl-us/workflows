@@ -1,0 +1,79 @@
+{
+  "name" : "us-awfl-workflows-helpers-SmallStrider-Input",
+  "description" : "Schema inferred from deriver sample JSON for us.awfl.workflows.helpers.SmallStrider.Input.",
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "agentId" : {
+        "type" : "object",
+        "properties" : {
+          "workflowName" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "workflowName"
+        ],
+        "additionalProperties" : true
+      },
+      "overlapSeconds" : {
+        "type" : "integer"
+      },
+      "segmentEnd" : {
+        "type" : "integer"
+      },
+      "windowSeconds" : {
+        "type" : "integer"
+      },
+      "env" : {
+        "type" : "object",
+        "properties" : {
+          "callingWorkflowExec" : {
+            "type" : "string"
+          },
+          "model" : {
+            "type" : "string"
+          },
+          "background" : {
+            "type" : "boolean"
+          },
+          "workdir" : {
+            "type" : "string"
+          },
+          "projectId" : {
+            "type" : "string"
+          },
+          "sessionId" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          },
+          "BASE_URL" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "userId",
+          "model",
+          "callingWorkflowExec",
+          "BASE_URL",
+          "background",
+          "projectId",
+          "sessionId",
+          "workdir"
+        ],
+        "additionalProperties" : true
+      }
+    },
+    "required" : [
+      "agentId",
+      "segmentEnd",
+      "windowSeconds",
+      "overlapSeconds",
+      "env"
+    ],
+    "additionalProperties" : true,
+    "$id" : "https://topaigents.dev/workflows/types/us-awfl-workflows-helpers-SmallStrider-Input.json"
+  }
+}

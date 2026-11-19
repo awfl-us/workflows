@@ -40,6 +40,7 @@ main:
                         sessionId: "${input.env.sessionId}"
                         end: "${segmentsForSession_convertValue.end}"
                         windowSeconds: "${default(input.windowSeconds, 1200)}"
+                        kind: "SegKala"
                 - segmentsForSession_convert_updateResult:
                     assign:
                     - segmentsForSession_convertResult_fdb29a4: "${list.concat(segmentsForSession_convertResult_fdb29a4, segmentsForSession_convert_assignIterResultVar)}"
@@ -51,13 +52,15 @@ main:
             args:
               workflow_id: "${\"assistant-ExtractTopics-All${WORKFLOW_ENV}\"}"
               argument:
+                agentId:
+                  workflowName: "${input.agentId.workflowName}"
                 segmentEnd: "${segmentsForSession_convertResult_fdb29a4[(len(segmentsForSession_convertResult_fdb29a4) - 1)].end}"
                 windowSeconds: "${1200}"
                 overlapSeconds: "${240}"
                 env:
                   userId: "${input.env.userId}"
                   model: "${input.env.model}"
-                  callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                  callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
                   BASE_URL: "${input.env.BASE_URL}"
                   background: "${default(map.get(input.env, \"background\"), null)}"
                   projectId: "${input.env.projectId}"
@@ -67,9 +70,9 @@ main:
               project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
               connector_params:
                 skip_polling: false
-            result: "All_Latest_runResult_2809ffaa"
+            result: "All_Latest_runResult_74078d29"
       retry: "${http.default_retry}"
   - returnLatest:
-      return: "${All_Latest_runResult_2809ffaa}"
+      return: "${All_Latest_runResult_74078d29}"
   - return:
-      return: "${All_Latest_runResult_2809ffaa}"
+      return: "${All_Latest_runResult_74078d29}"

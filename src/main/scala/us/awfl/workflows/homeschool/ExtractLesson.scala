@@ -25,11 +25,10 @@ trait ExtractLesson(using kala: SegKala) {
   given LessonContext(using prevTopics: Yoj[TopicInfo], convoContext: Yoj[ConvoContext], lesson: Yoj[Lesson]): Yoj[LessonContext] = Yoj(
     "lessonContext",
     { kala =>
-      given KalaVibhaga = kala
-
       YojComposer.composed(
         name = "topicContext",
         childComponents = List(prevTopics.component, convoContext.component, lesson.component),
+        kala = kala,
         intro = Some("Here are the topics, lessons and summaries extracted from earlier parts of the conversation:\r"),
         promoteUpstream = true,
         filters = ListValue.nil

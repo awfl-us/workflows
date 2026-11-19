@@ -7,7 +7,8 @@ import us.awfl.workflows.tools.CliTools
 import us.awfl.workflows.EventHandler
 import us.awfl.workflows.helpers.Agents
 import us.awfl.workflows.helpers.ToolDefs
-import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
+import us.awfl.services.Llm.ToolWithWorkflow
+import us.awfl.services.Llm.Tool
 
 trait Tools extends us.awfl.core.Workflow with EventHandler.WithInput {
   def toolsWfName = s"${workflowName}-tools"
@@ -36,8 +37,14 @@ trait Tools extends us.awfl.core.Workflow with EventHandler.WithInput {
 
   override def workflows: List[Workflow[?]] = Workflow(
     {
-      val maybeSelectChoice = Switch("maybeFilterChoice", List(
-        input.toolChoice.present -> (List() -> ListValue(List(input.toolChoice.getOrElse(Value.nil).cel)))
+      val maybeSelectChoice = Switch.list("maybeFilterChoice", List(
+        input.toolChoice.present.cel -> buildList(
+          "buildToolChoice",
+          List(ToolWithWorkflow(
+            function = input.toolChoice.getOrElse(Value.nil).flatMap(_.function),
+            workflowName = OptValue.nil
+          ))
+        ).fn,
         (true: Cel) -> buildTools.fn
       ))
       List(maybeSelectChoice) -> obj(ToolsResult(maybeSelectChoice.resultValue))

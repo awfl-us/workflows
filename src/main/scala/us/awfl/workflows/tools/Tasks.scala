@@ -9,6 +9,7 @@ import us.awfl.workflows.EventHandler
 import us.awfl.workflows.helpers.tasks.TaskRunners
 import us.awfl.workflows.traits.ToolWorkflow
 import us.awfl.workflows.helpers.ToolDefs._
+import us.awfl.services.Llm.ToolWithWorkflow
 
 /**
  * tools/Tasks
@@ -77,7 +78,7 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
         str("Create a task in the current user's scope. Session is inferred by the current CLI workflow session."),
         obj(createParams.toLlm)
       )),
-      workflowName = str(workflowName)
+      workflowName = OptValue(str(workflowName))
     ),
     ToolWithWorkflow(
       function = obj(ToolFunctionDef(
@@ -85,7 +86,7 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
         str("Update a task by id in the current user's scope (session inferred)."),
         updateParams
       )),
-      workflowName = str(workflowName)
+      workflowName = OptValue(str(workflowName))
     )
   ))
 

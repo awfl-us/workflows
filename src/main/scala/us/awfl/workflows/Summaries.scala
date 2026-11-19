@@ -13,18 +13,18 @@ import us.awfl.utils.Env
 import us.awfl.utils.SegKala
 import us.awfl.utils.KalaVibhaga
 
-trait Summaries extends us.awfl.core.Workflow {
+trait Summaries extends EventHandler {
   override def buildSteps(
     main: (List[Step[?, ?]], BaseValue[Result]),
     except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
   )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
-    (main._1 :+ Summaries("runSummaries")) -> main._2,
+    (main._1 :+ Summaries(id)) -> main._2,
     except
   )
 }
 
 given StepName = StepName("summariesStrider")
-object Summaries extends us.awfl.utils.strider.Latest[ConvoContext, ConvoSummary]("Summaries") {
+object Summaries extends us.awfl.utils.strider.Latest[ConvoContext, EventHandler.Input, ConvoSummary]("Summaries") {
   override def prompt = "You are a thoughtfull and pragmatic assistant. Plan and operate towards the most impactful, cost effective solutions."
 
   override def onPostWrite(sessionId: Value[String], responseId: Value[String], response: Value[ConvoSummary], at: Value[Double]): List[Step[?, ?]] = {

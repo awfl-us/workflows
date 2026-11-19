@@ -9,6 +9,7 @@ import us.awfl.utils.Env
 import us.awfl.workflows.traits.Agent
 import us.awfl.workflows.tools.Sleep
 import us.awfl.workflows.tools.Tasks.Task
+import us.awfl.services.Llm.Tool
 
 /**
  * Small: a lightweight, low-cost agent for quick direction-setting and minimal side effects.
@@ -45,7 +46,7 @@ object Small extends Agent {
     fund: Value[Double],
     spent: Value[Double] = Value(0),
     task: OptBase[Task] = OptValue.nil,
-    toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
-    env: BaseValue[Env] = obj(Env.get.copy(sessionId = str(workflowName), model = str("gpt-4o-mini")))
+    toolChoice: OptBase[Tool] = OptValue.nil,
+    env: BaseValue[Env] = obj(Env.get.copy(sessionId = str(workflowName), model = str("gpt-6-luna")))
   ) = super.apply(name, query, fund, spent, task, toolChoice, env)
 }

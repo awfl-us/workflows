@@ -151,7 +151,7 @@ object BusinessAnalysis extends us.awfl.core.Workflow {
         totalCompetitors = str(len(generateKeywords.resultValue.flatMap(_.competitors))),
         topCompetitors = generateKeywords.resultValue.flatMap(_.competitors)
       )),
-      analysis = analyzeReport.resultValue.flatMap(_.result),
+      analysis = analyzeReport.resultValue.flatMap(_.message),
       reviews = reviews.resultValue.flatMap(_.reviews)
     ))
   ) }

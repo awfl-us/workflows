@@ -55,18 +55,11 @@ object ToolDefs extends us.awfl.core.Workflow {
       obj(parameters.toLlm)
     ))
   }
-
-  // Service-facing variant that carries workflowName metadata alongside the LLM tool def
-  case class ToolWithWorkflow(
-    `type`: Value[String] = str("function"),
-    function: BaseValue[Llm.ToolFunctionDef],
-    workflowName: Value[String]
-  )
   
-  case class Result(defs: ListValue[ToolWithWorkflow])
+  case class Result(defs: ListValue[Llm.ToolWithWorkflow])
 
   // Envelope for service response: we avoid returning a bare list so PostResult[T] wraps an object
-  case class ServiceResp(items: ListValue[ToolWithWorkflow])
+  case class ServiceResp(items: ListValue[Llm.ToolWithWorkflow])
 
   // Fetch tool defs from service with optional names filter (CSV supported by service)
   // Return an object envelope so PostResult[T] is PostResult[ServiceResp] (T is an object), not a list

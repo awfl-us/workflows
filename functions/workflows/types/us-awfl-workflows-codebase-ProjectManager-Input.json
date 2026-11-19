@@ -101,31 +101,82 @@
         ],
         "additionalProperties" : true
       },
+      "windowSeconds" : {
+        "type" : "integer"
+      },
+      "windowEnd" : {
+        "type" : "integer"
+      },
       "fund" : {
         "type" : "integer"
       },
       "toolChoice" : {
         "type" : "object",
         "properties" : {
+          "type" : {
+            "type" : "string"
+          },
           "function" : {
             "type" : "object",
             "properties" : {
               "name" : {
                 "type" : "string"
+              },
+              "description" : {
+                "type" : "string"
+              },
+              "parameters" : {
+                "type" : "object",
+                "properties" : {
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      
+                    },
+                    "required" : [
+                    ],
+                    "additionalProperties" : true
+                  },
+                  "properties" : {
+                    "type" : "object",
+                    "properties" : {
+                      
+                    },
+                    "required" : [
+                    ],
+                    "additionalProperties" : true
+                  },
+                  "enum" : {
+                    "type" : "string"
+                  },
+                  "type" : {
+                    "type" : "string"
+                  },
+                  "required" : {
+                    "type" : "string"
+                  }
+                },
+                "required" : [
+                  "type",
+                  "properties",
+                  "enum",
+                  "required",
+                  "items"
+                ],
+                "additionalProperties" : true
               }
             },
             "required" : [
-              "name"
+              "name",
+              "description",
+              "parameters"
             ],
             "additionalProperties" : true
-          },
-          "type" : {
-            "type" : "string"
           }
         },
         "required" : [
-          "function",
-          "type"
+          "type",
+          "function"
         ],
         "additionalProperties" : true
       },
@@ -185,6 +236,8 @@
       "toolChoice",
       "sideCall",
       "callback",
+      "windowSeconds",
+      "windowEnd",
       "env"
     ],
     "additionalProperties" : true,

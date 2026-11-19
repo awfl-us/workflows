@@ -465,7 +465,7 @@ main:
                                       env:
                                         userId: "${input.env.userId}"
                                         model: "${input.env.model}"
-                                        callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                        callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
                                         BASE_URL: "${input.env.BASE_URL}"
                                         background: "${default(map.get(input.env, \"background\"), null)}"
                                         projectId: "${input.env.projectId}"
@@ -686,7 +686,7 @@ main:
           steps:
           - fundPrompt_initResult:
               assign:
-              - fundPromptResult_79374364: []
+              - fundPromptResult_5afb473f: []
           - fundPrompt_steps:
               for:
                 value: "fundPromptIdx"
@@ -696,14 +696,14 @@ main:
                     steps:
                     - fundPrompt_switch_initResult:
                         assign:
-                        - fundPrompt_switchResult_3f363a67: {}
+                        - fundPrompt_switchResult_1f99f9f9: {}
                     - fundPrompt_switch_steps:
                         switch:
                         - condition: "${(fundPromptIdx == 0)}"
                           steps:
                           - fundPrompt_switch_updateResult_0:
                               assign:
-                              - fundPrompt_switchResult_3f363a67:
+                              - fundPrompt_switchResult_1f99f9f9:
                                   role: "${\"system\"}"
                                   content: "${(((\"Original funds allocated for the current task: $\" + input.fund) + \"\rSpent so far: $\") + default(map.get(input, \"spent\"), 0))}"
                                   tool_calls: "${[]}"
@@ -714,7 +714,7 @@ main:
                           steps:
                           - fundPrompt_switch_updateResult_1:
                               assign:
-                              - fundPrompt_switchResult_3f363a67:
+                              - fundPrompt_switchResult_1f99f9f9:
                                   role: "${\"system\"}"
                                   content: "${\"Plan accordingly. If a third of the available funds have been spent: Make sure you're wrapping up investigation and have updated the task.\nIf two thirds of the funds have been spent: Make sure you're wrapping up implentation/main work and the task is up to date.\nIf all the funds have been spent: No more work allowed! Immediatly update the task and then report the latest status.\n(You can update a file if that is the last step remaining, then return)\n        \"}"
                                   tool_calls: "${[]}"
@@ -723,37 +723,37 @@ main:
                                   docId: "${null}"
                 - fundPrompt_updateResult:
                     assign:
-                    - fundPromptResult_79374364: "${list.concat(fundPromptResult_79374364, fundPrompt_switchResult_3f363a67)}"
+                    - fundPromptResult_5afb473f: "${list.concat(fundPromptResult_5afb473f, fundPrompt_switchResult_1f99f9f9)}"
       - fundsPrompts_joinSteps:
           steps:
           - fundsPrompts_joinSteps_initResult:
               assign:
-              - fundsPrompts_joinStepsResult_46e79fb1: []
+              - fundsPrompts_joinStepsResult_394a6028: []
           - fundsPrompts_joinSteps_steps:
               for:
                 value: "fundsPrompts_joinStepsIdx"
-                range: "${[0, (((0 + len(cli_joinStepsResult_710ce85f)) + len(fundPromptResult_79374364)) - 1)]}"
+                range: "${[0, (((0 + len(cli_joinStepsResult_710ce85f)) + len(fundPromptResult_5afb473f)) - 1)]}"
                 steps:
                 - fundsPrompts_joinSteps_switch:
                     steps:
                     - fundsPrompts_joinSteps_switch_initResult:
                         assign:
-                        - fundsPrompts_joinSteps_switchResult_e4b3770: {}
+                        - fundsPrompts_joinSteps_switchResult_6f9aa911: {}
                     - fundsPrompts_joinSteps_switch_steps:
                         switch:
                         - condition: "${(fundsPrompts_joinStepsIdx >= (0 + len(cli_joinStepsResult_710ce85f)))}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_0:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_e4b3770: "${fundPromptResult_79374364[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_710ce85f)))]}"
+                              - fundsPrompts_joinSteps_switchResult_6f9aa911: "${fundPromptResult_5afb473f[(fundsPrompts_joinStepsIdx - (0 + len(cli_joinStepsResult_710ce85f)))]}"
                         - condition: "${(fundsPrompts_joinStepsIdx >= 0)}"
                           steps:
                           - fundsPrompts_joinSteps_switch_updateResult_1:
                               assign:
-                              - fundsPrompts_joinSteps_switchResult_e4b3770: "${cli_joinStepsResult_710ce85f[(fundsPrompts_joinStepsIdx - 0)]}"
+                              - fundsPrompts_joinSteps_switchResult_6f9aa911: "${cli_joinStepsResult_710ce85f[(fundsPrompts_joinStepsIdx - 0)]}"
                 - fundsPrompts_joinSteps_updateResult:
                     assign:
-                    - fundsPrompts_joinStepsResult_46e79fb1: "${list.concat(fundsPrompts_joinStepsResult_46e79fb1, fundsPrompts_joinSteps_switchResult_e4b3770)}"
+                    - fundsPrompts_joinStepsResult_394a6028: "${list.concat(fundsPrompts_joinStepsResult_394a6028, fundsPrompts_joinSteps_switchResult_6f9aa911)}"
   - return:
       return:
-        prompts: "${fundsPrompts_joinStepsResult_46e79fb1}"
+        prompts: "${fundsPrompts_joinStepsResult_394a6028}"

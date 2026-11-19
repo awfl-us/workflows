@@ -6,7 +6,7 @@ main:
       steps:
       - mainTry_initResult:
           assign:
-          - mainTryResult_1363d3b3: {}
+          - mainTryResult_3c1063b: {}
       - mainTry_steps:
           try:
             steps:
@@ -14,7 +14,7 @@ main:
                 steps:
                 - registerExecForSessionTry_initResult:
                     assign:
-                    - registerExecForSessionTryResult_134cfffa: {}
+                    - registerExecForSessionTryResult_503a005d: {}
                 - registerExecForSessionTry_steps:
                     try:
                       steps:
@@ -43,7 +43,7 @@ main:
                           retry: "${http.default_retry}"
                       - registerExecForSessionTry_updateResult:
                           assign:
-                          - registerExecForSessionTryResult_134cfffa: "${\"ok\"}"
+                          - registerExecForSessionTryResult_503a005d: "${\"ok\"}"
                     except:
                       as: "registerExecForSessionTryError"
                       steps:
@@ -51,7 +51,7 @@ main:
                           steps:
                           - registerExecForSessionSwitch_initResult:
                               assign:
-                              - registerExecForSessionSwitchResult_78c29a22: {}
+                              - registerExecForSessionSwitchResult_1d9099ac: {}
                           - registerExecForSessionSwitch_steps:
                               switch:
                               - condition: "${((\"code\" in registerExecForSessionTryError) and (default(map.get(registerExecForSessionTryError, \"code\"), 0) == 409))}"
@@ -81,22 +81,22 @@ main:
                                     retry: "${http.default_retry}"
                                 - registerExecForSessionSwitch_updateResult_0:
                                     assign:
-                                    - registerExecForSessionSwitchResult_78c29a22: "${\"ok\"}"
+                                    - registerExecForSessionSwitchResult_1d9099ac: "${\"ok\"}"
                               - condition: "${true}"
                                 steps:
                                 - registerExecForSessionRethrow:
                                     raise: "${registerExecForSessionTryError}"
                                 - registerExecForSessionSwitch_updateResult_1:
                                     assign:
-                                    - registerExecForSessionSwitchResult_78c29a22: "${\"fail\"}"
+                                    - registerExecForSessionSwitchResult_1d9099ac: "${\"fail\"}"
                       - registerExecForSessionTry_updateResultError:
                           assign:
-                          - registerExecForSessionTryResult_134cfffa: "${registerExecForSessionSwitchResult_78c29a22}"
+                          - registerExecForSessionTryResult_503a005d: "${registerExecForSessionSwitchResult_1d9099ac}"
             - registerWorkflowExecLink:
                 steps:
                 - registerWorkflowExecLink_initResult:
                     assign:
-                    - registerWorkflowExecLinkResult_23f07d68: {}
+                    - registerWorkflowExecLinkResult_4ba0f305: {}
                 - registerWorkflowExecLink_steps:
                     switch:
                     - condition: "${(len(default(default(map.get(input.env, \"callingWorkflowExec\"), null), \"\")) > 0)}"
@@ -105,7 +105,7 @@ main:
                           steps:
                           - registerWorkflowExecLinkTry_initResult:
                               assign:
-                              - registerWorkflowExecLinkTryResult_4e2a0dfd: {}
+                              - registerWorkflowExecLinkTryResult_3cd107e2: {}
                           - registerWorkflowExecLinkTry_steps:
                               try:
                                 steps:
@@ -131,11 +131,11 @@ main:
                                             headers:
                                               x-user-id: "${input.env.userId}"
                                               x-project-id: "${input.env.projectId}"
-                                          result: "registerWorkflowExecLinkCreateResult_524e6132"
+                                          result: "registerWorkflowExecLinkCreateResult_5f49ed0b"
                                     retry: "${http.default_retry}"
                                 - registerWorkflowExecLinkTry_updateResult:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_4e2a0dfd: "${\"ok\"}"
+                                    - registerWorkflowExecLinkTryResult_3cd107e2: "${\"ok\"}"
                               except:
                                 as: "registerWorkflowExecLinkTryError"
                                 steps:
@@ -143,7 +143,7 @@ main:
                                     steps:
                                     - registerWorkflowExecLinkSwitch_initResult:
                                         assign:
-                                        - registerWorkflowExecLinkSwitchResult_107cd5a2: {}
+                                        - registerWorkflowExecLinkSwitchResult_2275539c: {}
                                     - registerWorkflowExecLinkSwitch_steps:
                                         switch:
                                         - condition: "${(default(map.get(registerWorkflowExecLinkTryError, \"code\"), 0) == 409)}"
@@ -170,34 +170,34 @@ main:
                                                       headers:
                                                         x-user-id: "${input.env.userId}"
                                                         x-project-id: "${input.env.projectId}"
-                                                    result: "registerWorkflowExecLinkUpdateResult_2eebbb90"
+                                                    result: "registerWorkflowExecLinkUpdateResult_30cb1007"
                                               retry: "${http.default_retry}"
                                           - registerWorkflowExecLinkSwitch_updateResult_0:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_107cd5a2: "${\"ok\"}"
+                                              - registerWorkflowExecLinkSwitchResult_2275539c: "${\"ok\"}"
                                         - condition: "${true}"
                                           steps:
                                           - registerWorkflowExecLinkRethrow:
                                               raise: "${registerWorkflowExecLinkTryError}"
                                           - registerWorkflowExecLinkSwitch_updateResult_1:
                                               assign:
-                                              - registerWorkflowExecLinkSwitchResult_107cd5a2: "${\"fail\"}"
+                                              - registerWorkflowExecLinkSwitchResult_2275539c: "${\"fail\"}"
                                 - registerWorkflowExecLinkTry_updateResultError:
                                     assign:
-                                    - registerWorkflowExecLinkTryResult_4e2a0dfd: "${registerWorkflowExecLinkSwitchResult_107cd5a2}"
+                                    - registerWorkflowExecLinkTryResult_3cd107e2: "${registerWorkflowExecLinkSwitchResult_2275539c}"
                       - registerWorkflowExecLink_updateResult_0:
                           assign:
-                          - registerWorkflowExecLinkResult_23f07d68: "${registerWorkflowExecLinkTryResult_4e2a0dfd}"
+                          - registerWorkflowExecLinkResult_4ba0f305: "${registerWorkflowExecLinkTryResult_3cd107e2}"
                     - condition: "${true}"
                       steps:
                       - registerWorkflowExecLink_updateResult_1:
                           assign:
-                          - registerWorkflowExecLinkResult_23f07d68: "${\"skip\"}"
+                          - registerWorkflowExecLinkResult_4ba0f305: "${\"skip\"}"
             - tryInitStatus:
                 steps:
                 - tryInitStatus_initResult:
                     assign:
-                    - tryInitStatusResult_6a75fab9: {}
+                    - tryInitStatusResult_45b1093c: {}
                 - tryInitStatus_steps:
                     try:
                       steps:
@@ -255,11 +255,11 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "relay_ingest_tool_callResult_6b765f6a"
+                                    result: "relay_ingest_tool_callResult_726859be"
                               retry: "${http.default_retry}"
                       - tryInitStatus_updateResult:
                           assign:
-                          - tryInitStatusResult_6a75fab9: "${null}"
+                          - tryInitStatusResult_45b1093c: "${null}"
                     except:
                       as: "tryInitStatusError"
                       steps:
@@ -276,203 +276,14 @@ main:
                           raise: "${tryInitStatusError}"
                       - tryInitStatus_updateResultError:
                           assign:
-                          - tryInitStatusResult_6a75fab9: "${null}"
-            - runSummaries:
-                try:
-                  steps:
-                  - runSummaries_call:
-                      call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                      args:
-                        workflow_id: "${\"Summaries${WORKFLOW_ENV}\"}"
-                        argument:
-                          segmentEnd: "${null}"
-                          windowSeconds: "${1200}"
-                          overlapSeconds: "${240}"
-                          env:
-                            userId: "${input.env.userId}"
-                            model: "${input.env.model}"
-                            callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                            BASE_URL: "${input.env.BASE_URL}"
-                            background: "${default(map.get(input.env, \"background\"), null)}"
-                            projectId: "${input.env.projectId}"
-                            sessionId: "${input.env.sessionId}"
-                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                        location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                        project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                        connector_params:
-                          skip_polling: true
-                      result: "runSummariesResult_69b4c3a0"
-                retry: "${http.default_retry}"
-            - chainBlock:
-                steps:
-                - buildWorkflows:
-                    steps:
-                    - buildWorkflows_initResult:
-                        assign:
-                        - buildWorkflowsResult_644e1124: []
-                    - buildWorkflows_steps:
-                        for:
-                          value: "buildWorkflowsIdx"
-                          range: "${[0, (1 - 1)]}"
-                          steps:
-                          - buildWorkflows_switch:
-                              steps:
-                              - buildWorkflows_switch_initResult:
-                                  assign:
-                                  - buildWorkflows_switchResult_a7c0e28: {}
-                              - buildWorkflows_switch_steps:
-                                  switch:
-                                  - condition: "${(buildWorkflowsIdx == 0)}"
-                                    steps:
-                                    - buildWorkflows_switch_updateResult_0:
-                                        assign:
-                                        - buildWorkflows_switchResult_a7c0e28:
-                                            workflowName: "${\"helpers-links-SaveReflection\"}"
-                                            params:
-                                              agentWorkflow: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
-                          - buildWorkflows_updateResult:
-                              assign:
-                              - buildWorkflowsResult_644e1124: "${list.concat(buildWorkflowsResult_644e1124, buildWorkflows_switchResult_a7c0e28)}"
-                - callChain:
-                    try:
-                      steps:
-                      - callChain_call:
-                          call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                          args:
-                            workflow_id: "${\"helpers-Chain${WORKFLOW_ENV}\"}"
-                            argument:
-                              input:
-                                segmentEnd: "${null}"
-                                windowSeconds: "${1200}"
-                                overlapSeconds: "${240}"
-                                env:
-                                  userId: "${input.env.userId}"
-                                  model: "${input.env.model}"
-                                  callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                  BASE_URL: "${input.env.BASE_URL}"
-                                  background: "${default(map.get(input.env, \"background\"), null)}"
-                                  projectId: "${input.env.projectId}"
-                                  sessionId: "${input.env.sessionId}"
-                                  workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                              headWorkflow: "${\"assistant-ExtractTopics\"}"
-                              tail: "${buildWorkflowsResult_644e1124}"
-                              env:
-                                userId: "${input.env.userId}"
-                                model: "${input.env.model}"
-                                callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                BASE_URL: "${input.env.BASE_URL}"
-                                background: "${default(map.get(input.env, \"background\"), null)}"
-                                projectId: "${input.env.projectId}"
-                                sessionId: "${input.env.sessionId}"
-                                workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                            location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                            project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                            connector_params:
-                              skip_polling: true
-                          result: "callChainResult_47dee693"
-                    retry: "${http.default_retry}"
-            - collapseMessages_try:
-                steps:
-                - collapseMessages_try_initResult:
-                    assign:
-                    - collapseMessages_tryResult_138280e4: {}
-                - collapseMessages_try_steps:
-                    try:
-                      steps:
-                      - segmentsForSession_block:
-                          steps:
-                          - segmentsForSession_fetch:
-                              try:
-                                steps:
-                                - segmentsForSession_fetch_call:
-                                    call: "http.post"
-                                    args:
-                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
-                                      body:
-                                        collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
-                                        windowSeconds: "${420}"
-                                        overlapSeconds: "${60}"
-                                        userId: "${input.env.userId}"
-                                      auth:
-                                        type: "${\"OIDC\"}"
-                                        audience: "${input.env.BASE_URL}"
-                                      headers:
-                                        x-user-id: "${input.env.userId}"
-                                        x-project-id: "${input.env.projectId}"
-                                    result: "segmentsForSession_fetchResult_6027e6fd"
-                              retry: "${http.default_retry}"
-                          - segmentsForSession_convert:
-                              steps:
-                              - segmentsForSession_convert_initResult:
-                                  assign:
-                                  - segmentsForSession_convertResult_323d5453: []
-                              - segmentsForSession_convert_steps:
-                                  for:
-                                    value: "segmentsForSession_convertValue"
-                                    in: "${segmentsForSession_fetchResult_6027e6fd.body.segments}"
-                                    steps:
-                                    - segmentsForSession_convert_assignIterResult:
-                                        assign:
-                                        - segmentsForSession_convert_assignIterResultVar:
-                                            sessionId: "${input.env.sessionId}"
-                                            end: "${segmentsForSession_convertValue.end}"
-                                            windowSeconds: "${420}"
-                                    - segmentsForSession_convert_updateResult:
-                                        assign:
-                                        - segmentsForSession_convertResult_323d5453: "${list.concat(segmentsForSession_convertResult_323d5453, segmentsForSession_convert_assignIterResultVar)}"
-                      - collapseMessages:
-                          try:
-                            steps:
-                            - collapseMessages_call:
-                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
-                                args:
-                                  workflow_id: "${\"context-ContextCollapser-SegKala${WORKFLOW_ENV}\"}"
-                                  argument:
-                                    segmentEnd: "${segmentsForSession_convertResult_323d5453[(len(segmentsForSession_convertResult_323d5453) - 1)].end}"
-                                    windowSeconds: "${420}"
-                                    overlapSeconds: "${60}"
-                                    env:
-                                      userId: "${input.env.userId}"
-                                      model: "${input.env.model}"
-                                      callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
-                                      BASE_URL: "${input.env.BASE_URL}"
-                                      background: "${default(map.get(input.env, \"background\"), null)}"
-                                      projectId: "${input.env.projectId}"
-                                      sessionId: "${input.env.sessionId}"
-                                      workdir: "${default(map.get(input.env, \"workdir\"), null)}"
-                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
-                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
-                                  connector_params:
-                                    skip_polling: true
-                                result: "collapseMessagesResult_445cb1c6"
-                          retry: "${http.default_retry}"
-                      - collapseMessages_try_updateResult:
-                          assign:
-                          - collapseMessages_tryResult_138280e4: "${collapseMessagesResult_445cb1c6}"
-                    except:
-                      as: "collapseMessages_tryError"
-                      steps:
-                      - logError_1:
-                          try:
-                            steps:
-                            - logError_call_1:
-                                call: "sys.log"
-                                args:
-                                  text: "${(\"[logError] \" + collapseMessages_tryError.message)}"
-                                result: "logErrorResult_645e84ef"
-                          retry: "${http.default_retry}"
-                      - reRaise_1:
-                          raise: "${collapseMessages_tryError}"
-                      - collapseMessages_try_updateResultError:
-                          assign:
-                          - collapseMessages_tryResult_138280e4: "${null}"
+                          - tryInitStatusResult_45b1093c: "${null}"
             - maybeSaveInputTask:
                 steps:
                 - maybeSaveInputTask_switch:
                     steps:
                     - maybeSaveInputTask_switch_initResult:
                         assign:
-                        - maybeSaveInputTask_switchResult_1fab8217: {}
+                        - maybeSaveInputTask_switchResult_334d6d81: {}
                     - maybeSaveInputTask_switch_steps:
                         switch:
                         - condition: "${(get_type(default(map.get(input, \"task\"), null)) == \"map\")}"
@@ -495,13 +306,13 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "maybeSaveInputTask_postResult_48eea1a1"
+                                    result: "maybeSaveInputTask_postResult_8b9545e"
                               retry: "${http.default_retry}"
                           - maybeSaveInputTask_switch_updateResult_0:
                               assign:
-                              - maybeSaveInputTask_switchResult_1fab8217:
+                              - maybeSaveInputTask_switchResult_334d6d81:
                                   role: "${\"system\"}"
-                                  content: "${(((((((((\"Task created\" + \": id=\") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.id)) + \" | \") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.title)) + \" — \") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.description)) + \" [status=\") + string(maybeSaveInputTask_postResult_48eea1a1.body.task.status)) + \"]\")}"
+                                  content: "${(((((((((\"Task created\" + \": id=\") + string(maybeSaveInputTask_postResult_8b9545e.body.task.id)) + \" | \") + string(maybeSaveInputTask_postResult_8b9545e.body.task.title)) + \" — \") + string(maybeSaveInputTask_postResult_8b9545e.body.task.description)) + \" [status=\") + string(maybeSaveInputTask_postResult_8b9545e.body.task.status)) + \"]\")}"
                                   tool_calls: "${[]}"
                                   tool_call_id: "${null}"
                                   create_time: "${sys.now()}"
@@ -510,130 +321,232 @@ main:
                           steps:
                           - maybeSaveInputTask_switch_updateResult_1:
                               assign:
-                              - maybeSaveInputTask_switchResult_1fab8217:
+                              - maybeSaveInputTask_switchResult_334d6d81:
                                   role: "${\"system\"}"
                                   content: "${\"No input.task provided\"}"
                                   tool_calls: "${[]}"
                                   tool_call_id: "${null}"
                                   create_time: "${sys.now()}"
                                   docId: "${null}"
-            - maybeAddMessage:
+            - buildKala:
                 steps:
-                - maybeAddMessage_initResult:
+                - buildKala_initResult:
                     assign:
-                    - maybeAddMessageResult_2cae0fcd: {}
-                - maybeAddMessage_steps:
+                    - buildKalaResult_489e21fe: {}
+                - buildKala_steps:
                     switch:
-                    - condition: "${(default(map.get(input, \"sideCall\"), false) or (not  default(true, false)))}"
+                    - condition: "${default((map.get(input, \"kala\") != null), false)}"
                       steps:
-                      - maybeAddMessage_updateResult_0:
+                      - buildKala_updateResult_0:
                           assign:
-                          - maybeAddMessageResult_2cae0fcd: "${null}"
+                          - buildKalaResult_489e21fe: "${default(map.get(input, \"kala\"), null)}"
                     - condition: "${true}"
                       steps:
-                      - addMessage_seg_write_with_session_update:
-                          steps:
-                          - addMessage_newId:
-                              steps:
-                              - addMessage_newId_initResult:
-                                  assign:
-                                  - addMessage_newIdResult_dd64d33: {}
-                              - addMessage_newId_steps:
-                                  try:
-                                    steps:
-                                    - addMessage_newId_updateResult:
-                                        assign:
-                                        - addMessage_newIdResult_dd64d33: "${uuid.generate()}"
-                                  except:
-                                    as: "addMessage_newIdError"
-                                    steps:
-                                    - logError_2:
-                                        try:
-                                          steps:
-                                          - logError_call_2:
-                                              call: "sys.log"
-                                              args:
-                                                text: "${(\"[logError] \" + addMessage_newIdError.message)}"
-                                              result: "logErrorResult_23ca3a34"
-                                        retry: "${http.default_retry}"
-                                    - reRaise_2:
-                                        raise: "${addMessage_newIdError}"
-                                    - addMessage_newId_updateResultError:
-                                        assign:
-                                        - addMessage_newIdResult_dd64d33: "${null}"
-                          - addMessage_write_messagesIsta_SegKala:
-                              try:
-                                steps:
-                                - addMessage_write_messagesIsta_SegKala_call:
-                                    call: "http.post"
-                                    args:
-                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/create\")}"
-                                      body:
-                                        collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
-                                        id: "${addMessage_newIdResult_dd64d33}"
-                                        contents:
-                                          value:
-                                            role: "${\"user\"}"
-                                            content: "${default(map.get(input, \"query\"), null)}"
-                                            tool_calls: "${[]}"
-                                            tool_call_id: "${null}"
-                                            create_time: "${sys.now()}"
-                                            docId: "${null}"
-                                          create_time: "${sys.now()}"
-                                          cost: "${null}"
-                                          execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                        userId: "${input.env.userId}"
-                                      auth:
-                                        type: "${\"OIDC\"}"
-                                        audience: "${input.env.BASE_URL}"
-                                      headers:
-                                        x-user-id: "${input.env.userId}"
-                                        x-project-id: "${input.env.projectId}"
-                                    result: "addMessage_write_messagesIsta_SegKalaResult_cccffff"
-                              retry: "${http.default_retry}"
-                          - addMessage_update_session_update_time:
-                              try:
-                                steps:
-                                - addMessage_update_session_update_time_call:
-                                    call: "http.post"
-                                    args:
-                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                      body:
-                                        collection: "${\"convo.sessions\"}"
-                                        id: "${input.env.sessionId}"
-                                        contents:
-                                          update_time: "${sys.now()}"
-                                        userId: "${input.env.userId}"
-                                      auth:
-                                        type: "${\"OIDC\"}"
-                                        audience: "${input.env.BASE_URL}"
-                                      headers:
-                                        x-user-id: "${input.env.userId}"
-                                        x-project-id: "${input.env.projectId}"
-                                    result: "addMessage_update_session_update_timeResult_73e66c7b"
-                              retry: "${http.default_retry}"
-                      - maybeAddMessage_updateResult_1:
+                      - buildKala_updateResult_1:
                           assign:
-                          - maybeAddMessageResult_2cae0fcd: "${addMessage_write_messagesIsta_SegKalaResult_cccffff}"
+                          - buildKalaResult_489e21fe:
+                              sessionId: "${input.env.sessionId}"
+                              end: "${sys.now()}"
+                              windowSeconds: "${1200}"
+                              kind: "SegKala"
+            - sessionKeyTry:
+                steps:
+                - sessionKeyTry_initResult:
+                    assign:
+                    - sessionKeyTryResult_6ed84940: {}
+                - sessionKeyTry_steps:
+                    try:
+                      steps:
+                      - matchId_block:
+                          steps:
+                          - matchId_caseValues:
+                              steps:
+                              - matchId_caseValues_initResult:
+                                  assign:
+                                  - matchId_caseValuesResult_6973e2e6: []
+                              - matchId_caseValues_steps:
+                                  for:
+                                    value: "matchId_caseValuesIdx"
+                                    range: "${[0, (4 - 1)]}"
+                                    steps:
+                                    - matchId_caseValues_switch:
+                                        steps:
+                                        - matchId_caseValues_switch_initResult:
+                                            assign:
+                                            - matchId_caseValues_switchResult_23006f82: {}
+                                        - matchId_caseValues_switch_steps:
+                                            switch:
+                                            - condition: "${(matchId_caseValuesIdx == 0)}"
+                                              steps:
+                                              - caseValueTry:
+                                                  steps:
+                                                  - caseValueTry_initResult:
+                                                      assign:
+                                                      - caseValueTryResult_5063473c: {}
+                                                  - caseValueTry_steps:
+                                                      try:
+                                                        steps:
+                                                        - caseValueTry_updateResult:
+                                                            assign:
+                                                            - caseValueTryResult_5063473c:
+                                                                sessionId: "${buildKalaResult_489e21fe.sessionId}"
+                                                                end: "${buildKalaResult_489e21fe.end}"
+                                                                windowSeconds: "${buildKalaResult_489e21fe.windowSeconds}"
+                                                                kind: "SegKala"
+                                                      except:
+                                                        as: "caseValueTryError"
+                                                        steps:
+                                                        - caseValueTry_updateResultError:
+                                                            assign:
+                                                            - caseValueTryResult_5063473c: "${\"Non matching case\"}"
+                                              - matchId_caseValues_switch_updateResult_0:
+                                                  assign:
+                                                  - matchId_caseValues_switchResult_23006f82: "${caseValueTryResult_5063473c}"
+                                            - condition: "${(matchId_caseValuesIdx == 1)}"
+                                              steps:
+                                              - caseValueTry_1:
+                                                  steps:
+                                                  - caseValueTry_initResult_1:
+                                                      assign:
+                                                      - caseValueTryResult_37c53a8a: {}
+                                                  - caseValueTry_steps_1:
+                                                      try:
+                                                        steps:
+                                                        - caseValueTry_updateResult_1:
+                                                            assign:
+                                                            - caseValueTryResult_37c53a8a:
+                                                                sessionId: "${buildKalaResult_489e21fe.sessionId}"
+                                                                sessionEnd: "${buildKalaResult_489e21fe.sessionEnd}"
+                                                                kind: "SessionKala"
+                                                      except:
+                                                        as: "caseValueTryError"
+                                                        steps:
+                                                        - caseValueTry_updateResultError_1:
+                                                            assign:
+                                                            - caseValueTryResult_37c53a8a: "${\"Non matching case\"}"
+                                              - matchId_caseValues_switch_updateResult_1:
+                                                  assign:
+                                                  - matchId_caseValues_switchResult_23006f82: "${caseValueTryResult_37c53a8a}"
+                                            - condition: "${(matchId_caseValuesIdx == 2)}"
+                                              steps:
+                                              - caseValueTry_2:
+                                                  steps:
+                                                  - caseValueTry_initResult_2:
+                                                      assign:
+                                                      - caseValueTryResult_7a0d88ea: {}
+                                                  - caseValueTry_steps_2:
+                                                      try:
+                                                        steps:
+                                                        - caseValueTry_updateResult_2:
+                                                            assign:
+                                                            - caseValueTryResult_7a0d88ea:
+                                                                weekEnd: "${buildKalaResult_489e21fe.weekEnd}"
+                                                                kind: "WeekKala"
+                                                      except:
+                                                        as: "caseValueTryError"
+                                                        steps:
+                                                        - caseValueTry_updateResultError_2:
+                                                            assign:
+                                                            - caseValueTryResult_7a0d88ea: "${\"Non matching case\"}"
+                                              - matchId_caseValues_switch_updateResult_2:
+                                                  assign:
+                                                  - matchId_caseValues_switchResult_23006f82: "${caseValueTryResult_7a0d88ea}"
+                                            - condition: "${(matchId_caseValuesIdx == 3)}"
+                                              steps:
+                                              - caseValueTry_3:
+                                                  steps:
+                                                  - caseValueTry_initResult_3:
+                                                      assign:
+                                                      - caseValueTryResult_6d1ba867: {}
+                                                  - caseValueTry_steps_3:
+                                                      try:
+                                                        steps:
+                                                        - caseValueTry_updateResult_3:
+                                                            assign:
+                                                            - caseValueTryResult_6d1ba867:
+                                                                termBegin: "${buildKalaResult_489e21fe.termBegin}"
+                                                                termEnd: "${buildKalaResult_489e21fe.termEnd}"
+                                                                kind: "TermKala"
+                                                      except:
+                                                        as: "caseValueTryError"
+                                                        steps:
+                                                        - caseValueTry_updateResultError_3:
+                                                            assign:
+                                                            - caseValueTryResult_6d1ba867: "${\"Non matching case\"}"
+                                              - matchId_caseValues_switch_updateResult_3:
+                                                  assign:
+                                                  - matchId_caseValues_switchResult_23006f82: "${caseValueTryResult_6d1ba867}"
+                                    - matchId_caseValues_updateResult:
+                                        assign:
+                                        - matchId_caseValuesResult_6973e2e6: "${list.concat(matchId_caseValuesResult_6973e2e6, matchId_caseValues_switchResult_23006f82)}"
+                          - matchId:
+                              steps:
+                              - matchId_initResult:
+                                  assign:
+                                  - matchIdResult_6d094ea: {}
+                              - matchId_steps:
+                                  switch:
+                                  - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(matchId_caseValuesResult_6973e2e6[0]))}"
+                                    steps:
+                                    - matchId_updateResult_0:
+                                        assign:
+                                        - matchIdResult_6d094ea: "${buildKalaResult_489e21fe.sessionId}"
+                                  - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(matchId_caseValuesResult_6973e2e6[1]))}"
+                                    steps:
+                                    - matchId_updateResult_1:
+                                        assign:
+                                        - matchIdResult_6d094ea: "${buildKalaResult_489e21fe.sessionId}"
+                                  - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(matchId_caseValuesResult_6973e2e6[2]))}"
+                                    steps:
+                                    - matchId_updateResult_2:
+                                        assign:
+                                        - matchIdResult_6d094ea: "${\"global\"}"
+                                  - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(matchId_caseValuesResult_6973e2e6[3]))}"
+                                    steps:
+                                    - matchId_updateResult_3:
+                                        assign:
+                                        - matchIdResult_6d094ea: "${\"global\"}"
+                      - sessionKeyTry_updateResult:
+                          assign:
+                          - sessionKeyTryResult_6ed84940:
+                              collection: "${\"locks.Convo.Session\"}"
+                              id: "${matchIdResult_6d094ea}"
+                    except:
+                      as: "sessionKeyTryError"
+                      steps:
+                      - logError_1:
+                          try:
+                            steps:
+                            - logError_call_1:
+                                call: "sys.log"
+                                args:
+                                  text: "${(\"[logError] \" + sessionKeyTryError.message)}"
+                                result: "logErrorResult_6ce76149"
+                          retry: "${http.default_retry}"
+                      - reRaise_1:
+                          raise: "${sessionKeyTryError}"
+                      - sessionKeyTry_updateResultError:
+                          assign:
+                          - sessionKeyTryResult_6ed84940: "${null}"
             - maybeBypassAquire:
                 steps:
                 - maybeBypassAquire_initResult:
                     assign:
-                    - maybeBypassAquireResult_4e2d11a4: {}
+                    - maybeBypassAquireResult_137206d4: {}
                 - maybeBypassAquire_steps:
                     switch:
                     - condition: "${default(map.get(input, \"sideCall\"), false)}"
                       steps:
                       - maybeBypassAquire_updateResult_0:
                           assign:
-                          - maybeBypassAquireResult_4e2d11a4: "${true}"
+                          - maybeBypassAquireResult_137206d4: "${true}"
                     - condition: "${true}"
                       steps:
                       - acquireResponseLock_try:
                           steps:
                           - acquireResponseLock_try_initResult:
                               assign:
-                              - acquireResponseLock_tryResult_196bcc86: {}
+                              - acquireResponseLock_tryResult_54ec8af2: {}
                           - acquireResponseLock_try_steps:
                               try:
                                 steps:
@@ -645,8 +558,8 @@ main:
                                           args:
                                             url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/acquire\")}"
                                             body:
-                                              collection: "${\"locks.Convo.Session\"}"
-                                              id: "${input.env.sessionId}"
+                                              collection: "${sessionKeyTryResult_6ed84940.collection}"
+                                              id: "${sessionKeyTryResult_6ed84940.id}"
                                               ttlSeconds: 300
                                               owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                               userId: "${input.env.userId}"
@@ -656,11 +569,11 @@ main:
                                             headers:
                                               x-user-id: "${input.env.userId}"
                                               x-project-id: "${input.env.projectId}"
-                                          result: "acquireResponseLockResult_187876de"
+                                          result: "acquireResponseLockResult_687edc9d"
                                     retry: "${http.default_retry}"
                                 - acquireResponseLock_try_updateResult:
                                     assign:
-                                    - acquireResponseLock_tryResult_196bcc86: "${acquireResponseLockResult_187876de.body.acquired}"
+                                    - acquireResponseLock_tryResult_54ec8af2: "${acquireResponseLockResult_687edc9d.body.acquired}"
                               except:
                                 as: "acquireResponseLock_tryError"
                                 steps:
@@ -668,7 +581,7 @@ main:
                                     steps:
                                     - acquireResponseLock_err_initResult:
                                         assign:
-                                        - acquireResponseLock_errResult_5c167539: {}
+                                        - acquireResponseLock_errResult_16043a06: {}
                                     - acquireResponseLock_err_steps:
                                         switch:
                                         - condition: "${((\"code\" in acquireResponseLock_tryError) and (default(map.get(acquireResponseLock_tryError, \"code\"), 0) == 409))}"
@@ -684,28 +597,28 @@ main:
                                               retry: "${http.default_retry}"
                                           - acquireResponseLock_err_updateResult_0:
                                               assign:
-                                              - acquireResponseLock_errResult_5c167539: "${false}"
+                                              - acquireResponseLock_errResult_16043a06: "${false}"
                                         - condition: "${true}"
                                           steps:
                                           - acquireResponseLock_rethrow:
                                               raise: "${acquireResponseLock_tryError}"
                                           - acquireResponseLock_err_updateResult_1:
                                               assign:
-                                              - acquireResponseLock_errResult_5c167539: "${false}"
+                                              - acquireResponseLock_errResult_16043a06: "${false}"
                                 - acquireResponseLock_try_updateResultError:
                                     assign:
-                                    - acquireResponseLock_tryResult_196bcc86: "${acquireResponseLock_errResult_5c167539}"
+                                    - acquireResponseLock_tryResult_54ec8af2: "${acquireResponseLock_errResult_16043a06}"
                       - maybeBypassAquire_updateResult_1:
                           assign:
-                          - maybeBypassAquireResult_4e2d11a4: "${acquireResponseLock_tryResult_196bcc86}"
+                          - maybeBypassAquireResult_137206d4: "${acquireResponseLock_tryResult_54ec8af2}"
             - maybeRespond:
                 steps:
                 - maybeRespond_initResult:
                     assign:
-                    - maybeRespondResult_12c2c315: {}
+                    - maybeRespondResult_7c075adf: {}
                 - maybeRespond_steps:
                     switch:
-                    - condition: "${maybeBypassAquireResult_4e2d11a4}"
+                    - condition: "${maybeBypassAquireResult_137206d4}"
                       steps:
                       - loadContext:
                           steps:
@@ -713,11 +626,13 @@ main:
                               assign:
                               - helpers_Small_promptsResult_3368db4c: {}
                               - helpers_Small_toolsResult_5129808f: {}
+                              - encodeKalaValResult_d6d5cb6: {}
                           - loadContext_run:
                               parallel:
                                 shared:
                                 - "helpers_Small_promptsResult_3368db4c"
                                 - "helpers_Small_toolsResult_5129808f"
+                                - "encodeKalaValResult_d6d5cb6"
                                 branches:
                                 - helpers_Small_promptsBranch:
                                     steps:
@@ -751,6 +666,185 @@ main:
                                                   skip_polling: false
                                               result: "helpers_Small_toolsResult_5129808f"
                                         retry: "${http.default_retry}"
+                                - encodeKalaVal_blockBranch:
+                                    steps:
+                                    - encodeKalaVal_block:
+                                        steps:
+                                        - encodeKalaVal_caseValues:
+                                            steps:
+                                            - encodeKalaVal_caseValues_initResult:
+                                                assign:
+                                                - encodeKalaVal_caseValuesResult_2b5560ee: []
+                                            - encodeKalaVal_caseValues_steps:
+                                                for:
+                                                  value: "encodeKalaVal_caseValuesIdx"
+                                                  range: "${[0, (4 - 1)]}"
+                                                  steps:
+                                                  - encodeKalaVal_caseValues_switch:
+                                                      steps:
+                                                      - encodeKalaVal_caseValues_switch_initResult:
+                                                          assign:
+                                                          - encodeKalaVal_caseValues_switchResult_7a9662bf: {}
+                                                      - encodeKalaVal_caseValues_switch_steps:
+                                                          switch:
+                                                          - condition: "${(encodeKalaVal_caseValuesIdx == 0)}"
+                                                            steps:
+                                                            - caseValueTry_4:
+                                                                steps:
+                                                                - caseValueTry_initResult_4:
+                                                                    assign:
+                                                                    - caseValueTryResult_5063473c: {}
+                                                                - caseValueTry_steps_4:
+                                                                    try:
+                                                                      steps:
+                                                                      - caseValueTry_updateResult_4:
+                                                                          assign:
+                                                                          - caseValueTryResult_5063473c:
+                                                                              sessionId: "${buildKalaResult_489e21fe.sessionId}"
+                                                                              end: "${buildKalaResult_489e21fe.end}"
+                                                                              windowSeconds: "${buildKalaResult_489e21fe.windowSeconds}"
+                                                                              kind: "SegKala"
+                                                                    except:
+                                                                      as: "caseValueTryError"
+                                                                      steps:
+                                                                      - caseValueTry_updateResultError_4:
+                                                                          assign:
+                                                                          - caseValueTryResult_5063473c: "${\"Non matching case\"}"
+                                                            - encodeKalaVal_caseValues_switch_updateResult_0:
+                                                                assign:
+                                                                - encodeKalaVal_caseValues_switchResult_7a9662bf: "${caseValueTryResult_5063473c}"
+                                                          - condition: "${(encodeKalaVal_caseValuesIdx == 1)}"
+                                                            steps:
+                                                            - caseValueTry_5:
+                                                                steps:
+                                                                - caseValueTry_initResult_5:
+                                                                    assign:
+                                                                    - caseValueTryResult_37c53a8a: {}
+                                                                - caseValueTry_steps_5:
+                                                                    try:
+                                                                      steps:
+                                                                      - caseValueTry_updateResult_5:
+                                                                          assign:
+                                                                          - caseValueTryResult_37c53a8a:
+                                                                              sessionId: "${buildKalaResult_489e21fe.sessionId}"
+                                                                              sessionEnd: "${buildKalaResult_489e21fe.sessionEnd}"
+                                                                              kind: "SessionKala"
+                                                                    except:
+                                                                      as: "caseValueTryError"
+                                                                      steps:
+                                                                      - caseValueTry_updateResultError_5:
+                                                                          assign:
+                                                                          - caseValueTryResult_37c53a8a: "${\"Non matching case\"}"
+                                                            - encodeKalaVal_caseValues_switch_updateResult_1:
+                                                                assign:
+                                                                - encodeKalaVal_caseValues_switchResult_7a9662bf: "${caseValueTryResult_37c53a8a}"
+                                                          - condition: "${(encodeKalaVal_caseValuesIdx == 2)}"
+                                                            steps:
+                                                            - caseValueTry_6:
+                                                                steps:
+                                                                - caseValueTry_initResult_6:
+                                                                    assign:
+                                                                    - caseValueTryResult_7a0d88ea: {}
+                                                                - caseValueTry_steps_6:
+                                                                    try:
+                                                                      steps:
+                                                                      - caseValueTry_updateResult_6:
+                                                                          assign:
+                                                                          - caseValueTryResult_7a0d88ea:
+                                                                              weekEnd: "${buildKalaResult_489e21fe.weekEnd}"
+                                                                              kind: "WeekKala"
+                                                                    except:
+                                                                      as: "caseValueTryError"
+                                                                      steps:
+                                                                      - caseValueTry_updateResultError_6:
+                                                                          assign:
+                                                                          - caseValueTryResult_7a0d88ea: "${\"Non matching case\"}"
+                                                            - encodeKalaVal_caseValues_switch_updateResult_2:
+                                                                assign:
+                                                                - encodeKalaVal_caseValues_switchResult_7a9662bf: "${caseValueTryResult_7a0d88ea}"
+                                                          - condition: "${(encodeKalaVal_caseValuesIdx == 3)}"
+                                                            steps:
+                                                            - caseValueTry_7:
+                                                                steps:
+                                                                - caseValueTry_initResult_7:
+                                                                    assign:
+                                                                    - caseValueTryResult_6d1ba867: {}
+                                                                - caseValueTry_steps_7:
+                                                                    try:
+                                                                      steps:
+                                                                      - caseValueTry_updateResult_7:
+                                                                          assign:
+                                                                          - caseValueTryResult_6d1ba867:
+                                                                              termBegin: "${buildKalaResult_489e21fe.termBegin}"
+                                                                              termEnd: "${buildKalaResult_489e21fe.termEnd}"
+                                                                              kind: "TermKala"
+                                                                    except:
+                                                                      as: "caseValueTryError"
+                                                                      steps:
+                                                                      - caseValueTry_updateResultError_7:
+                                                                          assign:
+                                                                          - caseValueTryResult_6d1ba867: "${\"Non matching case\"}"
+                                                            - encodeKalaVal_caseValues_switch_updateResult_3:
+                                                                assign:
+                                                                - encodeKalaVal_caseValues_switchResult_7a9662bf: "${caseValueTryResult_6d1ba867}"
+                                                  - encodeKalaVal_caseValues_updateResult:
+                                                      assign:
+                                                      - encodeKalaVal_caseValuesResult_2b5560ee: "${list.concat(encodeKalaVal_caseValuesResult_2b5560ee, encodeKalaVal_caseValues_switchResult_7a9662bf)}"
+                                        - encodeKalaVal:
+                                            steps:
+                                            - encodeKalaVal_initResult:
+                                                assign:
+                                                - encodeKalaValResult_d6d5cb6: {}
+                                            - encodeKalaVal_steps:
+                                                switch:
+                                                - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(encodeKalaVal_caseValuesResult_2b5560ee[0]))}"
+                                                  steps:
+                                                  - encodeKalaVal_updateResult_0:
+                                                      assign:
+                                                      - encodeKalaValResult_d6d5cb6:
+                                                          kind: "${\"SegKala\"}"
+                                                          sessionId: "${buildKalaResult_489e21fe.sessionId}"
+                                                          end: "${buildKalaResult_489e21fe.end}"
+                                                          windowSeconds: "${buildKalaResult_489e21fe.windowSeconds}"
+                                                          sessionEnd: "${null}"
+                                                          weekEnd: "${null}"
+                                                          begin: "${null}"
+                                                - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(encodeKalaVal_caseValuesResult_2b5560ee[1]))}"
+                                                  steps:
+                                                  - encodeKalaVal_updateResult_1:
+                                                      assign:
+                                                      - encodeKalaValResult_d6d5cb6:
+                                                          kind: "${\"SessionKala\"}"
+                                                          sessionId: "${buildKalaResult_489e21fe.sessionId}"
+                                                          end: "${null}"
+                                                          windowSeconds: "${null}"
+                                                          sessionEnd: "${buildKalaResult_489e21fe.sessionEnd}"
+                                                          weekEnd: "${null}"
+                                                          begin: "${null}"
+                                                - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(encodeKalaVal_caseValuesResult_2b5560ee[2]))}"
+                                                  steps:
+                                                  - encodeKalaVal_updateResult_2:
+                                                      assign:
+                                                      - encodeKalaValResult_d6d5cb6:
+                                                          kind: "${\"WeekKala\"}"
+                                                          sessionId: "${null}"
+                                                          end: "${null}"
+                                                          windowSeconds: "${null}"
+                                                          sessionEnd: "${null}"
+                                                          weekEnd: "${buildKalaResult_489e21fe.weekEnd}"
+                                                          begin: "${null}"
+                                                - condition: "${(json.encode_to_string(buildKalaResult_489e21fe) == json.encode_to_string(encodeKalaVal_caseValuesResult_2b5560ee[3]))}"
+                                                  steps:
+                                                  - encodeKalaVal_updateResult_3:
+                                                      assign:
+                                                      - encodeKalaValResult_d6d5cb6:
+                                                          kind: "${\"TermKala\"}"
+                                                          sessionId: "${null}"
+                                                          end: "${buildKalaResult_489e21fe.termEnd}"
+                                                          windowSeconds: "${null}"
+                                                          sessionEnd: "${null}"
+                                                          weekEnd: "${null}"
+                                                          begin: "${buildKalaResult_489e21fe.termBegin}"
                       - mapToolDefs:
                           steps:
                           - mapToolDefs_initResult:
@@ -778,392 +872,48 @@ main:
                                 - mapToolDefs_updateResult:
                                     assign:
                                     - mapToolDefsResult_6ab9d8e1: "${list.concat(mapToolDefsResult_6ab9d8e1, mapToolDefs_assignIterResultVar)}"
-                      - inSession:
-                          steps:
-                          - topicContextYojBlock_SegKala:
-                              steps:
-                              - topicContext_components_SegKala_1:
-                                  steps:
-                                  - topicContext_components_SegKala_initResult:
-                                      assign:
-                                      - topicContext_components_SegKalaResult_644491d0: []
-                                  - topicContext_components_SegKala_steps:
-                                      for:
-                                        value: "topicContext_components_SegKalaIdx"
-                                        range: "${[0, (1 - 1)]}"
-                                        steps:
-                                        - topicContext_components_SegKala_switch:
-                                            steps:
-                                            - topicContext_components_SegKala_switch_initResult:
-                                                assign:
-                                                - topicContext_components_SegKala_switchResult_65aaf8c5: {}
-                                            - topicContext_components_SegKala_switch_steps:
-                                                switch:
-                                                - condition: "${(topicContext_components_SegKalaIdx == 0)}"
-                                                  steps:
-                                                  - topicContext_components_SegKala_switch_updateResult_0:
-                                                      assign:
-                                                      - topicContext_components_SegKala_switchResult_65aaf8c5:
-                                                          kind: "yoj"
-                                                          name: "topicContext"
-                                                          framing: "${null}"
-                                                          value: "${null}"
-                                                          children:
-                                                          - kind: "yoj"
-                                                            name: "topicInfos"
-                                                            framing: "Previously extracted topic info:\r"
-                                                            value: "${null}"
-                                                            children: []
-                                                          - kind: "yoj"
-                                                            name: "convoContext"
-                                                            framing: "${null}"
-                                                            value: "${null}"
-                                                            children:
-                                                            - kind: "yoj"
-                                                              name: "summaries"
-                                                              framing: "Summary of older conversation messages:\r"
-                                                              value: "${null}"
-                                                              children: []
-                                                            - kind: "yoj"
-                                                              name: "messages"
-                                                              framing: ""
-                                                              value: "${null}"
-                                                              children: []
-                                        - topicContext_components_SegKala_updateResult:
-                                            assign:
-                                            - topicContext_components_SegKalaResult_644491d0: "${list.concat(topicContext_components_SegKalaResult_644491d0, topicContext_components_SegKala_switchResult_65aaf8c5)}"
-                              - topicContext_model_SegKala:
-                                  steps:
-                                  - topicContext_model_SegKala_initResult:
-                                      assign:
-                                      - topicContext_model_SegKalaResult_12d4d563: {}
-                                  - topicContext_model_SegKala_steps:
-                                      try:
-                                        steps:
-                                        - topicContext_components_SegKala:
-                                            steps:
-                                            - topicContext_components_SegKala_initResult_1:
-                                                assign:
-                                                - topicContext_components_SegKalaResult_644491d0: []
-                                            - topicContext_components_SegKala_steps_1:
-                                                for:
-                                                  value: "topicContext_components_SegKalaIdx"
-                                                  range: "${[0, (1 - 1)]}"
-                                                  steps:
-                                                  - topicContext_components_SegKala_switch_1:
-                                                      steps:
-                                                      - topicContext_components_SegKala_switch_initResult_1:
-                                                          assign:
-                                                          - topicContext_components_SegKala_switchResult_65aaf8c5: {}
-                                                      - topicContext_components_SegKala_switch_steps_1:
-                                                          switch:
-                                                          - condition: "${(topicContext_components_SegKalaIdx == 0)}"
-                                                            steps:
-                                                            - topicContext_components_SegKala_switch_updateResult_0_1:
-                                                                assign:
-                                                                - topicContext_components_SegKala_switchResult_65aaf8c5:
-                                                                    kind: "yoj"
-                                                                    name: "topicContext"
-                                                                    framing: "${null}"
-                                                                    value: "${null}"
-                                                                    children:
-                                                                    - kind: "yoj"
-                                                                      name: "topicInfos"
-                                                                      framing: "Previously extracted topic info:\r"
-                                                                      value: "${null}"
-                                                                      children: []
-                                                                    - kind: "yoj"
-                                                                      name: "convoContext"
-                                                                      framing: "${null}"
-                                                                      value: "${null}"
-                                                                      children:
-                                                                      - kind: "yoj"
-                                                                        name: "summaries"
-                                                                        framing: "Summary of older conversation messages:\r"
-                                                                        value: "${null}"
-                                                                        children: []
-                                                                      - kind: "yoj"
-                                                                        name: "messages"
-                                                                        framing: ""
-                                                                        value: "${null}"
-                                                                        children: []
-                                                  - topicContext_components_SegKala_updateResult_1:
-                                                      assign:
-                                                      - topicContext_components_SegKalaResult_644491d0: "${list.concat(topicContext_components_SegKalaResult_644491d0, topicContext_components_SegKala_switchResult_65aaf8c5)}"
-                                        - topicContext_model_SegKala_updateResult:
-                                            assign:
-                                            - topicContext_model_SegKalaResult_12d4d563:
-                                                intro:
-                                                  system: "These are the previously extracted topic information, as well as the conversation context: "
-                                                promoteUpstream: true
-                                                components: "${topicContext_components_SegKalaResult_644491d0}"
-                                                filters: "${null}"
-                                      except:
-                                        as: "topicContext_model_SegKalaError"
-                                        steps:
-                                        - logError_3:
-                                            try:
-                                              steps:
-                                              - logError_call_3:
-                                                  call: "sys.log"
-                                                  args:
-                                                    text: "${(\"[logError] \" + topicContext_model_SegKalaError.message)}"
-                                                  result: "logErrorResult_6d04f39d"
-                                            retry: "${http.default_retry}"
-                                        - reRaise_3:
-                                            raise: "${topicContext_model_SegKalaError}"
-                                        - topicContext_model_SegKala_updateResultError:
-                                            assign:
-                                            - topicContext_model_SegKalaResult_12d4d563: "${null}"
-                              - TopicContextYoj_run_with_model:
-                                  try:
-                                    steps:
-                                    - TopicContextYoj_run_with_model_call:
-                                        call: "http.post"
-                                        args:
-                                          url: "${((input.env.BASE_URL + \"/\") + \"context/topicContextYoj/run\")}"
-                                          body:
-                                            kala:
-                                              kind: "${\"SegKala\"}"
-                                              sessionId: "${input.env.sessionId}"
-                                              end: "${sys.now()}"
-                                              windowSeconds: "${1200}"
-                                              sessionEnd: "${null}"
-                                              weekEnd: "${null}"
-                                              begin: "${null}"
-                                            presetId: "${null}"
-                                            includeDocId: "${true}"
-                                            model: "${topicContext_model_SegKalaResult_12d4d563}"
-                                          auth:
-                                            type: "${\"OIDC\"}"
-                                            audience: "${input.env.BASE_URL}"
-                                          headers:
-                                            x-user-id: "${input.env.userId}"
-                                            x-project-id: "${input.env.projectId}"
-                                        result: "TopicContextYoj_run_with_modelResult_2b984e84"
-                                  retry: "${http.default_retry}"
-                              - for_topicContext_items_SegKala:
-                                  steps:
-                                  - for_topicContext_items_SegKala_initResult:
-                                      assign:
-                                      - for_topicContext_items_SegKalaResult_6bde807f: []
-                                  - for_topicContext_items_SegKala_steps:
-                                      for:
-                                        value: "for_topicContext_items_SegKalaValue"
-                                        in: "${TopicContextYoj_run_with_modelResult_2b984e84.body.yoj}"
-                                        steps:
-                                        - for_topicContext_items_SegKala_updateResult:
-                                            assign:
-                                            - for_topicContext_items_SegKalaResult_6bde807f: "${list.concat(for_topicContext_items_SegKalaResult_6bde807f, for_topicContext_items_SegKalaValue)}"
-                          - complete_block:
-                              steps:
-                              - complete_switch:
-                                  steps:
-                                  - complete_switch_initResult:
-                                      assign:
-                                      - complete_switchResult_239ce97: {}
-                                  - complete_switch_steps:
-                                      switch:
-                                      - condition: "${(len(for_topicContext_items_SegKalaResult_6bde807f) > 0)}"
-                                        steps:
-                                        - complete_joinMessages:
-                                            steps:
-                                            - complete_joinMessages_initResult:
-                                                assign:
-                                                - complete_joinMessagesResult_297e1f79: []
-                                            - complete_joinMessages_steps:
-                                                for:
-                                                  value: "complete_joinMessagesIdx"
-                                                  range: "${[0, (((0 + len(helpers_Small_promptsResult_3368db4c.prompts)) + len(for_topicContext_items_SegKalaResult_6bde807f)) - 1)]}"
-                                                  steps:
-                                                  - complete_joinMessages_switch:
-                                                      steps:
-                                                      - complete_joinMessages_switch_initResult:
-                                                          assign:
-                                                          - complete_joinMessages_switchResult_416103a5: {}
-                                                      - complete_joinMessages_switch_steps:
-                                                          switch:
-                                                          - condition: "${(complete_joinMessagesIdx >= (0 + len(helpers_Small_promptsResult_3368db4c.prompts)))}"
-                                                            steps:
-                                                            - complete_joinMessages_switch_updateResult_0:
-                                                                assign:
-                                                                - complete_joinMessages_switchResult_416103a5: "${for_topicContext_items_SegKalaResult_6bde807f[(complete_joinMessagesIdx - (0 + len(helpers_Small_promptsResult_3368db4c.prompts)))]}"
-                                                          - condition: "${(complete_joinMessagesIdx >= 0)}"
-                                                            steps:
-                                                            - complete_joinMessages_switch_updateResult_1:
-                                                                assign:
-                                                                - complete_joinMessages_switchResult_416103a5: "${helpers_Small_promptsResult_3368db4c.prompts[(complete_joinMessagesIdx - 0)]}"
-                                                  - complete_joinMessages_updateResult:
-                                                      assign:
-                                                      - complete_joinMessagesResult_297e1f79: "${list.concat(complete_joinMessagesResult_297e1f79, complete_joinMessages_switchResult_416103a5)}"
-                                        - chatBlock:
-                                            steps:
-                                            - toolChoice:
-                                                steps:
-                                                - toolChoice_initResult:
-                                                    assign:
-                                                    - toolChoiceResult_663ffc57: {}
-                                                - toolChoice_steps:
-                                                    switch:
-                                                    - condition: "${((mapToolDefsResult_6ab9d8e1 != null) and (len(mapToolDefsResult_6ab9d8e1) > 0))}"
-                                                      steps:
-                                                      - toolChoice_updateResult_0:
-                                                          assign:
-                                                          - toolChoiceResult_663ffc57: "${default(map.get(input, \"toolChoice\"), \"auto\")}"
-                                                    - condition: "${true}"
-                                                      steps:
-                                                      - toolChoice_updateResult_1:
-                                                          assign:
-                                                          - toolChoiceResult_663ffc57: "${null}"
-                                            - complete_chat:
-                                                try:
-                                                  steps:
-                                                  - complete_chat_call:
-                                                      call: "http.post"
-                                                      args:
-                                                        url: "${((input.env.BASE_URL + \"/\") + \"llm/chat\")}"
-                                                        body:
-                                                          messages: "${complete_joinMessagesResult_297e1f79}"
-                                                          model: "${input.env.model}"
-                                                          temperature: 0.8
-                                                          max_completion_tokens: "${null}"
-                                                          response_format:
-                                                            type: "text"
-                                                          sessionId: "${input.env.sessionId}"
-                                                          workflow_name: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_ID\")}"
-                                                          tools: "${mapToolDefsResult_6ab9d8e1}"
-                                                          tool_choice: "${toolChoiceResult_663ffc57}"
-                                                        auth:
-                                                          type: "${\"OIDC\"}"
-                                                          audience: "${input.env.BASE_URL}"
-                                                        headers:
-                                                          x-user-id: "${input.env.userId}"
-                                                          x-project-id: "${input.env.projectId}"
-                                                      result: "complete_chatResult_5cc710f8"
-                                                retry: "${http.default_retry}"
-                                        - complete_switch_updateResult_0:
-                                            assign:
-                                            - complete_switchResult_239ce97: "${complete_chatResult_5cc710f8.body}"
-                                      - condition: "${true}"
-                                        steps:
-                                        - emptyYoj:
-                                            raise:
-                                              message: "${\"Empty Yoj returned\"}"
-                                              code: "${default(400, null)}"
-                                        - complete_switch_updateResult_1:
-                                            assign:
-                                            - complete_switchResult_239ce97: "${null}"
-                          - maybeAddResponse:
-                              steps:
-                              - maybeAddResponse_initResult:
-                                  assign:
-                                  - maybeAddResponseResult_51b1d8a: {}
-                              - maybeAddResponse_steps:
-                                  switch:
-                                  - condition: "${default(map.get(input, \"sideCall\"), false)}"
-                                    steps:
-                                    - maybeAddResponse_updateResult_0:
-                                        assign:
-                                        - maybeAddResponseResult_51b1d8a: "${null}"
-                                  - condition: "${true}"
-                                    steps:
-                                    - addResponse_seg_write_with_session_update:
-                                        steps:
-                                        - addResponse_newId:
-                                            steps:
-                                            - addResponse_newId_initResult:
-                                                assign:
-                                                - addResponse_newIdResult_54c689dc: {}
-                                            - addResponse_newId_steps:
-                                                try:
-                                                  steps:
-                                                  - addResponse_newId_updateResult:
-                                                      assign:
-                                                      - addResponse_newIdResult_54c689dc: "${uuid.generate()}"
-                                                except:
-                                                  as: "addResponse_newIdError"
-                                                  steps:
-                                                  - logError_4:
-                                                      try:
-                                                        steps:
-                                                        - logError_call_4:
-                                                            call: "sys.log"
-                                                            args:
-                                                              text: "${(\"[logError] \" + addResponse_newIdError.message)}"
-                                                            result: "logErrorResult_4b664d8e"
-                                                      retry: "${http.default_retry}"
-                                                  - reRaise_4:
-                                                      raise: "${addResponse_newIdError}"
-                                                  - addResponse_newId_updateResultError:
-                                                      assign:
-                                                      - addResponse_newIdResult_54c689dc: "${null}"
-                                        - addResponse_write_messagesIsta_SegKala:
-                                            try:
-                                              steps:
-                                              - addResponse_write_messagesIsta_SegKala_call:
-                                                  call: "http.post"
-                                                  args:
-                                                    url: "${((input.env.BASE_URL + \"/\") + \"firebase/create\")}"
-                                                    body:
-                                                      collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
-                                                      id: "${addResponse_newIdResult_54c689dc}"
-                                                      contents:
-                                                        value:
-                                                          role: "${complete_switchResult_239ce97.message.role}"
-                                                          content: "${complete_switchResult_239ce97.message.content}"
-                                                          tool_calls: "${map.get(complete_switchResult_239ce97.message, \"tool_calls\")}"
-                                                          tool_call_id: "${null}"
-                                                          create_time: "${sys.now()}"
-                                                          docId: "${null}"
-                                                        create_time: "${sys.now()}"
-                                                        cost: "${complete_switchResult_239ce97.total_cost}"
-                                                        execId: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
-                                                      userId: "${input.env.userId}"
-                                                    auth:
-                                                      type: "${\"OIDC\"}"
-                                                      audience: "${input.env.BASE_URL}"
-                                                    headers:
-                                                      x-user-id: "${input.env.userId}"
-                                                      x-project-id: "${input.env.projectId}"
-                                                  result: "addResponse_write_messagesIsta_SegKalaResult_ce43e96"
-                                            retry: "${http.default_retry}"
-                                        - addResponse_update_session_update_time:
-                                            try:
-                                              steps:
-                                              - addResponse_update_session_update_time_call:
-                                                  call: "http.post"
-                                                  args:
-                                                    url: "${((input.env.BASE_URL + \"/\") + \"firebase/update\")}"
-                                                    body:
-                                                      collection: "${\"convo.sessions\"}"
-                                                      id: "${input.env.sessionId}"
-                                                      contents:
-                                                        update_time: "${sys.now()}"
-                                                      userId: "${input.env.userId}"
-                                                    auth:
-                                                      type: "${\"OIDC\"}"
-                                                      audience: "${input.env.BASE_URL}"
-                                                    headers:
-                                                      x-user-id: "${input.env.userId}"
-                                                      x-project-id: "${input.env.projectId}"
-                                                  result: "addResponse_update_session_update_timeResult_375cf97e"
-                                            retry: "${http.default_retry}"
-                                    - maybeAddResponse_updateResult_1:
-                                        assign:
-                                        - maybeAddResponseResult_51b1d8a: "${addResponse_write_messagesIsta_SegKalaResult_ce43e96}"
+                      - helpers_Convo:
+                          try:
+                            steps:
+                            - helpers_Convo_call:
+                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                args:
+                                  workflow_id: "${\"helpers-Convo${WORKFLOW_ENV}\"}"
+                                  argument:
+                                    query: "${default(map.get(input, \"query\"), null)}"
+                                    prompts: "${helpers_Small_promptsResult_3368db4c.prompts}"
+                                    tools: "${mapToolDefsResult_6ab9d8e1}"
+                                    toolChoice: "${default(map.get(input, \"toolChoice\"), null)}"
+                                    skipAddMessages: "${default(map.get(input, \"sideCall\"), false)}"
+                                    kala: "${encodeKalaValResult_d6d5cb6}"
+                                    env:
+                                      userId: "${input.env.userId}"
+                                      model: "${input.env.model}"
+                                      callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                      BASE_URL: "${input.env.BASE_URL}"
+                                      background: "${default(map.get(input.env, \"background\"), null)}"
+                                      projectId: "${input.env.projectId}"
+                                      sessionId: "${input.env.sessionId}"
+                                      workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                  connector_params:
+                                    skip_polling: false
+                                result: "helpers_ConvoResult_49600060"
+                          retry: "${http.default_retry}"
                       - followup:
                           steps:
                           - followup_initResults:
                               assign:
-                              - sendContentsResult_3a1071bd: {}
-                              - processToolCallsResult_201d6abc: {}
-                              - maybeNBypassReleaseResult_2ef4f074: {}
+                              - sendContentsResult_3a54a361: {}
+                              - processToolCallsResult_40567d9d: {}
+                              - maybeNBypassReleaseResult_78477ce2: {}
                           - followup_run:
                               parallel:
                                 shared:
-                                - "sendContentsResult_3a1071bd"
-                                - "processToolCallsResult_201d6abc"
-                                - "maybeNBypassReleaseResult_2ef4f074"
+                                - "sendContentsResult_3a54a361"
+                                - "processToolCallsResult_40567d9d"
+                                - "maybeNBypassReleaseResult_78477ce2"
                                 branches:
                                 - sendContentsBranch:
                                     steps:
@@ -1171,10 +921,10 @@ main:
                                         steps:
                                         - sendContents_initResult:
                                             assign:
-                                            - sendContentsResult_3a1071bd: {}
+                                            - sendContentsResult_3a54a361: {}
                                         - sendContents_steps:
                                             switch:
-                                            - condition: "${(\"content\" in complete_switchResult_239ce97.message)}"
+                                            - condition: "${(\"content\" in helpers_ConvoResult_49600060.message)}"
                                               steps:
                                               - enqueueContent_enqueue_block:
                                                   steps:
@@ -1191,9 +941,9 @@ main:
                                                                 data:
                                                                   create_time: "${sys.now()}"
                                                                   callback_id: "${null}"
-                                                                  content: "${complete_switchResult_239ce97.message.content}"
+                                                                  content: "${helpers_ConvoResult_49600060.message.content}"
                                                                   tool_call: "${null}"
-                                                                  cost: "${complete_switchResult_239ce97.total_cost}"
+                                                                  cost: "${helpers_ConvoResult_49600060.total_cost}"
                                                                   background: "${default(map.get(input.env, \"background\"), false)}"
                                                                   workdir: "${null}"
                                                                   timeout_seconds: "${60}"
@@ -1208,16 +958,16 @@ main:
                                                               headers:
                                                                 x-user-id: "${input.env.userId}"
                                                                 x-project-id: "${input.env.projectId}"
-                                                            result: "relay_ingest_tool_callResult_1018c505"
+                                                            result: "relay_ingest_tool_callResult_78434a32"
                                                       retry: "${http.default_retry}"
                                               - sendContents_updateResult_0:
                                                   assign:
-                                                  - sendContentsResult_3a1071bd: "${null}"
+                                                  - sendContentsResult_3a54a361: "${null}"
                                             - condition: "${true}"
                                               steps:
                                               - sendContents_updateResult_1:
                                                   assign:
-                                                  - sendContentsResult_3a1071bd: "${null}"
+                                                  - sendContentsResult_3a54a361: "${null}"
                                 - processToolCallsBranch:
                                     steps:
                                     - processToolCalls:
@@ -1228,13 +978,13 @@ main:
                                               args:
                                                 workflow_id: "${\"helpers-ToolDispatcher${WORKFLOW_ENV}\"}"
                                                 argument:
-                                                  totalCost: "${complete_switchResult_239ce97.total_cost}"
-                                                  toolCalls: "${default(map.get(complete_switchResult_239ce97.message, \"tool_calls\"), [])}"
+                                                  totalCost: "${helpers_ConvoResult_49600060.total_cost}"
+                                                  toolCalls: "${default(map.get(helpers_ConvoResult_49600060.message, \"tool_calls\"), [])}"
                                                   toolDefs: "${helpers_Small_toolsResult_5129808f.tools}"
                                                   env:
                                                     userId: "${input.env.userId}"
                                                     model: "${input.env.model}"
-                                                    callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                                    callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
                                                     BASE_URL: "${input.env.BASE_URL}"
                                                     background: "${default(map.get(input.env, \"background\"), null)}"
                                                     projectId: "${input.env.projectId}"
@@ -1244,7 +994,7 @@ main:
                                                 project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                                 connector_params:
                                                   skip_polling: false
-                                              result: "processToolCallsResult_201d6abc"
+                                              result: "processToolCallsResult_40567d9d"
                                         retry: "${http.default_retry}"
                                 - maybeNBypassReleaseBranch:
                                     steps:
@@ -1252,14 +1002,14 @@ main:
                                         steps:
                                         - maybeNBypassRelease_initResult:
                                             assign:
-                                            - maybeNBypassReleaseResult_2ef4f074: {}
+                                            - maybeNBypassReleaseResult_78477ce2: {}
                                         - maybeNBypassRelease_steps:
                                             switch:
                                             - condition: "${default(map.get(input, \"sideCall\"), false)}"
                                               steps:
                                               - maybeNBypassRelease_updateResult_0:
                                                   assign:
-                                                  - maybeNBypassReleaseResult_2ef4f074: "${null}"
+                                                  - maybeNBypassReleaseResult_78477ce2: "${null}"
                                             - condition: "${true}"
                                               steps:
                                               - releaseResponseLock:
@@ -1270,8 +1020,8 @@ main:
                                                         args:
                                                           url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
                                                           body:
-                                                            collection: "${\"locks.Convo.Session\"}"
-                                                            id: "${input.env.sessionId}"
+                                                            collection: "${sessionKeyTryResult_6ed84940.collection}"
+                                                            id: "${sessionKeyTryResult_6ed84940.id}"
                                                             owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                                             userId: "${input.env.userId}"
                                                           auth:
@@ -1280,22 +1030,22 @@ main:
                                                           headers:
                                                             x-user-id: "${input.env.userId}"
                                                             x-project-id: "${input.env.projectId}"
-                                                        result: "releaseResponseLockResult_62bc2b8e"
+                                                        result: "releaseResponseLockResult_23887513"
                                                   retry: "${http.default_retry}"
                                               - maybeNBypassRelease_updateResult_1:
                                                   assign:
-                                                  - maybeNBypassReleaseResult_2ef4f074: "${releaseResponseLockResult_62bc2b8e}"
+                                                  - maybeNBypassReleaseResult_78477ce2: "${releaseResponseLockResult_23887513}"
                       - calcStats:
                           steps:
                           - calcStats_initResults:
                               assign:
-                              - toolsCostResult_10ce398f: {}
-                              - addUsageResult_1e86f07: {}
+                              - toolsCostResult_c5d1808: {}
+                              - addUsageResult_695777c4: {}
                           - calcStats_run:
                               parallel:
                                 shared:
-                                - "toolsCostResult_10ce398f"
-                                - "addUsageResult_1e86f07"
+                                - "toolsCostResult_c5d1808"
+                                - "addUsageResult_695777c4"
                                 branches:
                                 - toolsCostBranch:
                                     steps:
@@ -1303,22 +1053,22 @@ main:
                                         steps:
                                         - toolsCost_initResult:
                                             assign:
-                                            - toolsCostResult_10ce398f: "${0}"
+                                            - toolsCostResult_c5d1808: "${0}"
                                         - toolsCost_steps:
                                             for:
                                               value: "toolsCostValue"
-                                              in: "${processToolCallsResult_201d6abc.results}"
+                                              in: "${processToolCallsResult_40567d9d.results}"
                                               steps:
                                               - toolsCost_updateResult:
                                                   assign:
-                                                  - toolsCostResult_10ce398f: "${(toolsCostResult_10ce398f + toolsCostValue.cost)}"
+                                                  - toolsCostResult_c5d1808: "${(toolsCostResult_c5d1808 + toolsCostValue.cost)}"
                                 - addUsageBranch:
                                     steps:
                                     - addUsage:
                                         steps:
                                         - addUsage_initResult:
                                             assign:
-                                            - addUsageResult_1e86f07: {}
+                                            - addUsageResult_695777c4: {}
                                         - addUsage_steps:
                                             switch:
                                             - condition: "${(default(map.get(input, \"usage\"), null) != null)}"
@@ -1327,7 +1077,7 @@ main:
                                                   steps:
                                                   - plusUsage_initResult:
                                                       assign:
-                                                      - plusUsageResult_23124ae0: {}
+                                                      - plusUsageResult_4fda68ac: {}
                                                   - plusUsage_steps:
                                                       try:
                                                         steps:
@@ -1335,105 +1085,105 @@ main:
                                                             steps:
                                                             - addCompleteDetails_initResult:
                                                                 assign:
-                                                                - addCompleteDetailsResult_6ed53b83: {}
+                                                                - addCompleteDetailsResult_7ee7689c: {}
                                                             - addCompleteDetails_steps:
                                                                 try:
                                                                   steps:
                                                                   - addCompleteDetails_updateResult:
                                                                       assign:
-                                                                      - addCompleteDetailsResult_6ed53b83: "${default(map.get(input, \"usage\"), null).completion_tokens_details}"
+                                                                      - addCompleteDetailsResult_7ee7689c: "${default(map.get(input, \"usage\"), null).completion_tokens_details}"
                                                                 except:
                                                                   as: "addCompleteDetailsError"
                                                                   steps:
-                                                                  - logError_5:
+                                                                  - logError_2:
                                                                       try:
                                                                         steps:
-                                                                        - logError_call_5:
+                                                                        - logError_call_2:
                                                                             call: "sys.log"
                                                                             args:
                                                                               text: "${(\"[logError] \" + addCompleteDetailsError.message)}"
                                                                             result: "logErrorResult_932112c"
                                                                       retry: "${http.default_retry}"
-                                                                  - reRaise_5:
+                                                                  - reRaise_2:
                                                                       raise: "${addCompleteDetailsError}"
                                                                   - addCompleteDetails_updateResultError:
                                                                       assign:
-                                                                      - addCompleteDetailsResult_6ed53b83: "${null}"
+                                                                      - addCompleteDetailsResult_7ee7689c: "${null}"
                                                         - addPromptDetails:
                                                             steps:
                                                             - addPromptDetails_initResult:
                                                                 assign:
-                                                                - addPromptDetailsResult_c920d9e: {}
+                                                                - addPromptDetailsResult_28bc3842: {}
                                                             - addPromptDetails_steps:
                                                                 try:
                                                                   steps:
                                                                   - addPromptDetails_updateResult:
                                                                       assign:
-                                                                      - addPromptDetailsResult_c920d9e: "${default(map.get(input, \"usage\"), null).prompt_tokens_details}"
+                                                                      - addPromptDetailsResult_28bc3842: "${default(map.get(input, \"usage\"), null).prompt_tokens_details}"
                                                                 except:
                                                                   as: "addPromptDetailsError"
                                                                   steps:
-                                                                  - logError_6:
+                                                                  - logError_3:
                                                                       try:
                                                                         steps:
-                                                                        - logError_call_6:
+                                                                        - logError_call_3:
                                                                             call: "sys.log"
                                                                             args:
                                                                               text: "${(\"[logError] \" + addPromptDetailsError.message)}"
                                                                             result: "logErrorResult_7804d5e9"
                                                                       retry: "${http.default_retry}"
-                                                                  - reRaise_6:
+                                                                  - reRaise_3:
                                                                       raise: "${addPromptDetailsError}"
                                                                   - addPromptDetails_updateResultError:
                                                                       assign:
-                                                                      - addPromptDetailsResult_c920d9e: "${null}"
+                                                                      - addPromptDetailsResult_28bc3842: "${null}"
                                                         - plusUsage_updateResult:
                                                             assign:
-                                                            - plusUsageResult_23124ae0:
-                                                                completion_tokens: "${(default(map.get(input, \"usage\"), null).completion_tokens + complete_switchResult_239ce97.usage.completion_tokens)}"
+                                                            - plusUsageResult_4fda68ac:
+                                                                completion_tokens: "${(default(map.get(input, \"usage\"), null).completion_tokens + helpers_ConvoResult_49600060.usage.completion_tokens)}"
                                                                 completion_tokens_details:
-                                                                  accepted_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.accepted_prediction_tokens + complete_switchResult_239ce97.usage.completion_tokens_details.accepted_prediction_tokens)}"
-                                                                  audio_tokens: "${(addCompleteDetailsResult_6ed53b83.audio_tokens + complete_switchResult_239ce97.usage.completion_tokens_details.audio_tokens)}"
-                                                                  reasoning_tokens: "${(addCompleteDetailsResult_6ed53b83.reasoning_tokens + complete_switchResult_239ce97.usage.completion_tokens_details.reasoning_tokens)}"
-                                                                  rejected_prediction_tokens: "${(addCompleteDetailsResult_6ed53b83.rejected_prediction_tokens + complete_switchResult_239ce97.usage.completion_tokens_details.rejected_prediction_tokens)}"
-                                                                prompt_tokens: "${(default(map.get(input, \"usage\"), null).prompt_tokens + complete_switchResult_239ce97.usage.prompt_tokens)}"
+                                                                  accepted_prediction_tokens: "${(addCompleteDetailsResult_7ee7689c.accepted_prediction_tokens + helpers_ConvoResult_49600060.usage.completion_tokens_details.accepted_prediction_tokens)}"
+                                                                  audio_tokens: "${(addCompleteDetailsResult_7ee7689c.audio_tokens + helpers_ConvoResult_49600060.usage.completion_tokens_details.audio_tokens)}"
+                                                                  reasoning_tokens: "${(addCompleteDetailsResult_7ee7689c.reasoning_tokens + helpers_ConvoResult_49600060.usage.completion_tokens_details.reasoning_tokens)}"
+                                                                  rejected_prediction_tokens: "${(addCompleteDetailsResult_7ee7689c.rejected_prediction_tokens + helpers_ConvoResult_49600060.usage.completion_tokens_details.rejected_prediction_tokens)}"
+                                                                prompt_tokens: "${(default(map.get(input, \"usage\"), null).prompt_tokens + helpers_ConvoResult_49600060.usage.prompt_tokens)}"
                                                                 prompt_tokens_details:
-                                                                  audio_tokens: "${(addPromptDetailsResult_c920d9e.audio_tokens + complete_switchResult_239ce97.usage.prompt_tokens_details.audio_tokens)}"
-                                                                  cached_tokens: "${(addPromptDetailsResult_c920d9e.cached_tokens + complete_switchResult_239ce97.usage.prompt_tokens_details.cached_tokens)}"
-                                                                total_tokens: "${(default(map.get(input, \"usage\"), null).total_tokens + complete_switchResult_239ce97.usage.total_tokens)}"
+                                                                  audio_tokens: "${(addPromptDetailsResult_28bc3842.audio_tokens + helpers_ConvoResult_49600060.usage.prompt_tokens_details.audio_tokens)}"
+                                                                  cached_tokens: "${(addPromptDetailsResult_28bc3842.cached_tokens + helpers_ConvoResult_49600060.usage.prompt_tokens_details.cached_tokens)}"
+                                                                total_tokens: "${(default(map.get(input, \"usage\"), null).total_tokens + helpers_ConvoResult_49600060.usage.total_tokens)}"
                                                       except:
                                                         as: "plusUsageError"
                                                         steps:
-                                                        - logError_7:
+                                                        - logError_4:
                                                             try:
                                                               steps:
-                                                              - logError_call_7:
+                                                              - logError_call_4:
                                                                   call: "sys.log"
                                                                   args:
                                                                     text: "${(\"[logError] \" + plusUsageError.message)}"
                                                                   result: "logErrorResult_7317ca91"
                                                             retry: "${http.default_retry}"
-                                                        - reRaise_7:
+                                                        - reRaise_4:
                                                             raise: "${plusUsageError}"
                                                         - plusUsage_updateResultError:
                                                             assign:
-                                                            - plusUsageResult_23124ae0: "${null}"
+                                                            - plusUsageResult_4fda68ac: "${null}"
                                               - addUsage_updateResult_0:
                                                   assign:
-                                                  - addUsageResult_1e86f07: "${plusUsageResult_23124ae0}"
+                                                  - addUsageResult_695777c4: "${plusUsageResult_4fda68ac}"
                                             - condition: "${true}"
                                               steps:
                                               - addUsage_updateResult_1:
                                                   assign:
-                                                  - addUsageResult_1e86f07: "${complete_switchResult_239ce97.usage}"
+                                                  - addUsageResult_695777c4: "${helpers_ConvoResult_49600060.usage}"
                       - maybeToolFeedback:
                           steps:
                           - maybeToolFeedback_initResult:
                               assign:
-                              - maybeToolFeedbackResult_542e8e6d: {}
+                              - maybeToolFeedbackResult_7833afd0: {}
                           - maybeToolFeedback_steps:
                               switch:
-                              - condition: "${((len(processToolCallsResult_201d6abc.results) > 0) and (not  default(map.get(input, \"sideCall\"), false)))}"
+                              - condition: "${((len(processToolCallsResult_40567d9d.results) > 0) and (not  (default(map.get(input, \"sideCall\"), false) or default((map.get(input, \"toolChoice\") != null), false))))}"
                                 steps:
                                 - toolCallsCompleted:
                                     try:
@@ -1445,16 +1195,17 @@ main:
                                             argument:
                                               query: "${default(\"Tool calls completed\", null)}"
                                               fund: "${input.fund}"
-                                              spent: "${default((default(map.get(input, \"spent\"), 0) + (complete_switchResult_239ce97.total_cost + toolsCostResult_10ce398f)), null)}"
+                                              spent: "${default((default(map.get(input, \"spent\"), 0) + (helpers_ConvoResult_49600060.total_cost + toolsCostResult_c5d1808)), null)}"
                                               usage: "${default(null, null)}"
                                               task: "${default(null, null)}"
                                               toolChoice: "${default(null, null)}"
                                               sideCall: "${default(false, null)}"
                                               callback: "${default(map.get(input, \"callback\"), null)}"
+                                              kala: "${default(map.get(input, \"kala\"), null)}"
                                               env:
                                                 userId: "${input.env.userId}"
                                                 model: "${input.env.model}"
-                                                callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                                                callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
                                                 BASE_URL: "${input.env.BASE_URL}"
                                                 background: "${default(map.get(input.env, \"background\"), null)}"
                                                 projectId: "${input.env.projectId}"
@@ -1464,18 +1215,18 @@ main:
                                             project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                                             connector_params:
                                               skip_polling: true
-                                          result: "toolCallsCompletedResult_6e34cb5f"
+                                          result: "toolCallsCompletedResult_426ba37"
                                     retry: "${http.default_retry}"
                                 - maybeToolFeedback_updateResult_0:
                                     assign:
-                                    - maybeToolFeedbackResult_542e8e6d: "${toolCallsCompletedResult_6e34cb5f}"
+                                    - maybeToolFeedbackResult_7833afd0: "${toolCallsCompletedResult_426ba37}"
                               - condition: "${true}"
                                 steps:
                                 - statusStop:
                                     steps:
                                     - statusStop_initResult:
                                         assign:
-                                        - statusStopResult_55e17c0a: {}
+                                        - statusStopResult_4d21b300: {}
                                     - statusStop_steps:
                                         try:
                                           steps:
@@ -1533,35 +1284,35 @@ main:
                                                           headers:
                                                             x-user-id: "${input.env.userId}"
                                                             x-project-id: "${input.env.projectId}"
-                                                        result: "relay_ingest_tool_callResult_6cf1d1ee"
+                                                        result: "relay_ingest_tool_callResult_623e17d1"
                                                   retry: "${http.default_retry}"
                                           - stopInit:
                                               steps: []
                                           - statusStop_updateResult:
                                               assign:
-                                              - statusStopResult_55e17c0a: "${null}"
+                                              - statusStopResult_4d21b300: "${null}"
                                         except:
                                           as: "statusStopError"
                                           steps:
-                                          - logError_8:
+                                          - logError_5:
                                               try:
                                                 steps:
-                                                - logError_call_8:
+                                                - logError_call_5:
                                                     call: "sys.log"
                                                     args:
                                                       text: "${(\"[logError] \" + statusStopError.message)}"
                                                     result: "logErrorResult_32c967ba"
                                               retry: "${http.default_retry}"
-                                          - reRaise_8:
+                                          - reRaise_5:
                                               raise: "${statusStopError}"
                                           - statusStop_updateResultError:
                                               assign:
-                                              - statusStopResult_55e17c0a: "${null}"
+                                              - statusStopResult_4d21b300: "${null}"
                                 - maybeCallback:
                                     steps:
                                     - maybeCallback_initResult:
                                         assign:
-                                        - maybeCallbackResult_647d4953: {}
+                                        - maybeCallbackResult_64f34c75: {}
                                     - maybeCallback_steps:
                                         switch:
                                         - condition: "${(default(map.get(input, \"callback\"), null) != null)}"
@@ -1574,45 +1325,340 @@ main:
                                                     args:
                                                       url: "${((input.env.BASE_URL + \"/\") + (\"callbacks/\" + default(map.get(input, \"callback\"), null).id))}"
                                                       body:
-                                                        message: "${complete_switchResult_239ce97.message}"
-                                                        total_cost: "${(default(map.get(input, \"spent\"), 0) + (complete_switchResult_239ce97.total_cost + toolsCostResult_10ce398f))}"
-                                                        usage: "${addUsageResult_1e86f07}"
+                                                        message: "${helpers_ConvoResult_49600060.message}"
+                                                        total_cost: "${(default(map.get(input, \"spent\"), 0) + (helpers_ConvoResult_49600060.total_cost + toolsCostResult_c5d1808))}"
+                                                        usage: "${addUsageResult_695777c4}"
                                                       auth:
                                                         type: "${\"OIDC\"}"
                                                         audience: "${input.env.BASE_URL}"
                                                       headers:
                                                         x-user-id: "${input.env.userId}"
                                                         x-project-id: "${input.env.projectId}"
-                                                    result: "callbackResult_3147f90f"
+                                                    result: "callbackResult_1579c62d"
                                               retry: "${http.default_retry}"
                                           - maybeCallback_updateResult_0:
                                               assign:
-                                              - maybeCallbackResult_647d4953: "${callbackResult_3147f90f.body}"
+                                              - maybeCallbackResult_64f34c75: "${callbackResult_1579c62d.body}"
                                         - condition: "${true}"
                                           steps:
                                           - maybeCallback_updateResult_1:
                                               assign:
-                                              - maybeCallbackResult_647d4953: "${null}"
+                                              - maybeCallbackResult_64f34c75: "${null}"
                                 - maybeToolFeedback_updateResult_1:
                                     assign:
-                                    - maybeToolFeedbackResult_542e8e6d:
-                                        message: "${complete_switchResult_239ce97.message}"
-                                        total_cost: "${(default(map.get(input, \"spent\"), 0) + (complete_switchResult_239ce97.total_cost + toolsCostResult_10ce398f))}"
-                                        usage: "${addUsageResult_1e86f07}"
+                                    - maybeToolFeedbackResult_7833afd0:
+                                        message: "${helpers_ConvoResult_49600060.message}"
+                                        total_cost: "${(default(map.get(input, \"spent\"), 0) + (helpers_ConvoResult_49600060.total_cost + toolsCostResult_c5d1808))}"
+                                        usage: "${addUsageResult_695777c4}"
                       - maybeRespond_updateResult_0:
                           assign:
-                          - maybeRespondResult_12c2c315:
-                              message: "${complete_switchResult_239ce97.message}"
-                              total_cost: "${(complete_switchResult_239ce97.total_cost + toolsCostResult_10ce398f)}"
-                              usage: "${complete_switchResult_239ce97.usage}"
+                          - maybeRespondResult_7c075adf:
+                              message: "${helpers_ConvoResult_49600060.message}"
+                              total_cost: "${(helpers_ConvoResult_49600060.total_cost + toolsCostResult_c5d1808)}"
+                              usage: "${helpers_ConvoResult_49600060.usage}"
                     - condition: "${true}"
                       steps:
                       - maybeRespond_updateResult_1:
                           assign:
-                          - maybeRespondResult_12c2c315: "${null}"
+                          - maybeRespondResult_7c075adf: "${null}"
+            - collapseMessages_try:
+                steps:
+                - collapseMessages_try_initResult:
+                    assign:
+                    - collapseMessages_tryResult_62edfdc1: {}
+                - collapseMessages_try_steps:
+                    try:
+                      steps:
+                      - segmentsForSession_block:
+                          steps:
+                          - segmentsForSession_fetch:
+                              try:
+                                steps:
+                                - segmentsForSession_fetch_call:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
+                                      body:
+                                        collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
+                                        windowSeconds: "${1200}"
+                                        overlapSeconds: "${840}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "${\"OIDC\"}"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "segmentsForSession_fetchResult_798aeffe"
+                              retry: "${http.default_retry}"
+                          - segmentsForSession_convert:
+                              steps:
+                              - segmentsForSession_convert_initResult:
+                                  assign:
+                                  - segmentsForSession_convertResult_2a783565: []
+                              - segmentsForSession_convert_steps:
+                                  for:
+                                    value: "segmentsForSession_convertValue"
+                                    in: "${segmentsForSession_fetchResult_798aeffe.body.segments}"
+                                    steps:
+                                    - segmentsForSession_convert_assignIterResult:
+                                        assign:
+                                        - segmentsForSession_convert_assignIterResultVar:
+                                            sessionId: "${input.env.sessionId}"
+                                            end: "${segmentsForSession_convertValue.end}"
+                                            windowSeconds: "${1200}"
+                                            kind: "SegKala"
+                                    - segmentsForSession_convert_updateResult:
+                                        assign:
+                                        - segmentsForSession_convertResult_2a783565: "${list.concat(segmentsForSession_convertResult_2a783565, segmentsForSession_convert_assignIterResultVar)}"
+                      - collapseMessages:
+                          try:
+                            steps:
+                            - collapseMessages_call:
+                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                args:
+                                  workflow_id: "${\"context-ContextCollapser-SegKala${WORKFLOW_ENV}\"}"
+                                  argument:
+                                    agentId:
+                                      workflowName: "${\"helpers-Small${WORKFLOW_ENV}\"}"
+                                    segmentEnd: "${segmentsForSession_convertResult_2a783565[(len(segmentsForSession_convertResult_2a783565) - 1)].end}"
+                                    windowSeconds: "${1200}"
+                                    overlapSeconds: "${840}"
+                                    env:
+                                      userId: "${input.env.userId}"
+                                      model: "${input.env.model}"
+                                      callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                      BASE_URL: "${input.env.BASE_URL}"
+                                      background: "${default(map.get(input.env, \"background\"), null)}"
+                                      projectId: "${input.env.projectId}"
+                                      sessionId: "${input.env.sessionId}"
+                                      workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                  connector_params:
+                                    skip_polling: true
+                                result: "collapseMessagesResult_368de3a5"
+                          retry: "${http.default_retry}"
+                      - collapseMessages_try_updateResult:
+                          assign:
+                          - collapseMessages_tryResult_62edfdc1: "${collapseMessagesResult_368de3a5}"
+                    except:
+                      as: "collapseMessages_tryError"
+                      steps:
+                      - logError_6:
+                          try:
+                            steps:
+                            - logError_call_6:
+                                call: "sys.log"
+                                args:
+                                  text: "${(\"[logError] \" + collapseMessages_tryError.message)}"
+                                result: "logErrorResult_645e84ef"
+                          retry: "${http.default_retry}"
+                      - reRaise_6:
+                          raise: "${collapseMessages_tryError}"
+                      - collapseMessages_try_updateResultError:
+                          assign:
+                          - collapseMessages_tryResult_62edfdc1: "${null}"
+            - chainBlock:
+                steps:
+                - buildWorkflows:
+                    steps:
+                    - buildWorkflows_initResult:
+                        assign:
+                        - buildWorkflowsResult_57e8dc3d: []
+                    - buildWorkflows_steps:
+                        for:
+                          value: "buildWorkflowsIdx"
+                          range: "${[0, (1 - 1)]}"
+                          steps:
+                          - buildWorkflows_switch:
+                              steps:
+                              - buildWorkflows_switch_initResult:
+                                  assign:
+                                  - buildWorkflows_switchResult_7899654f: {}
+                              - buildWorkflows_switch_steps:
+                                  switch:
+                                  - condition: "${(buildWorkflowsIdx == 0)}"
+                                    steps:
+                                    - buildWorkflows_switch_updateResult_0:
+                                        assign:
+                                        - buildWorkflows_switchResult_7899654f:
+                                            workflowName: "${\"helpers-links-SaveReflection\"}"
+                                            params:
+                                              agentId:
+                                                workflowName: "${\"helpers-Small${WORKFLOW_ENV}\"}"
+                          - buildWorkflows_updateResult:
+                              assign:
+                              - buildWorkflowsResult_57e8dc3d: "${list.concat(buildWorkflowsResult_57e8dc3d, buildWorkflows_switchResult_7899654f)}"
+                - callChain:
+                    try:
+                      steps:
+                      - callChain_call:
+                          call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                          args:
+                            workflow_id: "${\"helpers-Chain${WORKFLOW_ENV}\"}"
+                            argument:
+                              input:
+                                agentId:
+                                  workflowName: "${\"helpers-Small${WORKFLOW_ENV}\"}"
+                                segmentEnd: "${null}"
+                                windowSeconds: "${1200}"
+                                overlapSeconds: "${240}"
+                                env:
+                                  userId: "${input.env.userId}"
+                                  model: "${input.env.model}"
+                                  callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                  BASE_URL: "${input.env.BASE_URL}"
+                                  background: "${default(map.get(input.env, \"background\"), null)}"
+                                  projectId: "${input.env.projectId}"
+                                  sessionId: "${input.env.sessionId}"
+                                  workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                              headWorkflow: "${\"assistant-ExtractTopics\"}"
+                              tail: "${buildWorkflowsResult_57e8dc3d}"
+                              env:
+                                userId: "${input.env.userId}"
+                                model: "${input.env.model}"
+                                callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                BASE_URL: "${input.env.BASE_URL}"
+                                background: "${default(map.get(input.env, \"background\"), null)}"
+                                projectId: "${input.env.projectId}"
+                                sessionId: "${input.env.sessionId}"
+                                workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                            location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                            project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                            connector_params:
+                              skip_polling: true
+                          result: "callChainResult_70da1ad7"
+                    retry: "${http.default_retry}"
+            - smallStrider_try:
+                steps:
+                - smallStrider_try_initResult:
+                    assign:
+                    - smallStrider_tryResult_143abbd7: {}
+                - smallStrider_try_steps:
+                    try:
+                      steps:
+                      - segmentsForSession_block_1:
+                          steps:
+                          - segmentsForSession_fetch_1:
+                              try:
+                                steps:
+                                - segmentsForSession_fetch_call_1:
+                                    call: "http.post"
+                                    args:
+                                      url: "${((input.env.BASE_URL + \"/\") + \"firebase/segmentsForSession\")}"
+                                      body:
+                                        collection: "${(((\"convo.sessions/\" + input.env.sessionId) + \"/\") + \"messages\")}"
+                                        windowSeconds: "${180}"
+                                        overlapSeconds: "${30}"
+                                        userId: "${input.env.userId}"
+                                      auth:
+                                        type: "${\"OIDC\"}"
+                                        audience: "${input.env.BASE_URL}"
+                                      headers:
+                                        x-user-id: "${input.env.userId}"
+                                        x-project-id: "${input.env.projectId}"
+                                    result: "segmentsForSession_fetchResult_7fc47db2"
+                              retry: "${http.default_retry}"
+                          - segmentsForSession_convert_1:
+                              steps:
+                              - segmentsForSession_convert_initResult_1:
+                                  assign:
+                                  - segmentsForSession_convertResult_1d3a9e07: []
+                              - segmentsForSession_convert_steps_1:
+                                  for:
+                                    value: "segmentsForSession_convertValue"
+                                    in: "${segmentsForSession_fetchResult_7fc47db2.body.segments}"
+                                    steps:
+                                    - segmentsForSession_convert_assignIterResult_1:
+                                        assign:
+                                        - segmentsForSession_convert_assignIterResultVar:
+                                            sessionId: "${input.env.sessionId}"
+                                            end: "${segmentsForSession_convertValue.end}"
+                                            windowSeconds: "${180}"
+                                            kind: "SegKala"
+                                    - segmentsForSession_convert_updateResult_1:
+                                        assign:
+                                        - segmentsForSession_convertResult_1d3a9e07: "${list.concat(segmentsForSession_convertResult_1d3a9e07, segmentsForSession_convert_assignIterResultVar)}"
+                      - smallStrider:
+                          try:
+                            steps:
+                            - smallStrider_call:
+                                call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                                args:
+                                  workflow_id: "${\"helpers-SmallStrider-SegKala${WORKFLOW_ENV}\"}"
+                                  argument:
+                                    agentId:
+                                      workflowName: "${\"helpers-Small${WORKFLOW_ENV}\"}"
+                                    segmentEnd: "${segmentsForSession_convertResult_1d3a9e07[(len(segmentsForSession_convertResult_1d3a9e07) - 1)].end}"
+                                    windowSeconds: "${180}"
+                                    overlapSeconds: "${30}"
+                                    env:
+                                      userId: "${input.env.userId}"
+                                      model: "${input.env.model}"
+                                      callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                                      BASE_URL: "${input.env.BASE_URL}"
+                                      background: "${default(map.get(input.env, \"background\"), null)}"
+                                      projectId: "${input.env.projectId}"
+                                      sessionId: "${input.env.sessionId}"
+                                      workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                                  location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                                  project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                                  connector_params:
+                                    skip_polling: true
+                                result: "smallStriderResult_17d7ccb6"
+                          retry: "${http.default_retry}"
+                      - smallStrider_try_updateResult:
+                          assign:
+                          - smallStrider_tryResult_143abbd7: "${smallStriderResult_17d7ccb6}"
+                    except:
+                      as: "smallStrider_tryError"
+                      steps:
+                      - logError_7:
+                          try:
+                            steps:
+                            - logError_call_7:
+                                call: "sys.log"
+                                args:
+                                  text: "${(\"[logError] \" + smallStrider_tryError.message)}"
+                                result: "logErrorResult_5fab0aa6"
+                          retry: "${http.default_retry}"
+                      - reRaise_7:
+                          raise: "${smallStrider_tryError}"
+                      - smallStrider_try_updateResultError:
+                          assign:
+                          - smallStrider_tryResult_143abbd7: "${null}"
+            - Summaries:
+                try:
+                  steps:
+                  - Summaries_call:
+                      call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
+                      args:
+                        workflow_id: "${\"Summaries${WORKFLOW_ENV}\"}"
+                        argument:
+                          agentId:
+                            workflowName: "${\"helpers-Small${WORKFLOW_ENV}\"}"
+                          segmentEnd: "${null}"
+                          windowSeconds: "${1200}"
+                          overlapSeconds: "${240}"
+                          env:
+                            userId: "${input.env.userId}"
+                            model: "${input.env.model}"
+                            callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
+                            BASE_URL: "${input.env.BASE_URL}"
+                            background: "${default(map.get(input.env, \"background\"), null)}"
+                            projectId: "${input.env.projectId}"
+                            sessionId: "${input.env.sessionId}"
+                            workdir: "${default(map.get(input.env, \"workdir\"), null)}"
+                        location: "${sys.get_env(\"GOOGLE_CLOUD_LOCATION\")}"
+                        project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
+                        connector_params:
+                          skip_polling: true
+                      result: "SummariesResult_344d2d18"
+                retry: "${http.default_retry}"
             - mainTry_updateResult:
                 assign:
-                - mainTryResult_1363d3b3: "${maybeRespondResult_12c2c315}"
+                - mainTryResult_3c1063b: "${maybeRespondResult_7c075adf}"
           except:
             as: "mainTryError"
             steps:
@@ -1620,7 +1666,7 @@ main:
                 steps:
                 - errorStatus_initResult:
                     assign:
-                    - errorStatusResult_3f509bdb: {}
+                    - errorStatusResult_77137bb6: {}
                 - errorStatus_steps:
                     try:
                       steps:
@@ -1678,20 +1724,20 @@ main:
                                       headers:
                                         x-user-id: "${input.env.userId}"
                                         x-project-id: "${input.env.projectId}"
-                                    result: "relay_ingest_tool_callResult_3f93d137"
+                                    result: "relay_ingest_tool_callResult_41d7375"
                               retry: "${http.default_retry}"
                       - maybeNBypassRelease_1:
                           steps:
                           - maybeNBypassRelease_initResult_1:
                               assign:
-                              - maybeNBypassReleaseResult_2ef4f074: {}
+                              - maybeNBypassReleaseResult_78477ce2: {}
                           - maybeNBypassRelease_steps_1:
                               switch:
                               - condition: "${default(map.get(input, \"sideCall\"), false)}"
                                 steps:
                                 - maybeNBypassRelease_updateResult_0_1:
                                     assign:
-                                    - maybeNBypassReleaseResult_2ef4f074: "${null}"
+                                    - maybeNBypassReleaseResult_78477ce2: "${null}"
                               - condition: "${true}"
                                 steps:
                                 - releaseResponseLock_1:
@@ -1702,8 +1748,8 @@ main:
                                           args:
                                             url: "${((input.env.BASE_URL + \"/\") + \"firebase/locks/release\")}"
                                             body:
-                                              collection: "${\"locks.Convo.Session\"}"
-                                              id: "${input.env.sessionId}"
+                                              collection: "${sessionKeyTryResult_6ed84940.collection}"
+                                              id: "${sessionKeyTryResult_6ed84940.id}"
                                               owner: "${sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\")}"
                                               userId: "${input.env.userId}"
                                             auth:
@@ -1712,16 +1758,16 @@ main:
                                             headers:
                                               x-user-id: "${input.env.userId}"
                                               x-project-id: "${input.env.projectId}"
-                                          result: "releaseResponseLockResult_62bc2b8e"
+                                          result: "releaseResponseLockResult_23887513"
                                     retry: "${http.default_retry}"
                                 - maybeNBypassRelease_updateResult_1_1:
                                     assign:
-                                    - maybeNBypassReleaseResult_2ef4f074: "${releaseResponseLockResult_62bc2b8e}"
+                                    - maybeNBypassReleaseResult_78477ce2: "${releaseResponseLockResult_23887513}"
                       - callbackFailure:
                           steps:
                           - callbackFailure_initResult:
                               assign:
-                              - callbackFailureResult_3e228642: {}
+                              - callbackFailureResult_3c54eeb1: {}
                           - callbackFailure_steps:
                               switch:
                               - condition: "${(default(map.get(input, \"callback\"), null) != null)}"
@@ -1741,40 +1787,40 @@ main:
                                             headers:
                                               x-user-id: "${input.env.userId}"
                                               x-project-id: "${input.env.projectId}"
-                                          result: "callbackResult_2e7fae09"
+                                          result: "callbackResult_3bcd51a8"
                                     retry: "${http.default_retry}"
                                 - callbackFailure_updateResult_0:
                                     assign:
-                                    - callbackFailureResult_3e228642: "${callbackResult_2e7fae09.body}"
+                                    - callbackFailureResult_3c54eeb1: "${callbackResult_3bcd51a8.body}"
                               - condition: "${true}"
                                 steps:
                                 - callbackFailure_updateResult_1:
                                     assign:
-                                    - callbackFailureResult_3e228642: "${null}"
+                                    - callbackFailureResult_3c54eeb1: "${null}"
                       - errorStatus_updateResult:
                           assign:
-                          - errorStatusResult_3f509bdb: "${null}"
+                          - errorStatusResult_77137bb6: "${null}"
                     except:
                       as: "errorStatusError"
                       steps:
-                      - logError_9:
+                      - logError_8:
                           try:
                             steps:
-                            - logError_call_9:
+                            - logError_call_8:
                                 call: "sys.log"
                                 args:
                                   text: "${(\"[logError] \" + errorStatusError.message)}"
                                 result: "logErrorResult_365965ec"
                           retry: "${http.default_retry}"
-                      - reRaise_9:
+                      - reRaise_8:
                           raise: "${errorStatusError}"
                       - errorStatus_updateResultError:
                           assign:
-                          - errorStatusResult_3f509bdb: "${null}"
+                          - errorStatusResult_77137bb6: "${null}"
             - ReRaise_error:
                 raise: "${mainTryError}"
             - mainTry_updateResultError:
                 assign:
-                - mainTryResult_1363d3b3: "${errorStatusResult_3f509bdb}"
+                - mainTryResult_3c1063b: "${errorStatusResult_77137bb6}"
   - return:
-      return: "${mainTryResult_1363d3b3}"
+      return: "${mainTryResult_3c1063b}"

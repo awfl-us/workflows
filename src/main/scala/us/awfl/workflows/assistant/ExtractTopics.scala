@@ -19,6 +19,7 @@ import us.awfl.utils.Env
 import us.awfl.utils.strider.StriderInput
 import us.awfl.workflows.helpers.links.SaveReflection
 import us.awfl.workflows.helpers.Chain
+import us.awfl.workflows.EventHandler
 
 case class TopicContext(prevTopics: ListValue[TopicInfo], convoContext: BaseValue[ConvoContext])
 object TopicContext:
@@ -27,11 +28,10 @@ object TopicContext:
     Yoj(
       "topicContext",
       { kala =>
-        given KalaVibhaga = kala
-
         YojComposer.composed(
           name = "topicContext",
           childComponents = List(prevTopics.component, convoContext.component),
+          kala = kala,
           intro = Some("These are the previously extracted topic information, as well as the conversation context: "),
           promoteUpstream = true,
           filters = ListValue.nil
@@ -44,20 +44,20 @@ object TopicContext:
       )
     )
 
-trait ExtractTopics extends us.awfl.core.Workflow {
+trait ExtractTopics extends EventHandler {
   override def buildSteps(
     main: (List[Step[?, ?]], BaseValue[Result]),
     except: Resolved[Error] => (List[Step[?, ?]], BaseValue[Result])
   )(using Spec[Result]): (List[Step[?, ?]], BaseValue[Result]) = super.buildSteps(
     (main._1 :+ Chain(
       ExtractTopics
-        .runSync(obj(StriderInput()))
-        .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
+        .runSync(obj(StriderInput(id)))
+        .andThen(SaveReflection)(obj(SaveReflection.Params(obj(id))))
     )) -> main._2,
     except
   )
 }
 
-object ExtractTopics extends us.awfl.utils.strider.Latest[TopicContext, TopicInfo]("assistant-ExtractTopics") {
+object ExtractTopics extends us.awfl.utils.strider.Latest[TopicContext, EventHandler.Input, TopicInfo]("assistant-ExtractTopics") {
   override def prompt = "You're a background assistant, scrutanizing live or recorded conversations. You're the 'unconsciouse' part of the conversation agent, adding depth and structured memory to the conversation."
 }

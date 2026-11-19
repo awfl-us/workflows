@@ -4,6 +4,7 @@ import us.awfl.dsl._
 import us.awfl.dsl.CelOps._
 import us.awfl.dsl.auto.given
 import us.awfl.ista.ToolCall
+import us.awfl.services.Llm
 import us.awfl.utils.PostRequest
 import us.awfl.workflows.EventHandler
 import us.awfl.workflows.traits.ToolWorkflow
@@ -18,9 +19,23 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
   case class ProducerRequest(sessionId: Value[String] = Value.nil)
 
   val toolNames = List("READ_FILE", "UPDATE_FILE", "RUN_COMMAND")
+
+  val updateFileTool = Llm.Tool(
+    function = ToolDefFunc(
+      str("UPDATE_FILE"),
+      "Update a file on disk with provided content",
+      ToolDefObj(
+        properties = Map(
+          "filepath" -> ToolDefStr,
+          "content" -> ToolDefStr
+        ),
+        required = ListValue(List("filepath", "content").cel)
+      )
+    ).toLlm
+  )
  
   val buildTools = buildList("buildCliTools", List(
-    ToolWithWorkflow(
+    Llm.ToolWithWorkflow(
       function = ToolDefFunc(
         str("READ_FILE"),
         "Read a file from disk.",
@@ -31,9 +46,9 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
           required = ListValue(List("filepath").cel)
         )
       ).toLlm,
-      workflowName = str(workflowName)
+      workflowName = OptValue(str(workflowName))
     ),
-    ToolWithWorkflow(
+    Llm.ToolWithWorkflow(
       function = ToolDefFunc(
         str("RUN_COMMAND"),
         "Execute a shell command.",
@@ -44,21 +59,11 @@ object CliTools extends us.awfl.workflows.traits.ToolWorkflow {
           required = ListValue(List("command").cel)
         )
       ).toLlm,
-      workflowName = str(workflowName)
+      workflowName = OptValue(str(workflowName))
     ),
-    ToolWithWorkflow(
-      function = ToolDefFunc(
-        str("UPDATE_FILE"),
-        "Update a file on disk with provided content",
-        ToolDefObj(
-          properties = Map(
-            "filepath" -> ToolDefStr,
-            "content" -> ToolDefStr
-          ),
-          required = ListValue(List("filepath", "content").cel)
-        )
-      ).toLlm,
-      workflowName = str(workflowName)
+    Llm.ToolWithWorkflow(
+      function = updateFileTool.function,
+      workflowName = OptValue(str(workflowName))
     )
   ))
 

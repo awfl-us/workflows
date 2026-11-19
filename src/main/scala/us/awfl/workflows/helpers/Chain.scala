@@ -34,7 +34,7 @@ object Chain extends us.awfl.core.Workflow {
     val runTail = Fold("foldWorkflows", initCall.resultValue, input.tail) { case (b, wfArgs) =>
       val args = RunWorkflowArgs(
         str(wfArgs.get.workflowName.cel + "${WORKFLOW_ENV}"),
-        obj(ChainableInput(b, wfArgs.flatMap(_.params.asInstanceOf[BaseValue[AnyValueT]])))
+        obj(ChainableInput(OptValue(b), wfArgs.flatMap(_.params.asInstanceOf[BaseValue[AnyValueT]])))
       )
       Call[RunWorkflowArgs[ChainableInput[AnyValueT, AnyValueT]], AnyValueT](
         "Run",

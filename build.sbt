@@ -4,6 +4,11 @@ ThisBuild / scalaVersion := "3.4.2"
 name := "workflows"
 organization := "us.awfl"
 
+Compile / incOptions := (Compile / incOptions).value
+  .withApiDebug(true)
+  .withRelationsDebug(true)
+Global / logLevel := Level.Debug
+
 ThisBuild / versionScheme := Some("early-semver")
 // ThisBuild / dynverTagPrefix := "" // uncomment if your tags are not prefixed with "v"
 
@@ -39,8 +44,8 @@ libraryDependencies ++= Seq(
 
 // Keep our org snapshot overrides
 dependencyOverrides += "us.awfl" %% "dsl" % "0.1.0-SNAPSHOT"
-// dependencyOverrides += "us.awfl" %% "compiler" % "0.1.0-SNAPSHOT"
-// dependencyOverrides += "us.awfl" %% "compiler-yaml" % "0.1.0-SNAPSHOT"
+dependencyOverrides += "us.awfl" %% "compiler" % "0.1.0-SNAPSHOT"
+dependencyOverrides += "us.awfl" %% "compiler-yaml" % "0.1.0-SNAPSHOT"
 dependencyOverrides += "us.awfl" %% "workflow-utils" % "0.1.0-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-language:implicitConversions")

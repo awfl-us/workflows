@@ -6,10 +6,10 @@ main:
       steps:
       - maybeSaveReflection_initResult:
           assign:
-          - maybeSaveReflectionResult_419e10f3: {}
+          - maybeSaveReflectionResult_566be382: {}
       - maybeSaveReflection_steps:
           switch:
-          - condition: "${((\"input\" in input) and input.input.shouldSaveReflection)}"
+          - condition: "${default(map.get(map.get(input, \"input\"), \"shouldSaveReflection\"), false)}"
             steps:
             - callAgent:
                 try:
@@ -17,23 +17,43 @@ main:
                   - callAgent_call:
                       call: "googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run"
                       args:
-                        workflow_id: "${input.params.agentWorkflow}"
+                        workflow_id: "${input.params.agentId.workflowName}"
                         argument:
-                          query: "${\"The current conversation has been marked to save reflection.\nAnalyze what general, widely applicable learnings can be reaped and remembered in order to pay dividends in the future in terms of saved time and quicker, better results going forward.\nDon't polute the file with information that is only narrowly applicable to a specific recent task or project. Only general development guidelines.\nFeel free to cleanup anything messy or out of date with the latest state of the project.\nKeep you changes minimal, agent files should be stable for the most part (except at the very begining of a project).\n      \"}"
+                          query: "${default(\"The current conversation has been marked to save reflection.\nAnalyze what general, widely applicable learnings can be reaped and remembered in order to pay dividends in the future in terms of saved time and quicker, better results going forward.\nDon't polute the file with information that is only narrowly applicable to a specific recent task or project. Only general development guidelines.\nFeel free to cleanup anything messy or out of date with the latest state of the project.\nKeep you changes minimal, agent files should be stable for the most part (except at the very begining of a project).\n      \", null)}"
                           fund: "${0}"
-                          spent: "${default(null, null)}"
+                          spent: "${default(0, null)}"
                           usage: "${default(null, null)}"
                           task: "${default(null, null)}"
                           toolChoice:
+                            type: "${\"function\"}"
                             function:
-                              name: "UPDATE_FILE"
-                            type: "function"
+                              name: "${\"UPDATE_FILE\"}"
+                              description: "${\"Update a file on disk with provided content\"}"
+                              parameters:
+                                type: "object"
+                                properties:
+                                  filepath:
+                                    type: "string"
+                                    properties: {}
+                                    enum: "${default(null, null)}"
+                                    required: "${default(null, null)}"
+                                    items: "${null}"
+                                  content:
+                                    type: "string"
+                                    properties: {}
+                                    enum: "${default(null, null)}"
+                                    required: "${default(null, null)}"
+                                    items: "${null}"
+                                enum: "${default(null, null)}"
+                                required: "${default([\"filepath\", \"content\"], null)}"
+                                items: "${null}"
                           sideCall: "${default(true, null)}"
                           callback: "${default(null, null)}"
+                          kala: "${default(null, null)}"
                           env:
                             userId: "${input.env.userId}"
                             model: "${input.env.model}"
-                            callingWorkflowExec: "${default(\"WORKFLOW_EXECUTION_ID\", null)}"
+                            callingWorkflowExec: "${default(sys.get_env(\"GOOGLE_CLOUD_WORKFLOW_EXECUTION_ID\"), null)}"
                             BASE_URL: "${input.env.BASE_URL}"
                             background: "${default(map.get(input.env, \"background\"), null)}"
                             projectId: "${input.env.projectId}"
@@ -43,15 +63,15 @@ main:
                         project_id: "${sys.get_env(\"GOOGLE_CLOUD_PROJECT_ID\")}"
                         connector_params:
                           skip_polling: false
-                      result: "callAgentResult_683ca4b4"
+                      result: "callAgentResult_4046af6a"
                 retry: "${http.default_retry}"
             - maybeSaveReflection_updateResult_0:
                 assign:
-                - maybeSaveReflectionResult_419e10f3: "${callAgentResult_683ca4b4}"
+                - maybeSaveReflectionResult_566be382: "${callAgentResult_4046af6a}"
           - condition: "${true}"
             steps:
             - maybeSaveReflection_updateResult_1:
                 assign:
-                - maybeSaveReflectionResult_419e10f3: "${null}"
+                - maybeSaveReflectionResult_566be382: "${null}"
   - return:
-      return: "${maybeSaveReflectionResult_419e10f3}"
+      return: "${maybeSaveReflectionResult_566be382}"
