@@ -382,3 +382,37 @@ memory-mode regressions and the HTTP-error mapping regression. All 3 memory
 tests and both error-mapping tests passed locally. No durable journal work,
 production deployment, or live LLM calls were involved. Production release
 and a real-browser acceptance check remain separate work.
+
+### Phase 1.11 — merged and deployed production checkpoint (2026-11-19)
+
+**CURRENT STATUS: RELEASED.** The preceding phases are retained as a
+chronological test/reconciliation history; earlier statements that this
+change was not merged or deployed no longer describe its release status.
+
+- `workflow-utils/main` at `911722e`, `workflows/main` at `0214823`, and
+  `server/main` at `84998ae` contain the merged reconciliation work.
+- The full 26/26 Project Manager Rust workflow dependency closure was
+  published and activated in `gs://awfl-us-native-workflows/`.
+- The `awfl-us/server` production Cloud Run deployment for `84998ae`
+  succeeded (GitHub Actions run `44639870788`), including the GKE native
+  worker image rollout and OAuth/anonymous-request checks.
+- Cloud Run API and Jobs use `AWFL_DOCUMENT_STORAGE_BACKEND=postgres`,
+  `AWFL_NATIVE_MEMORY_EXECUTION_ENABLED=1` and
+  `AWFL_NATIVE_DOCUMENT_STORE_ENABLED=1`. The GKE deployment was aligned
+  through the existing native-execution Terraform state: one in-place
+  change and no resources added or destroyed.
+- Live Project Manager execution `native_ac889a2e593c45e2b963ed01c310f872`
+  completed and returned `AWFL_MEMORY_PG_SMOKE_OK`; production GCP logs
+  showed `executionMode=memory` and `storageBackend=postgres`.
+- The native Rust Try/Raise CI passed on the final server commit. The
+  isolated PostgreSQL storage CI passed after allowing the dedicated CI
+  `/benchmark_ci` database; production databases remain disallowed.
+- Completed remote feature branches were deleted after verifying merge
+  ancestry. See `server/docs/plans/2026-11-19-wip-old-production-release.md`
+  for the release record and residual validation limitations.
+
+**Important:** durable per-effect Firestore/PostgreSQL journal work remains
+**deferred**, not part of this release. No automatic queuing of 409-conflicted
+turns was added; callers must resubmit. The production smoke exercised a
+real model response but did not constitute an authenticated browser-based
+concurrent-tool acceptance test.
