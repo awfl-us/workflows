@@ -60,7 +60,7 @@ def main(argv:list[str]|None=None) -> int:
         return 0 if all(x.exists() for x in checks.values()) and all(shutil.which(x) for x in ['java','sbt','cargo','node']) else 1
     if opts.command in ('unit','all'):
         existing(server/'scripts/reconcileScenario.test.mjs','server')
-        run(['python3','-m','unittest','discover','-s','tests','-p','test_native_dev.py','-q'],ROOT)
+        run(['python3','-m','unittest','discover','-s','tests','-p','test_*.py','-q'],ROOT)
         run(['node','--test','scripts/nativeLocalDev.test.mjs','scripts/reconcileScenario.test.mjs'],server)
     if opts.command in ('compile','all'):
         existing(compiler/'Cargo.toml','compiler')
