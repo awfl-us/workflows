@@ -12,12 +12,12 @@ import us.awfl.workflows.helpers.ToolDefs._
 
 /**
  * tools/Tasks
- * - Accepts CliTools.ToolWorkflowInput and executes CREATE_TASK or UPDATE_TASK via TaskRunners.
+ * - Accepts CliTools.ToolWorkflowInput and executes CHECK_TASKS, CREATE_TASK or UPDATE_TASK via TaskRunners.
  * - Returns CliTools.ToolWorkflowResult with the operation's message as the encoded string.
  * - Keeps response format minimal and stable for ToolDispatcher usage.
  */
 object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
-  val supported = List("CREATE_TASK", "UPDATE_TASK")
+  val supported = List("CHECK_TASKS", "CREATE_TASK", "UPDATE_TASK")
 
   case class Task(title: Value[String], description: Value[String], status: Value[String])
 
@@ -53,6 +53,9 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
     val nameStr: Cel = nameV.cel
 
     // Build branches
+    val (checkSteps, checkMsg) = TaskRunners.runCheck()
+    val runCheckBlock = Block("run_check_tasks", checkSteps -> checkMsg)
+
     val (createSteps, createMsg) = TaskRunners.runCreate(toolCall = toolCall )
     val runCreateBlock = Block("run_create_task", createSteps -> createMsg)
 
@@ -62,6 +65,7 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
     val unsupportedMsg = str((("Unsupported tool: ": Cel) + nameStr))
 
     val sw = Switch("select_task_tool", List(
+      (nameStr === ("CHECK_TASKS": Cel)) -> { List(runCheckBlock) -> runCheckBlock.resultValue },
       (nameStr === ("CREATE_TASK": Cel)) -> { List(runCreateBlock) -> runCreateBlock.resultValue },
       (nameStr === ("UPDATE_TASK": Cel)) -> { List(runUpdateBlock) -> runUpdateBlock.resultValue },
       (true: Cel) -> { List() -> unsupportedMsg }
@@ -71,6 +75,14 @@ object Tasks extends us.awfl.workflows.traits.ToolWorkflow {
   })
 
   val buildTools = buildList("buildTaskTools", List(
+    ToolWithWorkflow(
+      function = obj(ToolFunctionDef(
+        str("CHECK_TASKS"),
+        str("List tasks in the current session (IDs, descriptions and statuses). Use before creating duplicate tasks or when checking work progress."),
+        obj(ToolDefObj(Map.empty, ListValue.empty).toLlm)
+      )),
+      workflowName = str(workflowName)
+    ),
     ToolWithWorkflow(
       function = obj(ToolFunctionDef(
         str("CREATE_TASK"),

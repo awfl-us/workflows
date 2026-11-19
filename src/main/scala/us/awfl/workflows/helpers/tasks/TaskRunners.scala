@@ -128,6 +128,20 @@ object TaskRunners {
     (List[Step[?, ?]](patch, tryUpdate, maybePromote), combinedMsg)
   }
 
+  // -------- CHECK_TASKS exec --------
+  // Read the session's tasks on demand, never as a changing prompt preamble.
+  def runCheck(): (List[Step[?, ?]], Value[String]) = {
+    val queryTasks = get[Tasks.TasksList](
+      "checkTasksGet", Tasks.bySessionUrl("", 50, "desc")
+    )
+    val tryCheck = Try("tryCheckTasks", {
+      List(queryTasks) -> str(json.encode_to_string(queryTasks.resultValue.flatMap(_.body).cel))
+    }, err => {
+      List() -> str(("Task lookup failed: ": Cel) + err.get.message.cel)
+    })
+    (List(tryCheck), tryCheck.resultValue)
+  }
+
   // -------- Public exec helpers used by tools/Tasks workflow --------
   def runCreate(toolCall: Value[ToolCall]): (List[Step[?, ?]], Value[String]) =
     createRun(toolCall)
