@@ -113,3 +113,7 @@ Non-goals: restore compiler API/schema file generation; port historical GKE Terr
 ### Final combined Phase 0 local verification
 
 `PGTEST_URL=postgres://awfl@127.0.0.1:55439/awfl_reconcile ./scripts/reconcile-test all --strict-background --server /workspace/reconcile-server --compiler /workspace/reconcile-compiler-rust --report /workspace/reconcile-native-output-fixed/build-report.json` completed with **exit code 0**. Verified **26 ELF workflows** (warm compilation 7.6 s), 17 Python unit tests, 10 passing Node fixture/unit tests with 1 optional skip, 22 passing durable journal tests (1 optional skip), 14 passing PostgreSQL tests (no skips), and three strict background Project Manager scenarios (0 failed detached executions). The entrypoint now verifies the PostgreSQL URL is the loopback-only `awfl_reconcile` database **before running any SQL tests**.
+
+### Scoped production Jobs route test added
+
+The fourth native/Postgres integration case mounts the actual `jobs/firebaseDbApi.js` Express router with production `workflowsUserInject` and `projectIdMiddleware`, injecting isolated `PostgresStorage`. It verifies scoped create/read, duplicate-document 409, and two concurrent `locks/acquire` requests with **exactly one winner**, followed by lock release. **Combined PostgreSQL suite: 15/15 pass**, now including this production-router integration. This is still not a launch of the whole Jobs service (which initializes cloud-adjacent modules and a recovery scheduler). The remaining full app + multi-turn ProjectManager test stays open.
