@@ -28,6 +28,18 @@ class ReconcileLauncherTest(unittest.TestCase):
                 mod.main(['postgres'])
         self.assertIn('Refusing PostgreSQL tests outside loopback',str(raised.exception))
 
+    def test_typed_ista_requires_local_database(self):
+        with patch.dict('os.environ', {'PGTEST_URL':''}):
+            with self.assertRaises(SystemExit) as raised:
+                mod.main(['typed-ista'])
+        self.assertIn('PGTEST_URL is required',str(raised.exception))
+
+    def test_typed_ista_refuses_remote_database_before_compile(self):
+        with patch.dict('os.environ', {'PGTEST_URL':'postgres://admin@db.example.com/awfl_reconcile'}):
+            with self.assertRaises(SystemExit) as raised:
+                mod.main(['typed-ista'])
+        self.assertIn('Refusing typed-ista test outside loopback',str(raised.exception))
+
     def test_durable_requires_compiled_report(self):
         with self.assertRaises(SystemExit) as raised:
             mod.main(['durable','--report','/tmp/missing-reconcile-report.json'])
