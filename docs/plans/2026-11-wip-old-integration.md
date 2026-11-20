@@ -1031,3 +1031,45 @@ Running → Done/Failed behavior. Measure background cost/latency and cache
 impact before considering further autonomy. **Native Rust PostgreSQL memory
 mode stays primary; per-effect durable journaling, Small/SmallStrider and
 SLEEP remain explicitly deferred.**
+
+### Phase 3.10 — real PostgreSQL concurrent Strider and failure-path acceptance (2026-11-20)
+
+**Implemented in the existing local Rust/Jobs integration harness:** the
+server `scripts/reconcileStriderProjectManager.test.mjs` now covers four
+isolated scenarios using compiled `Summaries-Convo`, the actual Jobs LLM
+router and PostgreSQL-backed `/firebase` routes. Existing `sequential` is
+retained. `contended` holds the winning model response and launches another
+compiled native Strider using a **distinct native execution-store instance
+and PostgreSQL connection pool**. The second acquire returns a real HTTP
+`409`, with no second model completion or premature summary write. Once
+released, the winner persists one typed summary; a later repeat performs no
+duplicate completion. The test verifies every successful acquire has an
+identical release owner and the PostgreSQL segment-lock collection is empty.
+
+`provider-failure` causes the Jobs LLM provider adapter to fail before a
+summary is committed. `callback-failure` rejects the native callback await
+**after** the first typed model response. Both runs fail without a partial
+summary, release the owner-scoped lock, and succeed when retried with a new
+native execution, creating exactly one output. All callback awaits use URLs
+issued by callback.create in the same fixture. Native log effects use the
+**production authenticated log handler**, rather than a no-op. In the
+existing compiled Strider test, both a **6 KB summary** and a realistic
+**6 KB TopicInfo document** survive the aggregate read path without the old
+unbounded-log failure.
+
+**Local verification:** `./scripts/reconcile-test strider` passed: 4/4
+real-Jobs/native/Postgres ProjectManager scenarios, 12/12 native Strider
+regressions, and the existing three memory-mode session/callback/typed-422
+tests. The contended case also passed **five consecutive independent runs**.
+No Scala library or compiled workflow modification was required.
+
+**Limitations and next acceptance gate:** worker stores/connections are
+independent but run within one Node process; the callback delivery and
+auxiliary context endpoints are still deterministic fixtures. This does
+**not** establish callback garbage collection or crash-proof exactly-once
+external effects, and a production pod-level race remains a separate
+deployment-sensitive test. The next feature slice is the original `Status`
+trait from Phase 3.2: compare lock-first EventHandler semantics, normal and
+error transitions, 409 contention, typed 422 and query-free callbacks before
+changing its composition. Durable mode and autonomous SmallStrider remain
+deferred.
