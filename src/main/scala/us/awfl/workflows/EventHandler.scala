@@ -44,8 +44,9 @@ import us.awfl.workflows.helpers.ToolDefs.ToolDefObj
 import scala.annotation.tailrec
 import us.awfl.services.Llm.ToolFunctionDef
 import us.awfl.workflows.tools.Tasks.Task
+import us.awfl.workflows.event.Status
 
-trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools {
+trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools with Status {
   // Single entry point: tool-enabled chat that surfaces tool_calls
   def eventHandler(
     message: ChatMessage = ChatMessage("user", input.query.getOrElse(str(""))),
@@ -60,18 +61,6 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
     val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", inputVal.flatMap(_.task.getOrElse(Value.nil)))
 
     val triggeredExecId: Value[String] = Exec.currentExecId
-
-    // Mark this execution as Running at the start (best-effort, non-fatal if it fails)
-    val statusRunning = Exec.updateExecStatus(
-      "statusRunning",
-      triggeredExecId,
-      str("Running"),
-      Value(false)
-    )
-    val enqueueRunning = Exec.enqueueExecStatus(
-      "enqueueStatusRunning",
-      str("Running")
-    )
 
     val mapToolDefs = For("mapToolDefs", toolsWorkflow.resultValue.flatMap(_.tools)) { toolDef =>
       List(Log("logTool", str(encodeJson(toolDef)))) -> obj(Tool(
@@ -113,10 +102,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
     val mainTry = buildSteps(
       {
         // Best-effort init status; don't fail the workflow if this call errors.
-        val tryInitStatus = Try(
-          "tryInitStatus",
-          List[Step[?, ?]](statusRunning, enqueueRunning) -> Value.nil[NoValueT]
-        )
+        val tryInitStatus = statusStart(triggeredExecId)
 
         // Tool-call continuations have no query: resume from the stored tool
         // results without synthesizing a new user message.
@@ -194,22 +180,12 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             ).fn
           },
           (true: Cel) -> {
-            val statusDone = Exec.updateExecStatus(
-              "statusDone",
-              triggeredExecId,
-              str("Done"),
-              Value(true)
-            )
-            val enqueueDone = Exec.enqueueExecStatus(
-              "enqueueStatusDone",
-              str("Done")
-            )
             val maybeCallback = Switch("maybeCallback", List(
               (input.callback.getOrElse(Value.nil) !== Cel.nil) ->
                 input.callback.getOrElse(Value.nil).get.apply(responseWithCost).fn,
               (true: Cel) -> (List() -> Value.nil)
             ))
-            List[Step[?, ?]](statusDone, enqueueDone, maybeCallback) -> responseWithCost
+            (statusComplete(triggeredExecId) :+ maybeCallback) -> responseWithCost
           }
         ))
 
@@ -270,35 +246,14 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         ) -> whenAcquired.resultValue
       },
       err => {
-        val errMsg = str(core.default(
-          core.default(
-            core.default(
-              map.get( err.cel, CelConst("""["body", "error", "message"]""")),
-              map.get( err.cel, CelConst("""["body", "error"]"""))
-            ),
-            map.get( err.cel, "message")
-          ),
-          "Unknown error"
-        ))
-        val statusFailed = Exec.updateExecStatus(
-          "statusFailed",
-          triggeredExecId,
-          str("Failed"),
-          Value(true),
-          error = errMsg
-        )
-        val enqueueFailed = Exec.enqueueExecStatus(
-          "enqueueStatusFailed",
-          str("Failed"),
-          error = errMsg
-        )
+        val errMsg = statusErrorMessage(err)
         val callbackFailure = Switch("callbackFailure", List(
           (input.callback.getOrElse(Value.nil) !== Cel.nil) -> input.callback.getOrElse(Value.nil).get.failure(err).fn,
           (true: Cel) -> (List() -> Value.nil)
         ))
         // Do not report the native root as Completed after a failed turn.
-        List[Step[?, ?]](release, statusFailed, enqueueFailed, callbackFailure,
-          Raise("propagateEventHandlerError", err)) -> Value.nil[ChatToolResponse]
+        (List[Step[?, ?]](release) ++ statusFailure(triggeredExecId, errMsg) ++
+          List[Step[?, ?]](callbackFailure, Raise("propagateEventHandlerError", err))) -> Value.nil[ChatToolResponse]
       }
     )
 

@@ -1073,3 +1073,43 @@ trait from Phase 3.2: compare lock-first EventHandler semantics, normal and
 error transitions, 409 contention, typed 422 and query-free callbacks before
 changing its composition. Durable mode and autonomous SmallStrider remain
 deferred.
+
+### Phase 3.11 — historical `Status` lifecycle extracted without changing native behavior (2026-11-20)
+
+Original source reviewed directly: `wip-old:src/main/scala/us/awfl/workflows/event/Status.scala`.
+It wrapped `buildSteps` to inject best-effort Running and Failed status updates,
+and `stop` to set Done. The **current** native EventHandler already has
+important ordering and exception constraints absent from this historical
+design: session lock acquisition before saving the user turn, tool dispatch
+and lock release before terminal Done, explicit callback failure delivery,
+and a final Raise so the root is never silently marked complete after a 409
+or typed 422. Blindly mixing in the old `buildSteps`/`stop` overrides could
+change those invariants.
+
+**Implementation:** add `event/Status.scala` as a composable trait with
+`statusStart`, `statusComplete`, `statusErrorMessage`, and `statusFailure` DSL
+step constructors. `EventHandler` mixes in `Status` and uses the constructors
+at its **existing exact call sites**, preserving the order and stable native
+step IDs `tryInitStatus`, `statusRunning`, `enqueueStatusRunning`,
+`statusDone`, `enqueueStatusDone`, `statusFailed`, and
+`enqueueStatusFailed`. In particular, an error still releases the session
+lock, attempts Failed status, notifies the callback, then rethrows. The
+original `Recursion` or `stop` override is intentionally not reintroduced.
+
+**Local validation:** independent standalone checkout avoids the sbt/JGit
+linked-worktree bug. `sbt compile` passed. Recompiled the full **27 native
+Rust static-ELF ProjectManager closure** with `publish=false` and compared
+the generated `src/main.rs` across every workflow to the pre-extraction
+compiled closure: **27/27 files are byte-for-byte identical**. Re-ran the
+same `./scripts/reconcile-test strider` suite against the new build:
+4/4 Strider → ProjectManager/Postgres scenarios, 12/12 native Strider cases,
+and all three memory-mode concurrency/callback/typed-422 regressions passed.
+This is a behavior-preserving extraction, **not** a claim of improved
+status/lifecycle reliability or different production semantics.
+
+**Next:** maintain a status-specific parity gate that asserts persisted
+Running → Done/Failed events and callback error delivery against Jobs routes,
+including side calls and query-free continuations. Then consider whether
+additional lifecycle mixins (`Summaries`, `ExtractTopics`, `ContextCollapser`)
+can be extracted without changing native step order, background model cost,
+or cached prompt behavior. Durable mode remains deferred.
