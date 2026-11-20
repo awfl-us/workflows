@@ -416,3 +416,51 @@ change was not merged or deployed no longer describe its release status.
 turns was added; callers must resubmit. The production smoke exercised a
 real model response but did not constitute an authenticated browser-based
 concurrent-tool acceptance test.
+
+### Phase 2.1 — `wip-old` Sadhaka original design reconciled (2026-11-19)
+
+**Status: implemented and locally verified on `feat/reconcile-sadhaka-native`; not merged or deployed.**
+
+Architectural source-of-truth: `workflow-utils/wip-old` `Prakriya.scala`
+(`Ista` and `Sadhaka`) and `workflows/wip-old` `EventHandler.scala`
+(`given Sadhaka[Input]`). Before modifying additional `wip-old` functionality,
+read its original abstraction and use sites across the relevant repositories;
+do not replace good original approaches solely to simplify migration.
+
+**Preserved:** the original `Ista[T]` factory performs inline typed schema
+derivation when the concrete `Ista[T]` is constructed; generic
+`Sadhaka.complete[In, Out]` consumes the stored tool schema without attempting
+to derive abstract `Out`. The current `Ista` retains its `build` parameter and
+strict `JsonSchema.nativeTool[T]` output. The fixed $0.10 fund, `sideCall=true`,
+asynchronous callback, and first tool-call JSON arguments decoding are kept.
+
+**Compatibility adaptations:** the old `WorkflowId` wrapper is unavailable in
+current DSL, so the method accepts `workflowName: Value[String]`. The old
+Google Workflows connector was replaced by `CallOperations.WorkflowRun`.
+Current `ChatToolResponse` has a non-generic `message` and usage information,
+so `Sadhaka.Response[Out]` carries the decoded typed message, total cost and
+usage. EventHandler receives the selected `Ista` tool schema as `typedTool`
+and adds it to model-visible `tools`, while `toolChoice` selects its name.
+This does not expose workflow routing metadata to the provider.
+
+**Evidence:** `workflow-utils` local publish/compile succeeded; the updated
+Scala workflows compiled, all 26 Project Manager closure binaries compiled
+as static Rust, and the standalone Sadhaka parent and child fixtures compiled
+to static native Rust. `server/scripts/reconcileSadhakaNative.test.mjs` runs
+both native Rust fixtures through PostgreSQL memory-mode execution and the
+actual `workflow.run`, callback.create, HTTP callback, callback.await and
+typed JSON decoding; it passed, with one callback delivery, expected
+`ConvoSummary` fields, preserved cost/usage and successful terminal replay.
+The fixture is **test-only and must not be published**. Project Manager's
+existing strict `basic`, `no-query`, and `tool-roundtrip` scenarios also passed
+on the newly built 26-workflow closure.
+
+**Remaining before promotion:** a complete native Project Manager-driven
+Sadhaka provider call still needs a dedicated integration gate. An initial
+mock-run failed in `codebase-ProjectManager-prompts` during preload text
+concatenation (`String + Null`) before reaching `/llm/chat`; the narrower
+native child fixture isolates and verifies Sadhaka itself but does not
+establish end-to-end Project Manager preload/model behavior in that scenario.
+Add a regression case for invalid/no tool call and callback errors, and
+check caller-side schema selection with a real Jobs LLM response. Do not
+conflate this phase with deferred durable journaling.

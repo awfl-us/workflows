@@ -7,6 +7,8 @@ import us.awfl.ista.ChatMessage
 import us.awfl.services.Llm.ToolChoice
 import us.awfl.utils.Convo
 import us.awfl.utils.KalaVibhaga
+import us.awfl.utils.Sadhaka
+import us.awfl.utils.Ista
 import us.awfl.utils.SegKala
 import us.awfl.utils.TopicContextYoj
 import us.awfl.services.Llm.ChatToolResponse
@@ -78,6 +80,18 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
       ))
     }
 
+    // A side-call requesting a typed Ista output must declare that function
+    // in the provider-visible tools as well as choosing its name. The schema
+    // stays in the Jobs LLM request; routing information stays server-side.
+    val withIstaTool = Switch.list("withIstaTool", List(
+      (input.typedTool.getOrElse(Value.nil[Tool]) !== Cel.nil) ->
+        (List() -> ListValue[Tool](list.concat(
+          mapToolDefs.resultValue.cel,
+          input.typedTool.getOrElse(Value.nil[Tool]).cel
+        ))),
+      (true: Cel) -> (List() -> mapToolDefs.resultValue)
+    ))
+
     val sideCall = input.sideCall.getOrElse(Value(false))
     val bypassLock = sideCall
     val skipToolFeedback = sideCall
@@ -127,7 +141,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
             "complete",
             promptsWorkflow.result.prompts,
             buildYojStep.resultValue,
-            mapToolDefs.resultValue,
+            withIstaTool.resultValue,
             sessionId,
             toolChoice = input.toolChoice.getOrElse(ToolChoice.auto),
             model = model
@@ -243,6 +257,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
                 toolsWorkflow,
               )),
               mapToolDefs,
+              withIstaTool,
               complete,
               sendContents,
               processToolCalls,
@@ -319,10 +334,50 @@ object EventHandler {
     // Optional task payload to seed a task for this session (title/description/status)
     task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
+    typedTool: OptValue[Tool] = OptValue.nil[Tool],
     sideCall: OptValue[Boolean] = OptValue(false),
     callback: OptValue[Callback[ChatToolResponse]] = OptValue.nil,
     env: BaseValue[Env] = ENV
   )
+
+  // Reconcile the sole wip-old Sadhaka implementation. Preserve its fixed
+  // $0.10 budget, side-call flag, callback and first-output-tool semantics;
+  // replace only the obsolete Google Workflows connector with native AWFL
+  // workflow execution and adapt the provider tool-choice wire shape.
+  given Sadhaka[Input] = new Sadhaka[Input] {
+    override def complete[In: Yoj, Out: Ista: Spec](
+      query: String,
+      workflowName: Value[String]
+    )(using kala: KalaVibhaga): Step[Sadhaka.Response[Out], Value[Sadhaka.Response[Out]]] = {
+      val output = summon[Ista[Out]]
+      val completion = Callback[ChatToolResponse] { callback =>
+        val args = RunWorkflowArgs(
+          workflowName,
+          obj(Input(
+            query = OptValue(str(query)),
+            fund = Value[Double](0.1),
+            toolChoice = OptValue(obj(ToolChoice.Function(output.name))),
+            typedTool = OptValue(obj(output.tool(kala))),
+            sideCall = OptValue(obj(true)),
+            callback = OptValue(obj(callback))
+          ))
+        )
+        Call[RunWorkflowArgs[Input], ChatToolResponse](
+          "eventHandlerComplete",
+          CallOperations.WorkflowRun,
+          obj(args)
+        )
+      }
+      val arguments = completion.result.message
+        .flatMap(_.tool_calls(0)).flatMap(_.function).flatMap(_.arguments)
+      val response = obj(Sadhaka.Response(
+        Value[Out](json.decode(arguments)),
+        completion.result.total_cost,
+        completion.result.usage
+      ))
+      Try("eventHandlerTry", List(completion) -> response)
+    }
+  }
 
   trait WithInput extends us.awfl.core.Workflow {
     override type Input = EventHandler.Input

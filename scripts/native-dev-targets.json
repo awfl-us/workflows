@@ -26,5 +26,10 @@
     "root_class": "us.awfl.workflows.helpers.TypedIstaSchemaFixture",
     "dependencies": [],
     "dynamic_targets": []
+  },
+  "helpers-SadhakaNativeFixture": {
+    "root_class": "us.awfl.workflows.helpers.SadhakaNativeFixture",
+    "dependencies": ["us.awfl.workflows.helpers.SadhakaChildFixture"],
+    "dynamic_targets": ["helpers-SadhakaChildFixture"]
   }
 }
