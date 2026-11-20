@@ -4,6 +4,9 @@ import us.awfl.dsl.*
 import us.awfl.dsl.auto.given
 import us.awfl.dsl.CelOps._
 import us.awfl.workflows.EventHandler
+import us.awfl.workflows.Summaries
+import us.awfl.workflows.assistant.ExtractTopics
+import us.awfl.workflows.context.ContextCollapser
 import us.awfl.services.Llm.ChatToolResponse
 import us.awfl.utils.Env
 import us.awfl.utils.Callback
@@ -12,7 +15,8 @@ import us.awfl.workflows.helpers.ToolDefs._
 import us.awfl.services.Llm.ToolChoice
 import us.awfl.workflows.tools.Tasks.Task
 
-trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks with Cli with Funds {
+trait Agent extends us.awfl.core.Workflow with EventHandler with Preloads with Tasks with Cli with Funds
+  with Summaries with ExtractTopics with ContextCollapser {
   override type Result = ChatToolResponse
 
   // Use a single JSON config at .awfl/config.json; avoid temp files. Keep each command < 400 chars.

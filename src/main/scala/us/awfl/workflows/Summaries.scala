@@ -13,6 +13,15 @@ import us.awfl.utils.Env
 import us.awfl.utils.SegKala
 import us.awfl.utils.KalaVibhaga
 
+/** Original wip-old Summaries lifecycle mixin, now composed inside the
+  * existing sideCall-gated background pipeline instead of unconditionally
+  * appending in buildSteps (which would duplicate side-call launches).
+  */
+trait Summaries extends EventHandler {
+  override protected def backgroundStriderSteps: List[Step[?, ?]] =
+    super.backgroundStriderSteps :+ Summaries("runSummaries", WORKFLOW_ID)
+}
+
 given StepName = StepName("summariesStrider")
 import EventHandler.given
 object Summaries extends us.awfl.utils.strider.Latest[ConvoContext, EventHandler.Input, ConvoSummary]("Summaries") {

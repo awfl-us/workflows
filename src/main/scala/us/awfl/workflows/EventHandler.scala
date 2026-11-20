@@ -19,20 +19,15 @@ import us.awfl.utils.Yoj
 import us.awfl.utils.Exec
 import us.awfl.workflows.assistant.TopicContext
 import us.awfl.utils.Locks
-import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents, Chain, Convo as ConvoWorkflow}
+import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents, Convo as ConvoWorkflow}
 import us.awfl.utils.{Env, ENV}
 import us.awfl.utils.Events
 import us.awfl.utils.Callback
 import us.awfl.workflows.cli.CliActions
-import us.awfl.workflows.Summaries
-import us.awfl.workflows.assistant.ExtractTopics
-import us.awfl.workflows.context.ContextCollapser
 import us.awfl.workflows.traits.Agent
 import us.awfl.workflows.traits.Tools
 import us.awfl.workflows.traits.Prompts
 import us.awfl.workflows.traits.Preloads
-import us.awfl.utils.strider.StriderInput
-import us.awfl.workflows.helpers.links.SaveReflection
 import us.awfl.utils.PostResult
 import us.awfl.workflows.helpers.ToolDefs.ToolWithWorkflow
 import us.awfl.services.Llm.{Tool, Usage}
@@ -47,6 +42,12 @@ import us.awfl.workflows.tools.Tasks.Task
 import us.awfl.workflows.event.Status
 
 trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput with Prompts with Tools with Status {
+  /** Compose background Striders at the agent boundary. Each wip-old trait
+    * contributes exactly one step; EventHandler retains the single sideCall
+    * and lock-acquisition guards, so nested Sadhaka calls never recurse.
+    */
+  protected def backgroundStriderSteps: List[Step[?, ?]] = List.empty
+
   // Single entry point: tool-enabled chat that surfaces tool_calls
   def eventHandler(
     message: ChatMessage = ChatMessage("user", input.query.getOrElse(str(""))),
@@ -184,20 +185,12 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           }
         ))
 
-        val summaries = Summaries("runSummaries", WORKFLOW_ID)
-        val extract = Chain(
-          ExtractTopics
-            .runSync(obj(StriderInput[EventHandler.Input](WORKFLOW_ID)))
-            .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
-        )
-        val collapse = ContextCollapser("collapseMessages", WORKFLOW_ID, windowSeconds = 60 * 7, overlapSeconds = 60)
-
         // Typed Sadhaka side calls must never start fresh background Striders:
         // doing so recursively invokes the same agent via the Strider's
         // Sadhaka completion. Keep the normal turn's background pipeline.
         val maybeBackgroundStriders = Switch("maybeBackgroundStriders", List(
           sideCall.cel -> (List() -> Value.nil[NoValueT]),
-          (true: Cel) -> (List[Step[?, ?]](summaries, extract, collapse) -> Value.nil[NoValueT])
+          (true: Cel) -> (backgroundStriderSteps -> Value.nil[NoValueT])
         ))
 
         val whenAcquired = Switch("maybeRespond", List(

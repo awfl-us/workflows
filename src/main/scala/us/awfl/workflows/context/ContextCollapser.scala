@@ -71,6 +71,16 @@ object CollapserMessages {
 // Rework ContextCollapser to use the Strider pattern (Latest wrapper) similar to ExtractTopics.
 // - Input Yoj: us.awfl.utils.Convo.ConvoContext (already provided by us.awfl.utils.Convo)
 // - Output Ista: ista.CollapseResponse (defined under ista/, handles read/write semantics)
+/** Wip-old lifecycle mixin, retaining the existing memory-mode Strider
+  * window (7 minutes / 1 minute overlap) and the single sideCall guard.
+  */
+trait ContextCollapser extends EventHandler {
+  override protected def backgroundStriderSteps: List[Step[?, ?]] =
+    super.backgroundStriderSteps :+ ContextCollapser(
+      "collapseMessages", WORKFLOW_ID, windowSeconds = 60 * 7, overlapSeconds = 60
+    )
+}
+
 object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMessages, EventHandler.Input, CollapseResponse] {
 
   override def name: String = "context-ContextCollapser"
