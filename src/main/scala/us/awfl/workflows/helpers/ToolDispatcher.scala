@@ -24,6 +24,7 @@ object ToolDispatcher extends us.awfl.core.Workflow {
     env: BaseValue[us.awfl.utils.Env] = us.awfl.utils.ENV
   )
   case class Result(results: ListValue[ToolWorkflow.Result])
+  private case class MatchedResults(results: ListValue[ToolWorkflow.Result])
 
   override val inputVal = init[Input]("input")
 
@@ -34,31 +35,42 @@ object ToolDispatcher extends us.awfl.core.Workflow {
   }
 
   override def workflows = List({
-    val dispatch = For("forToolCall", input.toolCalls) { toolCall =>
+    // Match only executable registrations. Typed output functions may be
+    // exposed to the model without a backing workflow, and must not create
+    // synthetic tool results (the original wip-old ToolDispatcher behavior).
+    val dispatch = Fold("dispatchRegisteredTools", obj(MatchedResults(ListValue.empty[ToolWorkflow.Result])), input.toolCalls) { (results, toolCall) =>
       val function = toolCall.flatMap(_.function).get
       val functionName = function.name
 
-      val toolFold = Fold("fold", Value.nil[ToolWorkflow.Result], input.toolDefs) { case (b, d) =>
+      val toolFold = Fold("findExecutableTool", Value.nil[ToolWorkflow.Result], input.toolDefs) { case (b, d) =>
         Switch("matchFunction", List(
-          (functionName === d.flatMap(_.function).flatMap(_.name)) -> {
+          ((b.cel === Cel.nil) &&
+            (functionName === d.flatMap(_.function).flatMap(_.name)) &&
+            (d.get.workflowName.cel !== Cel.nil) &&
+            (d.get.workflowName.cel !== str(""))) -> {
             val args = RunWorkflowArgs(str(d.get.workflowName + "${WORKFLOW_ENV}"), obj(ToolWorkflow.Input(toolCall, input.totalCost)))
-            Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result]("callToolWorkflow", CallOperations.WorkflowRun, obj(args)).fn
+            val runWorkflow = Call[RunWorkflowArgs[ToolWorkflow.Input], ToolWorkflow.Result](
+              "callToolWorkflow", CallOperations.WorkflowRun, obj(args))
+            given KalaVibhaga = SegKala(Env.sessionId, Value(time.now()), Value(0))
+            val saveResult = Convo.addMessage(
+              "saveResult",
+              obj(ChatMessage(str("tool"), runWorkflow.result.encoded, tool_call_id = toolCall.flatMap(_.id)))
+            )
+            List[Step[?, ?]](runWorkflow, saveResult) -> runWorkflow.resultValue
           },
           (true: Cel) -> (List() -> b)
         )).fn
       }
 
-      val saveResult = {
-        given KalaVibhaga = SegKala(Env.sessionId, Value(time.now()), Value(0))
-        Convo.addMessage(
-          "saveResult",
-          obj(ChatMessage(str("tool"), toolFold.result.encoded, tool_call_id = toolCall.flatMap(_.id)))
-        )
-      }
-
-      List[Step[?, ?]](toolFold, saveResult) -> toolFold.resultValue
+      val appendMatched = Switch("appendMatchedTool", List(
+        (toolFold.resultValue.cel !== Cel.nil) ->
+          (List() -> obj(MatchedResults(ListValue[ToolWorkflow.Result](
+            list.concat(results.get.results.cel, toolFold.resultValue.cel))))),
+        (true: Cel) -> (List() -> results)
+      ))
+      List[Step[?, ?]](toolFold, appendMatched) -> appendMatched.resultValue
     }
 
-    Workflow(buildSteps[Result](List(dispatch) -> obj(Result(dispatch.resultValue)), _ => List() -> Value.nil))
+    Workflow(buildSteps[Result](List(dispatch) -> obj(Result(dispatch.resultValue.flatMap(_.results))), _ => List() -> Value.nil))
   })
 }

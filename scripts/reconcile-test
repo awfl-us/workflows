@@ -150,6 +150,10 @@ def main(argv:list[str]|None=None) -> int:
                  '--recursive','--compiler',str(compiler),
                  '--output',str(sadhaka_report.parent)],ROOT)
         env=dict(os.environ,AWFL_SADHAKA_NATIVE_REPORT=str(sadhaka_report))
+        print('+ compiled native ToolDispatcher registered-workflow gate',flush=True)
+        subprocess.run(['node','--test','scripts/reconcileRegisteredToolDispatcher.test.mjs'],
+                       cwd=server,env={**env,'AWFL_NATIVE_LOCAL_BUILD_REPORT':str(sadhaka_report)},
+                       check=True,stdout=subprocess.DEVNULL)
         for target,cases in (
             ('helpers-SadhakaChildFixture',('success',)),
             ('codebase-ProjectManager',('success','missing-tool','malformed-json',

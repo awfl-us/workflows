@@ -553,3 +553,33 @@ locally with a mocked provider, *not* with a publicly published Sadhaka
 parent. The exact parent fixture intentionally remains test-only. Future
 public call sites should be integrated and smoke-tested as their own release.
 **Durable mode remains deferred** for latency reasons.
+
+### Phase 2.4 — restore original registered-tool dispatch semantics (2026-11-19)
+
+The `wip-old` `helpers/ToolDispatcher.scala` already excluded non-executable
+functions: execution and `Convo.addMessage` occurred **only** in the branch
+matching the function name **and** a present workflow target. The earlier
+native reconciliation had accidentally moved `saveResult` outside that match,
+so it attempted to save unmatched model-only output functions. Our Phase 2.2
+workaround suppressed *every* tool call for `sideCall=true`, which is broader
+than the original design and is now superseded.
+
+**Restored on `fix/restore-registered-tool-dispatch`:** `ToolDispatcher` owns
+the matching rule again, requiring a nonempty workflow target. It invokes
+and persists a result only for the first matching executable registration;
+unmatched or model-only calls contribute no result and no tool message.
+Its result list contains actual executed tools only, avoiding null placeholders
+in downstream cost calculation. `EventHandler` now passes all tool calls
+unchanged into the dispatcher, without a `sideCall`-based filtering step.
+It still preserves the original side-call lock, context/message, and follow-up
+behavior; durable per-effect journaling remains deferred.
+
+**Regression coverage:** `server/scripts/reconcileRegisteredToolDispatcher.test.mjs`
+executes the compiled Rust dispatcher against PostgreSQL memory mode for an
+unknown function and a registered function with an empty workflow target.
+Neither dispatches or saves a tool result, both replay without effects.
+`./scripts/reconcile-test sadhaka` includes this gate alongside all eight
+typed parent/child completion and failure cases. Ordinary Project Manager
+`tool-roundtrip` must still execute and save exactly one real tool result.
+Only merge/deploy following successful full native integration tests and
+independent 26-binary production compilation.
