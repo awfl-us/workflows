@@ -1126,3 +1126,33 @@ including side calls and query-free continuations. Then consider whether
 additional lifecycle mixins (`Summaries`, `ExtractTopics`, `ContextCollapser`)
 can be extracted without changing native step order, background model cost,
 or cached prompt behavior. Durable mode remains deferred.
+
+### Phase 3.12 — `Status` extraction published; production smoke (2026-11-20 UTC)
+
+**Published:** workflows main `6b41a58fed9fbd29fc56dd7cc7d65c6f25b0957a`
+contains the Status extraction, and `e3978779451684899d06f53a9d122f1083580557`
+adds the reusable parity gate. Native publisher
+[GitHub Actions 44683242268](https://github.com/awfl-us/workflows/actions/runs/44683242268)
+completed successfully for the extraction commit. The active manifests
+retain the exact prior artifact digests, consistent with the byte-identical
+27/27 generated Rust sources: `codebase-ProjectManager` `cd07f008…`,
+`Summaries-Convo` `4aa245d8…`, `assistant-ExtractTopics-Session`
+`8290609b…`. No new GKE or Cloud Run service release was needed for this
+source-equivalent workflow publication; public API `/health` returned `OK`.
+
+**Live-provider verification:** production ProjectManager session
+`0f603f47-9343-46f6-a06e-788299a5d22a`, native root
+`native_fc5a07c9e73c4e219e1e8406fe3430f4` (model `gpt-6.1-terra`,
+fund `$0.20`) produced exact `AWFL_STATUS_NATIVE_OK` and assistant cost
+`$0.006425`. GCP telemetry shows the root native execution completed at
+`2026-11-20T05:50:59.300791Z` and all six `Summaries` stages, all six
+`assistant-ExtractTopics` stages, and `ContextCollapser-SegKala` completed.
+No native effect/workflow/execution failures appeared in the inspected window.
+
+**Boundary:** the session-info API showed `status=unknown` with no latest
+execution after completion, despite a persisted assistant reply and a native
+completion log. Do not infer from this that the status view is fully
+reconciled. Investigate/cover persisted Running → Done and Running → Failed,
+including transient lookup status and callback failure paths, in the next
+status-specific Jobs integration gate. The Status extraction intentionally
+preserves existing behavior rather than claiming to correct this read path.
