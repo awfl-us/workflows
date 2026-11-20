@@ -982,3 +982,52 @@ Strider/ProjectManager/callback/concurrency/typed-422 suite passed
    optional CLI/web work where current behavior genuinely benefits. Keep
    `Small`/`SmallStrider` autonomy, SLEEP, and durable journaling deferred;
    measure latency/cache and model costs before enabling more background work.
+
+### Phase 3.9 — bounded-log follow-up fully deployed and live Strider smoke green (2026-11-20 UTC)
+
+**Production release complete.** The bounded `Ista.read` logging fix from
+`workflow-utils` main `bf24233170e48d4358540a61dda1bc6c63f9fcbe`, and
+its matching 6 KB authenticated-log regression from server main
+`0573b6a5e5f48b2d15de528530a6024b1dbaf383`, are deployed. The native
+publisher on workflows main `4d800717016913ff6669f6c3df3c84ca71a97b67`
+succeeded: [GitHub Actions run 44679741499](https://github.com/awfl-us/workflows/actions/runs/44679741499).
+The API, Jobs and native GKE worker rollout also succeeded:
+[server deployment run 44679612939](https://github.com/awfl-us/server/actions/runs/44679612939).
+Current Cloud Run ready revisions verified after this deployment:
+API `api-00248-6s5`, Jobs `jobs-00244-2kw`; public `/health` returned `OK`.
+Active GCS native release manifests include `Summaries-Convo` SHA-256
+`4aa245d83b07b20a9aadfb769b009ed845f7cd135f3ded28e2e01e0c4228cdc2`
+and `assistant-ExtractTopics-Session` SHA-256
+`8290609be798f797752d9cbaf6d11c5c31fc7b6882eb92bb1331f7c653d546a7`.
+
+**New live-provider smoke verified:** `codebase-ProjectManager` session
+`d69a590e-ceb8-45ec-acd1-36349a24f61a`, initial submitted execution
+`native_a9d43d41fb534264a46cabb64dee5167`, model `gpt-6.1-terra`, fund
+`$0.30`, responded exactly `AWFL_STRIDER_BOUNDED_LOG_OK` with foreground
+assistant cost `$0.006339`. In GCP native workflow telemetry for this run,
+the following three detached roots and every expected stage completed:
+
+- `Summaries` root `native_5c798b6ffe967d911705e1455bd02718`: `Summaries`,
+  `-All`, `-Convo`, `-Session`, `-Week`, `-Term`.
+- `assistant-ExtractTopics` root `native_c968c8e3e6d08d3fde41324e92068eb2`:
+  `assistant-ExtractTopics`, `-All`, `-Convo`, `-Session`, `-Week`, `-Term`.
+  Notably `-Session` **succeeded** where the preceding live smoke failed.
+- `context-ContextCollapser-SegKala` root
+  `native_1c54e3b0868f014a64240080caa63ca2` completed.
+
+No native `workflow_failed`, `execution_failed`, or `effect_failed` log
+entries appeared in the observed smoke window (from
+`2026-11-20T05:20:45Z`). This establishes one healthy post-fix live-provider
+run. It does **not** establish exhaustive long-term reliability or
+exactly-once semantics under worker concurrency.
+
+**Next on the reconciliation plan:** (1) execute simultaneous real-Postgres
+Striders for the same segment and verify owner-scoped lock contention,
+exactly one persisted summary, no orphan callbacks, and retry after failure;
+(2) add typed-provider/callback failure and large-topic regressions;
+(3) resume the independent historical `Status` trait reconciliation from
+Phase 3.2, preserving current EventHandler lock-first ordering and
+Running → Done/Failed behavior. Measure background cost/latency and cache
+impact before considering further autonomy. **Native Rust PostgreSQL memory
+mode stays primary; per-effect durable journaling, Small/SmallStrider and
+SLEEP remain explicitly deferred.**
