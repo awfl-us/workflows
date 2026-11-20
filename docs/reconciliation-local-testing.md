@@ -2,6 +2,51 @@
 
 > **Current reconciliation target (Nov 20, 2026 UTC): native Rust MEMORY mode with isolated PostgreSQL for local tests. Durable/per-effect journal mode is explicitly deferred for latency reasons.** The original Phase 0 notes below describe an *earlier historical baseline*, not today's passing integration coverage.
 
+## Background lifecycle composition parity (pre-merge feature)
+
+The historical `wip-old` `Agent with Summaries with ExtractTopics with
+ContextCollapser` lifecycle is being restored in the separate workflows
+`feat/reconcile-background-lifecycle` working tree. The old per-trait
+`buildSteps` append cannot be copied blindly: on current `EventHandler` it
+would duplicate background scheduling or recurse into typed Sadhaka
+`sideCall` completions. Each trait instead contributes one step through
+`backgroundStriderSteps`, and the **existing** sole
+`maybeBackgroundStriders` switch runs them only for normal user turns.
+
+From a **normal Git clone** checked out to that feature implementation
+(after its `BackgroundLifecycleSmoke.scala` test fixture is committed):
+
+```bash
+sbt -batch compile
+sbt -batch 'Test/runMain us.awfl.workflows.BackgroundLifecycleSmoke'
+```
+
+Expected smoke output includes:
+
+```text
+BACKGROUND_LIFECYCLE_NAMES=runSummaries,chainBlock,collapseMessages_try
+BACKGROUND_LIFECYCLE_GUARD_PASS
+BACKGROUND_LIFECYCLE_COMPOSITION_PASS
+```
+
+The smoke test traverses the constructed `EventHandler` DSL tree and
+requires **exactly one** background switch; its `sideCall` branch has no
+background steps and its normal branch has the three steps once and in the
+listed order. As of 2026-11-20 these **Scala compile and DSL construction
+checks passed locally**, but the feature implementation had **not yet been
+merged, compiled to a new native ProjectManager closure, or deployed**.
+The mixed `SegKala`/`ContextCollapser` configuration retains the already
+used **7-minute/1-minute** collapse windows, not the older `wip-old`
+20-minute/14-minute configuration.
+
+**Required before integrating:** compare baseline and feature-generated
+EventHandler/ProjectManager control flow, compile the full native dependency
+closure, execute `basic`, `no-query`, `tool-roundtrip` with
+`--strict-background`, and then run isolated PostgreSQL `strider-pm`/callback
+and concurrency tests. A green DSL-tree test does not prove runtime parity.
+Continue using **native Rust memory mode**, with durable/per-effect
+journaling explicitly deferred and no Google Workflows execution.
+
 ## Current composable `Status` / `Recursion` regression gate
 
 The original `wip-old` `Recursion.stop` and `Status.buildSteps`/`Status.stop`
