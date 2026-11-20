@@ -1107,6 +1107,19 @@ and all three memory-mode concurrency/callback/typed-422 regressions passed.
 This is a behavior-preserving extraction, **not** a claim of improved
 status/lifecycle reliability or different production semantics.
 
+**Reusable source equivalence gate:**
+
+```bash
+python3 scripts/verify-native-source-parity.py \
+  /path/to/pre-status/native-artifacts \
+  /path/to/post-status/native-artifacts
+```
+
+This compares every generated Rust `src/main.rs` and fails on missing, new,
+or changed native workflow sources; it does not replace runtime integration
+tests. For this extraction it printed
+`AWFL_NATIVE_SOURCE_PARITY_PASS workflows=27 identical=27`.
+
 **Next:** maintain a status-specific parity gate that asserts persisted
 Running → Done/Failed events and callback error delivery against Jobs routes,
 including side calls and query-free continuations. Then consider whether
