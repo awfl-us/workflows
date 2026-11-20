@@ -623,3 +623,48 @@ independent 26-binary production compilation.
 The durable journal remains explicitly deferred. A production smoke using a
 normal model response does not replace the local compiled Sadhaka and
 unregistered-function acceptance tests.
+
+### Phase 3.1 — `wip-old` `helpers/Convo` boundary (2026-11-19)
+
+**Implemented on `feat/reconcile-convo-native`; release pending independent
+production build and smoke test.** The architectural reference is
+`workflows/wip-old/src/main/scala/us/awfl/workflows/helpers/Convo.scala`,
+cross-checked against the original `EventHandler` call site and current
+`workflow-utils/Convo`. Preserve the original separation: a helper owns
+topic-context construction, model completion, and assistant-message saving;
+the outer EventHandler owns agent lifecycle, executable tool dispatch, and
+lock coordination. The new child uses the general native `WorkflowRun`, not
+Google Workflows. Its current `ChatToolResponse` type replaces the retired
+generic `ChatResponse[ChatMessage]`.
+
+**Critical deliberate adaptation:** user-turn persistence and lock acquire
+remain together in the **parent** (lock before write). The `wip-old` helper
+saved an initial query itself, which would violate our corrected 409 session
+contention and could duplicate turns. In the new boundary, parent persists
+the user turn only for a non-nil query, after acquiring the session lock;
+child persists the assistant response only if `skipAddMessages=false`.
+Query-free tool continuations never manufacture a user turn. Existing context
+and prompt composition, Sadhaka typed tool choice, `Ista` schema, callbacks,
+tool-result persistence, lock release and status updates remain unchanged.
+
+**Measured native local acceptance:** Scala compile passed and **29/29**
+test-closure ELF binaries compiled. Comparison with an independently
+SHA-256-verified **26/26** pre-extraction Rust release showed identical
+foreground `/llm/chat` request payloads (excluding only `workflow_name` and
+volatile execution metadata) and identical persisted messages for `basic`,
+`no-query`, and `tool-roundtrip`: respectively 2, 2, and 4 messages and
+1, 1, and 2 foreground model requests. All three strict-background scenarios
+passed. `Sadhaka` complete-through-native-ProjectManager passed, and the
+eight-case Sadhaka/dispatcher acceptance gate passed. Three PostgreSQL
+memory-mode session/concurrency, delayed callback and typed 422 regressions
+also passed after adapting test-only foreground classification to include the
+new `helpers-Convo` caller. The direct dispatcher still excludes unregistered
+model-only output tools.
+
+**Next release checks:** build/publish the independent production
+`codebase-ProjectManager` closure (**27**, including `helpers-Convo`, excluding
+Sadhaka test fixtures), verify active artifact hashes and live PostgreSQL
+memory-mode execution. Compare latency/cached prompt performance before
+proceeding with Status/Summaries/ExtractTopics/ContextCollapser lifecycle
+trait extraction. Mixin ordering and background summary stability remain
+distinct acceptance gates. **Durable execution remains deferred.**

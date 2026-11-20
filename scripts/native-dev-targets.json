@@ -12,14 +12,16 @@
       "us.awfl.workflows.assistant.ExtractTopics",
       "us.awfl.workflows.helpers.links.SaveReflection",
       "us.awfl.workflows.tools.Tasks",
-      "us.awfl.workflows.tools.Agent"
+      "us.awfl.workflows.tools.Agent",
+      "us.awfl.workflows.helpers.Convo"
     ],
     "dynamic_targets": [
       "tools-CliTools",
       "tools-Tasks",
       "tools-Agent",
       "assistant-ExtractTopics",
-      "helpers-links-SaveReflection"
+      "helpers-links-SaveReflection",
+      "helpers-Convo"
     ]
   },
   "helpers-TypedIstaSchemaFixture": {
@@ -42,7 +44,8 @@
       "us.awfl.workflows.assistant.ExtractTopics",
       "us.awfl.workflows.helpers.links.SaveReflection",
       "us.awfl.workflows.tools.Tasks",
-      "us.awfl.workflows.tools.Agent"
+      "us.awfl.workflows.tools.Agent",
+      "us.awfl.workflows.helpers.Convo"
     ],
     "dynamic_targets": [
       "helpers-SadhakaChildFixture",
@@ -51,7 +54,8 @@
       "tools-Tasks",
       "tools-Agent",
       "assistant-ExtractTopics",
-      "helpers-links-SaveReflection"
+      "helpers-links-SaveReflection",
+      "helpers-Convo"
     ]
   }
 }

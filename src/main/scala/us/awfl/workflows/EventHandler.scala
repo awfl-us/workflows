@@ -19,7 +19,7 @@ import us.awfl.utils.Yoj
 import us.awfl.utils.Exec
 import us.awfl.workflows.assistant.TopicContext
 import us.awfl.utils.Locks
-import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents, Chain}
+import us.awfl.workflows.helpers.{Tasks, ToolDefs, ToolDispatcher, Agents, Chain, Convo as ConvoWorkflow}
 import us.awfl.utils.{Env, ENV}
 import us.awfl.utils.Events
 import us.awfl.utils.Callback
@@ -126,42 +126,16 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           (true: Cel) -> (List() -> Value.nil[PostResult[Nothing]])
         ))
 
-        // Persist the user turn only after acquiring the session lock. An
-        // already-busy request must not leave an unanswerable queued message.
-        val complete = Convo.inSession[ChatToolResponse]("inSession", sessionId) {
-          val buildYojStep = summon[Yoj[TopicContext]].build
-          val messages = Switch.list("messages", List(
-            skipAddMessages.cel -> {
-              val buildMessage = Try("buildMessage", List() -> obj(message))
-              List(buildMessage) -> ListValue[ChatMessage](list.concat( buildYojStep.resultValue, buildMessage.resultValue))
-            },
-            (true: Cel) -> (List() -> buildYojStep.resultValue)
-          ))
-          val completeStep = Convo.completeWithTools(
-            "complete",
-            promptsWorkflow.result.prompts,
-            buildYojStep.resultValue,
-            withIstaTool.resultValue,
-            sessionId,
-            toolChoice = input.toolChoice.getOrElse(ToolChoice.auto),
-            model = model
-          )
-          val responseMessage = completeStep.result.message
-          val addResponse  = Switch("maybeAddResponse", List(
-            skipAddMessages.cel -> (List() -> Value.nil[PostResult[Nothing]]),
-            (true: Cel) -> Convo.addMessage(
-              "addResponse",
-              obj(us.awfl.ista.ChatMessage(
-                role = responseMessage.flatMap(_.role),
-                content = responseMessage.flatMap(_.content),
-                tool_calls = ListValue(map.get( responseMessage, "tool_calls")),
-                create_time = Value(time.now())
-              )),
-              cost = completeStep.result.total_cost
-            ).fn
-          ))
-          List[Step[?, ?]](buildYojStep, completeStep, addResponse) -> completeStep.resultValue
-        }
+        // The wip-old Convo boundary owns context construction, LLM completion,
+        // and assistant response persistence. Keep the user turn in the parent
+        // after lock acquisition, preventing lost turns on session contention.
+        val complete = ConvoWorkflow(
+          "completeConvo",
+          promptsWorkflow.result.prompts,
+          withIstaTool.resultValue,
+          input.toolChoice.getOrElse(ToolChoice.auto),
+          skipAddMessages
+        )
 
         val sendContents = Switch("sendContents", List(
           // Dispatch only message content via Pub/Sub; not a tool-call interaction
