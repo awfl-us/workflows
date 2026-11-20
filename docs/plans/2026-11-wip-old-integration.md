@@ -790,3 +790,28 @@ server tests; publish 27 real production native workflows (no fixture
 binaries), verify SHA-256 against the active GCS mappings, run a live
 ProjectManager smoke test and check its background typed Strider executions.
 No durable-effect-journal changes and no legacy Google YAML pipeline.
+
+### Phase 3.4 — expanded generic Strider native acceptance (2026-11-20)
+
+Extended the server `scripts/reconcileStriderNative.test.mjs` acceptance suite
+against the same **27 compiled native Rust workflows** and isolated PostgreSQL
+memory-mode database. The original six cases remain green; three additional
+tests now exercise `assistant-ExtractTopics-All`,
+`assistant-ExtractTopics-Backfill`, and `assistant-ExtractTopics` (Latest).
+All three invoke four typed Sadhaka completions and write the correct
+conversation, session, weekly, and term records, exactly as Summaries does.
+The direct-segment repeat-run assertion now applies to **all three output
+types**: ConvoSummary, TopicInfo, and CollapseResponse. Re-running the same
+segment causes neither another model call nor another collection write.
+
+**Results:** native Strider **9/9 passed**; combined native Strider + delayed
+callback/session-lock + concurrent-foreground-turn regressions **11/11 passed**;
+full Scala workflows compilation passed. These are deterministic mock-provider
+tests with compiled ELF execution and PostgreSQL persistence, not live-provider
+or production-deployment evidence.
+
+**Next gates:** preserve this test evidence when integrating with current
+`main`, validate lock release on side-call failures and repeated aggregate
+execution, and run a live ProjectManager foreground smoke test with background
+typed Striders after normal review. Keep **PostgreSQL memory mode** as the
+production-target execution mode. **Durable mode remains deferred**.
