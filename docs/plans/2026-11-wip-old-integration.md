@@ -874,3 +874,45 @@ their review.
 Deferred: original Small/SmallStrider autonomous background behavior,
 per-effect durability, and the three remaining negative/concurrent gates
 listed in Phase 3.5.
+
+### Phase 3.7 — local Strider -> ProjectManager -> generated summary (2026-11-20)
+
+**New repeatable native integration lane:** `scripts/reconcile-test strider-pm`
+invokes `scripts/reconcileStriderProjectManager.test.mjs` on the server
+`feat/reconcile-strider-native` branch. The test seeds a **real isolated
+PostgreSQL** document collection with a conversation, runs the compiled Rust
+`Summaries-Convo` through `codebase-ProjectManager` / `helpers-Convo`,
+and routes the typed completion through the **real Jobs `/llm/chat` Express
+router** with schema validation. The generated `ConvoSummary` is persisted
+through the **actual Jobs `/firebase/create` route**, and a second native
+execution for the same segment must not make another model call or create
+another summary. The default provider adapter is deterministic and derives
+its summary from the supplied conversation; it does not make external API
+requests. A live OpenAI API adapter is available **only by explicit opt-in**
+using `AWFL_STRIDER_PROVIDER=live` and a separately supplied API key. Live
+provider behavior has **not** been exercised in this checkpoint.
+
+The realistic Jobs PostgreSQL lock route exposed a preexisting bug absent
+from mocked lock fixtures: an inline `Value(uuid.generate())` produced
+**different owner UUIDs** for acquisition and release. The first run
+returned `released:false`, and a second run got HTTP 409 until the lock's
+TTL. The corrected `StriderBase` materializes the owner once in a named
+DSL `Try` step and reuses that result. Verified with a fresh **27/27 native
+ELF rebuild** and a local `strider-pm` pass: one generated summary, one
+Jobs LLM request and usage accounting, no duplicate completion, and two
+successful lock acquire/release cycles. The source is at
+`workflow-utils:72f8b1fe7e10556e63f660441c5a0622035bc9b8`, now
+pinned by `install-model-aware-workflow-utils.sh`.
+
+**Reproduction:** from the workflows checkout, provide
+`PGTEST_URL=postgres://...@127.0.0.1:55439/awfl_reconcile`, then run
+`./scripts/reconcile-test strider-pm --server /path/to/server
+--strider-report /path/to/build-report.json`. Supply
+`AWFL_STRIDER_CONVERSATION_FILE=/path/to/messages.json` to replace the
+checked-in conversation fixture. The native build must use the pinned utility
+revision. No production calls or deployment are involved in the default
+mode. **Memory mode remains the target; durable mode remains deferred.**
+
+Still outstanding: a genuine provider run (requires an explicit key),
+concurrent aggregate runs using the realistic Postgres locks, and a post-fix production
+ProjectManager smoke test after the next reviewed merge/release.

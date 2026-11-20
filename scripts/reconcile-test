@@ -41,7 +41,7 @@ def existing(path:Path, description:str) -> Path:
 
 def main(argv:list[str]|None=None) -> int:
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','typed-ista','typed-dispatch','sadhaka','strider','convo-parity','all'])
+    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','typed-ista','typed-dispatch','sadhaka','strider','strider-pm','convo-parity','all'])
     p.add_argument('--server', type=Path,default=Path(os.getenv('AWFL_RECONCILE_SERVER',ROOT.parent/'server')))
     p.add_argument('--compiler',type=Path,default=Path(os.getenv('AWFL_RECONCILE_COMPILER',ROOT.parent/'compiler-rust')))
     p.add_argument('--report',type=Path,default=Path(os.getenv('AWFL_RECONCILE_BUILD_REPORT',DEFAULT_REPORT)))
@@ -174,7 +174,7 @@ def main(argv:list[str]|None=None) -> int:
             cwd=server,check=True,env={**os.environ,
                 'AWFL_CONVO_BASELINE_REPORT':str(baseline),
                 'AWFL_CONVO_EXTRACTED_REPORT':str(extracted)})
-    if opts.command=='strider':
+    if opts.command in ('strider','strider-pm'):
         database=urlparse(os.getenv('PGTEST_URL',''))
         if (database.scheme not in ('postgres','postgresql') or
                 database.hostname not in ('127.0.0.1','localhost','::1') or
@@ -183,13 +183,19 @@ def main(argv:list[str]|None=None) -> int:
         strider_report=existing(opts.strider_report.resolve(),'Strider native build report')
         env={**os.environ,'AWFL_STRIDER_NATIVE_REPORT':str(strider_report),
              'AWFL_NATIVE_LOCAL_BUILD_REPORT':str(strider_report)}
-        subprocess.run(['node','--test','scripts/reconcileStriderNative.test.mjs'],
+        # This test routes a compiled Strider through native ProjectManager,
+        # the actual Jobs LLM HTTP router, and Postgres-backed Jobs document
+        # persistence. Real OpenAI is opt-in via AWFL_STRIDER_PROVIDER=live.
+        subprocess.run(['node','--test','scripts/reconcileStriderProjectManager.test.mjs'],
                        cwd=server,env=env,check=True)
-        subprocess.run(['node','--test',
-                 'scripts/reconcileMemoryConcurrency.test.mjs',
-                 'scripts/reconcileMemoryCallbackConcurrency.test.mjs',
-                 'scripts/reconcileMemoryTyped422.test.mjs'],
-                cwd=server,env=env,check=True,stdout=subprocess.DEVNULL)
+        if opts.command=='strider':
+            subprocess.run(['node','--test','scripts/reconcileStriderNative.test.mjs'],
+                           cwd=server,env=env,check=True)
+            subprocess.run(['node','--test',
+                     'scripts/reconcileMemoryConcurrency.test.mjs',
+                     'scripts/reconcileMemoryCallbackConcurrency.test.mjs',
+                     'scripts/reconcileMemoryTyped422.test.mjs'],
+                    cwd=server,env=env,check=True,stdout=subprocess.DEVNULL)
     if opts.command in ('basic','no-query','tool-roundtrip','all'):
         existing(server/'scripts/reconcileScenario.mjs','server')
         if not report.exists():
