@@ -464,3 +464,50 @@ establish end-to-end Project Manager preload/model behavior in that scenario.
 Add a regression case for invalid/no tool call and callback errors, and
 check caller-side schema selection with a real Jobs LLM response. Do not
 conflate this phase with deferred durable journaling.
+
+### Phase 2.2 — full native Sadhaka / Project Manager acceptance (2026-11-19)
+
+**Acceptance tests passed locally; release pending.** The original `wip-old`
+`Ista[T]` inline factory and generic `Sadhaka` remain intact. The only
+execution migration is to native `CallOperations.WorkflowRun`, retaining
+the original $0.10 fund, `sideCall=true`, callback and first-tool-call decode.
+
+The initial `String + Null` preload failure was a **fixture bug**: the
+reconciliation harness returned Sadhaka's structured callback payload to
+CLI preloads that expected command-output results. Distinct callbacks for
+parent completion and CLI commands resolved that problem without modifying
+production preload code.
+
+**Necessary integration correction:** `EventHandler` now bypasses ordinary
+`ToolDispatcher` for `sideCall=true` output calls. An `Ista` output function
+is the *answer*, not a registered executable workflow tool. The model-visible
+tool and final callback payload are preserved; ordinary agent tool calls still
+dispatch normally. This was verified against both the real Project Manager
+and the old original `wip-old` behavior before changing it.
+
+`helpers-SadhakaNativeFixture` accepts a test-only target workflow name;
+the native build fixture explicitly registers both the minimal child and the
+full Project Manager closure. The resulting **28 static Rust binaries** are
+for integration testing only and **must never be published as a closure**.
+Production publication must instead use the independent
+`codebase-ProjectManager --recursive` closure. The native publisher explicitly
+rejects requests to publish Sadhaka fixture roots.
+
+The new `./scripts/reconcile-test sadhaka` gate checks 8 PostgreSQL
+memory-mode cases across the compiled Rust parent/child graph. The full
+Project Manager sends typed `summaries` tool selection and schema to the
+**actual Jobs `/llm/chat` HTTP router**, with a mocked provider (no live
+models), and its output callback returns to the Sadhaka caller. It verifies
+the strict schema, one provider usage record, the calculated cost, no
+internal workflow routing leaked to the provider, no tool dispatch of the
+typed answer, and cached terminal replay. Failure cases: no tool call,
+malformed JSON, invalid schema, wrong tool name (the last three return 422),
+provider error (500), and rejected callback delivery. All terminate failed
+without repeating provider calls on replay.
+
+Existing strict `basic`, `no-query`, and `tool-roundtrip` Project Manager
+scenarios and native PostgreSQL concurrency/typed-422 regressions are the
+remaining release gate. This remains **memory mode**, not deferred durable
+effect journaling. The full-graph test's model is mocked; production smoke
+must be described separately and cannot claim a live Sadhaka parent unless
+one is explicitly published as a production workflow.

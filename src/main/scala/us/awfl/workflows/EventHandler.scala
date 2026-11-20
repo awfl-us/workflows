@@ -176,11 +176,20 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           )
         )
 
+        // A Sadhaka side-call uses a function call as its *typed answer*,
+        // not an executable operation. Do not hand that function to the
+        // normal ToolDispatcher, which only knows registered workflow tools.
+        // Preserve the original model response for Sadhaka's first-call decode.
+        val dispatchableToolCalls = Switch.list("dispatchableToolCalls", List(
+          sideCall.cel -> (List() -> ListValue.empty[ToolCall]),
+          (true: Cel) -> (List() -> toolCalls)
+        ))
+
         // Trigger ToolDispatcher as a separate workflow to keep this definition small
         val processToolCalls = ToolDispatcher(
           "processToolCalls",
           complete.resultValue.flatMap(_.total_cost),
-          toolCalls,
+          dispatchableToolCalls.resultValue,
           toolsWorkflow.resultValue.flatMap(_.tools)
         )
 
@@ -260,6 +269,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               withIstaTool,
               complete,
               sendContents,
+              dispatchableToolCalls,
               processToolCalls,
               release,
               toolsCost,

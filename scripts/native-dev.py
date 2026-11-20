@@ -363,6 +363,10 @@ def main():
     args = parser.parse_args()
     if args.publish and (not args.recursive or args.check):
         parser.error("--publish requires --recursive and cannot use --check")
+    if args.publish and args.workflow in (
+        'helpers-SadhakaNativeFixture','helpers-SadhakaChildFixture',
+    ):
+        parser.error('Sadhaka fixtures are test-only and must never be published')
     args.compiler = args.compiler.resolve()
     output = (args.output or (args.compiler / "target/native-dev-generated" /
                               args.workflow)).resolve()

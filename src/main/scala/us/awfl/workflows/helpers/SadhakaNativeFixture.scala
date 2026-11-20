@@ -11,7 +11,7 @@ import us.awfl.workflows.EventHandler
   * native WorkflowRun and Jobs callbacks. Never publish this test workflow.
   */
 object SadhakaNativeFixture extends us.awfl.core.Workflow {
-  case class Input()
+  case class Input(workflowName: Value[String])
   override val inputVal = init[Input]("input")
 
   import EventHandler.given
@@ -23,7 +23,7 @@ object SadhakaNativeFixture extends us.awfl.core.Workflow {
 
   private val completion = summon[Sadhaka[EventHandler.Input]]
     .complete[ChatMessage, ConvoSummary](
-      "Summarize the fixture conversation", str("helpers-SadhakaChildFixture"))
+      "Summarize the fixture conversation", inputVal.flatMap(_.workflowName))
 
   override def workflows = List(
     Workflow(List[Step[?, ?]](completion) -> completion.resultValue)

@@ -41,11 +41,12 @@ def existing(path:Path, description:str) -> Path:
 
 def main(argv:list[str]|None=None) -> int:
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','typed-ista','typed-dispatch','all'])
+    p.add_argument('command', choices=['doctor','unit','compile','basic','no-query','tool-roundtrip','postgres','durable','typed-ista','typed-dispatch','sadhaka','all'])
     p.add_argument('--server', type=Path,default=Path(os.getenv('AWFL_RECONCILE_SERVER',ROOT.parent/'server')))
     p.add_argument('--compiler',type=Path,default=Path(os.getenv('AWFL_RECONCILE_COMPILER',ROOT.parent/'compiler-rust')))
     p.add_argument('--report',type=Path,default=Path(os.getenv('AWFL_RECONCILE_BUILD_REPORT',DEFAULT_REPORT)))
     p.add_argument('--typed-report',type=Path,default=Path(os.getenv('AWFL_TYPED_ISTA_REPORT',ROOT/'.awfl-reconcile-typed'/'build-report.json')))
+    p.add_argument('--sadhaka-report',type=Path,default=Path(os.getenv('AWFL_SADHAKA_NATIVE_REPORT',ROOT/'.awfl-reconcile-sadhaka'/'build-report.json')))
     p.add_argument('--strict-background',action='store_true',help='Fail on detached child errors (currently a known fixture gap)')
     p.add_argument('--check',action='store_true',help='Only check generated crate closure in compile mode')
     opts=p.parse_args(argv)
@@ -136,6 +137,30 @@ def main(argv:list[str]|None=None) -> int:
                  'scripts/reconcileMemoryTyped422.test.mjs',
                  'workflows/services/executionFailureResponse.test.js'],
                 server,concise=True)
+    if opts.command=='sadhaka':
+        database=urlparse(os.getenv('PGTEST_URL',''))
+        if (database.scheme not in ('postgres','postgresql') or
+                database.hostname not in ('127.0.0.1','localhost','::1') or
+                database.path!='/awfl_reconcile'):
+            raise SystemExit('Sadhaka tests require isolated loopback /awfl_reconcile PostgreSQL')
+        sadhaka_report=opts.sadhaka_report.resolve()
+        if not sadhaka_report.is_file():
+            sadhaka_report.parent.mkdir(parents=True,exist_ok=True)
+            run(['python3','scripts/native-dev.py','helpers-SadhakaNativeFixture',
+                 '--recursive','--compiler',str(compiler),
+                 '--output',str(sadhaka_report.parent)],ROOT)
+        env=dict(os.environ,AWFL_SADHAKA_NATIVE_REPORT=str(sadhaka_report))
+        for target,cases in (
+            ('helpers-SadhakaChildFixture',('success',)),
+            ('codebase-ProjectManager',('success','missing-tool','malformed-json',
+                'invalid-schema','wrong-tool','provider-error','callback-error')),
+        ):
+            for case in cases:
+                print('+ Sadhaka native memory-mode:',target,case,flush=True)
+                subprocess.run(['node','--test','scripts/reconcileSadhakaNative.test.mjs'],
+                               cwd=server,env={**env,'AWFL_SADHAKA_TARGET':target,
+                                               'AWFL_SADHAKA_CASE':case},check=True,
+                               stdout=subprocess.DEVNULL)
     if opts.command in ('basic','no-query','tool-roundtrip','all'):
         existing(server/'scripts/reconcileScenario.mjs','server')
         if not report.exists():
