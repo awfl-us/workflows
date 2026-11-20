@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: awfl-us/compiler-rust
-          ref: c7b2bfd2dcc37acb590a192c945112b79a90ab2d
+          ref: b760f5ec10b65efa27c6dd21ff924f6046f9ffc2
           path: compiler-rust
 
       - name: Install Java 21 for existing Scala DSL/compiler
@@ -51,9 +51,6 @@ jobs:
 
       - name: Install sbt
         uses: sbt/setup-sbt@v1
-
-      - name: Install tested model-aware workflow-utils dependency
-        run: bash scripts/install-model-aware-workflow-utils.sh
 
       - name: Install static Linux Rust target
         uses: dtolnay/rust-toolchain@stable

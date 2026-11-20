@@ -45,7 +45,7 @@ class NativeDevTests(unittest.TestCase):
 
     def test_root_targets_and_static_closure(self):
         spec, modules = module.modules_for("codebase-ProjectManager", True)
-        self.assertEqual(len(modules), 12)
+        self.assertEqual(len(modules), 13)
         self.assertIn("tools-CliTools", spec["dynamic_targets"])
         self.crate("codebase-ProjectManager",
                    ["tools-CliTools" + self.env], ("workflow.run",))
