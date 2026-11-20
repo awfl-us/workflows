@@ -668,3 +668,44 @@ memory-mode execution. Compare latency/cached prompt performance before
 proceeding with Status/Summaries/ExtractTopics/ContextCollapser lifecycle
 trait extraction. Mixin ordering and background summary stability remain
 distinct acceptance gates. **Durable execution remains deferred.**
+
+#### Phase 3.1 merge and production verification (2026-11-19)
+
+- Merged `workflows/main` commit `2772ddb` and `server/main` commit `5a8396a`.
+- Independent production root `codebase-ProjectManager` generated and verified
+  **27/27** native static Rust binaries. Artifact publication updated
+  `codebase-ProjectManager` and new `helpers-Convo`; 25 existing active
+  workflows were unchanged. Active object hashes matched the verified build:
+  ProjectManager `4f2047219d1106ccfbf5355dfb7279c56a6d20693ac6547e81736d4a870459e3`,
+  Convo `a60394af1ea0927537f8efaa582f5fde89bbf7053514cb3b0a5aeb5a96845c42`.
+  No Sadhaka test fixtures were published.
+- Live production session `4fc628c8-3666-46d9-a1c8-6d9aaa08af78`, native
+  execution `native_05bf14c0d5014148b53b2261382319ea`, completed with
+  exactly `AWFL_CONVO_NATIVE_SMOKE_OK` and no execution error. GCP logs showed
+  PostgreSQL `memory` mode and a completed `helpers-Convo` native child.
+- Server production deployment run:
+  [44660220538](https://github.com/awfl-us/server/actions/runs/44660220538)
+  **completed successfully**, including API/Jobs rollout, GKE native worker,
+  traffic routing and MCP/OAuth checks. Final Cloud Run revisions:
+  `api-00244-c7g`, `jobs-00240-4nr`; public API `/health` returned `OK`.
+  Previous Phase 3.1 text describing pending release checks is historical.
+
+#### Phase 3.2 preparation — original `Status` trait
+
+Original source: `workflows/wip-old/src/main/scala/us/awfl/workflows/event/Status.scala`.
+It implements status initialization and exception status via `buildSteps`
+composition, and `Done` updates via `stop`, with `Recursion` as the superclass.
+Original `traits/Agent.scala` mixes `Status` after `Funds`, before summary
+traits. This is an **architectural reference**, not code to copy blindly:
+current `EventHandler` must keep the existing lock-first ordering, 409
+propagation, callback error delivery, `tryInitStatus` best-effort semantics,
+and terminal failure rethrow rather than masking errors.
+
+Implement `Status` in a separate small phase from Summaries, ExtractTopics,
+ContextCollapser or the deferred Small/SmallStrider. Compare exact
+Running → Done and Running → Failed updates, failure propagation, callback
+status, no duplicate status updates, and the type/ordering of `super.buildSteps`
+and `super.stop`. Ensure a query-free continuation and a Sadhaka side call
+retain their current lifecycle behavior. Build and run normal tool, callback,
+typed 422, session contention and process replay tests before merging.
+Do not reintroduce Google Workflows or durable per-effect journaling.
