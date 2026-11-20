@@ -709,3 +709,84 @@ and `super.stop`. Ensure a query-free continuation and a Sadhaka side call
 retain their current lifecycle behavior. Build and run normal tool, callback,
 typed 422, session contention and process replay tests before merging.
 Do not reintroduce Google Workflows or durable per-effect journaling.
+
+### Phase 3.3 — `wip-old` generic Strider reconciliation (2026-11-19)
+
+**Implemented and tested on `feat/reconcile-strider-native` in
+`workflow-utils`, `workflows`, and `server`; deployment checkpoint to be
+recorded after merge/release.** Reviewed the original `wip-old` Strider
+files (`StriderInput`, `StriderBase`, `StriderTraits`,
+`StriderAllLatestBackfill`), the original `SmallStrider`, and the current
+Summaries/ExtractTopics/ContextCollapser use sites. Preserved the intended
+generic `Strider[In, Params, Out]` and `Sadhaka[Params]` relationship, with
+the original agent target carried through `StriderInput[Params]`, native
+`All`/`Latest`/`Backfill`, and child segment/session/week/term workflows.
+Current `Sadhaka` takes a workflow-name `Value[String]`; no historical
+`WorkflowId[Params, ChatResponse[ChatMessage]]` or Google Workflows connector
+is needed. All nested execution calls use `CallOperations.WorkflowRun`.
+
+**Necessary compatibility fixes beyond the old implementation:**
+
+- A side-call invoked by Strider must **not** start the same background
+  Strider pipelines again, otherwise Summaries → Sadhaka → ProjectManager →
+  Summaries recurses. `EventHandler` guards the background pipeline when
+  `sideCall=true`, but **does not** suppress model tool dispatch broadly;
+  only the registered-executable-tool gate in `ToolDispatcher` controls that.
+- The caller-specific `Yoj[In]` must reach the model. `Sadhaka.complete`
+  now builds that Yoj and passes it as optional `sideCallContext` to
+  `EventHandler`/`helpers-Convo`; regular turns retain the default
+  TopicContext. This is important for the CollapserMessages document IDs
+  and for typed Summaries and TopicInfo context.
+- `Backfill.apply` receives its `agentId` explicitly instead of referring
+  to a workflow input value that is unavailable at the caller's use site.
+  Segments and Ista write locations are otherwise preserved.
+- The old `Small`/`SmallStrider`/`SLEEP` auto-scheduled agent is **deliberately
+  deferred**, not silently integrated. It includes an unverified hardcoded
+  model and adds recurring paid background work, neither justified for the
+  core Strider migration. Keep the original branch as the architectural
+  reference should that behavior be reprioritized.
+
+**Verified locally**: `workflow-utils` Scala `compile`, `test`, `publishLocal`
+passed; the full `workflows` Scala project compiled. The independently built
+native ProjectManager closure verified **27/27** static ELF binaries. In
+isolated PostgreSQL memory-mode, six compiled end-to-end tests passed:
+`Summaries-Convo`, `assistant-ExtractTopics-Convo`,
+`context-ContextCollapser-SegKala`, `Summaries-All`, `Summaries-Backfill`,
+and `Summaries`. The first three each produce one typed Sadhaka answer and
+the expected persisted result. The three aggregate cases each produce
+four typed answers and persist one SegKala summary plus session/week/term
+updates in the expected collections. Replaying the same segment through a
+new native root produced **zero additional typed model calls and zero
+duplicate summary creates**. All three Postgres memory-mode ProjectManager
+concurrency/callback/typed-422 regressions passed after test classification
+distinguished typed Strider calls from foreground user replies.
+
+The legacy local memory-mode fixture was also corrected to drain detached
+children before assertions. With that drain, strict-background end-to-end
+native memory tests passed for **basic**, **no-query**, and **tool-roundtrip**;
+the latter preserved user → assistant tool call → tool result → assistant
+continuation order, without failed background executions. The separately
+compiled **29/29**-binary Sadhaka fixture closure passed eight direct output
+and failure cases (including missing/wrong tool, malformed JSON, invalid
+schema, provider error, and callback error). For reproducible publishing,
+`scripts/install-model-aware-workflow-utils.sh` is pinned to the exact new
+`workflow-utils` source commit `28e85072f010d16b93f4a30a85d7f27201c193f3`;
+it locally publishes `0.3.6-SNAPSHOT`, matching `workflows/build.sbt`.
+The native publisher is likewise pinned to the tested `compiler-rust` main
+commit `c7b2bfd2dcc37acb590a192c945112b79a90ab2d`, rather than its older
+compiler revision. A clean full-workflows Scala compile against that exact
+locally published `0.3.6-SNAPSHOT` passed in the full local repository
+checkout; the linked Git worktree was not used for this test because sbt's
+JGit plugin cannot open that worktree's bare `.git` pointer.
+
+**Native-only test gate:** `PGTEST_URL=<loopback /awfl_reconcile> \
+./scripts/reconcile-test strider --strider-report <compiled build-report.json>`.
+This intentionally bypasses the legacy *durable* development runner's
+parallel child restriction; it targets the supported PostgreSQL native
+memory-mode runtime and verifies real child execution and writes.
+
+**Release requirements:** merge utility source first, then workflows and
+server tests; publish 27 real production native workflows (no fixture
+binaries), verify SHA-256 against the active GCS mappings, run a live
+ProjectManager smoke test and check its background typed Strider executions.
+No durable-effect-journal changes and no legacy Google YAML pipeline.

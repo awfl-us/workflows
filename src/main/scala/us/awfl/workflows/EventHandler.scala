@@ -134,7 +134,8 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           promptsWorkflow.result.prompts,
           withIstaTool.resultValue,
           input.toolChoice.getOrElse(ToolChoice.auto),
-          skipAddMessages
+          skipAddMessages,
+          input.sideCallContext
         )
 
         val sendContents = Switch("sendContents", List(
@@ -212,13 +213,21 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
           }
         ))
 
-        val summaries = Summaries("runSummaries")
+        val summaries = Summaries("runSummaries", WORKFLOW_ID)
         val extract = Chain(
           ExtractTopics
-            .runSync(obj(StriderInput()))
+            .runSync(obj(StriderInput[EventHandler.Input](WORKFLOW_ID)))
             .andThen(SaveReflection)(obj(SaveReflection.Params(WORKFLOW_ID)))
         )
-        val collapse = ContextCollapser("collapseMessages", windowSeconds = 60 * 7, overlapSeconds = 60)
+        val collapse = ContextCollapser("collapseMessages", WORKFLOW_ID, windowSeconds = 60 * 7, overlapSeconds = 60)
+
+        // Typed Sadhaka side calls must never start fresh background Striders:
+        // doing so recursively invokes the same agent via the Strider's
+        // Sadhaka completion. Keep the normal turn's background pipeline.
+        val maybeBackgroundStriders = Switch("maybeBackgroundStriders", List(
+          sideCall.cel -> (List() -> Value.nil[NoValueT]),
+          (true: Cel) -> (List[Step[?, ?]](summaries, extract, collapse) -> Value.nil[NoValueT])
+        ))
 
         val whenAcquired = Switch("maybeRespond", List(
           // If lock acquired: persist the turn, build context, save the
@@ -240,9 +249,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
               toolsCost,
               addUsage,
               maybeToolFeedback,
-              summaries,
-              extract,
-              collapse
+              maybeBackgroundStriders
             ) -> obj(complete.result.copy(
               total_cost = Value[Double](totalCost)
             ))
@@ -310,6 +317,10 @@ object EventHandler {
     task: OptBase[Task] = OptValue.nil,
     toolChoice: OptBase[ToolChoice] = OptValue.nil[ToolChoice],
     typedTool: OptValue[Tool] = OptValue.nil[Tool],
+    // Build Strider-specific Yoj in the caller before invoking Sadhaka.
+    // The specialized CollapserMessages Yoj includes document IDs that the
+    // default ProjectManager TopicContext would otherwise omit.
+    sideCallContext: OptValue[List[ChatMessage]] = OptValue.nil[List[ChatMessage]],
     sideCall: OptValue[Boolean] = OptValue(false),
     callback: OptValue[Callback[ChatToolResponse]] = OptValue.nil,
     env: BaseValue[Env] = ENV
@@ -325,6 +336,7 @@ object EventHandler {
       workflowName: Value[String]
     )(using kala: KalaVibhaga): Step[Sadhaka.Response[Out], Value[Sadhaka.Response[Out]]] = {
       val output = summon[Ista[Out]]
+      val buildYoj = summon[Yoj[In]].build
       val completion = Callback[ChatToolResponse] { callback =>
         val args = RunWorkflowArgs(
           workflowName,
@@ -333,6 +345,7 @@ object EventHandler {
             fund = Value[Double](0.1),
             toolChoice = OptValue(obj(ToolChoice.Function(output.name))),
             typedTool = OptValue(obj(output.tool(kala))),
+            sideCallContext = OptValue(buildYoj.resultValue),
             sideCall = OptValue(obj(true)),
             callback = OptValue(obj(callback))
           ))
@@ -350,7 +363,7 @@ object EventHandler {
         completion.result.total_cost,
         completion.result.usage
       ))
-      Try("eventHandlerTry", List(completion) -> response)
+      Try("eventHandlerTry", List[Step[?, ?]](buildYoj, completion) -> response)
     }
   }
 

@@ -15,6 +15,8 @@ import us.awfl.utils.Convo.StepName
 import us.awfl.utils.strider.Strider
 import us.awfl.utils.TopicContextYoj
 import us.awfl.utils.YojComposer
+import us.awfl.workflows.EventHandler
+import EventHandler.given
 import us.awfl.utils.Env
 
 case class TopicContext(prevTopics: ListValue[TopicInfo], convoContext: BaseValue[ConvoContext])
@@ -55,6 +57,6 @@ object TopicContext:
 //   )
 // )
 
-object ExtractTopics extends us.awfl.utils.strider.Latest[TopicContext, TopicInfo]("assistant-ExtractTopics") {
+object ExtractTopics extends us.awfl.utils.strider.Latest[TopicContext, EventHandler.Input, TopicInfo]("assistant-ExtractTopics") {
   override def prompt = "You're a background assistant, scrutanizing live or recorded conversations. You're the 'unconsciouse' part of the conversation agent, adding depth and structured memory to the conversation."
 }

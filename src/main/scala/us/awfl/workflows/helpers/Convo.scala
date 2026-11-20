@@ -22,6 +22,7 @@ object Convo extends us.awfl.core.Workflow {
     tools: ListValue[Tool],
     toolChoice: BaseValue[ToolChoice],
     skipAddMessages: Value[Boolean],
+    contextOverride: OptValue[List[ChatMessage]] = OptValue.nil[List[ChatMessage]],
     env: BaseValue[Env] = ENV
   )
   override type Result = ChatToolResponse
@@ -29,9 +30,10 @@ object Convo extends us.awfl.core.Workflow {
 
   def apply(name: String, prompts: ListValue[ChatMessage],
     tools: ListValue[Tool], toolChoice: BaseValue[ToolChoice],
-    skipAddMessages: Value[Boolean]): Call[RunWorkflowArgs[Input], ChatToolResponse] = {
+    skipAddMessages: Value[Boolean],
+    contextOverride: OptValue[List[ChatMessage]] = OptValue.nil[List[ChatMessage]]): Call[RunWorkflowArgs[Input], ChatToolResponse] = {
     val args = RunWorkflowArgs(str("helpers-Convo${WORKFLOW_ENV}"),
-      obj(Input(prompts, tools, toolChoice, skipAddMessages)))
+      obj(Input(prompts, tools, toolChoice, skipAddMessages, contextOverride)))
     Call(name, CallOperations.WorkflowRun, obj(args))
   }
 
@@ -39,7 +41,11 @@ object Convo extends us.awfl.core.Workflow {
     val sessionId = inputVal.flatMap(_.env).get.sessionId
     given KalaVibhaga = SegKala(sessionId, Value(time.now()), Value(20 * 60))
 
-    val context = summon[Yoj[TopicContext]].build
+    val context = Switch.list("buildContext", List(
+      (input.contextOverride.getOrElse(Value.nil[List[ChatMessage]]) !== Cel.nil) ->
+        (List() -> ListValue[ChatMessage](input.contextOverride.getOrElse(Value.nil[List[ChatMessage]]).cel)),
+      (true: Cel) -> summon[Yoj[TopicContext]].build.fn
+    ))
     val completion = ConvoOps.completeWithTools(
       "complete", input.prompts, context.resultValue, input.tools, sessionId,
       toolChoice = input.toolChoice, model = inputVal.flatMap(_.env).get.model

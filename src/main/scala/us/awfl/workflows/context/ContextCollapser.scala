@@ -13,6 +13,8 @@ import us.awfl.utils.KalaVibhaga
 import us.awfl.utils.SegKala
 import us.awfl.utils.Convo.StepName
 import us.awfl.utils.post
+import us.awfl.workflows.EventHandler
+import EventHandler.given
 import us.awfl.utils.TopicContextYoj
 
 // Minimal prompt; core JSON schema/instructions live in Ista[CollapseResponse]
@@ -69,7 +71,7 @@ object CollapserMessages {
 // Rework ContextCollapser to use the Strider pattern (Latest wrapper) similar to ExtractTopics.
 // - Input Yoj: us.awfl.utils.Convo.ConvoContext (already provided by us.awfl.utils.Convo)
 // - Output Ista: ista.CollapseResponse (defined under ista/, handles read/write semantics)
-object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMessages, CollapseResponse] {
+object ContextCollapser extends us.awfl.utils.strider.ConvoStrider[CollapserMessages, EventHandler.Input, CollapseResponse] {
 
   override def name: String = "context-ContextCollapser"
 
