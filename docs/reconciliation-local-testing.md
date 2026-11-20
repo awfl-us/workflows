@@ -12,8 +12,36 @@ and inspect the three memory-mode regressions. Their assertions verify the
 actual `/workflows/exec/status/update` lifecycle transitions: terminal Done,
 409/422 Failed with error text, and correct detached tool-feedback handling.
 The initial execution of a tool-call handoff remains Running; the detached
-continuation records Done. Check native root status separately. The status
-read/aggregation endpoint's `unknown` state is a separate, outstanding issue.
+continuation records Done. Check native root status separately. The historical `unknown` read-path issue is covered by the following
+status-pagination gate; native Status write semantics remain unchanged.
+
+## Status lookup after native background fan-out
+
+`agentsMcp/service.js` uses `workflows/exec/statusService.js` to find the
+latest **status-bearing** execution for a session. A completed foreground
+ProjectManager turn previously disappeared from `get_session` after more than
+five newer child-workflow registrations, because `limit=1` inspected just
+five registration records. This is a read-path issue, not lost Status writes.
+The reader now pages registrations with `startAfter`, retaining creation
+order and fetching status records until the requested count is found, or the
+session is exhausted. The PostgreSQL compatibility adapter maps Firestore
+snapshot cursors to the existing Storage `startAfter` path cursor.
+
+Reproduce with **real isolated PostgreSQL**, no production writes or models:
+
+```bash
+PGTEST_URL=postgres://awfl@127.0.0.1:55439/awfl_reconcile \
+  node --test scripts/reconcileSessionStatusPostgres.test.mjs
+```
+
+Run the command from the server repository. This creates and cleans up a
+unique test project with 125 newer statusless child registrations, confirms
+`getSession` returns the older `Done` root (and an earlier `Failed` entry
+when requesting two), and confirms genuinely statusless sessions still report
+`unknown`. Same-second registrations exercise cursor tie ordering. This
+regression is also included in workflows `./scripts/reconcile-test strider`
+and `strider-pm`. A Firestore-shaped unit test in
+`agentsMcp/tests/service.test.js` verifies paging independently.
 
 ## Current local Strider → ProjectManager integration
 

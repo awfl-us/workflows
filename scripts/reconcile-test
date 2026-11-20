@@ -188,6 +188,10 @@ def main(argv:list[str]|None=None) -> int:
         # persistence. Real OpenAI is opt-in via AWFL_STRIDER_PROVIDER=live.
         subprocess.run(['node','--test','scripts/reconcileStriderProjectManager.test.mjs'],
                        cwd=server,env=env,check=True)
+        # Read-path regression: a completed foreground status must remain
+        # discoverable after 125 newer statusless child registrations.
+        subprocess.run(['node','--test','scripts/reconcileSessionStatusPostgres.test.mjs'],
+                       cwd=server,env=env,check=True)
         if opts.command=='strider':
             subprocess.run(['node','--test','scripts/reconcileStriderNative.test.mjs'],
                            cwd=server,env=env,check=True)
