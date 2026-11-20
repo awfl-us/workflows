@@ -60,8 +60,6 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
     // Best-effort: if an input.task object is provided, create it for this session before completion logic
     val maybeSaveTask = Tasks.maybeSaveInputTask("maybeSaveInputTask", inputVal.flatMap(_.task.getOrElse(Value.nil)))
 
-    val triggeredExecId: Value[String] = Exec.currentExecId
-
     val mapToolDefs = For("mapToolDefs", toolsWorkflow.resultValue.flatMap(_.tools)) { toolDef =>
       List(Log("logTool", str(encodeJson(toolDef)))) -> obj(Tool(
         toolDef.get.`type`,
@@ -98,12 +96,9 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
       (true: Cel) -> Locks.release("releaseResponseLock", lockKey, owner).fn
     ))
 
-    // Main body wrapped in Try so we can update status to Done or Failed
+    // Status wraps buildSteps and Recursion.stop; EventHandler owns lock/callback handling.
     val mainTry = buildSteps(
       {
-        // Best-effort init status; don't fail the workflow if this call errors.
-        val tryInitStatus = statusStart(triggeredExecId)
-
         // Tool-call continuations have no query: resume from the stored tool
         // results without synthesizing a new user message.
         val addMessage = Switch("maybeAddMessage", List(
@@ -185,7 +180,7 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
                 input.callback.getOrElse(Value.nil).get.apply(responseWithCost).fn,
               (true: Cel) -> (List() -> Value.nil)
             ))
-            (statusComplete(triggeredExecId) :+ maybeCallback) -> responseWithCost
+            List[Step[?, ?]](stop, maybeCallback) -> responseWithCost
           }
         ))
 
@@ -240,26 +235,35 @@ trait EventHandler extends us.awfl.core.Workflow with EventHandler.WithInput wit
         ))
 
         List[Step[?, ?]](
-          tryInitStatus,
           acquiredTry,
           whenAcquired,
         ) -> whenAcquired.resultValue
       },
       err => {
-        val errMsg = statusErrorMessage(err)
         val callbackFailure = Switch("callbackFailure", List(
           (input.callback.getOrElse(Value.nil) !== Cel.nil) -> input.callback.getOrElse(Value.nil).get.failure(err).fn,
           (true: Cel) -> (List() -> Value.nil)
         ))
-        // Do not report the native root as Completed after a failed turn.
-        (List[Step[?, ?]](release) ++ statusFailure(triggeredExecId, errMsg) ++
-          List[Step[?, ?]](callbackFailure, Raise("propagateEventHandlerError", err))) -> Value.nil[ChatToolResponse]
+        // Status prepends cleanup and Failed; the core Workflow rethrows.
+        List[Step[?, ?]](callbackFailure, Raise("propagateEventHandlerError", err)) -> Value.nil[ChatToolResponse]
       }
     )
 
     Workflow(
       mainTry
     )
+  }
+
+  /** Run owner-scoped cleanup BEFORE Status emits Failed and callbacks run. */
+  override protected def beforeStatusFailure(err: Resolved[Error]): List[Step[?, ?]] = {
+    given KalaVibhaga = SegKala(sessionId, Value(time.now()), Value(20 * 60))
+    val owner: Value[String] = Exec.currentExecId
+    val lockKey = Locks.sessionKey("Convo")
+    val bypassLock = input.sideCall.getOrElse(Value(false))
+    List[Step[?, ?]](Switch("maybeNBypassRelease", List(
+      bypassLock.cel -> (List() -> Value.nil[PostResult[NoValueT]]),
+      (true: Cel) -> Locks.release("releaseResponseLock", lockKey, owner).fn
+    )))
   }
 }
 object EventHandler {

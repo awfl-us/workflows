@@ -2,6 +2,19 @@
 
 > **Current reconciliation target (Nov 20, 2026 UTC): native Rust MEMORY mode with isolated PostgreSQL for local tests. Durable/per-effect journal mode is explicitly deferred for latency reasons.** The original Phase 0 notes below describe an *earlier historical baseline*, not today's passing integration coverage.
 
+## Current composable `Status` / `Recursion` regression gate
+
+The original `wip-old` `Recursion.stop` and `Status.buildSteps`/`Status.stop`
+composition is restored in `EventHandler` for native Rust memory mode.
+After compiling the latest native ProjectManager dependency closure, run
+`./scripts/reconcile-test strider --server /path/to/server --strider-report /path/to/build-report.json`
+and inspect the three memory-mode regressions. Their assertions verify the
+actual `/workflows/exec/status/update` lifecycle transitions: terminal Done,
+409/422 Failed with error text, and correct detached tool-feedback handling.
+The initial execution of a tool-call handoff remains Running; the detached
+continuation records Done. Check native root status separately. The status
+read/aggregation endpoint's `unknown` state is a separate, outstanding issue.
+
 ## Current local Strider → ProjectManager integration
 
 The source-of-truth test lives in [`server/scripts/reconcileStriderProjectManager.test.mjs`](https://github.com/awfl-us/server/blob/main/scripts/reconcileStriderProjectManager.test.mjs), with [fixture and complete setup instructions](https://github.com/awfl-us/server/blob/main/scripts/fixtures/README-strider-pm.md). Compile the current native ProjectManager dependency closure using the pinned `workflow-utils` revision from `scripts/install-model-aware-workflow-utils.sh`, and start an isolated local PostgreSQL database (`/awfl_reconcile`, loopback only). Then run:
