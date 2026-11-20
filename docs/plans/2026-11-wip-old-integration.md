@@ -511,3 +511,45 @@ remaining release gate. This remains **memory mode**, not deferred durable
 effect journaling. The full-graph test's model is mocked; production smoke
 must be described separately and cannot claim a live Sadhaka parent unless
 one is explicitly published as a production workflow.
+
+### Phase 2.3 — Sadhaka reconciliation released (2026-11-19)
+
+**RELEASED:** Previous Phase 2.1–2.2 language describing pending merge,
+release gates or deployment is preserved as historical progress; this
+checkpoint supersedes it.
+
+- Merged the reconciled `Ista`/`Sadhaka` implementation to
+  `workflow-utils/main` at `be2a04f`, workflow/runtime integration to
+  `workflows/main` at `1f862c9`, and the native acceptance suite to
+  `server/main` at `62d940b`. No changes were made to the deprecated durable
+  per-effect journal.
+- `./scripts/reconcile-test sadhaka` passed all **8** local PostgreSQL
+  memory-mode compiled Rust/Jobs-router tests (two native child targets,
+  successful response plus six fault cases). The `basic`, `no-query`, and
+  `tool-roundtrip` Project Manager scenarios passed with strict background
+  checking; three existing PostgreSQL concurrency, callback and typed-422
+  native tests also passed.
+- Built and verified **26 static native Rust binaries** independently of
+  test fixtures. The artifact publisher changed and activated **3** workflow
+  releases, leaving the other **23** unchanged. The active
+  `codebase-ProjectManager` binary SHA-256 matched local build:
+  `e894a7da1aa17ae6ea73b07766cd4dfbb077cdec361b9a91314813f92513ce94`.
+  `helpers-SadhakaNativeFixture` and `helpers-SadhakaChildFixture` were **not**
+  published.
+- `awfl-us/server` production GitHub Actions run
+  [44652647547](https://github.com/awfl-us/server/actions/runs/44652647547)
+  completed successfully, including Cloud Run API/Jobs deployment and GKE
+  native worker image rollout. A production `codebase-ProjectManager` smoke
+  execution `native_c3b8f5981a7b40ccbc02308d48f6de9d` in session
+  `0fc5f510-bd55-45d9-a17c-afb8df0b2649` completed and returned
+  `AWFL_SADHAKA_RELEASE_SMOKE_OK`; observed usage cost was `$0.00882875`.
+  GCP logs explicitly recorded `executionMode=memory` and
+  `storageBackend=postgres`.
+
+**Validation boundary:** The live production smoke exercised the updated
+Project Manager workflow only. The complete `Sadhaka` parent → actual Jobs
+LLM router → Project Manager → callback → typed result flow was verified
+locally with a mocked provider, *not* with a publicly published Sadhaka
+parent. The exact parent fixture intentionally remains test-only. Future
+public call sites should be integrated and smoke-tested as their own release.
+**Durable mode remains deferred** for latency reasons.
