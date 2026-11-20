@@ -815,3 +815,29 @@ or production-deployment evidence.
 execution, and run a live ProjectManager foreground smoke test with background
 typed Striders after normal review. Keep **PostgreSQL memory mode** as the
 production-target execution mode. **Durable mode remains deferred**.
+
+### Phase 3.5 — Strider lock-release regression resolved (2026-11-20)
+
+An explicit native failure injection reproduced a defect in the historical
+`StriderBase` flow: a failed `/firebase/list` after acquisition caused the
+root to fail but **never issued `/firebase/locks/release`**, leaving an
+owner-scoped segment lock until its 300-second TTL. The fix wraps the work
+and release in DSL `Try`, releases on failure, then rethrows the original
+error; normal success still releases once. The first test against the old
+compiled ELF failed as expected (`actual: 0` releases versus expected 1).
+
+Rebuilt **27/27 static native Rust ELF workflows** against local
+`workflow-utils` commit `5f160341fd142279875e64ff4e4194d4aac1df56`
+and `0.3.6-SNAPSHOT` (no publication/deployment). The same negative test
+passed against the rebuilt ELF, confirming **exactly one release** while
+preserving the failed native result. The full combined memory-mode suite
+passed **12/12**: nine successful Strider workflows, the failure/release
+case, session-turn concurrency, and delayed callback lifecycle.
+
+The tested utility source is pinned in
+`scripts/install-model-aware-workflow-utils.sh` to the new commit. Continue
+using PostgreSQL-backed **memory mode**, with durable mode deferred.
+**Still not exercised:** failed typed provider after callback dispatch,
+repeated aggregate runs under concurrent workers, and live production smoke
+validation. Do not claim those gates are complete or merge/deploy without
+their review.

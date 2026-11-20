@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 utils_dir="$repo_root/.workflow-utils-model-aware"
 version="0.3.6-SNAPSHOT"
-ref="28e85072f010d16b93f4a30a85d7f27201c193f3"
+ref="5f160341fd142279875e64ff4e4194d4aac1df56"
 if [[ ! -d "$utils_dir/.git" ]]; then
   git clone --quiet https://github.com/awfl-us/workflow-utils.git "$utils_dir"
 fi
