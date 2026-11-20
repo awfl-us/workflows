@@ -1,6 +1,6 @@
 # AWFL `wip-old` integration — cross-repository plan
 
-**2026-11-19 — plan only, no production change.** Authoritative integration plan in `awfl-us/workflows`. Full defect/test matrix: [2026-11-wip-old-workflows-bugs.md](./2026-11-wip-old-workflows-bugs.md). Do **not** merge the `wip-old` branches directly. All work targets latest `main` and **compiled native Rust workflows**, never Google Workflows execution.
+**Current: iterative implementation and production releases are underway (Nov 20, 2026 UTC).** The entries below retain earlier plan-only and pre-release checkpoints as historical evidence. This is the authoritative integration plan in `awfl-us/workflows`; full defect/test matrix: [2026-11-wip-old-workflows-bugs.md](./2026-11-wip-old-workflows-bugs.md). Do **not** merge the `wip-old` branches directly. All work targets latest `main` and **compiled native Rust workflows**, never Google Workflows execution.
 
 
 > **ACTIVE EXECUTION POLICY — MEMORY MODE (2026-11-19)**
@@ -916,3 +916,69 @@ mode. **Memory mode remains the target; durable mode remains deferred.**
 Still outstanding: a genuine provider run (requires an explicit key),
 concurrent aggregate runs using the realistic Postgres locks, and a post-fix production
 ProjectManager smoke test after the next reviewed merge/release.
+
+### Phase 3.8 — production acceptance, bounded Ista read logging and follow-up release (2026-11-20 UTC)
+
+**Completed initial deploy:** `workflow-utils` main `72f8b1f`, server main
+`48875d5`, workflows main `e0da91e`. GitHub Actions native publish
+[44677948750](https://github.com/awfl-us/workflows/actions/runs/44677948750)
+and server Cloud Run/GKE deployment
+[44677943675](https://github.com/awfl-us/server/actions/runs/44677943675)
+both **succeeded**. Active native `Summaries-Convo` artifact changed from
+`a773de3c…` to `8c864aa6…`. Cloud Run ready revisions:
+API `api-00247-dgr`, Jobs `jobs-00243-j5h`; `/health` returned `OK`.
+Production Jobs has `AWFL_DOCUMENT_STORAGE_BACKEND=postgres` and
+`AWFL_NATIVE_MEMORY_EXECUTION_ENABLED=1`. **Durable mode remains deferred**.
+
+**Live smoke:** a new native ProjectManager session
+`ed65dd8e-573d-4873-8127-0899ab1a6bf2` (initial execution
+`native_0a91fe5e224c42f7a4e57a805ba43512`, model `gpt-6.1-terra`,
+budget `$0.30`) produced exact `AWFL_STRIDER_POST_DEPLOY_OK` with `$0.006363`
+for the foreground response. GCP logs showed `Summaries-Convo`,
+`Summaries-Session`, `Summaries-Week`, `Summaries-Term`, and
+`context-ContextCollapser-SegKala` completing. However the detached
+`assistant-ExtractTopics-Session` failed during native `log.write` with
+`invalid authenticated native log effect` (root
+`native_f87eee7032405c53bd8b66f908bd5481`). Thus the *initial* smoke
+was **not** fully green; do not count the successful foreground response as
+proof that all background Striders completed.
+
+**Root cause and local fix:** `workflow-utils` `Ista.read` (`Prakriya.scala`)
+logged each **complete stored JSON item**. On larger topic/summary documents
+this exceeded the server's authenticated `log.write` text limit of 4,096
+bytes. Preserve that server limit. Remove the unbounded per-item diagnostic
+log, retaining the instrumented kala and actual HTTP read. In the native
+server harness, route all log effects through the real
+`createNativeLogEffectHandler` rather than an unconditional mock. Added a
+6 KB stored-summary aggregation regression: **prior ELF failed with the
+same invalid authenticated native log effect; rebuilt ELF succeeded**.
+`workflow-utils` local Scala compile/test/publishLocal succeeded, all
+**27 static native Rust workflows** rebuilt successfully, and the combined
+Strider/ProjectManager/callback/concurrency/typed-422 suite passed
+**15/15**. Follow-up commits: `workflow-utils` `bf24233` and server
+`0573b6a`. The pinned workflow-utils revision for the native publisher is
+`bf24233170e48d4358540a61dda1bc6c63f9fcbe`.
+
+**Next acceptance and implementation work, in priority order:**
+
+1. **Release and re-smoke the bounded-log fix** after workflows publication
+   and server deployment. Verify the new active native artifact and run a
+   fresh real-provider ProjectManager test. Require *all* Summaries,
+   ExtractTopics and ContextCollapser background workflows to complete;
+   check that no `log.write`, orphan callback, recursive Strider launch,
+   lingering segment lock, or duplicate summary write remains.
+2. **Hard failure and parallel aggregation gates:** in isolated PostgreSQL
+   memory mode, execute simultaneous Striders for the same segment and verify
+   exactly one write and correct lock ownership/release. Exercise failed
+   typed provider and failed callback delivery, idempotent retry, and
+   large pre-existing topics. Preserve the server's authenticated effect
+   limits instead of weakening checks.
+3. **Resume the deferred `wip-old` `Status` trait slice** (Phase 3.2 above)
+   independently: compare Running → Done/Failed lifecycle, 409 session-busy,
+   typed 422, callback continuation and query-free side calls against current
+   EventHandler. Do not import the old Google Workflows implementation or
+   alter memory-mode ordering.
+4. After `Status`, only selectively reconcile lifecycle composition and
+   optional CLI/web work where current behavior genuinely benefits. Keep
+   `Small`/`SmallStrider` autonomy, SLEEP, and durable journaling deferred;
+   measure latency/cache and model costs before enabling more background work.

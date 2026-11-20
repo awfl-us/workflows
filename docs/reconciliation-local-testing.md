@@ -1,5 +1,33 @@
 # `wip-old` reconciliation: local-first test loop
 
+> **Current reconciliation target (Nov 20, 2026 UTC): native Rust MEMORY mode with isolated PostgreSQL for local tests. Durable/per-effect journal mode is explicitly deferred for latency reasons.** The original Phase 0 notes below describe an *earlier historical baseline*, not today's passing integration coverage.
+
+## Current local Strider → ProjectManager integration
+
+The source-of-truth test lives in [`server/scripts/reconcileStriderProjectManager.test.mjs`](https://github.com/awfl-us/server/blob/main/scripts/reconcileStriderProjectManager.test.mjs), with [fixture and complete setup instructions](https://github.com/awfl-us/server/blob/main/scripts/fixtures/README-strider-pm.md). Compile the current native ProjectManager dependency closure using the pinned `workflow-utils` revision from `scripts/install-model-aware-workflow-utils.sh`, and start an isolated local PostgreSQL database (`/awfl_reconcile`, loopback only). Then run:
+
+```bash
+export PGTEST_URL='postgres://awfl:reconcile-test-only@127.0.0.1:55439/awfl_reconcile'
+./scripts/reconcile-test strider-pm --server ../server \
+  --strider-report /path/to/build-report.json
+
+# Includes that test plus existing native Strider/typed/callback/concurrency regressions:
+./scripts/reconcile-test strider --server ../server \
+  --strider-report /path/to/build-report.json
+```
+
+`strider-pm` executes the compiled **Summaries-Convo → ProjectManager → Convo** chain, uses the real Jobs `/llm/chat` route and schema validation with a deterministic provider adapter, and persists through the real Jobs `/firebase/*` route backed by isolated PostgreSQL. It asserts the summary is derived from the seeded conversation, that two executions of the same segment have just one model call and summary write, and that **both owner-scoped lock acquisitions and releases succeed**. Set `AWFL_STRIDER_CONVERSATION_FILE` to a JSON array of user/assistant turns to use different content. A second custom fixture was also verified. The test has no production network or API billing by default; live OpenAI testing is opt-in and requires an explicit API key. Agent/session discovery, callbacks and auxiliary context services still use local fixtures.
+
+**Observed locally:** 27 native Rust ELFs rebuilt successfully, the `strider-pm` test passed, and the combined `strider` command passed on current sources. The realistic Postgres lock test detected and fixed the historical duplicate-UUID bug: passing `Value(uuid.generate())` to acquire/release evaluated different owners. The corrected implementation materializes the owner once. Detailed evidence and rollout history are in [the integration plan](plans/2026-11-wip-old-integration.md).
+
+**Additional production-discovered regression (Nov 20 UTC):** the original `Ista.read` emitted the **entire stored item JSON** as a native log effect. Documents above 4 KB caused the authenticated log handler to reject it, failing the ExtractTopics aggregation after the initial segment had succeeded. The current fix removes only that unbounded per-item log; the server's authenticated 4 KB limit remains intact. The new `Summaries-All handles a 6KB previously stored summary` case uses the **real** native log handler: it failed against the prior compiled ELF with the same `invalid authenticated native log effect` and passed against the rebuilt one. Full native memory-mode integration gates: **15/15 passed** (including callbacks, typed 422, concurrent requests, aggregate tests and local ProjectManager summary persistence). Test source: `server/scripts/reconcileStriderNative.test.mjs`. Rebuild native binaries after changing the pinned utility source, rather than reusing stale artifacts.
+
+**Remaining local gates:** a live-model integration run using explicit credentials, concurrent aggregation across workers using the real PostgreSQL locks, and failure-after-callback lock/idempotency validation. These are distinct from the earlier successful native fixtures. Do not reinstate Google Workflows or durable journaling for this work.
+
+---
+
+## Historical Phase 0 baseline (2026-11-19)
+
 **State (2026-11-19): Phase 0 harness implemented on `feat/reconciliation-test-harness`, not deployed.** This is a development convenience on top of `scripts/native-dev.py` and server `scripts/nativeLocalDev.mjs`, not a new runtime. It neither calls OpenAI nor connects to production storage; all model, Jobs HTTP, callback, GCS, and message data for deterministic scenarios are mocked. Rust binaries are **real** generated binaries, execution uses the existing native durable store with its in-memory adapter.
 
 ## Workspace
