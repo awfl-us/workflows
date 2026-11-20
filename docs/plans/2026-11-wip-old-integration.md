@@ -583,3 +583,43 @@ typed parent/child completion and failure cases. Ordinary Project Manager
 `tool-roundtrip` must still execute and save exactly one real tool result.
 Only merge/deploy following successful full native integration tests and
 independent 26-binary production compilation.
+
+#### Phase 2.4 verification and rollout (2026-11-19)
+
+- Native Scala compilation and the compiled **28/28** test dependency closure
+  passed; direct Rust `helpers-ToolDispatcher` test verified unknown function
+  names and model-only function registrations with an empty workflow target
+  cause **no execution, no conversation tool result and no fake result entry**.
+  Each case replayed successfully. The only HTTP request was the dispatch
+  workflow's standard status-write operation, not a tool-result save.
+- `./scripts/reconcile-test sadhaka` passed the direct dispatcher test and
+  **8/8 Sadhaka cases** including the real Jobs `/llm/chat` router with a
+  mock model and full Project Manager child execution. Ordinary `basic`,
+  `no-query`, `tool-roundtrip` scenarios passed, and the `tool-roundtrip`
+  transcript persisted exactly one actual tool message. The three existing
+  native PostgreSQL memory-mode concurrency/422 regression tests passed.
+- Merged `workflows/main` at `bd540ad` and `server/main` at `b327ce1`.
+  Rebuilt the **separate 26/26 production Project Manager Rust closure**;
+  published the two changed active artifacts (`codebase-ProjectManager`,
+  `helpers-ToolDispatcher`), leaving 24 unchanged. Both active SHA-256 hashes
+  matched the tested binaries:
+  `c7847d49c61344ce14bb87288515f51035e9d688501540234363cf387449bceb`
+  and `e3bde9e4e41f1ff16d345d3023aab41cd6fdb086af2d65b009ccd14a70dd1657`.
+  No Sadhaka fixture workflows were published.
+- A live Project Manager smoke execution
+  `native_6bd76294359c40759ec9a3c64541ef62` (session
+  `ad5d3050-f2e8-47f2-8749-f0434e769955`) completed with exactly
+  `AWFL_REGISTERED_DISPATCH_SMOKE_OK`, cost `$0.00893875`; GCP logs showed
+  `executionMode=memory` and `storageBackend=postgres`.
+- Production CI deployment run:
+  [44657281462](https://github.com/awfl-us/server/actions/runs/44657281462)
+  **completed successfully**, including the native GKE image rollout,
+  latest Cloud Run routing and OAuth checks. Verified Cloud Run revisions:
+  `api-00243-5bm`, `jobs-00239-8sg`; both retained
+  `AWFL_DOCUMENT_STORAGE_BACKEND=postgres`,
+  `AWFL_NATIVE_MEMORY_EXECUTION_ENABLED=1` and
+  `AWFL_NATIVE_DOCUMENT_STORE_ENABLED=1`.
+
+The durable journal remains explicitly deferred. A production smoke using a
+normal model response does not replace the local compiled Sadhaka and
+unregistered-function acceptance tests.
