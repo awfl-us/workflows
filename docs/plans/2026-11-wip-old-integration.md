@@ -841,3 +841,36 @@ using PostgreSQL-backed **memory mode**, with durable mode deferred.
 repeated aggregate runs under concurrent workers, and live production smoke
 validation. Do not claim those gates are complete or merge/deploy without
 their review.
+
+### Phase 3.6 — initial production release and live-provider verification (2026-11-20)
+
+- Generic Strider sources and callers merged first: `workflow-utils` `28e8507`,
+  `workflows` `3f87055`, `server` `239b2c2`. Workflow native release job
+  [44672431037](https://github.com/awfl-us/workflows/actions/runs/44672431037)
+  **succeeded** and published the 27 native Rust workflows; server deployment
+  [44672459226](https://github.com/awfl-us/server/actions/runs/44672459226)
+  **succeeded**, including GKE worker, API `api-00245-mxx`, and Jobs
+  `jobs-00241-xpz`.
+- Initial live production session `b3103ce3-422e-4169-859b-374dd2eeb056`
+  on `gpt-5` returned exact `AWFL_STRIDER_NATIVE_SMOKE_OK` and cost $0.00786.
+  Summaries-Convo and ContextCollapser completed, but
+  `assistant-ExtractTopics-Convo` failed safely with HTTP 422 for invalid
+  typed tool arguments. This **is a failed background acceptance case** and
+  is not evidence that the generated schema is incorrect. Invalid output is
+  charged and rejected according to existing typed Jobs validation.
+- Second live production session `8e675eea-c9b8-434d-97be-daa60e55d3c3`
+  on `gpt-6.1-terra` returned `AWFL_STRIDER_TERRA_OK`, cost $0.006303, and
+  GCP logs showed all three background Striders completing successfully:
+  Summaries-Convo, ExtractTopics-Convo, ContextCollapser-SegKala. No
+  recursive background launches were observed in the test.
+- Separately, the failed-read **lock leak** was reproduced and fixed in
+  `workflow-utils` `5f160341fd142279875e64ff4e4194d4aac1df56`.
+  The tested 27/27-ELF fix, 12/12 isolated memory-mode regressions, server
+  negative test `005a0ec`, and workflow pin/plan `eec006e` are the
+  **follow-up release**, not part of the initial live smoke above. Repeat
+  the active-binary and production smoke verification after that release;
+  do not conflate the initial release with verification of the lock fix.
+
+Deferred: original Small/SmallStrider autonomous background behavior,
+per-effect durability, and the three remaining negative/concurrent gates
+listed in Phase 3.5.
